@@ -1,0 +1,93 @@
+# =====================================================================
+# PARAMETRES PAR DEFAUT — GELES
+# =====================================================================
+# Regle du brief section 1 : ces valeurs sont fixees depuis la litterature
+# AVANT tout regard sur les sorties du simulateur. Toute modification
+# exige une source citee dans le message de commit. Ne JAMAIS ajuster
+# une valeur pour ameliorer l'allure d'un resultat.
+#
+# Champ `src` : L = litterature/reglement, E = estimation d'ingenierie,
+#               N = mal connu, a traiter en incertitude (cf. analyse Sobol)
+# =====================================================================
+
+meta:
+  version: "0.1.0"
+  frozen_on: "2026-07-24"
+  boat_class: "8+"
+
+boat:
+  m_hull_kg:        {v: 96.0,  min: 93.0,  max: 110.0, src: L}   # minimum FISA 8+ = 96 kg
+  m_cox_kg:         {v: 55.0,  min: 50.0,  max: 70.0,  src: L}   # minimum FISA barreur homme = 55 kg
+  L_wl_m:           {v: 17.0,  min: 16.5,  max: 17.6,  src: E}
+  S_wet_m2:         {v: 11.5,  min: 10.5,  max: 13.0,  src: N}
+  form_factor:      {v: 1.15,  min: 1.08,  max: 1.25,  src: N}   # (1+k)
+  k_drag:           {v: 13.0,  min: 11.5,  max: 14.5,  src: N}   # N.s^2/m^2, modele simple
+  drag_exponent:    {v: 2.0,   min: 1.8,   max: 2.2,   src: N}
+  CdA_m2:           {v: 2.0,   min: 1.5,   max: 2.5,   src: N}   # INCERTITUDE MAJEURE (brief 3.5)
+  d_seat_m:         {v: 1.20,  min: 1.15,  max: 1.25,  src: E}
+
+rig:
+  L_in_m:           {v: 1.14,  min: 1.10,  max: 1.18,  src: L}
+  L_out_m:          {v: 2.26,  min: 2.20,  max: 2.32,  src: L}
+  A_blade_m2:       {v: 0.115, min: 0.105, max: 0.125, src: L}
+  I_oar_kgm2:       {v: 1.30,  min: 1.00,  max: 1.70,  src: E}
+  theta_catch_deg:  {v: 58.0,  min: 50.0,  max: 66.0,  src: L}   # + = palette vers la proue
+  theta_finish_deg: {v: -34.0, min: -42.0, max: -28.0, src: L}
+  L_slide_m:        {v: 0.72,  min: 0.65,  max: 0.80,  src: L}
+
+rower:
+  m_kg:             {v: 88.0,  min: 75.0,  max: 98.0,  src: E}
+  height_m:         {v: 1.92,  min: 1.80,  max: 2.02,  src: E}
+  # geometrie sagittale (fractions de la taille) — anthropometrie standard
+  f_trunk_len:      {v: 0.288, min: 0.27,  max: 0.31,  src: E}   # hanche -> epaule
+  f_thigh_len:      {v: 0.245, min: 0.23,  max: 0.26,  src: E}
+  f_shank_len:      {v: 0.246, min: 0.23,  max: 0.26,  src: E}
+  f_arm_len:        {v: 0.372, min: 0.35,  max: 0.39,  src: E}   # epaule -> main
+  seat_height_m:    {v: 0.22,  min: 0.18,  max: 0.26,  src: E}   # au-dessus de la cheville
+  x_ankle_off_m:    {v: -0.17, min: -0.19, max: -0.12, src: E}   # cheville / siege a l'attaque (vers poupe)
+  # CONTRAINTE : |x_ankle_off| + L_slide doit rester < sqrt(reach^2 - seat_height^2)
+  # sinon la jambe est geometriquement sur-etendue. Verifie par BodyModel.
+
+technique:
+  rate_spm:         {v: 36.0,  min: 18.0,  max: 44.0,  src: L}
+  drive_fraction:   {v: 0.42,  min: 0.35,  max: 0.50,  src: L}
+  trunk_catch_deg:  {v: -30.0, min: -38.0, max: -22.0, src: L}   # - = buste vers la poupe
+  trunk_finish_deg: {v: 25.0,  min: 18.0,  max: 32.0,  src: L}
+  arm_flex_finish:  {v: 0.15,  min: 0.08,  max: 0.25,  src: E}   # fraction de L_arm restante
+  # sequencage (fractions de la phase, cf. brief 3.7c)
+  seq_legs_end:     {v: 0.62,  min: 0.45,  max: 0.85,  src: L}   # fin du travail de jambes
+  seq_trunk_onset:  {v: 0.28,  min: 0.15,  max: 0.45,  src: L}
+  seq_trunk_end:    {v: 0.88,  min: 0.70,  max: 1.00,  src: L}
+  seq_arms_onset:   {v: 0.62,  min: 0.50,  max: 0.80,  src: L}
+  rec_arms_away:    {v: 0.10,  min: 0.00,  max: 0.20,  src: L}
+  rec_trunk_fwd:    {v: 0.22,  min: 0.10,  max: 0.35,  src: L}
+  rec_slide_start:  {v: 0.32,  min: 0.20,  max: 0.45,  src: L}
+  rec_slide_skew:   {v: 1.00,  min: 0.60,  max: 1.80,  src: E}   # >1 = coulisse precipitee
+  angvel_skew:      {v: 0.42,  min: 0.30,  max: 0.55,  src: E}   # position du pic de vitesse angulaire
+  kin_harmonics:    {v: 8,      min: 5,     max: 14,    src: E}   # bande passante corporelle
+  blade_ramp_s:     {v: 0.020, min: 0.010, max: 0.035, src: E}   # entree/sortie de palette
+
+crew:
+  # decalage de phase par poste, en ms. Index 0 = poste 1 (nage).
+  phase_offset_ms:  {v: [0,0,0,0,0,0,0,0], min: -80.0, max: 80.0, src: E}
+  mass_kg:          {v: [88,88,88,88,88,88,88,88], src: E}
+
+environment:
+  wind_axial_ms:    {v: 0.0,   min: -8.0,  max: 8.0,   src: E}   # + = vent de face
+  wind_lateral_ms:  {v: 0.0,   min: -6.0,  max: 6.0,   src: E}
+  gust_sigma_ms:    {v: 0.0,   min: 0.0,   max: 2.5,   src: E}
+  current_ms:       {v: 0.0,   min: -1.5,  max: 1.5,   src: E}
+  water_temp_C:     {v: 15.0,  min: 4.0,   max: 26.0,  src: E}
+  air_temp_C:       {v: 15.0,  min: -2.0,  max: 35.0,  src: E}
+  pressure_hPa:     {v: 1013.0, min: 980.0, max: 1035.0, src: E}
+  humidity_pct:     {v: 60.0,  min: 10.0,  max: 100.0, src: E}
+
+numerics:
+  n_strokes:        {v: 20,    src: E}
+  n_discard:        {v: 10,    src: E}
+  output_hz:        {v: 200.0, src: E}     # identique au bus CAN reel
+  rtol:             {v: 1.0e-8, src: E}
+  atol:             {v: 1.0e-10, src: E}
+  method:           {v: "LSODA", src: E}
+  drag_model:       {v: "simple", src: E}  # "simple" | "ittc"
+  v_init_ms:        {v: 5.0,   src: E}

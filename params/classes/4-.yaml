@@ -1,0 +1,90 @@
+# Classe 4- — parametres geometriques
+# Cotes de coque : mediane des moules Filippi + Empacher + Hudson + WinTech + Swift + Vespoli (voir data/hull_moulds.csv).
+# Greement : Filippi 'order form v.25 r.2', tableau Standard span and height.
+# Aviron : Empacher 'Specification sheet oars / sculls' (Sep 23).
+# GELE. Toute modification exige une source citee dans le commit.
+
+# =====================================================================
+# PROVENANCE — A LIRE AVANT D'UTILISER CE FICHIER
+# =====================================================================
+# ATTENTION : ce fichier decrit un BATEAU COMPOSITE. Aucun bateau reel
+# n'a exactement ces cotes. Les champs viennent de sources differentes :
+#
+#   m_hull_kg       WinTech (seul constructeur a publier) = minimum reglementaire
+#   loa_m           MEDIANE de tous les moules des 6 constructeurs
+#   L_wl_m          derivee de cette mediane (0,986 x LOA) — donc composite
+#   S_wet / k_drag / CdA   loi d'echelle calee sur le 8+, aucun constructeur
+#   span_m, stretcher.*    Filippi seul (order form v.25 r.2)
+#   L_in / L_out / A_blade / m_oar   Empacher seul (spec sheet oars-sculls)
+#   I_oar_kgm2      calcule depuis la masse Empacher, repartition ESTIMEE
+#   track_length_m  Empacher seul
+#
+# POURQUOI C'EST ACCEPTABLE ICI : l'objet du simulateur est de choisir des
+# capteurs. Une conclusion sur l'utilite d'un capteur ne doit PAS dependre
+# de la coque d'un constructeur particulier. Un composite median est donc
+# plus robuste qu'un bateau nomme.
+#
+# QUAND C'EST FAUX : des qu'on veut comparer la simulation a une sortie
+# reelle. Il faut alors renseigner `hull_ref` avec un moule reel de
+# data/hull_moulds.csv, et saisir le greement effectivement regle sur CE
+# bateau. Le composite ne sert plus a rien a ce stade.
+#
+# Toute sortie doit porter geometry_source = 'composite' ou 'named_hull'.
+# =====================================================================
+
+hull_ref:
+  # Laisser null pour utiliser le composite ci-dessous.
+  # Sinon : builder + mould presents dans data/hull_moulds.csv, ex.
+  #   builder: Filippi
+  #   mould: F49
+  # Les cotes de coque sont alors lues dans la base et remplacent loa_m/L_wl_m.
+  builder: null
+  mould: null
+  rig_measured_on_boat: false   # passer a true quand le greement reel est saisi
+
+meta:
+  code: "4-"
+  n_rowers: 4
+  sculling: false
+  coxed: false
+
+boat:
+  m_hull_kg:   {v: 50.0, src: L}   # WinTech : gammes course = minimum reglementaire, confirme
+  m_hull_club_kg: {v: 56.5, src: L}   # gamme club WinTech Competitor, +13 %
+  loa_m:       {v: 12.55, src: L}   # mediane 6 constructeurs, rameur 80-105 kg
+  L_wl_m:      {v: 12.37, min: 12.00, max: 12.74, src: N}   # NON publiee, estimee a 0,986*LOA
+  S_wet_m2:    {v: 6.95, min: 6.26, max: 7.65, src: N}
+  k_drag:      {v: 7.86, min: 7.07, max: 8.65, src: N}
+  CdA_m2:      {v: 1.21, min: 0.91, max: 1.51, src: N}
+
+rig:
+  # ecartement 84-87,5 cm
+  n_oars_per_rower: {v: 1, src: L}
+  span_m:           {v: 0.858, src: L}
+  L_in_m:           {v: 1.150, src: L}
+  L_out_m:          {v: 2.343, min: 2.293, max: 2.393, src: N}
+  A_blade_m2:       {v: 0.1124, src: L}
+  m_oar_kg:         {v: 2.71, src: L}
+  I_oar_kgm2:       {v: 6.16, min: 5.24, max: 7.08, src: N}
+  theta_catch_deg:  {v: 58.0, src: L}
+  theta_finish_deg: {v: -34.0, src: L}
+  pitch_deg:        {v: 4.0, min: 0.0, max: 7.0, src: L}   # calage palette hors plan sagittal
+  # NOUVEAU (recherche gréement) : confirme independamment par Concept2
+  # (concept2.com/oars/.../length-and-rigging) ET Braca Sport (Big Blade,
+  # Macon) — les deux publient EXACTEMENT 0-7 deg. Valeur v=4.0 = milieu de
+  # plage a titre de defaut, PAS une moyenne mesuree.
+  # Le modele actuel (cavalement seul, plan sagittal) NE CAPTURE PAS cet
+  # effet — le pitch agit hors du plan modelise. Parametre expose pour
+  # memoire et pour l'extension v3 (brief §4.7), sans effet sur les
+  # sorties tant que le modele reste 2D.
+  # source aviron : Empacher riemen: 2670-2750 g, inboard 115 cm, long. 368-379 cm, Smoothie medium 53,5x25,5 cm = 1123,5 cm2
+  # I_oar calcule depuis la masse reelle et la geometrie ; la REPARTITION de masse
+  # le long du manche reste estimee (categorie N).
+
+stretcher:
+  # Filippi order form, reglages cale-pieds : angle 42 ou 45 deg,
+  # distance 45-70 cm, profondeur 14-22 cm. Rail Empacher : 83 cm standard.
+  angle_deg:       {v: 43.5, min: 42.0, max: 45.0, src: L}
+  depth_m:         {v: 0.18, min: 0.14, max: 0.22, src: L}
+  distance_m:      {v: 0.57, min: 0.45, max: 0.70, src: L}
+  track_length_m:  {v: 0.83, src: L}

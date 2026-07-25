@@ -1,0 +1,106 @@
+# Classe 8x — parametres geometriques
+# Cotes de coque : mediane des moules Filippi + Empacher + Hudson + WinTech + Swift + Vespoli (voir data/hull_moulds.csv).
+# Greement : Filippi 'order form v.25 r.2', tableau Standard span and height.
+# Aviron : Empacher 'Specification sheet oars / sculls' (Sep 23).
+# GELE. Toute modification exige une source citee dans le commit.
+#
+# HYPOTHESE DE COQUE PARTAGEE — desormais etayee, pas encore etablie
+#
+# Preuve directe : Swift International publie une page unique intitulee
+#   "Racing Shells 8+/x" — memes moules 808+/821+/822+/823+ pour les deux
+#   greements, et mentionne explicitement les octuples dans le meme texte.
+#   -> 4 moules Swift comptes comme cotes 8x propres.
+# Indice fort : un revendeur Filippi reference une F49 sous l'intitule "8/8x".
+#   Non verifie sur la page constructeur.
+# Aucun autre constructeur releve (Empacher, Hudson, WinTech, Vespoli) ne
+#   publie de ligne 8x distincte.
+#
+# Consequence : les cotes de coque ci-dessous restent la mediane du 8+, mais
+# l'hypothese de partage est maintenant appuyee par une source directe.
+# Conserver le drapeau hull_source = 'shared_mould_8plus' sur les sorties.
+# Le greement, lui, est bien celui du couple (envergure, aviron, palette).
+
+# =====================================================================
+# PROVENANCE — A LIRE AVANT D'UTILISER CE FICHIER
+# =====================================================================
+# ATTENTION : ce fichier decrit un BATEAU COMPOSITE. Aucun bateau reel
+# n'a exactement ces cotes. Les champs viennent de sources differentes :
+#
+#   m_hull_kg       WinTech (seul constructeur a publier) = minimum reglementaire
+#   loa_m           MEDIANE de tous les moules des 6 constructeurs
+#   L_wl_m          derivee de cette mediane (0,986 x LOA) — donc composite
+#   S_wet / k_drag / CdA   loi d'echelle calee sur le 8+, aucun constructeur
+#   span_m, stretcher.*    Filippi seul (order form v.25 r.2)
+#   L_in / L_out / A_blade / m_oar   Empacher seul (spec sheet oars-sculls)
+#   I_oar_kgm2      calcule depuis la masse Empacher, repartition ESTIMEE
+#   track_length_m  Empacher seul
+#
+# POURQUOI C'EST ACCEPTABLE ICI : l'objet du simulateur est de choisir des
+# capteurs. Une conclusion sur l'utilite d'un capteur ne doit PAS dependre
+# de la coque d'un constructeur particulier. Un composite median est donc
+# plus robuste qu'un bateau nomme.
+#
+# QUAND C'EST FAUX : des qu'on veut comparer la simulation a une sortie
+# reelle. Il faut alors renseigner `hull_ref` avec un moule reel de
+# data/hull_moulds.csv, et saisir le greement effectivement regle sur CE
+# bateau. Le composite ne sert plus a rien a ce stade.
+#
+# Toute sortie doit porter geometry_source = 'composite' ou 'named_hull'.
+# =====================================================================
+
+hull_ref:
+  # Laisser null pour utiliser le composite ci-dessous.
+  # Sinon : builder + mould presents dans data/hull_moulds.csv, ex.
+  #   builder: Filippi
+  #   mould: F49
+  # Les cotes de coque sont alors lues dans la base et remplacent loa_m/L_wl_m.
+  builder: null
+  mould: null
+  rig_measured_on_boat: false   # passer a true quand le greement reel est saisi
+
+meta:
+  code: "8x"
+  n_rowers: 8
+  sculling: true
+  coxed: true
+
+boat:
+  m_hull_kg:   {v: 96.0, src: L}   # WinTech : gammes course = minimum reglementaire, confirme
+  # pas de gamme club publiee dans cette classe
+  loa_m:       {v: 17.42, src: L}   # mediane 6 constructeurs, rameur 80-105 kg
+  L_wl_m:      {v: 17.18, min: 16.66, max: 17.70, src: N}   # NON publiee, estimee a 0,986*LOA
+  S_wet_m2:    {v: 11.50, min: 10.35, max: 12.65, src: N}
+  k_drag:      {v: 13.00, min: 11.70, max: 14.30, src: N}
+  CdA_m2:      {v: 2.00, min: 1.50, max: 2.50, src: N}
+
+rig:
+  # envergure axe-axe 156-163 cm
+  n_oars_per_rower: {v: 2, src: L}
+  span_m:           {v: 1.595, src: L}
+  L_in_m:           {v: 0.880, src: L}
+  L_out_m:          {v: 1.792, min: 1.742, max: 1.842, src: N}
+  A_blade_m2:       {v: 0.0814, src: L}
+  m_oar_kg:         {v: 1.49, src: L}
+  I_oar_kgm2:       {v: 1.82, min: 1.55, max: 2.09, src: N}
+  theta_catch_deg:  {v: 66.0, src: L}
+  theta_finish_deg: {v: -46.0, src: L}
+  pitch_deg:        {v: 4.0, min: 0.0, max: 7.0, src: L}   # calage palette hors plan sagittal
+  # NOUVEAU (recherche gréement) : confirme independamment par Concept2
+  # (concept2.com/oars/.../length-and-rigging) ET Braca Sport (Big Blade,
+  # Macon) — les deux publient EXACTEMENT 0-7 deg. Valeur v=4.0 = milieu de
+  # plage a titre de defaut, PAS une moyenne mesuree.
+  # Le modele actuel (cavalement seul, plan sagittal) NE CAPTURE PAS cet
+  # effet — le pitch agit hors du plan modelise. Parametre expose pour
+  # memoire et pour l'extension v3 (brief §4.7), sans effet sur les
+  # sorties tant que le modele reste 2D.
+  # source aviron : Empacher scull: 1380-1580 g, inboard 88 cm, long. 279-295 cm, Big Blade homme 44x22 cm = 814 cm2
+  # I_oar calcule depuis la masse reelle et la geometrie ; la REPARTITION de masse
+  # le long du manche reste estimee (categorie N).
+
+stretcher:
+  # Filippi order form, reglages cale-pieds : angle 42 ou 45 deg,
+  # distance 45-70 cm, profondeur 14-22 cm. Rail Empacher : 83 cm standard.
+  angle_deg:       {v: 43.5, min: 42.0, max: 45.0, src: L}
+  depth_m:         {v: 0.18, min: 0.14, max: 0.22, src: L}
+  distance_m:      {v: 0.57, min: 0.45, max: 0.70, src: L}
+  track_length_m:  {v: 0.83, src: L}

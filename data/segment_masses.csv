@@ -1,0 +1,18 @@
+# Fractions de masse segmentaire et positions de CdM
+# Source : De Leva P. (1996) "Adjustments to Zatsiorsky-Seluyanov's segment
+#          inertia parameters", Journal of Biomechanics 29(9):1223-1230, Table 4.
+# Sujets masculins. mass_frac = fraction de la masse corporelle totale.
+# com_ratio = position du CdM depuis l'extremite proximale, en fraction de la longueur du segment.
+# NOTE AGENT : ces valeurs sont saisies de memoire d'une source secondaire.
+#              A VERIFIER contre l'article original avant toute exploitation.
+#              Le test test_conventions.py verifie seulement que la somme fait 100 %.
+segment,side,mass_frac,com_ratio,note
+head_neck,center,0.0694,0.5002,tete+cou
+pelvis,center,0.1117,0.0000,suit le siege SANS rotation autour de la hanche
+upper_trunk,center,0.3229,0.5400,thorax+abdomen, tourne autour de la hanche
+upper_arm,each,0.0271,0.5772,
+forearm,each,0.0162,0.4574,
+hand,each,0.0061,0.7900,
+thigh,each,0.1416,0.4095,
+shank,each,0.0433,0.4459,
+foot,each,0.0137,0.4415,
