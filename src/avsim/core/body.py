@@ -199,8 +199,10 @@ class BodyModel:
             tau_r = 1.0 - u
             w = _recovery_windows(t)
             x_seat = self.L_slide * (1.0 - _window_cruise(tau_r, *w["slide"]))
-            phi = self.phi_f + (self.phi_c - self.phi_f) * _window(
-                tau_r, *w["trunk"])
+            # Tronc aussi en croisiere : un smootherstep serre ([0,12;0,30])
+            # recentrait un pic d'accel tot en debut de retour.
+            phi = self.phi_f + (self.phi_c - self.phi_f) * _window_cruise(
+                tau_r, *w["trunk"], blend=0.22)
         return x_seat, phi
 
     def joints_from_handle(self, x_handle, u, *, drive: bool):
@@ -283,13 +285,13 @@ class BodyModel:
 
         phi_d = self.phi_c + (self.phi_f - self.phi_c) * _window(
             tau_d, t["seq_trunk_onset"], t["seq_trunk_end"])
-        phi_r = self.phi_f + (self.phi_c - self.phi_f) * _window(
-            tau_r, *rw["trunk"])
+        phi_r = self.phi_f + (self.phi_c - self.phi_f) * _window_cruise(
+            tau_r, *rw["trunk"], blend=0.22)
         phi = np.where(is_drive, phi_d, phi_r)
 
         e_d = self.e_ext + (self.e_flex - self.e_ext) * _window(tau_d, t["seq_arms_onset"], 1.0)
-        e_r = self.e_flex + (self.e_ext - self.e_flex) * _window(
-            tau_r, *rw["arms"])
+        e_r = self.e_flex + (self.e_ext - self.e_flex) * _window_cruise(
+            tau_r, *rw["arms"], blend=0.22)
         e = np.where(is_drive, e_d, e_r)
 
         x_hip = x_seat
