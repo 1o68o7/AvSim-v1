@@ -59,9 +59,15 @@ technique:
   seq_trunk_onset:  {v: 0.28,  min: 0.15,  max: 0.45,  src: L}
   seq_trunk_end:    {v: 0.88,  min: 0.70,  max: 1.00,  src: L}
   seq_arms_onset:   {v: 0.62,  min: 0.50,  max: 0.80,  src: L}
-  rec_arms_away:    {v: 0.10,  min: 0.00,  max: 0.20,  src: L}
-  rec_trunk_fwd:    {v: 0.22,  min: 0.10,  max: 0.35,  src: L}
-  rec_slide_start:  {v: 0.32,  min: 0.20,  max: 0.45,  src: L}
+  # Retour — sequence « hands → body → slide » (Kleshnev BioRow ; Nolte,
+  # Rowing Faster). Fins = onset du segment suivant (pas de chevauchement
+  # d'accel au milieu du retour — brief §12.2 / « rushing the slide »).
+  # rec_slide_start≈0,30 : le palier de vitesse de coulisse couvre le pic
+  # de ω Hermite (τ≈0,55) ; un onset trop tardif place l'accel d'entree
+  # pile sous ω max.
+  rec_arms_away:    {v: 0.05,  min: 0.00,  max: 0.20,  src: L}
+  rec_trunk_fwd:    {v: 0.12,  min: 0.05,  max: 0.35,  src: L}
+  rec_slide_start:  {v: 0.30,  min: 0.20,  max: 0.55,  src: L}
   rec_slide_skew:   {v: 1.00,  min: 0.60,  max: 1.80,  src: E}   # >1 = coulisse precipitee
   angvel_skew:      {v: 0.42,  min: 0.30,  max: 0.55,  src: E}   # position du pic de vitesse angulaire
   kin_harmonics:    {v: 8,      min: 5,     max: 14,    src: E}   # bande passante corporelle

@@ -69,6 +69,79 @@ def _window(tau, start, end):
     return smootherstep((np.asarray(tau, dtype=float) - start) / (end - start))
 
 
+def _hermite_quintic_pos(s, x0, v0, x1, v1):
+    """Position Hermite quintique sur s∈[0,1], a0=a1=0. v = dx/ds."""
+    s = np.asarray(s, dtype=float)
+    rhs1 = x1 - x0 - v0
+    rhs2 = v1 - v0
+    c5 = 6.0 * rhs1 - 3.0 * rhs2
+    c4 = rhs2 - 3.0 * rhs1 - 2.0 * c5
+    c3 = rhs1 - c4 - c5
+    return x0 + v0 * s + c3 * s ** 3 + c4 * s ** 4 + c5 * s ** 5
+
+
+def _window_cruise(tau, start, end, blend: float = 0.16):
+    """Rampe 0→1 a vitesse quasi uniforme au milieu, accel C2 aux bornes.
+
+    Un smootherstep sur toute la fenetre place un pic de courbure au milieu
+    de la course en τ — sous Hermite (ω max vers τ≈0,55) cela produit le
+    signature « rushing the slide » (~40 m/s²). Ici l'acceleration est
+    concentree sur les blends d'entree/sortie ; le plateau central a
+    d²y/dτ² = 0 (retour efficace, lit. technique).
+    """
+    tau_arr = np.atleast_1d(np.asarray(tau, dtype=float))
+    start = float(start)
+    end = max(float(end), start + 1e-6)
+    width = end - start
+    bf = float(np.clip(blend, 1e-3, 0.49))
+    b = bf * width
+    t1, t2 = start + b, end - b
+    # Deplacement symetrique des blends + croisiere : v_c = 1/(width - b)
+    v_c = 1.0 / (width - b)
+    y1 = 0.5 * v_c * b
+    y2 = 1.0 - y1
+
+    out = np.zeros_like(tau_arr, dtype=float)
+    flat = (tau_arr > t1) & (tau_arr < t2)
+    out = np.where(flat, y1 + v_c * (tau_arr - t1), out)
+
+    left = (tau_arr > start) & (tau_arr <= t1)
+    if np.any(left):
+        out[left] = _hermite_quintic_pos(
+            (tau_arr[left] - start) / b, 0.0, 0.0, y1, v_c * b)
+
+    right = (tau_arr >= t2) & (tau_arr < end)
+    if np.any(right):
+        out[right] = _hermite_quintic_pos(
+            (tau_arr[right] - t2) / b, y2, v_c * b, 1.0, 0.0)
+
+    out = np.where(tau_arr <= start, 0.0, out)
+    out = np.where(tau_arr >= end, 1.0, out)
+    if np.ndim(tau) == 0:
+        return float(out[0])
+    return out
+
+
+def _recovery_windows(t: dict):
+    """Onsets/fins de retour etages : bras → tronc → coulisse (pas d'empilement).
+
+    Les fins sont l'onset du segment suivant — meme famille de bug que le
+    drive (brief §12.2), reactive sous Hermite ou les anciennes largeurs
+    +0,45/+0,50 chevauchaient le pic de ω.
+    """
+    skew = max(float(t["rec_slide_skew"]), 1e-3)
+    arms_start = float(t["rec_arms_away"])
+    trunk_start = float(t["rec_trunk_fwd"])
+    slide_start = float(t["rec_slide_start"]) / skew
+    arms_end = max(trunk_start, arms_start + 1e-3)
+    trunk_end = max(slide_start, trunk_start + 1e-3)
+    return {
+        "arms": (arms_start, arms_end),
+        "trunk": (trunk_start, trunk_end),
+        "slide": (slide_start, 1.0),
+    }
+
+
 class BodyModel:
     """Chaine sagittale : pied fixe -> jambe -> cuisse -> siege -> tronc -> bras."""
 
@@ -122,12 +195,12 @@ class BodyModel:
             phi = self.phi_c + (self.phi_f - self.phi_c) * _window(
                 u, t["seq_trunk_onset"], t["seq_trunk_end"])
         else:
-            # retour : u_rec = 1-u avec u qui va de 1 → 0, donc tau_r = 1-u
+            # retour : tau_r = 1-u (0 au degage → 1 a l'attaque)
             tau_r = 1.0 - u
-            skew = max(t["rec_slide_skew"], 1e-3)
-            x_seat = self.L_slide * (1.0 - _window(tau_r, t["rec_slide_start"] / skew, 1.0))
+            w = _recovery_windows(t)
+            x_seat = self.L_slide * (1.0 - _window_cruise(tau_r, *w["slide"]))
             phi = self.phi_f + (self.phi_c - self.phi_f) * _window(
-                tau_r, t["rec_trunk_fwd"], min(t["rec_trunk_fwd"] + 0.50, 0.98))
+                tau_r, *w["trunk"])
         return x_seat, phi
 
     def joints_from_handle(self, x_handle, u, *, drive: bool):
@@ -203,20 +276,20 @@ class BodyModel:
         t = self.P["technique"]
         tau_d, tau_r, is_drive = self._split(psi)
 
+        rw = _recovery_windows(t)
         seat_d = self.L_slide * _window(tau_d, 0.0, t["seq_legs_end"])
-        skew = max(t["rec_slide_skew"], 1e-3)
-        seat_r = self.L_slide * (1.0 - _window(tau_r, t["rec_slide_start"] / skew, 1.0))
+        seat_r = self.L_slide * (1.0 - _window_cruise(tau_r, *rw["slide"]))
         x_seat = np.where(is_drive, seat_d, seat_r)
 
         phi_d = self.phi_c + (self.phi_f - self.phi_c) * _window(
             tau_d, t["seq_trunk_onset"], t["seq_trunk_end"])
         phi_r = self.phi_f + (self.phi_c - self.phi_f) * _window(
-            tau_r, t["rec_trunk_fwd"], min(t["rec_trunk_fwd"] + 0.50, 0.98))
+            tau_r, *rw["trunk"])
         phi = np.where(is_drive, phi_d, phi_r)
 
         e_d = self.e_ext + (self.e_flex - self.e_ext) * _window(tau_d, t["seq_arms_onset"], 1.0)
         e_r = self.e_flex + (self.e_ext - self.e_flex) * _window(
-            tau_r, t["rec_arms_away"], min(t["rec_arms_away"] + 0.45, 0.95))
+            tau_r, *rw["arms"])
         e = np.where(is_drive, e_d, e_r)
 
         x_hip = x_seat
