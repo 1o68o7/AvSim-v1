@@ -81,14 +81,28 @@ def test_blade_near_stationary_in_water_at_catch(P):
 
 
 def test_blade_slips_sternward_mid_drive(P):
-    """Le glissement doit se faire vers la poupe : c'est ce qui propulse."""
+    """Le glissement doit se faire vers la poupe : c'est ce qui propulse.
+
+    Echantillon a 35 % de la duree de propulsion depuis l'attaque — phase de
+    forte puissance, independante de la facon dont le masque d'immersion se
+    referme en fin de coup.
+    """
     res = simulate(P)
     st = res.last_stroke()
-    idx = np.where(st.drive_mask())[0]
-    mid = idx[len(idx) // 2]
-    vx, _ = blade_velocity_water(st.theta[0][mid], st.theta_dot[0][mid], st.V[mid],
+    th = st.theta[0]
+    theta_finish = np.radians(P["rig"]["theta_finish_deg"])
+    # Attaque = debut de la fenetre de coup (poste 0, offsets nuls).
+    # Degage = premier franchissement de theta_finish a la baisse.
+    crossing = np.where((th[:-1] > theta_finish) & (th[1:] <= theta_finish))[0]
+    assert crossing.size > 0, "pas de degage detecte sur le dernier coup"
+    i_fin = int(crossing[0] + 1)
+    T_drive = float(st.t[i_fin] - st.t[0])
+    assert T_drive > 0.05, f"T_drive trop court ({T_drive:.3f} s)"
+    k = int(np.argmin(np.abs(st.t - (st.t[0] + 0.35 * T_drive))))
+    vx, _ = blade_velocity_water(th[k], st.theta_dot[0][k], st.V[k],
                                 P["rig"]["L_out_m"])
-    assert vx < 0, f"a mi-propulsion la palette doit glisser vers la poupe, vx={vx:.2f}"
+    assert vx < 0, (
+        f"a 35 % de T_drive la palette doit glisser vers la poupe, vx={vx:.2f}")
 
 
 # ---------------------------------------------------------------- coherence
