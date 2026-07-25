@@ -230,7 +230,8 @@ class Crew:
                 F_pull[i] = 0.0
 
             imm[i] = self._immersion(i, t, th[i])
-            F_applied = F_pull[i] * float(np.clip(imm[i], 0.02, 1.0))
+            # F_h(t) entre tel quel dans M_poignee = -L_in * F_h (brief §4.4).
+            # L'immersion ne lisse que la force hydrodynamique de palette.
 
             fx_i, fy_i, pl, _a, _s = blade_force(
                 th[i], w[i], V, self.P, rho_w, immersion=imm[i])
@@ -241,8 +242,7 @@ class Crew:
 
             rbx, rby = blade_position(th[i], self.L_out)
             M_bl[i] = float(moment_z(rbx, rby, fx[i], fy[i]))
-            thdd[i] = (-self.L_in * F_applied - M_bl[i]) / self.I_oar
-            F_pull[i] = F_applied
+            thdd[i] = (-self.L_in * F_pull[i] - M_bl[i]) / self.I_oar
 
         return thdd, F_pull, imm, fx, fy, p_loss, M_bl, drive
 
