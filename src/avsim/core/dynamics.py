@@ -173,24 +173,22 @@ class Crew:
 
     # --------------------------------------------------------------- oar RHS
     def _immersion(self, i, t, th):
-        """Immersion [0,1] : rampe sur l'arc, sortie avant le degage extreme.
+        """Immersion [0,1] pendant la propulsion (brief §3.6).
 
-        La sortie commence vers 0 deg pour que le milieu de drive_mask reste
-        dans la zone ou vx < 0 (glissement propulsif).
+        Entree : rampe temporelle sur blade_ramp_s depuis l'attaque.
+        Sortie : rampe temporelle symetrique approchee via la proximite
+        angulaire du degage (theta_finish) — pas de dependance a une
+        fraction d'arc d'entree.
         """
         if self.mode[i] != self.MODE_DRIVE:
             return 0.0
-        span = max(self.theta_catch - self.theta_finish, 1e-6)
-        u = float(np.clip((self.theta_catch - th) / span, 0.0, 1.0))
-        edge = 0.72
         r = max(self.ramp, 1e-6)
         t_since = max(t - self.t_catch[i], 0.0)
         enter_t = float(smootherstep(t_since / r))
-        enter = float(smootherstep(u / edge))
-        # sortie progressive des ~+5 deg vers le degage
+        # Sortie progressive vers theta_finish (fenetre ~25 deg, lissage).
         leave = float(smootherstep((th - self.theta_finish) / max(
             np.radians(25.0), 1e-6)))
-        return enter_t * enter * leave
+        return enter_t * leave
 
     def oar_accelerations(self, t, V, th, w, rho_w):
         """theta'' et efforts associes pour tous les postes."""
