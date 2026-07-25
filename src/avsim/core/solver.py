@@ -36,6 +36,7 @@ class Stroke:
     D_aero: np.ndarray
     m_total: float
     handle_power: np.ndarray
+    oar_power_identity: np.ndarray  # diagnostic seul — pas un substitut de E_rower
 
     def drive_mask(self) -> np.ndarray:
         return self.immersion[0] > 0.5
@@ -47,6 +48,7 @@ class Stroke:
         E_aero = np.trapezoid(self.D_aero * self.V, t)
         E_blade_loss = np.trapezoid(self.P_blade_loss.sum(axis=0), t)
         E_handle = np.trapezoid(self.handle_power.sum(axis=0), t)
+        E_id = np.trapezoid(self.oar_power_identity, t)
         dEk = E_prop - E_hull - E_aero
         T = t[-1] - t[0]
         eta = E_prop / (E_prop + E_blade_loss) if (E_prop + E_blade_loss) > 0 else np.nan
@@ -56,6 +58,7 @@ class Stroke:
             "E_aero_J": float(E_aero),
             "E_blade_loss_J": float(E_blade_loss),
             "E_rower_J": float(E_handle),
+            "E_oar_identity_J": float(E_id),  # diagnostic, jamais substitut
             "dE_kinetic_J": float(dEk),
             "eta_blade": float(eta),
             "P_rower_mean_W": float(E_handle / T / self.handle_force.shape[0]),
@@ -157,21 +160,23 @@ class Result:
         V_g = V + e["current_ms"]
         D_a, _ = aero_drag(V_g, self.P, rho_a, e["wind_axial_ms"])
 
-        # Puissance rameur via l'identite de l'aviron (valable propulsion ET retour) :
-        #   sum_i (I * thdd_i * w_i) + F_prop * V + P_blade_loss = P_rower_total
-        # En propulsion cela coincide avec -L_in*F*w ; en retour cela compte le
-        # guidage Hermite. Sur un cycle, ΔKE_oar ≈ 0 ⇒ E_rower ≈ E_prop + E_blade.
+        # Puissance rameur independante — travail a la poignee sur l'aviron.
+        # Avec Q_poignee = -L_in * F_pull (dynamics), P_i = Q_i * omega_i
+        #   = -L_in * F_handle_i * omega_i.
+        # Equivalent a F·v_poignee relatif au pin (referentiel coque).
+        # Note : le F·v referentiel-eau de session 1 (vhx = V - L cos ω, …)
+        # avec F_handle traction-positive ajoute un terme -F·V et inverse le
+        # signe du travail rotatif ; ce n'est plus coherent avec Q = -L_in F.
+        # Ne jamais substituer par l'identite Iθ''ω+F_prop V+P_blade (circulaire).
+        p_handle = -c.L_in * F_handle * w
+
+        # Diagnostic seul : identite de l'aviron (ne remplace pas E_rower)
         thdd = np.gradient(w, t, axis=1)
-        p_total = (
+        p_identity = (
             (c.I_oar * thdd * w).sum(axis=0)
             + fx.sum(axis=0) * V
             + p_loss.sum(axis=0)
         )
-        # Repartition poste a poste (pour les tests d'offset) : proportionnelle
-        # a |F| en propulsion, uniforme en retour.
-        weights = np.maximum(np.abs(F_handle), 1e-6)
-        weights = weights / weights.sum(axis=0, keepdims=True)
-        p_handle = weights * p_total[None, :]
         com_w = (c.masses[:, None] * com).sum(axis=0) / c.M
 
         return Stroke(
@@ -179,7 +184,8 @@ class Result:
             F_prop=fx.sum(axis=0), F_blade_x=fx, P_blade_loss=p_loss,
             handle_force=F_handle, pin_force=pin_n, foot_force=foot,
             com_rel=com_w, immersion=imm, D_hull=D_h, D_aero=D_a,
-            m_total=c.m_boat + c.M, handle_power=p_handle)
+            m_total=c.m_boat + c.M, handle_power=p_handle,
+            oar_power_identity=p_identity)
 
 
 def _snap_recovery(crew: Crew, t: float, y: np.ndarray) -> np.ndarray:
