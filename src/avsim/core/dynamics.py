@@ -19,25 +19,43 @@ from .body import BodyModel, smootherstep
 from .forces import aero_drag, blade_force, hull_drag, rho_air, rho_water, nu_water
 from .geometry import blade_position, handle_position, moment_z
 
-# Profil de force parametrique (brief §4.4) — valeurs d'ingenierie, pas dans
-# defaults.yaml (gel). Surchargeables via technique.F_peak_N / F_u_peak si presents.
-_F_PEAK_DEFAULT = 1100.0  # N, pic de traction a la poignee (pointe)
-_F_U_PEAK_DEFAULT = 0.38  # position du pic sur tau in [0,1]
+def handle_force_profile(
+    u,
+    F_peak: float,
+    u_peak: float = 0.40,
+    u_rise_70: float = 0.17,
+    high_width: float = 0.35,
+):
+    """Force de traction F_h(u) >= 0, u = fraction d'arc (0 attaque → 1 degage).
 
-
-def handle_force_profile(u, F_peak: float, u_peak: float = _F_U_PEAK_DEFAULT):
-    """Force de traction F_h(u) >= 0, u = fraction de course de poignee.
-
-    Deux demi-sinus^2 se rejoignant en u_peak (profil type Concept2 / ORM).
-    Nul hors ]0, 1[.
+    Deux demi-sinus^2 asymetriques (montee / descente) cales pour :
+      - pic a u_peak ;
+      - 70 % du pic atteint a u_rise_70 ;
+      - F > 70 % du pic sur une largeur ~ high_width.
+    Parametres lus depuis technique.* (defaults.yaml), sources Kleshnev /
+    Rowing Faster Table 9.2 / Cerne et al. 2013. Nul hors ]0, 1[.
     """
     u = np.asarray(u, dtype=float)
     u_peak = float(np.clip(u_peak, 0.05, 0.95))
+    u_rise_70 = float(np.clip(u_rise_70, 1e-3, u_peak * 0.95))
+    high_width = float(np.clip(high_width, 0.05, 0.90))
+    u_fall_70 = float(np.clip(u_rise_70 + high_width, u_peak + 1e-3, 0.99))
+
+    # sin^2(π/2 * x) = 0.7  ⇒  x_70 = (2/π) * arcsin(√0.7)
+    x_70 = (2.0 / np.pi) * np.arcsin(np.sqrt(0.70))
+    # Remap puissance : (u/u_peak)^p_rise = x_70 en u_rise_70
+    ratio_r = max(u_rise_70 / u_peak, 1e-6)
+    p_rise = float(np.log(x_70) / np.log(ratio_r))
+    ratio_f = max((1.0 - u_fall_70) / (1.0 - u_peak), 1e-6)
+    p_fall = float(np.log(x_70) / np.log(ratio_f))
+
     out = np.zeros_like(u, dtype=float)
     left = (u > 0.0) & (u <= u_peak)
     right = (u > u_peak) & (u < 1.0)
-    out[left] = F_peak * np.sin(0.5 * np.pi * u[left] / u_peak) ** 2
-    out[right] = F_peak * np.sin(0.5 * np.pi * (1.0 - u[right]) / (1.0 - u_peak)) ** 2
+    x_l = np.clip((u[left] / u_peak) ** p_rise, 0.0, 1.0)
+    x_r = np.clip(((1.0 - u[right]) / (1.0 - u_peak)) ** p_fall, 0.0, 1.0)
+    out[left] = F_peak * np.sin(0.5 * np.pi * x_l) ** 2
+    out[right] = F_peak * np.sin(0.5 * np.pi * x_r) ** 2
     return out
 
 
@@ -94,8 +112,11 @@ class Crew:
         self.n_oars = int(P["rig"].get("n_oars_per_rower", 1))
 
         tech = P["technique"]
-        self.F_peak = float(tech.get("F_peak_N", _F_PEAK_DEFAULT))
-        self.F_u_peak = float(tech.get("F_u_peak", _F_U_PEAK_DEFAULT))
+        self.F_peak = float(tech["F_peak_N"])
+        self.F_u_peak = float(tech["F_u_peak"])
+        self.F_u_rise_70 = float(tech["F_u_rise_70"])
+        self.F_high_width = float(tech["F_high_width"])
+        self._arc_span = max(self.theta_catch - self.theta_finish, 1e-6)
 
         # Etat hybride par poste (mis a jour par le solveur via events)
         self.mode = np.full(self.n, self.MODE_DRIVE, dtype=int)
@@ -202,7 +223,6 @@ class Crew:
         M_bl = np.zeros(n)
 
         drive = self.mode == self.MODE_DRIVE
-        T_shape = max(0.40 * self.T, 0.30)
 
         for i in range(n):
             if t < self.offsets[i] - 1e-12:
@@ -214,20 +234,21 @@ class Crew:
                 thdd[i] = a
                 continue
 
-            # --- propulsion : F_h(tau), tau = temps depuis l'attaque (§4.4) ---
-            t_since = max(t - self.t_catch[i], 0.0)
-            u_t = t_since / T_shape
-            if u_t <= 1.0:
-                F_pull[i] = float(handle_force_profile(
-                    max(u_t, 1e-3), self.F_peak, self.F_u_peak))
-            elif u_t < 1.20:
-                tail = float(handle_force_profile(1.0 - 1e-6, self.F_peak, self.F_u_peak))
-                F_pull[i] = tail * (1.0 - (u_t - 1.0) / 0.20)
-            else:
-                F_pull[i] = 0.0
+            # --- propulsion : F_h(u), u = fraction d'arc (§4.4) ---
+            # u=0 a l'attaque, u=1 au degage. Le profil est nul en u=0 ; avec
+            # omega=0 et immersion qui monte en blade_ramp_s, le couple palette
+            # peut pousser theta > theta_catch. On evalue alors le profil a
+            # u_eff = max(u_geom, u_rise_70) pour garder un couple moteur
+            # (sinon F reste ~0 et l'arc ne demarre jamais — piege I_oar eleve).
+            u_geom = (self.theta_catch - th[i]) / self._arc_span
+            u_arc = float(np.clip(u_geom, 0.0, 1.0))
+            u_eff = max(u_arc, self.F_u_rise_70) if u_geom < self.F_u_rise_70 else u_arc
+            F_pull[i] = float(handle_force_profile(
+                u_eff, self.F_peak, self.F_u_peak,
+                self.F_u_rise_70, self.F_high_width))
 
             imm[i] = self._immersion(i, t, th[i])
-            # F_h(t) entre tel quel dans M_poignee = -L_in * F_h (brief §4.4).
+            # F_h(u) entre tel quel dans M_poignee = -L_in * F_h (brief §4.4).
             # L'immersion ne lisse que la force hydrodynamique de palette.
 
             fx_i, fy_i, pl, _a, _s = blade_force(
