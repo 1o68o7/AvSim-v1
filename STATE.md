@@ -1,107 +1,81 @@
-# Etat de construction — session 1
+# État de construction — session 3 (remplace l'état de session 1)
 
-## Ce qui est en place et fonctionne
+## Résolu depuis la session 1
 
-| Element | Etat |
+| Chantier | Statut |
 |---|---|
-| Arborescence, `pyproject.toml`, separation en 3 couches | OK |
-| `params/defaults.yaml` gele, chaque valeur sourcee (`src: L/E/N`) | OK |
-| `data/segment_masses.csv` (De Leva) — somme verifiee a 100,0000 % | OK |
-| `data/blade_coefficients.csv` — **approximation analytique, pas Caplan & Gardner** | a remplacer |
-| `core/geometry.py` — conventions de signe centralisees | OK |
-| `core/body.py` — chaine sagittale, CI de jambe, bassin non tournant | OK |
-| `core/forces.py` — palette portance/trainee, coque simple + ITTC, aero, fluides | OK |
-| `core/dynamics.py` — tabulation de phase + derivation spectrale | OK |
-| `core/solver.py` — `solve_ivp`, decoupage en coups, bilan energetique | OK |
-| `tests/test_conventions.py` — 5 tests de geometrie et cinematique | **verts** |
-| `tests/test_conservation.py` | non concluant (voir plus bas) |
+| Chargeur multi-classes (`load_class`, `load_params(boat_class=)`, `hull_ref`, `n_rowers` dynamique, `m_cox_kg=0` si non barré) | **fait**, PR #1 fusionnée |
+| Fermeture cinématique → fermeture pilotée par la force (`I_oar·θ''=M_poignée+M_palette`) | **fait**, structure validée |
+| `F_h` reparamétré en fraction d'arc `u` plutôt qu'en temps absolu | **fait**, sourcé Kleshnev/BioRow (`F_u_peak=0,40`, `F_u_rise_70=0,17`, `F_high_width=0,35`) |
+| `F×immersion`, `lock_omega(V)`, `edge=0,72` | **retirés** — trois réglages numériques sans justification physique, chacun ajouté pour faire passer un test précis plutôt que pour respecter la spec |
+| Coefficients de palette | recalés sur les repères mesurés Caplan & Gardner (2007), domaine complet 0-180° |
+| `E_rower_J` | **corrigé** — n'est plus calculé comme résidu de l'identité qu'il est censé vérifier (résidu 0,82 % désormais, contre 33 % avant) |
+| `test_steady_state_reached` | **passe** |
 
-Temps de calcul : **44 s** pour 20 coups. Cible du brief : < 1 s. Non tenu.
+## Bug actif — diagnostiqué, correction en attente
 
-## Bugs reels trouves et corriges
+**`check_factor` trop élevé (v_max-v_min ≈ 3,7-4,7 m/s contre 0,5-0,8 m/s attendus).**
 
-1. **Sur-extension de jambe.** Le defaut `x_ankle_off_m = -0.42` plus une course
-   de coulisse de 0,72 m placait la hanche hors de portee de la jambe en fin de
-   propulsion. La cinematique inverse saturait en silence et injectait un pic
-   d'acceleration de **3 858 m/s²** dans le terme inertiel, donc dans tout le
-   bilan energetique. Corrige a -0,17 m, avec un controle explicite
-   (`BodyModel._check_leg_reach`) qui leve une erreur parlante.
-2. **Empilement du sequencage.** Jambes, tronc et bras acceleraient simultanement.
-   Ajout de `seq_legs_end` et `seq_trunk_end` pour etager les fenetres.
-3. **Bassin tournant.** Les 43,46 % du tronc pivotaient autour de la hanche,
-   bassin compris. Le bassin suit le siege sans tourner : table scindee en
-   `pelvis` (11,17 %) et `upper_trunk` (32,29 %).
+Localisé : pas un problème de propulsion. `v_min` en plein drive (365 ms),
+`v_max` pendant le retour (465 ms après le dégagé).
 
-## Le probleme de fond — DECISION REQUISE
+Cause confirmée : `kin_harmonics`/`_build_tables` (bande-limitation spectrale
+qui empêchait ce genre de pic sous l'ancienne fermeture cinématique) ne
+s'appliquent plus au chemin actuel — absents du `Crew` réécrit, aucun
+FFT/bandlimit dans le code. Le chemin de retour actuel (Hermite quintique →
+`handle_position` → `com_x_from_handle` sur les fenêtres `seq_*`/`rec_*` →
+dérivée seconde par différences finies → clip) ne repasse par aucun
+lissage spectral.
 
-Le modele **sur-determine le coup**. On impose a la fois :
+Chiffré : au pic (t+1225 ms), `s''` brut atteint ≈-51 m/s² contre un plafond
+de 25 — un dépassement d'un facteur **~2**, pas une divergence numérique
+sauvage. Terme dominant : `(d²s/dθ²)·ω²` à `|ω|≈3,7 rad/s`.
 
-- l'arc d'aviron (58° a -34°, soit 92°)
-- la duree de propulsion (`drive_fraction` x periode = 0,70 s)
+**Diagnostic C2 des fenêtres (session 3)** : les fenêtres `seq_*`/`rec_*`
+passent toutes par `_window` → `smootherstep` (C2, dérivées 1re et 2e nulles
+aux bornes) — **aucune transition linéaire ou non-C2 introduite** à ce
+niveau pendant la réécriture. Le pic ~50 m/s² persiste donc **malgré** des
+fenêtres déjà C2. Question ouverte avant de toucher au clip : existe-t-il
+une donnée biomécanique sur l'accélération du CdM pendant le retour qui
+validerait ou invaliderait ~50 m/s² comme caractéristique réelle du couplage
+`s(θ)×ω` au milieu de l'Hermite ? Note annexe : au pic, le clip d'extension
+de bras `e` est actif (`e_raw > e_max`) — autre non-lissage possible, distinct
+des fenêtres de séquençage.
 
-Ces deux contraintes fixent la vitesse de balayage **independamment de la
-vitesse du bateau**. La palette est donc forcee dans l'eau a une vitesse
-imposee de l'exterieur.
+## Point ouvert, non bloquant pour l'instant
 
-Mesure sur la propulsion, dernier coup :
+**`F_peak_N`** : 1100 N vient de la plage ergomètre (800-1100 N, McGregor/Colloud) — pas comparable à notre modèle qui simule un bateau. La plage sourcée sur l'eau, à rythme de corps de course (`rate_spm=36`, pas un départ), est 500-700 N (Steinacker, confirmé par Holt et al. sur 47 courses réelles). Testé à 650 N : `check_factor` baisse un peu mais `v_mean` et `T_drive` s'éloignent des cibles — **la magnitude de F_peak seule n'explique pas le problème**, cohérent avec le fait que la vraie cause vit dans le retour, pas le drive. À trancher une fois le bug du retour résolu, pas avant. *(Valeur actuellement dans `defaults.yaml` : 650 N, commentaire sourcé Steinacker/Holt ; ancienne 1100 N documentée comme pics erg.)*
 
-```
-glissement palette vx : min -1,41  max +6,35  moyen +1,35 m/s
-|v_rel| moyen         : 3,30 m/s        (aviron correct : 0,5 - 1,0)
-bout de palette pic   : 8,64 m/s        vs coque a 6,69 m/s
-```
+## Encore rouge, volontairement pas retouché
 
-La palette dissipe donc enormement. Consequences en cascade :
+- `blade_near_stationary_in_water_at_catch` — cible sourcée disponible depuis peu : Kleshnev situe la pleine immersion à **≈3° après l'attaque** (le concept s'appelle *Catch Slip*), pas les 25-33° que produisaient les anciens réglages. Pas encore recalé sur cette cible précise — à faire une fois `check_factor` réglé.
+- `leave` (fenêtre de sortie de palette, 25°) — toujours présent, jamais justifié ni retiré. Sa nécessité réelle ne pourra être jugée qu'une fois drive et retour tous les deux corrects.
 
-| Grandeur | Obtenu | Cible brief 8.2 |
-|---|---|---|
-| Rendement de palette | **0,224** | 0,75 - 0,85 |
-| Puissance par rameur | **2 730 W** | ~420 W |
-| Vitesse moyenne | 6,69 m/s | 5,8 - 6,1 |
-| Fluctuation intra-coup | **±1,84 m/s** | ±0,25 - 0,40 |
-| Temps 2 000 m | 299 s | 320 - 340 s |
+## Pas retesté depuis la réécriture de la fermeture
 
-Aucune de ces valeurs ne se corrige en ajustant un parametre — et le brief
-interdit de le tenter. C'est la fermeture du modele qui est fausse.
+`test_zero_wind_zero_current_ground_equals_water`, `test_identical_offsets_give_identical_seats`, `test_phase_offset_actually_shifts_seat`, `test_numerical_convergence` — aucun n'a été relancé depuis le changement de fermeture. À revérifier avant de déclarer v1 terminé, pas seulement les 3-4 tests qu'on suit activement.
 
-### Fermeture correcte
+## Pas encore écrit du tout
 
-Le brief 3.7a proposait le profil de force a la poignee comme entree primaire.
-Il faut y revenir :
+`tests/test_plausibility.py`, `tests/test_class_scaling.py`, `tests/test_triangulation.py` (brief §9.2-9.4). Ce dernier est **le test le plus important du projet** selon le brief lui-même — la comparaison contre Atkinson/van Holst/Roosendaal — et il n'existe pas encore en code.
 
-- **entree** : profil de force a la poignee `F(tau)` (parametrique ou issu de
-  Concept2 / OpenRowingMonitor)
-- **etat supplementaire** : angle d'aviron `theta`, gouverne par
-  `I_oar * theta'' = M_poignee + M_palette`
-- **consequence** : le glissement de palette s'auto-regule. Si le rameur pousse
-  plus fort, la palette accroche et le bateau accelere ; il ne peut pas balayer
-  plus vite que l'eau ne le permet.
-- **cinematique corporelle** : reste prescrite, mais ne pilote plus l'aviron.
-  Elle alimente uniquement le terme inertiel `sum(m_i * s_i'')`.
+## Performance
 
-Le systeme passe de 1 a 3 etats (`V`, `theta`, `theta'`). Risque a surveiller :
-sans couplage main-corps, un profil de force trop fort peut emballer la rotation
-de l'aviron. Prevoir une butee de fin de course et un test de stabilite.
+44 s/simulation en session 1 → **5-6 min actuellement**. Ça a empiré, probablement à cause de la complexité ajoutée par les événements de catch/dégagé et le suivi par coup. Cible du brief : < 1 s. Complètement intact, jamais attaqué — et ça devient plus urgent maintenant que ça ralentit directement la boucle de diagnostic elle-même.
 
-## A faire ensuite, dans cet ordre
+## Points ouverts trouvés en construisant les vues sagittale/frontale (documentation, pas du code)
 
-0. **Chargeur multi-classes — manquant, confirme.** `params.py` ne lit que
-   `defaults.yaml`. Les 8 fichiers `params/classes/*.yaml` (avec leur
-   mecanisme `hull_ref` vers `data/hull_moulds.csv`) existent mais ne sont
-   consommes par aucun code. Le brief §11 prevoyait cette piece (`boat_class.py`
-   + chargeur fusionnant defaults + classe) **avant** de retoucher le solveur —
-   sautee en session 1. A ecrire : une fonction qui fusionne `defaults.yaml`
-   avec `classes/<code>.yaml`, et qui resout `hull_ref` en remplacant les
-   cotes composites par celles du moule nomme quand il est renseigne.
-   `n_rowers` doit en sortir dynamique — `defaults.yaml` fixe aujourd'hui
-   `crew.phase_offset_ms` et `crew.mass_kg` a des listes de longueur 8 en
-   dur, ce qui casse toute classe autre que 8+/8x.
-1. Basculer sur la fermeture pilotee par la force (ci-dessus).
-2. Refaire tourner `test_plausibility` — c'est le seul juge.
-3. Rendre `dE_kinetic` **independant** : il est actuellement calcule comme le
-   residu de l'identite qu'il est cense verifier, donc `test_energy_balance_closes`
-   est trivialement vrai. Le calculer par `integrale( somme(m_i s_i'') * V ) dt`.
-4. Performance : viser < 1 s. Pistes — relacher `max_step`, vectoriser les 8
-   postes en une seule passe, ne calculer `internal_forces` qu'a la demande.
-5. `test_triangulation` contre Atkinson / van Holst / Roosendaal.
-6. Seulement ensuite : capteurs virtuels, estimation, analyse, interface.
+- `x_ankle_off_m=-0,17` produit un genou à l'attaque géométriquement très replié (derrière la cheville) — corrigé en session 2 pour satisfaire la contrainte de portée de jambe, jamais validé contre une vraie position de catch.
+- Position et hauteur du pivot (dame) non paramétrées dans le modèle — reconstituées approximativement pour le dessin, incohérentes de 0,22 m entre attaque et dégagé (`geometry_mismatch`, déjà documenté dans `body.py`, jamais résolu).
+- `drive_fraction=0,42` fixe — devrait varier avec la cadence (Černe et al. 2013 : ratio propulsion:retour de 1:2,04 à 20 c/min à 1:1,31 à 34 c/min), non implémenté.
+
+## Ordre recommandé à partir d'ici
+
+1. Fenêtres seq_*/rec_* déjà C2 — **ne pas retoucher le clip** tant qu'on n'a pas tranché si ~50 m/s² est physique (donnée biomécanique CdM au retour) ou un autre artefact (ex. saturation `e`)
+2. Reconfirmer `check_factor` + les 5 autres grandeurs de plausibilité ensemble une fois (1) décidé
+3. Trancher `F_peak_N` dans la plage 500-700 N une fois (2) stable
+4. Recaler l'immersion sur la cible de 3° (Catch Slip), revoir si `leave` est encore nécessaire
+5. Relancer la suite complète de `test_conventions.py` (pas seulement les tests suivis)
+6. Écrire `test_plausibility`, `test_class_scaling`, `test_triangulation` — dans cet ordre
+7. Performance (brief §6) — seulement une fois la physique juste, pas avant
+8. Alors seulement : capteurs, estimation, analyse, API, web
