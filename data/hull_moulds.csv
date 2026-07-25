@@ -1,7 +1,7 @@
 # Base de coques relevee sur documents constructeurs fournis par l'utilisateur
 # Filippi 'Moulds list' v.4 04/11/2024 -- Empacher 'Bootsformen' Dez25
 # loa_m = longueur HORS-TOUT. beam_wl_m = largeur A LA FLOTTAISON (explicite chez les deux).
-# ATTENTION : la longueur de flottaison n'est PAS publiee. L_wl est estimee a 0,97*LOA (categorie N).
+# ATTENTION : la longueur de flottaison n'est PAS publiee. L_wl est estimee a 0,986*LOA (categorie N).
 # Les masses de coque ne sont PAS publiees en gamme course : on retient les minima reglementaires.
 builder,mould,boat_class,loa_m,beam_wl_m,rower_kg_min,rower_kg_max
 Filippi,F44,1x,7.4,0.26,50,60
