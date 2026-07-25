@@ -1,21 +1,20 @@
 """Cinematique corporelle et centre de masse du rameur.
 
-Le terme sum(m_i * d2s_i/dt2) de l'equation de mouvement (brief 3.3) sort d'ici.
+Le terme sum(m_i * d2s_i/dt2) de l'equation de mouvement (brief 4.3) sort d'ici.
 C'est le terme sur lequel les modeles publies divergent le plus, et celui que
 les coulisses et les pods dorsaux mesurent. Il est calcule explicitement,
 jamais approxime par une masse ponctuelle.
 
-CHOIX DE MODELISATION A CONNAITRE (brief 3.7b) :
+CHOIX DE MODELISATION (brief 4.6) :
   Les pieds sont FIXES sur le cale-pieds. Seuls jambe et cuisse tournent.
-  C'est l'erreur classique a ne pas commettre.
+  Le bassin (11,17 %) suit le siege sans tourner ; seul le tronc superieur pivote.
 
-APPROXIMATION ASSUMEE — fermeture geometrique de la poignee :
-  Le deplacement longitudinal des mains issu de la chaine corporelle ne
-  coincide pas exactement avec l'arc geometrique impose par les angles
-  d'attaque et de degage (modele sagittal, alors que la pointe fait tourner
-  les epaules). On conserve la FORME du mouvement issue du corps et on
-  renormalise son AMPLITUDE sur l'arc geometrique. Le rapport brut est
-  expose par `geometry_mismatch()` et doit rester dans [0.75, 1.35].
+FERMETURE §4.2 — la poignee est la coordonnee maitresse :
+  theta(t) vient de l'integration → x_poignee(t).
+  Le sequencage (jambes, tronc) se repartit sur la course de poignee reelle u.
+  L'extension de bras e est deduite par fermeture geometrique exacte :
+      e = x_siege + L_tronc * sin(phi) - x_poignee
+  Plus de renormalisation arbitraire sur un arc impose.
 """
 from __future__ import annotations
 
@@ -59,11 +58,7 @@ def _ratio(name: str) -> float:
 
 
 def smootherstep(u):
-    """Interpolation C2 : derivees premiere ET seconde nulles aux bornes.
-
-    Indispensable ici : on derive deux fois pour le terme inertiel, une
-    transition seulement C1 injecterait des sauts d'acceleration parasites.
-    """
+    """Interpolation C2 : derivees premiere ET seconde nulles aux bornes."""
     u = np.clip(u, 0.0, 1.0)
     return u * u * u * (u * (6.0 * u - 15.0) + 10.0)
 
@@ -89,31 +84,23 @@ class BodyModel:
         self.x_ankle = r["x_ankle_off_m"]
         self.L_slide = rig["L_slide_m"]
         self.L_in = rig["L_in_m"]
-        self.drive_frac = t["drive_fraction"]
+        self.drive_frac = t["drive_fraction"]  # reference legacy / tests unitaires
 
         self.phi_c = np.radians(t["trunk_catch_deg"])
         self.phi_f = np.radians(t["trunk_finish_deg"])
         self.e_ext = self.L_arm
         self.e_flex = t["arm_flex_finish"] * self.L_arm
+        self.e_min = 0.10 * self.L_arm
+        self.e_max = 1.00 * self.L_arm
 
-        # bornes geometriques imposees par les angles d'aviron
         self.x_handle_catch = -self.L_in * np.sin(np.radians(rig["theta_catch_deg"]))
         self.x_handle_finish = -self.L_in * np.sin(np.radians(rig["theta_finish_deg"]))
+        self._handle_span = self.x_handle_finish - self.x_handle_catch
 
         self._check_leg_reach()
 
-        # calibration de la renormalisation (cf. docstring du module)
-        raw_c = self._hand_raw(0.0)
-        raw_f = self._hand_raw(self.drive_frac - 1e-9)
-        self._raw_c, self._raw_span = raw_c, (raw_f - raw_c)
-
     def _check_leg_reach(self):
-        """La hanche doit rester atteignable par la jambe sur toute la course.
-
-        Sans ce controle, la cinematique inverse sature silencieusement en fin
-        de propulsion et injecte un pic d'acceleration purement numerique dans
-        le terme inertiel — donc dans tout le bilan energetique.
-        """
+        """La hanche doit rester atteignable par la jambe sur toute la course."""
         reach = self.L_shank + self.L_thigh
         d_max = np.hypot(abs(self.x_ankle) + self.L_slide, self.z_hip)
         if d_max > 0.985 * reach:
@@ -122,46 +109,42 @@ class BodyModel:
                 f"pour une portee de {reach:.3f} m. Reduire |x_ankle_off_m| "
                 f"(actuel {self.x_ankle:.3f}) ou L_slide_m (actuel {self.L_slide:.3f}).")
 
-    # ------------------------------------------------------------ phases
-    def _split(self, psi):
-        """psi in [0,1) -> (tau_drive, tau_recovery, is_drive)."""
-        psi = np.asarray(psi, dtype=float) % 1.0
-        is_drive = psi < self.drive_frac
-        tau_d = np.where(is_drive, psi / self.drive_frac, 0.0)
-        tau_r = np.where(is_drive, 0.0,
-                         (psi - self.drive_frac) / (1.0 - self.drive_frac))
-        return tau_d, tau_r, is_drive
+    # ---------------------------------------------------- sequencage sur u
+    def seat_phi_from_u(self, u, *, drive: bool):
+        """Siege et angle de tronc a partir de la position normalisee u dans le coup.
 
-    # ------------------------------------------------------------ segments
-    def joints(self, psi):
-        """Positions longitudinales des articulations, relatives a la coque."""
+        u=0 a l'attaque, u=1 au degage (propulsion). Au retour, u decroit de 1 a 0.
+        """
         t = self.P["technique"]
-        tau_d, tau_r, is_drive = self._split(psi)
+        u = np.asarray(u, dtype=float)
+        if drive:
+            x_seat = self.L_slide * _window(u, 0.0, t["seq_legs_end"])
+            phi = self.phi_c + (self.phi_f - self.phi_c) * _window(
+                u, t["seq_trunk_onset"], t["seq_trunk_end"])
+        else:
+            # retour : u_rec = 1-u avec u qui va de 1 → 0, donc tau_r = 1-u
+            tau_r = 1.0 - u
+            skew = max(t["rec_slide_skew"], 1e-3)
+            x_seat = self.L_slide * (1.0 - _window(tau_r, t["rec_slide_start"] / skew, 1.0))
+            phi = self.phi_f + (self.phi_c - self.phi_f) * _window(
+                tau_r, t["rec_trunk_fwd"], min(t["rec_trunk_fwd"] + 0.50, 0.98))
+        return x_seat, phi
 
-        # --- siege
-        seat_d = self.L_slide * _window(tau_d, 0.0, t["seq_legs_end"])
-        skew = max(t["rec_slide_skew"], 1e-3)
-        seat_r = self.L_slide * (1.0 - _window(tau_r, t["rec_slide_start"] / skew, 1.0))
-        x_seat = np.where(is_drive, seat_d, seat_r)
+    def joints_from_handle(self, x_handle, u, *, drive: bool):
+        """Configuration corporelle pour une poignee donnee (brief §4.2).
 
-        # --- tronc
-        phi_d = self.phi_c + (self.phi_f - self.phi_c) * _window(
-            tau_d, t["seq_trunk_onset"], t["seq_trunk_end"])
-        phi_r = self.phi_f + (self.phi_c - self.phi_f) * _window(
-            tau_r, t["rec_trunk_fwd"], min(t["rec_trunk_fwd"] + 0.50, 0.98))
-        phi = np.where(is_drive, phi_d, phi_r)
-
-        # --- bras
-        e_d = self.e_ext + (self.e_flex - self.e_ext) * _window(tau_d, t["seq_arms_onset"], 1.0)
-        e_r = self.e_flex + (self.e_ext - self.e_flex) * _window(
-            tau_r, t["rec_arms_away"], min(t["rec_arms_away"] + 0.45, 0.95))
-        e = np.where(is_drive, e_d, e_r)
-
+        e est deduit par fermeture geometrique. Hors [0.10, 1.00]*L_bras :
+        combinaison de sequencage impossible — on clippe et on remonte un drapeau.
+        """
+        x_handle = np.asarray(x_handle, dtype=float)
+        u = np.asarray(u, dtype=float)
+        x_seat, phi = self.seat_phi_from_u(u, drive=drive)
         x_hip = x_seat
         x_shoulder = x_hip + self.L_trunk * np.sin(phi)
-        x_hand = x_shoulder - e
+        e_raw = x_shoulder - x_handle
+        e = np.clip(e_raw, self.e_min, self.e_max)
+        x_hand = x_handle  # la main suit la poignee (maitre)
 
-        # --- genou par cinematique inverse a deux barres (cheville fixe)
         dx = x_hip - self.x_ankle
         dz = self.z_hip
         d = np.hypot(dx, dz)
@@ -170,27 +153,22 @@ class BodyModel:
         a = (d * d + self.L_shank ** 2 - self.L_thigh ** 2) / (2.0 * d)
         hgt = np.sqrt(np.maximum(self.L_shank ** 2 - a * a, 0.0))
         ux, uz = dx / d, dz / d
-        # le genou est du cote haut : perpendiculaire (-uz, ux) orientee +z
         x_knee = self.x_ankle + a * ux - hgt * uz
 
-        return {"x_seat": x_seat, "x_hip": x_hip, "phi": phi, "e": e,
-                "x_shoulder": x_shoulder, "x_hand": x_hand, "x_knee": x_knee}
+        return {
+            "x_seat": x_seat, "x_hip": x_hip, "phi": phi, "e": e, "e_raw": e_raw,
+            "x_shoulder": x_shoulder, "x_hand": x_hand, "x_knee": x_knee,
+            "envelope_ok": bool(np.all((e_raw >= self.e_min) & (e_raw <= self.e_max))),
+        }
 
-    def _hand_raw(self, psi):
-        return float(np.asarray(self.joints(psi)["x_hand"]).reshape(-1)[0])
+    def handle_progress(self, x_handle):
+        """u in [0,1] le long de la course de poignee attaque → degage."""
+        span = self._handle_span if abs(self._handle_span) > 1e-12 else 1.0
+        return np.clip((np.asarray(x_handle, float) - self.x_handle_catch) / span, 0.0, 1.0)
 
-    # ------------------------------------------------------------ CdM
-    def com_x(self, psi, phase: str | None = None):
-        """Position longitudinale du CdM du rameur, relative a la coque."""
-        if phase == "drive":
-            psi = np.asarray(psi, dtype=float) * self.drive_frac
-        elif phase == "recovery":
-            psi = self.drive_frac + np.asarray(psi, dtype=float) * (1 - self.drive_frac)
-        j = self.joints(psi)
-
+    def _com_from_joints(self, j):
         x_shank = j["x_knee"] + _ratio("shank") * (self.x_ankle - j["x_knee"])
         x_thigh = j["x_hip"] + _ratio("thigh") * (j["x_knee"] - j["x_hip"])
-        # le bassin suit le siege sans tourner ; seul le tronc superieur pivote
         x_pelvis = j["x_hip"]
         x_upper = j["x_hip"] + _ratio("upper_trunk") * self.L_trunk * np.sin(j["phi"])
         x_head = j["x_hip"] + 1.05 * self.L_trunk * np.sin(j["phi"])
@@ -207,16 +185,77 @@ class BodyModel:
                + _frac("upper_arm") + _frac("forearm") + _frac("hand"))
         return num / den
 
-    # ------------------------------------------------------------ aviron
+    def com_x_from_handle(self, x_handle, u, *, drive: bool):
+        """CdM longitudinal pour une poignee / sequencage donnes (§4.2 + §4.3)."""
+        return self._com_from_joints(self.joints_from_handle(x_handle, u, drive=drive))
+
+    # ---------------------------------------------------- API legacy (tests)
+    def _split(self, psi):
+        psi = np.asarray(psi, dtype=float) % 1.0
+        is_drive = psi < self.drive_frac
+        tau_d = np.where(is_drive, psi / self.drive_frac, 0.0)
+        tau_r = np.where(is_drive, 0.0,
+                         (psi - self.drive_frac) / (1.0 - self.drive_frac))
+        return tau_d, tau_r, is_drive
+
+    def joints(self, psi):
+        """API legacy : sequencage sur la phase de cycle (tests unitaires CdM)."""
+        t = self.P["technique"]
+        tau_d, tau_r, is_drive = self._split(psi)
+
+        seat_d = self.L_slide * _window(tau_d, 0.0, t["seq_legs_end"])
+        skew = max(t["rec_slide_skew"], 1e-3)
+        seat_r = self.L_slide * (1.0 - _window(tau_r, t["rec_slide_start"] / skew, 1.0))
+        x_seat = np.where(is_drive, seat_d, seat_r)
+
+        phi_d = self.phi_c + (self.phi_f - self.phi_c) * _window(
+            tau_d, t["seq_trunk_onset"], t["seq_trunk_end"])
+        phi_r = self.phi_f + (self.phi_c - self.phi_f) * _window(
+            tau_r, t["rec_trunk_fwd"], min(t["rec_trunk_fwd"] + 0.50, 0.98))
+        phi = np.where(is_drive, phi_d, phi_r)
+
+        e_d = self.e_ext + (self.e_flex - self.e_ext) * _window(tau_d, t["seq_arms_onset"], 1.0)
+        e_r = self.e_flex + (self.e_ext - self.e_flex) * _window(
+            tau_r, t["rec_arms_away"], min(t["rec_arms_away"] + 0.45, 0.95))
+        e = np.where(is_drive, e_d, e_r)
+
+        x_hip = x_seat
+        x_shoulder = x_hip + self.L_trunk * np.sin(phi)
+        x_hand = x_shoulder - e
+
+        dx = x_hip - self.x_ankle
+        dz = self.z_hip
+        d = np.hypot(dx, dz)
+        reach = self.L_shank + self.L_thigh
+        d = np.clip(d, abs(self.L_shank - self.L_thigh) + 1e-6, reach - 1e-6)
+        a = (d * d + self.L_shank ** 2 - self.L_thigh ** 2) / (2.0 * d)
+        hgt = np.sqrt(np.maximum(self.L_shank ** 2 - a * a, 0.0))
+        ux, uz = dx / d, dz / d
+        x_knee = self.x_ankle + a * ux - hgt * uz
+
+        return {"x_seat": x_seat, "x_hip": x_hip, "phi": phi, "e": e,
+                "x_shoulder": x_shoulder, "x_hand": x_hand, "x_knee": x_knee}
+
+    def com_x(self, psi, phase: str | None = None):
+        """Position longitudinale du CdM (API tests : phase prescrites)."""
+        if phase == "drive":
+            psi = np.asarray(psi, dtype=float) * self.drive_frac
+        elif phase == "recovery":
+            psi = self.drive_frac + np.asarray(psi, dtype=float) * (1 - self.drive_frac)
+        return self._com_from_joints(self.joints(psi))
+
     def handle_x(self, psi):
-        """Position longitudinale de la poignee, renormalisee sur l'arc geometrique."""
-        raw = self.joints(psi)["x_hand"]
-        u = (raw - self._raw_c) / self._raw_span
-        return self.x_handle_catch + u * (self.x_handle_finish - self.x_handle_catch)
+        """Legacy : poignee issue du corps (non utilisee par le solveur force)."""
+        return self.joints(psi)["x_hand"]
 
     def theta(self, psi):
+        """Legacy : angle deduit du corps — remplace par l'etat integre dans Crew."""
         return oar_angle_from_handle(self.handle_x(psi), self.L_in)
 
     def geometry_mismatch(self) -> float:
-        """Rapport course corporelle / course geometrique. Doit rester proche de 1."""
-        return abs(self._raw_span / (self.x_handle_finish - self.x_handle_catch))
+        """Conserve pour diagnostic ; sous §4.2 la fermeture exacte vise ~1."""
+        raw_c = float(np.asarray(self.joints(0.0)["x_hand"]).reshape(-1)[0])
+        raw_f = float(np.asarray(
+            self.joints(self.drive_frac - 1e-9)["x_hand"]).reshape(-1)[0])
+        span = raw_f - raw_c
+        return abs(span / self._handle_span) if abs(self._handle_span) > 1e-12 else np.nan
