@@ -209,10 +209,9 @@ def simulate(P: dict) -> Result:
     y = np.zeros(1 + 2 * n)
     y[0] = ncfg["v_init_ms"]
     y[1:1 + n] = crew.theta_catch
-    # Omega initial : accrochage a v_init (evite glissement ~V au premier coup)
-    w0 = crew.lock_omega(ncfg["v_init_ms"])
-    y[1 + n:] = w0
-    crew.w_catch_target[:] = w0
+    # Brief §4.4 : a l'attaque omega = 0 (Hermite arrive a (theta_catch, 0)).
+    y[1 + n:] = 0.0
+    crew.w_catch_target[:] = 0.0
 
     for i in range(n):
         if crew.offsets[i] <= 1e-15:
@@ -224,7 +223,7 @@ def simulate(P: dict) -> Result:
             crew.t_finish[i] = crew.offsets[i] - 0.55 * T
             crew.th_at_finish[i] = crew.theta_finish
             crew.w_at_finish[i] = 0.0
-            crew.w_catch_target[i] = w0
+            crew.w_catch_target[i] = 0.0
             y = _snap_recovery(crew, 0.0, y)
 
     def rhs(t, z):
@@ -312,16 +311,15 @@ def simulate(P: dict) -> Result:
         elif kind == "catch":
             crew.begin_drive(who, t_hit)
             y[1 + who] = crew.theta_catch
-            # Accrochage a la V courante (pas la V du degage)
-            y[1 + n + who] = crew.lock_omega(float(y[0]))
-            crew.w_catch_target[who] = y[1 + n + who]
+            y[1 + n + who] = 0.0  # brief §4.4 : (theta_catch, omega=0)
+            crew.w_catch_target[who] = 0.0
             for j in range(n):
                 if (j != who and crew.mode[j] == crew.MODE_RECOVERY
                         and abs(t_hit - crew.t_next_catch[j]) < 1e-9):
                     crew.begin_drive(j, t_hit)
                     y[1 + j] = crew.theta_catch
-                    y[1 + n + j] = crew.lock_omega(float(y[0]))
-                    crew.w_catch_target[j] = y[1 + n + j]
+                    y[1 + n + j] = 0.0
+                    crew.w_catch_target[j] = 0.0
 
         if t_hit <= t_cur + 1e-14:
             # event colle : avancer d'un epsilon pour eviter la boucle

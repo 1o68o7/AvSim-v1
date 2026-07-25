@@ -104,7 +104,7 @@ class Crew:
         self.t_finish = np.full(self.n, np.nan)     # instant de degage
         self.th_at_finish = np.full(self.n, self.theta_finish)
         self.w_at_finish = np.zeros(self.n)
-        self.w_catch_target = np.zeros(self.n)      # omega vise a l'attaque (accrochage)
+        self.w_catch_target = np.zeros(self.n)      # brief §4.4 : omega=0 a l'attaque
 
     # --------------------------------------------------------------- fluides
     def fluid(self):
@@ -132,8 +132,7 @@ class Crew:
             return self.theta_finish, 0.0, 0.0
         dur = max(t_c - t_f, 1e-4)
         s = np.clip((t - t_f) / dur, 0.0, 1.0)
-        # Hermite vise omega=0 a l'attaque ; le solveur replace ensuite
-        # par lock_omega(V_courante) au moment du catch event.
+        # Brief §4.4 : arrivee a (theta_catch, omega=0).
         return quintic_hermite(
             s, self.th_at_finish[i], self.w_at_finish[i],
             self.theta_catch, 0.0, dur)
@@ -340,20 +339,10 @@ class Crew:
         self.t_finish[i] = t
         self.th_at_finish[i] = float(min(th, self.theta_finish))
         self.w_at_finish[i] = float(np.clip(w, -0.6, 0.2))
-        # Omega d'attaque : viser l'accrochage (vx≈0) a la vitesse courante,
-        # plutot que 0 (qui impose un glissement initial ~V).
-        V_ref = float(V) if V is not None else 5.0
-        self.w_catch_target[i] = self.lock_omega(V_ref)
+        # Cible Hermite = (theta_catch, 0) — brief §4.4 ; pas d'accrochage V.
+        self.w_catch_target[i] = 0.0
         if t - self.t_catch[i] >= self.T - 1e-6:
             raise RuntimeError(
                 f"poste {i+1}: duree de propulsion >= periode "
                 f"({t - self.t_catch[i]:.3f} s >= {self.T:.3f} s) — "
                 f"combinaison force/cadence infaisable (brief §4.4)")
-
-    def lock_omega(self, V):
-        """Omega d'attaque conservateur (accrochage type theta≈0).
-
-        Un cible calcule a 58 deg donne un |w| trop grand une fois la palette
-        immergee vers 20-25 deg (V a souvent baisse) → |v_rel| explose via vy.
-        """
-        return -float(np.clip(abs(V), 0.5, 8.0)) / self.L_out
