@@ -120,6 +120,11 @@ l'attaque) — `blade_normal_speed` encourageant mais autre grandeur.
 
 ## Suite
 
+**Phase 4 — capteurs virtuels** (`src/avsim/sensors/`) : 12 capteurs +
+`bus.py` (occupation ~70 % à 8 postes, latence non linéaire >60 %, PPS /
+sans PPS, pertes pods). Primitives composables ; tests stats 35 passed.
+Pas d'analysis/ (Phase 5) dans ce chantier.
+
 Chantier diagnostic §9.2 / η **clos**.
 
 **Phase 7 démarrée** (brief `docs/brief-interface-utilisateur.md`) : API

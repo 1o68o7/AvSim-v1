@@ -42,10 +42,11 @@ Ne pas avancer Phase 3+ tant que plausibility / scaling sont rouges
 
 Spécifiés dans le brief, **pas écrits**.
 
-## Phase 4 — Capteurs (`sensors/`)
+## Phase 4 — Capteurs (`sensors/`) — **démarrée**
 
-Un capteur à la fois, chacun avec son test de bruit. Seulement après
-plausibility / scaling verts (ou triage explicite du point ouvert §9.2).
+12 capteurs + `bus.py` (brief §7) : primitives, force/angle dame, coulisse,
+pieds, pod, IMU coque, GNSS std/RTK, impeller, météo, sync CAN.
+Tests `tests/sensors/` 35 passed. Observabilité (Phase 5) **pas** anticipée.
 
 ## Phase 5 — Estimation (`estimation/ekf.py`)
 
