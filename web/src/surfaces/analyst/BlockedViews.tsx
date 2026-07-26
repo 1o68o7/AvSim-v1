@@ -51,16 +51,6 @@ export function SensorsView() {
   );
 }
 
-export function ObservabilityView() {
-  return (
-    <Placeholder
-      title="Observabilité"
-      phase="Phase 5 (analysis/)"
-      detail="Livrable central (brief §14) : front de Pareto coût/erreur. Nécessite le mode Observabilité, pas encore implémenté."
-    />
-  );
-}
-
 export function SensitivityView() {
   return (
     <Placeholder
