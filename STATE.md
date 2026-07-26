@@ -2,8 +2,13 @@
 
 ## Phase 0 : fermeture v1 — TERMINÉE
 
-`pytest tests/` : **16/16 verts** sur `main` (`bfeb780`), vérifié sur 8+ ET 1x.
-Première fois que la validation porte sur deux classes, pas seulement 8+.
+`pytest tests/` historique (`bfeb780`) : **16/16 verts** mais uniquement via
+`load_params()` **sans** `boat_class` → `defaults.yaml` (`I_oar=1,30`), pas le
+vrai 8+ (`I_oar=6,16`). Le « vérifié 8+ et 1x » de Phase 0 close était un
+**override manuel** hors fixture (mesure `|v_n|` seule), pas la suite pytest.
+
+Fixtures corrigées (`tests/conftest.py`, params `8+` / `1x`) : compte réel
+ci-dessous — un échec apparaît dès que le vrai `I_oar=6,16` est confronté.
 
 Tout ce qui suit a été résolu au fil de la session, chacun avec une source :
 

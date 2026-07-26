@@ -3,16 +3,9 @@
 Le bilan energetique est le produit du projet. S'il ne boucle pas, rien
 d'autre n'a de valeur.
 """
-import numpy as np
-import pytest
+import copy
 
-from avsim.core.params import load_params
 from avsim.core.solver import simulate
-
-
-@pytest.fixture(scope="module")
-def res():
-    return simulate(load_params())
 
 
 def test_energy_balance_closes(res):
@@ -56,11 +49,11 @@ def test_all_energy_terms_have_correct_sign(res):
     assert 0.0 < e["eta_blade"] <= 1.0, f"rendement de palette hors bornes : {e['eta_blade']}"
 
 
-def test_numerical_convergence():
+def test_numerical_convergence(P):
     """Tolerance resserree d'un ordre : la vitesse moyenne ne doit pas bouger de > 0.1 %."""
-    p = load_params()
+    p = copy.deepcopy(P)
     v_loose = simulate(p).last_stroke().V.mean()
-    p2 = load_params()
+    p2 = copy.deepcopy(P)
     p2["numerics"]["rtol"] = 1e-9
     p2["numerics"]["atol"] = 1e-11
     v_tight = simulate(p2).last_stroke().V.mean()

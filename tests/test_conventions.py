@@ -3,10 +3,11 @@
 Une convention de signe fausse se propage silencieusement dans tout le bilan
 energetique. Ces tests sont la premiere barriere.
 """
+import copy
+
 import numpy as np
 import pytest
 
-from avsim.core.params import load_params
 from avsim.core.body import BodyModel, segment_table
 from avsim.core.geometry import (
     oar_angle_from_handle,
@@ -15,11 +16,6 @@ from avsim.core.geometry import (
     blade_normal_speed,
 )
 from avsim.core.solver import simulate
-
-
-@pytest.fixture(scope="module")
-def P():
-    return load_params()
 
 
 # ---------------------------------------------------------------- masses
@@ -59,7 +55,9 @@ def test_blade_sweeps_sternward_during_drive(P):
 def test_handle_travel_maps_back_to_angles(P):
     """L'inversion poignee -> angle doit etre coherente avec la geometrie."""
     L_in = P["rig"]["L_in_m"]
-    for th_deg in (-34.0, 0.0, 58.0):
+    th_c = float(P["rig"]["theta_catch_deg"])
+    th_f = float(P["rig"]["theta_finish_deg"])
+    for th_deg in (th_f, 0.0, th_c):
         th = np.radians(th_deg)
         x_handle = -L_in * np.sin(th)
         th_back = oar_angle_from_handle(x_handle, L_in)
@@ -115,7 +113,7 @@ def test_blade_slips_sternward_mid_drive(P):
 
 # ---------------------------------------------------------------- coherence
 def test_zero_wind_zero_current_ground_equals_water(P):
-    p = load_params()
+    p = copy.deepcopy(P)
     p["environment"]["wind_axial_ms"] = 0.0
     p["environment"]["current_ms"] = 0.0
     res = simulate(p)
@@ -124,20 +122,26 @@ def test_zero_wind_zero_current_ground_equals_water(P):
 
 
 def test_identical_offsets_give_identical_seats(P):
-    """Sans decalage de phase, les 8 postes doivent etre strictement identiques."""
+    """Sans decalage de phase, les n postes doivent etre strictement identiques."""
     res = simulate(P)
     st = res.last_stroke()
     f = st.handle_force  # (n_seats, n_samples)
+    assert f.shape[0] == P["meta"]["n_rowers"]
     for s in range(1, f.shape[0]):
         assert np.allclose(f[0], f[s], rtol=1e-9, atol=1e-9), \
             f"poste {s+1} differe du poste 1 alors que tous les offsets sont nuls"
 
 
 def test_phase_offset_actually_shifts_seat(P):
-    p = load_params()
-    p["crew"]["phase_offset_ms"] = [0, 0, 0, 50.0, 0, 0, 0, 0]
+    n = int(P["meta"]["n_rowers"])
+    if n < 2:
+        pytest.skip("decalage inter-postes exige n_rowers >= 2")
+    p = copy.deepcopy(P)
+    offsets = [0.0] * n
+    offsets[1] = 50.0
+    p["crew"]["phase_offset_ms"] = offsets
     res = simulate(p)
     st = res.last_stroke()
     f = st.handle_force
-    assert not np.allclose(f[0], f[3], atol=1e-6), \
+    assert not np.allclose(f[0], f[1], atol=1e-6), \
         "un decalage de 50 ms doit produire une trace differente"
