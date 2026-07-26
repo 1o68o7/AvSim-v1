@@ -1,4 +1,13 @@
-/** Schéma de bateau adaptatif — 1..8 postes, couple / pointe (brief UI §4.1). */
+/** Schéma de bateau adaptatif — 1..8 postes, couple / pointe (brief UI §4.1).
+ *
+ * Convention θ = `geometry.py` / `pose.py` :
+ *   blade (x_along, y_lat) = (L·sin θ, L·cos θ)
+ *   θ = 0 → palette perpendiculaire (portée latérale max)
+ *   θ > 0 (attaque) → palette vers la proue ; θ < 0 (dégagé) → poupe
+ *
+ * SVG vue de dessus : +X vers la poupe (cox à droite), +Y vers le bas.
+ * Donc tipX = pinX − L·sin(θ)  (signe SVG pour coller à +x physique = proue).
+ */
 
 export type BoatSchematicProps = {
   nRowers: number;
@@ -10,6 +19,19 @@ export type BoatSchematicProps = {
   width?: number;
   height?: number;
 };
+
+/** Position palette relative au portant — même formule que `blade_position`. */
+export function oarTipOffset(
+  thetaDeg: number,
+  side: 1 | -1,
+  oarLen: number,
+): { dx: number; dy: number } {
+  const th = (thetaDeg * Math.PI) / 180;
+  return {
+    dx: -Math.sin(th) * oarLen,
+    dy: side * Math.cos(th) * oarLen,
+  };
+}
 
 export function BoatSchematic({
   nRowers,
@@ -31,10 +53,9 @@ export function BoatSchematic({
       (n === 1 ? hullW * 0.5 : (hullW * (i + 0.5)) / n);
     // pointe : côté alterné (bâbord / tribord) ; couple : deux avirons
     const side = i % 2 === 0 ? 1 : -1;
-    return { i: i + 1, x, side };
+    return { i: i + 1, x, side: side as 1 | -1 };
   });
 
-  const th = ((thetaDeg ?? 0) * Math.PI) / 180;
   const oarLen = sculling ? 52 : 70;
 
   return (
@@ -92,10 +113,11 @@ export function BoatSchematic({
               {i}
             </text>
             {oars.map((s) => {
-              const x2 = x + Math.sin(th) * oarLen * 0.15;
-              const y2 = cy + s * (22 + Math.cos(th) * oarLen * 0.55);
-              const tipX = x + Math.sin(th) * 8 + s * Math.cos(th) * oarLen;
-              const tipY = cy + s * 10 - Math.sin(th) * oarLen * 0.2;
+              const { dx, dy } = oarTipOffset(thetaDeg ?? 0, s as 1 | -1, oarLen);
+              const tipX = x + dx;
+              const tipY = cy + dy;
+              const bladeRot =
+                (Math.atan2(dy, dx) * 180) / Math.PI;
               return (
                 <g key={`${i}-${s}`}>
                   <line
@@ -114,9 +136,8 @@ export function BoatSchematic({
                     ry="3.5"
                     fill="#3a9bb0"
                     opacity="0.85"
-                    transform={`rotate(${(-thetaDeg * s) / 2} ${tipX} ${tipY})`}
+                    transform={`rotate(${bladeRot} ${tipX} ${tipY})`}
                   />
-                  <circle cx={x2} cy={y2} r="0" />
                 </g>
               );
             })}
