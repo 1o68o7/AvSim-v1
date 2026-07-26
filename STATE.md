@@ -128,6 +128,15 @@ Simulé + Validée/Bêta par classe. Phase 1 (`test_plausibility` /
 `test_class_scaling`) reste en dette — les 6 classes bêta ne sont pas
 présentées à égalité avec 8+/1x.
 
+**CLI `avsim run`** : `--class` / `--param section__nom=valeur` / `--strokes`
+/ `--discard` — réutilise `load_params`/`override`/`simulate` ; affiche les
+6 grandeurs Phase 2 (`Stroke.energy()`), option `--out` pour replay.
+
+### Prochaine étape
+
+1. **`avsim replay --realtime`** — rejouer un Result à cadence T.
+2. Surface Produit (Team / Coach) consommateur du flux.
+
 ```
 pip install -e '.[api]' --break-system-packages
 python -m avsim.api          # :8000
