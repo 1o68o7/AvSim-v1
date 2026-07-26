@@ -128,6 +128,19 @@ Simulé + Validée/Bêta par classe. Phase 1 (`test_plausibility` /
 `test_class_scaling`) reste en dette — les 6 classes bêta ne sont pas
 présentées à égalité avec 8+/1x.
 
+**Bilan / Équipage** : `useEnsureSimulate` → `POST /api/simulate` (même
+source Python que Bateau/Coup ; pas de recalcul TS). Badge Bêta permanent
+sur classes non validées. Chargement + erreur réseau + Réessayer.
+
+### Prochaine étape
+
+1. **CLI minimale** — `avsim run --class … --param section__nom=valeur
+   --strokes N --discard N` (affiche les 6 grandeurs Phase 2 déjà calculées).
+2. **`avsim replay --realtime`** — rejouer un `Result` à cadence T (flux
+   pour Team / Coach live / Coach replay).
+3. **Perf `/simulate`** — ~17 s (8+) / ~8 s (2x) avec `n_strokes=6`,
+   `n_discard=2` ; à optimiser plus tard.
+
 ```
 pip install -e '.[api]' --break-system-packages
 python -m avsim.api          # :8000
