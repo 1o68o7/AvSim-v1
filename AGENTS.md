@@ -5,22 +5,28 @@ choisir quels capteurs acheter avant de câbler un bateau réel. Ce n'est pas
 une source de données — aucune sortie ne doit être présentée comme une mesure.
 
 ## Avant d'écrire une ligne
-Lis `STATE.md` (racine du repo) — décrit l'état exact, dans l'ordre :
-1. chargeur multi-classes absent (`params.py` ne lit que `defaults.yaml`)
-2. fermeture cinématique fausse (sur-détermine le coup, cf. brief §4.1-§4.4)
-3. `n_rowers` figé à 8 dans `defaults.yaml`
+Lis `STATE.md` puis `ROADMAP-PRODUCTION.md`. Phase 0 (fermeture v1) est
+**terminée** sur `main`. Point ouvert central : plausibilité §9.2 hors cibles
+(`F_peak` au-dessus de la plage eau — piste `I_oar` / traînée / pertes palette).
 
 Puis `brief-simulateur-v2.md` §2 (classes), §3 (enveloppe), §4 (fermeture),
-§11 (ordre de construction). Ignore §10 et au-delà pour l'instant — web app et
-dashboards viennent après, pas maintenant.
+§9.2–§9.4 (plausibility / scaling / triangulation), §11 (ordre). Ignore §10
+et au-delà — web app et dashboards viennent après, pas maintenant.
 
 ## Build & test
 ```
 pip install -e . --break-system-packages
 pytest tests/ -q
 ```
-Critère d'arrêt de cette tâche : `pytest tests/` entièrement vert, sur au
-moins deux classes différentes (ex. 1x et 8+).
+Les simulations de validation multi-classes passent par
+`load_params(boat_class=...)`, pas `load_params()` nu (defaults seuls).
+
+## Phase en cours
+Phase 1 : écrire `test_plausibility.py`, `test_class_scaling.py`,
+`test_triangulation.py` (brief : écrire d'abord, faire échouer). Ne pas
+avancer `sensors/`, `estimation/`, `analysis/`, `api/`, `web/` tant que
+plausibility / class_scaling ne sont pas traités (triangulation : skip OK si
+table D6 absente).
 
 ## Interdits
 - Ne jamais modifier une valeur de `params/defaults.yaml` ou
@@ -29,9 +35,10 @@ moins deux classes différentes (ex. 1x et 8+).
   citée dans le commit.
 - Ne jamais coder en dur le nombre de rameurs — tout se dimensionne sur
   `n_rowers` de la classe.
-- Ne pas toucher aux fichiers dans `tests/` pour les faire passer.
-- Ne pas avancer vers `sensors/`, `estimation/`, `analysis/`, `api/` ou
-  `web/` tant que `pytest tests/` n'est pas vert.
+- Ne pas toucher aux fichiers dans `tests/` pour les faire passer
+  (affaiblir un seuil / masquer un échec). Écrire de **nouveaux** tests
+  Phase 1 qui échouent pour de vraies raisons est attendu.
+- Ne pas inventer la table de triangulation (MANQUES D6) — skip documenté.
 
 ## En cas de doute sur la physique
 Demander plutôt que deviner. Une convention de signe fausse se propage
