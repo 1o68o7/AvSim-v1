@@ -5,23 +5,32 @@
 
 ---
 
-## État au 25/07 — ce qui existe déjà, vérifié dans le code
+## État au 26/07 — ce qui existe déjà, vérifié dans le code
 
-PR #7 mergée sur `main` (`447d5cc`). Vérifié directement dans le dépôt,
-pas seulement rapporté :
+PR #7 à #23 mergées ou en cours de revue. Vérifié directement dans le
+dépôt à chaque étape, pas seulement rapporté :
 
-- **API** (`src/avsim/api/`, pas un dossier `api/` à la racine — écart
-  mineur sans conséquence par rapport à la structure du brief §10 initial) :
-  `/classes`, `/hull_moulds`, `/params/{code}`, `/validate`, `/simulate`,
-  `/jobs/sweep` (stub 501, Phase 5). Rôles via en-tête `X-DataR0w-Role`,
-  `analyst_only()` réellement appliqué sur `/params`, `/validate`,
-  `/jobs/sweep` — vérifié dans le code, pas juste déclaré.
-- **Web** (`web/`, React+Vite) : sélection de rôle, surface Analyste avec
-  Bateau/Coup/Bilan/Équipage (Coup et Bilan encore à finir de brancher),
-  badges Simulé + Validée/Bêta déjà en place. Surface Produit en stubs.
-- **`BoatSchematic.tsx`** : vue de dessus 1-8 postes, pointe/couple,
-  fonctionne. Voir §4.1 ci-dessous pour la distinction avec le composant
-  qui reste à faire.
+- **API** (`src/avsim/api/`) : `/classes`, `/hull_moulds`, `/params/{code}`,
+  `/validate`, `/simulate`, `/jobs/sweep` (stub, Phase 5 bloquée — cf.
+  `STATE.md`), `/api/pose` + `/api/pose/series` (géométrie du coup),
+  `/api/replay/stream` (SSE). Rôles via en-tête `X-DataR0w-Role`,
+  `analyst_only()` réellement appliqué — vérifié dans le code.
+- **Web** (`web/`, React+Vite) : sélection de rôle, surface Analyste
+  complète — Bateau, Coup (`StrokeGeometry` branchée), Bilan et Équipage
+  branchés sur `/api/simulate` (badge Bêta permanent). Surface Produit :
+  `TeamView` faite (flux SSE, badge Simulé, défaut `2x`) ; Coach live et
+  Coach replay en cours (branche `cursor/product-coach-live-replay-36e5`).
+- **`BoatSchematic.tsx`** (§4.1a, vue de dessus) et **`StrokeGeometry`**
+  (§4.1b, vue latérale animée, alimentée uniquement par Python via
+  `/api/pose`) : **tous les deux faits**, distinction posée au §4.1.
+- **CLI** (`avsim run`, `avsim replay --realtime`) et **déploiement**
+  (Render, `render.yaml`, `avsim-api` live) : faits.
+
+**Rappel important, indépendant de l'UI** : plusieurs limites physiques
+1DOF sont documentées et acceptées (`η`, `check_factor`,
+`power_instantaneous`) — cf. `STATE.md`. Phase 5 (Observabilité) reste à
+87,5 % de rejet d'enveloppe, seule la classe `2x` passe. C'est pour ça que
+les nouvelles vues Produit sont testées sur `2x` par défaut.
 
 **Limite connue et acceptée pour l'instant** : le contrôle de rôle par
 en-tête HTTP empêche un clic accidentel dans la mauvaise surface, mais
@@ -332,7 +341,7 @@ correcte. Sert d'aperçu de configuration — Vue Bateau, Vue Équipage,
 Team. Ne représente pas la biomécanique du coup, ce n'est pas son rôle.
 Aucune modification nécessaire.
 
-**4.1b — `StrokeGeometry` (à construire, pour Vue Coup et Coach Replay uniquement)**
+**4.1b — `StrokeGeometry` (fait, PR #8 — pour Vue Coup et Coach Replay)**
 
 Vue latérale animée du rameur + aviron + coque, pilotée par `u` (fraction
 de course, 0 à 1). Doit reprendre **exactement** la géométrie déjà
@@ -340,10 +349,9 @@ calculée pour `vue-sagittale-rameur-aviron.svg` (position attaque/dégagé,
 `theta_catch`/`theta_finish`, cinématique inverse cheville→genou→hanche→
 épaule→main) — même source de vérité, pas un second calcul divergent.
 
-Concrètement : exposer cette géométrie via un endpoint serveur
-(`/api/pose?boat_class=X&u=0.3`) qui renvoie les coordonnées déjà
-calculées côté Python, plutôt que de réimplémenter les formules d'IK en
-TypeScript. Un seul calcul de géométrie, pas deux susceptibles de
+Fait exactement comme prévu : exposé via `/api/pose` et `/api/pose/series`,
+qui renvoient les coordonnées déjà calculées côté Python (`joints_from_handle`),
+plutôt que de réimplémenter les formules d'IK en TypeScript. Un seul calcul de géométrie, pas deux susceptibles de
 diverger — la même discipline qui a gouverné tout le chantier physique
 cette semaine (ne jamais laisser deux chemins de calcul indépendants
 produire silencieusement des résultats différents, cf. le
@@ -386,18 +394,15 @@ croire à une réponse instantanée.
 
 ## 6. Ordre de construction recommandé
 
-1. ~~Composants partagés (§4)~~ — `BoatSchematic` fait ; `StrokeGeometry`
-   (§4.1b) reste à construire, priorité immédiate
-2. ~~Vue Bateau (§2.1)~~ — faite
-3. Finir de brancher Vue Coup (§2.2) sur `StrokeGeometry` une fois
-   construit, et Vue Bilan (§2.3) — les deux sont amorcées mais pas
-   terminées d'après la revue de PR #7
-4. Vue Équipage (§2.4)
-5. Surface Produit (§3) en mode rejeu (`avsim replay --realtime`) —
-   encore en stubs
+1. ~~Composants partagés (§4)~~ — `BoatSchematic` et `StrokeGeometry` faits
+2. ~~Vue Bateau, Vue Coup, Vue Bilan, Vue Équipage (§2.1-2.4)~~ — faites
+3. ~~CLI + `avsim replay --realtime` + déploiement~~ — faits
+4. ~~TeamView (§3.2)~~ — faite
+5. Coach live + Coach replay (§3.3-3.4) — en cours
 6. Vues Capteurs/Observabilité/Sensibilité/Détectabilité (§2.5-2.8) —
-   passent de maquette à réel au fur et à mesure que les Phases 4 et 5
-   avancent, pas toutes d'un coup
+   restent en maquette : Phase 5 bloquée (87,5 % de rejet d'enveloppe,
+   cf. `STATE.md`), pas de raison de les construire pour de vrai avant
+   que ça change
 
 ---
 
