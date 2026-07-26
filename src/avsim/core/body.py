@@ -274,9 +274,17 @@ class BodyModel:
         t = self.P["technique"]
         u = np.asarray(u, dtype=float)
         if drive:
-            x_seat = self.L_slide * _window(u, 0.0, t["seq_legs_end"])
-            phi = self.phi_c + (self.phi_f - self.phi_c) * _window(
-                u, t["seq_trunk_onset"], t["seq_trunk_end"])
+            # Jambes / tronc en croisière (même famille que le retour §12.2) :
+            # un smootherstep sur [0 ; seq_legs_end] concentre s'' vers u≈0,25
+            # — avant F_u_peak=0,40 — et produit v_min drive quand I > F_prop
+            # (docs/diag-vmin-drive.md).
+            legs_b = _cruise_blend_frac(0.0, t["seq_legs_end"], 0.28, min_abs=0.10)
+            trunk_b = _cruise_blend_frac(
+                t["seq_trunk_onset"], t["seq_trunk_end"], 0.22, min_abs=0.10)
+            x_seat = self.L_slide * _window_cruise(
+                u, 0.0, t["seq_legs_end"], blend=legs_b)
+            phi = self.phi_c + (self.phi_f - self.phi_c) * _window_cruise(
+                u, t["seq_trunk_onset"], t["seq_trunk_end"], blend=trunk_b)
         else:
             # retour : tau_r = 1-u (0 au degage → 1 a l'attaque)
             tau_r = 1.0 - u
@@ -376,13 +384,17 @@ class BodyModel:
             *rw["slide"], rw.get("slide_blend", 0.22), min_abs=0.10)
         trunk_b = _cruise_blend_frac(*rw["trunk"], 0.22, min_abs=0.10)
         arms_b = _cruise_blend_frac(*rw["arms"], 0.22, min_abs=0.10)
-        seat_d = self.L_slide * _window(tau_d, 0.0, t["seq_legs_end"])
+        legs_b = _cruise_blend_frac(0.0, t["seq_legs_end"], 0.28, min_abs=0.10)
+        trunk_d_b = _cruise_blend_frac(
+            t["seq_trunk_onset"], t["seq_trunk_end"], 0.22, min_abs=0.10)
+        seat_d = self.L_slide * _window_cruise(
+            tau_d, 0.0, t["seq_legs_end"], blend=legs_b)
         seat_r = self.L_slide * (
             1.0 - _window_cruise(tau_r, *rw["slide"], blend=slide_b))
         x_seat = np.where(is_drive, seat_d, seat_r)
 
-        phi_d = self.phi_c + (self.phi_f - self.phi_c) * _window(
-            tau_d, t["seq_trunk_onset"], t["seq_trunk_end"])
+        phi_d = self.phi_c + (self.phi_f - self.phi_c) * _window_cruise(
+            tau_d, t["seq_trunk_onset"], t["seq_trunk_end"], blend=trunk_d_b)
         phi_r = self.phi_f + (self.phi_c - self.phi_f) * _window_cruise(
             tau_r, *rw["trunk"], blend=trunk_b)
         phi = np.where(is_drive, phi_d, phi_r)
