@@ -1,7 +1,21 @@
 export type Role = "analyst" | "product";
 
-/** Vide = même origine / proxy Vite → FastAPI. */
-const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+/**
+ * Base URL de l'API.
+ * - Prod / Render : `VITE_API_URL` (ex. https://avsim-api.onrender.com)
+ * - Dev local : non défini → même origine + proxy Vite `/api` → localhost:8000
+ */
+function apiBase(): string {
+  const raw = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
+  if (!raw) return "";
+  const withScheme =
+    raw.startsWith("http://") || raw.startsWith("https://")
+      ? raw
+      : `https://${raw}`;
+  return withScheme.replace(/\/$/, "");
+}
+
+const API_BASE = apiBase();
 
 export class ApiError extends Error {
   status: number;

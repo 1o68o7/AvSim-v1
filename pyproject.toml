@@ -7,6 +7,13 @@ dependencies = ["numpy", "scipy", "pandas", "pyyaml"]
 [project.optional-dependencies]
 api = ["fastapi", "uvicorn[standard]", "pydantic", "httpx"]
 
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
