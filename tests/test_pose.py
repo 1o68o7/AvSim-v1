@@ -39,6 +39,22 @@ def test_pose_series_length():
     assert s["u"][0] == 0.0 and s["u"][-1] == 1.0
 
 
+def test_catch_unvalidated_badge_tracks_knee_behind_ankle():
+    """Badge catch : présent ssi x_knee < x_ankle à u≈0 — suit la géométrie.
+
+    Ne fige pas le signe du genou : si `x_ankle_off_m` est recalibré un jour
+    et le problème disparaît, le flag doit rester absent (pas un assert
+    hardcodé sur behind=True).
+    """
+    catch = pose_at_u("8+", 0.0)
+    behind = catch["joints"]["knee"]["x"] < catch["joints"]["ankle"]["x"]
+    assert catch["flags"]["knee_behind_ankle"] is behind
+    assert catch["flags"]["show_catch_unvalidated_badge"] is behind
+
+    mid = pose_at_u("8+", 0.5)
+    assert mid["flags"]["show_catch_unvalidated_badge"] is False
+
+
 def test_api_pose_all_classes():
     client = TestClient(app)
     H = {"X-DataR0w-Role": "analyst"}

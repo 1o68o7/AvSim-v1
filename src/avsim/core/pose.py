@@ -124,6 +124,13 @@ def pose_at_u(
             "L_arm": float(body.L_arm),
             "L_slide": float(body.L_slide),
         },
+        # Transparence UI seulement — ne change pas le calcul (ROADMAP point ouvert).
+        # Genou en arrière de la cheville (x_knee < x_ankle) à l'attaque : pose
+        # non validée contre une mesure réelle. Badge StrokeGeometry si u≈0.
+        "flags": {
+            "knee_behind_ankle": bool(x_knee < x_ankle),
+            "show_catch_unvalidated_badge": bool(u <= 0.02 and x_knee < x_ankle),
+        },
     }
 
 

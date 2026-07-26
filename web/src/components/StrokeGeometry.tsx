@@ -1,5 +1,7 @@
 /** Vue latérale animée — géométrie 100 % serveur (/api/pose), pas d'IK TS. */
 
+import { StatusBadge } from "./StatusBadge";
+
 export type PosePoint = { x: number; z: number };
 
 export type PoseFrame = {
@@ -25,6 +27,10 @@ export type PoseFrame = {
     deck_z: number;
     keel_z: number;
     loa_m: number;
+  };
+  flags?: {
+    knee_behind_ankle?: boolean;
+    show_catch_unvalidated_badge?: boolean;
   };
 };
 
@@ -69,6 +75,15 @@ export function StrokeGeometry({
   }
 
   const { joints: j, oar, hull } = frame;
+  // Badge uniquement à l'attaque si genou géométriquement derrière la cheville
+  // (point ouvert ROADMAP — pas une correction, juste de la transparence).
+  const showCatchBadge =
+    frame.flags?.show_catch_unvalidated_badge === true ||
+    (frame.u <= 0.02 && j.knee.x < j.ankle.x);
+  const catchBadgeTitle =
+    "Position de catch non validée contre une mesure réelle " +
+    "(x_knee < x_ankle — point ouvert géométrie, ROADMAP)";
+
   const xs = [
     hull.stern_x,
     hull.bow_x,
@@ -125,6 +140,18 @@ export function StrokeGeometry({
   );
 
   return (
+    <div style={{ position: "relative", width: "100%" }}>
+      {showCatchBadge && (
+        <div
+          style={{ position: "absolute", top: 8, left: 8, zIndex: 2 }}
+          title={catchBadgeTitle}
+        >
+          <StatusBadge
+            kind="beta"
+            label="Catch non validé (mesure)"
+          />
+        </div>
+      )}
     <svg
       viewBox={`0 0 ${width} ${height}`}
       width="100%"
@@ -216,5 +243,6 @@ export function StrokeGeometry({
         proue →
       </text>
     </svg>
+    </div>
   );
 }
