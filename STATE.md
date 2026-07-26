@@ -50,7 +50,16 @@ Correction : puissance retour `I α ω` dans `handle_power` ; sauts de KE
 (`E_oar_ke_jump_J`) déduits de `E_rower_J`. Identité aviron sur α dynamique
 (plus `np.gradient`). Clamp Hermite **conservé** (sans lui le 1x diverge).
 
-## Point ouvert — chantier §9.2 / η clos (diagnostic)
+## Limites connues du modèle 1DOF (η et check_factor)
+
+Deux écarts **réels et compris** face aux cibles §9.2 / enveloppe — pas des
+bugs de seuil. Même traitement : documentés ici, `xfail` sur 8+/1x dans
+`tests/test_plausibility.py`, pistes différées dans `ROADMAP-PRODUCTION.md`.
+Le modèle reste valide pour comparer des configurations de capteurs
+(l'objectif du projet) ; les lectures absolues (watts, cavalement) sont
+sous-estimées / sur-estimées selon le poste.
+
+### η_blade ≈ 0,62 — chantier §9.2 / η clos (diagnostic)
 
 Les 4 suspects (`I_oar`, `k_drag`, pertes de palette comme knob, arc
 catch/finish) ont été examinés avec diagnostic réel : **3 innocents**, **1
@@ -59,11 +68,24 @@ catch/finish) ont été examinés avec diagnostic réel : **3 innocents**, **1
 de l'incidence de palette pendant le drive (le « aircraft principle »
 documenté au tout début du projet) ; à la différence d'un vrai rameur,
 notre aviron ne corrige pas `α` en temps réel, donc il traverse la zone
-`C_D/C_L` défavorable (`u∈[0,22 ; 0,52]`) sans compensation. Conséquence
-pratique : le modèle reste valide pour comparer des configurations de
-capteurs entre elles (l'objectif du projet), mais sous-estime le rendement
-absolu — à garder en tête pour toute lecture de watts absolus, pas pour
-les comparaisons relatives.
+`C_D/C_L` défavorable (`u∈[0,22 ; 0,52]`) sans compensation.
+
+### check_factor ≈ 3,1–3,2 — levier « largeur » épuisé
+
+Après les correctifs de forme (retour R Kleshnev + transition coulisse,
+cruise jambes/tronc drive), `cf = Vmax_retour − Vmin_drive` reste
+**~3,1–3,2** (cible §9.2 8+ : `[0,50 ; 0,80]`). Mécanisme établi :
+
+- saturations `s''=±25` aux transitions tronc→slide et fin jambes ;
+- **empilement CdM** (tronc + coulisse) grossi par le warp temporel
+  Hermite au carré `(dτ_r/dt)²` — pas une seule fenêtre trop étroite.
+
+Sweep « élargir les blends » (`docs/diag-transition-width.md`) : aucune
+config n'approche `cf ≲ 1,5–2` ; slide reste `|a|~70–80 m/s²` même au
+blend max. **Levier largeur épuisé** — pas de correctif blend appliqué.
+Pistes restantes (autre nature) : désempiler tronc/slide dans l'espace
+CdM, ou revoir le warp Hermite / le rôle du clamp. Voir aussi
+`docs/diag-vmin-drive.md`, `docs/diag-cf-cycle-overview.md`.
 
 ### Notes de clôture (2026-07-26)
 
@@ -114,13 +136,15 @@ l'attaque) — `blade_normal_speed` encourageant mais autre grandeur.
 | part hydro | ~47 % | 70–80 |
 | part blade | ~48 % | 15–25 |
 | part aero | ~4,5 % | 5–10 |
-| check_factor | ~3,7 | 0,50–0,80 |
+| check_factor | **~3,1–3,2** (après fixes forme ; ~3,7 avant) | 0,50–0,80 |
 | slip \|v_n\| moyen | ~2,3 | 0,4–1,4 |
 | steady drift | ~0,02 % | <0,5 % |
 
 ## Suite
 
-Chantier diagnostic §9.2 / η **clos**.
+Chantiers diagnostic §9.2 / η **et** check_factor (largeur) **clos** —
+deux limites 1DOF documentées, pas de nouvelle correction physique sur
+ces leviers.
 
 **Phase 7 démarrée** (brief `docs/brief-interface-utilisateur.md`) : API
 FastAPI + UI React (surfaces Analyste 🟢 / Produit maquette). Badges
