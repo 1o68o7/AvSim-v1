@@ -123,10 +123,9 @@ l'attaque) — `blade_normal_speed` encourageant mais autre grandeur.
 Chantier diagnostic §9.2 / η **clos**.
 
 **Phase 7 démarrée** (brief `docs/brief-interface-utilisateur.md`) : API
-FastAPI + UI React (surfaces Analyste 🟢 / Produit maquette). Badges
-Simulé + Validée/Bêta par classe. Phase 1 (`test_plausibility` /
-`test_class_scaling`) reste en dette — les 6 classes bêta ne sont pas
-présentées à égalité avec 8+/1x.
+FastAPI + UI React. `BoatSchematic` (dessus) + **`StrokeGeometry`** (latéral,
+`/api/pose` = géométrie `body.py`/`geometry.py`, pas d'IK TS). Badges
+Simulé + Validée/Bêta. Phase 1 scaling reste en dette.
 
 ```
 pip install -e '.[api]' --break-system-packages

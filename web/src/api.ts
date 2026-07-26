@@ -121,4 +121,24 @@ export const api = {
       method: "POST",
       body: JSON.stringify(body),
     }),
+  poseSeries: (
+    role: Role,
+    boatClass: string,
+    n = 41,
+    opts?: { hull_builder?: string | null; hull_mould?: string | null },
+  ) => {
+    const q = new URLSearchParams({
+      boat_class: boatClass,
+      n: String(n),
+      drive: "true",
+    });
+    if (opts?.hull_builder) q.set("hull_builder", opts.hull_builder);
+    if (opts?.hull_mould) q.set("hull_mould", opts.hull_mould);
+    return request<{
+      source: string;
+      boat_class: string;
+      u: number[];
+      frames: import("./components/StrokeGeometry").PoseFrame[];
+    }>(role, `/api/pose/series?${q}`);
+  },
 };
