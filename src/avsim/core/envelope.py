@@ -415,7 +415,10 @@ def check_outputs(result, P: dict, cls: BoatClass) -> list[Violation]:
         f"Fluctuation ±{half:.2f} m/s hors ±{lo_h:.2f}–±{hi_h:.2f} m/s ({cls.code})",
     ))
 
-    # η palette — hors bande = modèle de palette faux (REJECT)
+    # η palette — rejet structurel §3.3 [0,68–0,92] (modèle de palette faux).
+    # La cible de crédibilité §9.2 est plus stricte [0,75–0,85] ; elle n'est
+    # PAS un conflit — test_plausibility appelle is_admissible ici d'abord,
+    # puis applique la bande §9.2 (voir tests/test_plausibility.py).
     eta = float(en.get("eta_blade", float("nan")))
     if np.isfinite(eta):
         _append(out, _reject_if_outside(

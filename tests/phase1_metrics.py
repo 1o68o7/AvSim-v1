@@ -1,11 +1,18 @@
-"""Métriques Phase 1 (§9.2) — une seule source pour plausibility / scaling."""
+"""Métriques Phase 1 (§9.2) — une seule source pour plausibility / scaling.
+
+Enveloppe §3.3 (rejet structurel) et plausibilité §9.2 (cible plus stricte)
+sont voulues distinctes ; les métriques portent les deux pour que
+test_plausibility enchaîne is_admissible → bornes §9.2.
+"""
 from __future__ import annotations
 
 from typing import Any
 
 import numpy as np
 
+from avsim.core.boat_class import BoatClass
 from avsim.core.catalog import V_REF_MS
+from avsim.core.envelope import check_inputs, check_outputs, is_admissible
 from avsim.core.geometry import blade_normal_speed
 from avsim.core.params import load_class
 from avsim.core.solver import simulate
@@ -47,6 +54,7 @@ def steady_stroke_metrics(
     P = load_class(code)
     P["numerics"]["n_strokes"] = int(n_strokes)
     P["numerics"]["n_discard"] = int(n_discard)
+    cls = BoatClass.from_params(P)
     res = simulate(P)
     st = res.last_stroke()
     en = st.energy()
@@ -66,6 +74,8 @@ def steady_stroke_metrics(
     drive = st.immersion[0] > 0.01
     slip = float(np.abs(vn[drive]).mean()) if drive.any() else float("nan")
 
+    env_violations = check_inputs(P, cls) + check_outputs(res, P, cls)
+
     v_ref = V_REF_MS[code]
     out = {
         "code": code,
@@ -80,6 +90,8 @@ def steady_stroke_metrics(
         "check_factor": en["check_factor"],
         "slip_mean_ms": slip,
         "energy": en,
+        "envelope_violations": env_violations,
+        "envelope_admissible": is_admissible(env_violations),
     }
     _CACHE[key] = out
     return out
