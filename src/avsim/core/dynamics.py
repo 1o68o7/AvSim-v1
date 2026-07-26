@@ -134,6 +134,33 @@ class Crew:
         self.w_at_finish = np.zeros(self.n)
         self.w_catch_target = np.zeros(self.n)      # brief §4.4 : omega=0 a l'attaque
 
+        # Tables s(θ), ds/dθ, d²s/dθ² — une fois, index θ (pas le temps).
+        # Remplace 24 appels joints_from_handle / RHS par np.interp.
+        self._com_tab_drive = self._build_com_table(drive=True, n_pts=3001)
+        self._com_tab_rec = self._build_com_table(drive=False, n_pts=3001)
+
+    def _build_com_table(self, *, drive: bool, n_pts: int = 3001):
+        """Grille fine sur [θ_finish, θ_catch] + dérivées (DF centrales, dθ=1e-5)."""
+        th = np.linspace(self.theta_finish, self.theta_catch, int(n_pts))
+        s = np.empty(th.size)
+        ds = np.empty(th.size)
+        d2s = np.empty(th.size)
+        dth = 1.0e-5
+
+        def _s_at(thi: float) -> float:
+            xh = float(handle_position(thi, self.L_in)[0])
+            u = float(self.body.handle_progress(xh))
+            return float(self.body.com_x_from_handle(xh, u, drive=drive))
+
+        for i, thi in enumerate(th):
+            s0 = _s_at(float(thi))
+            sp = _s_at(float(thi) + dth)
+            sm = _s_at(float(thi) - dth)
+            s[i] = s0
+            ds[i] = (sp - sm) / (2.0 * dth)
+            d2s[i] = (sp - 2.0 * s0 + sm) / (dth * dth)
+        return {"th": th, "s": s, "ds": ds, "d2s": d2s}
+
     # --------------------------------------------------------------- fluides
     def fluid(self):
         e = self.P["environment"]
@@ -167,29 +194,22 @@ class Crew:
 
     # --------------------------------------------------------------- body / COM
     def _com_and_deriv(self, th, w, alpha, drive_mask):
-        """s, s', s'' pour chaque poste a partir de theta (poignee maitresse)."""
-        x_h = handle_position(th, self.L_in)[0]
-        u = self.body.handle_progress(x_h)
+        """s, s', s'' via tables θ (drive / retour) — pas de joints à chaque RHS."""
         n = self.n
         s = np.empty(n)
+        ds_dth = np.empty(n)
+        d2s_dth2 = np.empty(n)
+        th_lo, th_hi = self.theta_finish, self.theta_catch
         for i in range(n):
-            s[i] = float(self.body.com_x_from_handle(
-                x_h[i], u[i], drive=bool(drive_mask[i])))
-
-        # ds/dth, d2s/dth2 par differences centrales (configuration = f(theta))
-        dth = 1.0e-5
-        s_p = np.empty(n)
-        s_m = np.empty(n)
-        for i in range(n):
-            xp = handle_position(th[i] + dth, self.L_in)[0]
-            xm = handle_position(th[i] - dth, self.L_in)[0]
-            up = float(self.body.handle_progress(xp))
-            um = float(self.body.handle_progress(xm))
-            drv = bool(drive_mask[i])
-            s_p[i] = float(self.body.com_x_from_handle(xp, up, drive=drv))
-            s_m[i] = float(self.body.com_x_from_handle(xm, um, drive=drv))
-        ds_dth = (s_p - s_m) / (2.0 * dth)
-        d2s_dth2 = (s_p - 2.0 * s + s_m) / (dth * dth)
+            tab = self._com_tab_drive if drive_mask[i] else self._com_tab_rec
+            thi = float(th[i])
+            if thi < th_lo:
+                thi = th_lo
+            elif thi > th_hi:
+                thi = th_hi
+            s[i] = float(np.interp(thi, tab["th"], tab["s"]))
+            ds_dth[i] = float(np.interp(thi, tab["th"], tab["ds"]))
+            d2s_dth2[i] = float(np.interp(thi, tab["th"], tab["d2s"]))
 
         s_dot = ds_dth * w
         s_ddot = d2s_dth2 * w * w + ds_dth * alpha
