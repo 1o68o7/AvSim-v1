@@ -52,23 +52,48 @@ Correction : puissance retour `I α ω` dans `handle_power` ; sauts de KE
 
 ## Point ouvert — le vrai sujet de la suite
 
-**Phase 2 §9.2 (plausibilité) reste hors cibles** : `v_mean`, rendement de palette,
-`check_factor` pas encore dans les fourchettes du brief. `F_peak` retenu au-dessus
-de la plage sourcée en est le symptôme le plus probable — piste à creuser :
-`I_oar`, coefficient de traînée, ou pertes de palette surestimés quelque part
-dans le bilan. Pas encore diagnostiqué.
+**Phase 2 §9.2 (plausibilité) reste hors cibles.** Hypothèse traînée testée
+et **écartée** (voir sweep ci-dessous) : baisser `k_drag` dans sa bande ne
+permet pas de ramener `F_peak` dans 500–700 N tout en touchant v/cf/η.
+Prochaine piste : **pertes de palette** (surestimées), pas la traînée de coque.
 
 **Pas encore vérifié** : le repère angulaire de Kleshnev (glissement ≈3° après
 l'attaque) n'a pas été confronté directement — `blade_normal_speed` (0,94-1,04 m/s)
 est encourageant mais mesure autre chose que ce repère précis.
 
-### Snapshot §9.2 (8+, F_peak=1100, Catch Slip, leave=25)
+### Sweep `k_drag` × `F_peak` (8+, I_oar=6,16, 2026-07-26)
+
+Config réelle via `load_params(boat_class="8+")`. Grille :
+- `k_drag` ∈ {11,70 ; 12,00 ; 12,35 ; 12,70 ; 13,00} — bande classe
+  `params/classes/8+.yaml` **[11,70 ; 14,30]** (src N, loi d'échelle)
+- `F_peak` ∈ {500 ; 550 ; 600 ; 650 ; 700 ; 1100} — plage eau Steinacker/Holt
+  500–700 + référence erg actuelle
+
+Pilotage traînée : modèle `simple` → `k_drag` (`forces.hull_drag`), pas `CdA`
+(aéro minoritaire ~4 %).
+
+**Aucune combinaison** avec `k_drag` **et** `F_peak` dans leurs bandes sourcées
+n'atteint simultanément v_mean ∈ [5,78 ; 6,78], check_factor ∈ [0,50 ; 0,80],
+η_blade ∈ [0,75 ; 0,85]. **Aucun YAML modifié.**
+
+| Régime | k_drag | F_peak | viable ? | v_mean | cf | η | T_drive | Écarts vs §9.2 |
+|---|---|---|---|---|---|---|---|---|
+| Meilleure **deux bandes sourcées** | 13,00 | 550 | oui (limite) | 2,11 | 2,70 | 0,49 | 1,34 | v −3,67 ; cf +1,90 ; η −0,26 |
+| Meilleure v globale (F hors eau) | 11,70 | 1100 | oui | 5,13 | 3,77 | 0,64 | 0,73 | v −0,65 ; cf +2,97 ; η −0,12 |
+| Nominal actuel | 13,00 | 1100 | oui | 4,91 | 3,72 | 0,62 | 0,75 | v −0,87 ; cf +2,92 ; η −0,13 |
+
+À F∈[500;700] : quasi tous les points ont drift > 0,5 % (cycle non établi) ;
+les rares « viables » restent à v≈2,1–2,2 m/s. Baisser `k_drag` au min (11,70)
+à F=1100 ne gagne que **+0,22 m/s** sur v_mean — loin du plancher 5,78.
+`check_factor` et `η` bougent à peine. Signal : le problème n'est pas `k_drag`.
+
+### Snapshot §9.2 (8+, F_peak=1100, k_drag=13, Catch Slip, leave=25)
 
 | Grandeur | Valeur | Cible |
 |---|---|---|
-| v_mean | ~4,87–5,05 | 5,78–6,78 (`v_ref=6,28` ±8 %) |
-| P_rower | ~620 W | 420–540 |
-| η_blade | ~0,63 | 0,75–0,85 |
+| v_mean | ~4,91–5,13 | 5,78–6,78 (`v_ref=6,28` ±8 %) |
+| P_rower | ~608 W | 420–540 |
+| η_blade | ~0,62–0,64 | 0,75–0,85 |
 | part hydro | ~47 % | 70–80 |
 | part blade | ~48 % | 15–25 |
 | part aero | ~4,5 % | 5–10 |
