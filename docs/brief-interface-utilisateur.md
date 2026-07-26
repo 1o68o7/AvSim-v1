@@ -36,6 +36,7 @@ interne ; à revoir avant toute exposition au-delà de ce cercle.
 
 **Deux surfaces, un seul backend, séparation stricte.** Analyste (moi/toi,
 qui décide des capteurs à acheter) et Produit (rameur/team/coach, qui
+
 utilise le système sur l'eau) ne partagent aucune vue, mais consomment la
 même API FastAPI. Ne jamais mélanger les deux dans un même composant.
 
