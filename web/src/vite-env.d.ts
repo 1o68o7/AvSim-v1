@@ -1,7 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_API_BASE?: string;
+  /** URL publique de l'API (Render). Vide en local → proxy Vite. */
+  readonly VITE_API_URL?: string;
 }
 
 interface ImportMeta {

@@ -30,6 +30,10 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
+    # Usage restreint / interne pour l'instant. Avant toute exposition publique
+    # durable, resserrer à l'URL réelle du frontend (ex. https://avsim-web.onrender.com)
+    # — même caveat que le contrôle de rôle par en-tête X-DataR0w-Role
+    # (convention d'interface, pas une auth forte ; voir roles.py).
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],

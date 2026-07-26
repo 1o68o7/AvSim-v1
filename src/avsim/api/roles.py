@@ -1,4 +1,9 @@
-"""Séparation Analyste / Produit au niveau API (brief UI §1)."""
+"""Séparation Analyste / Produit au niveau API (brief UI §1).
+
+Le rôle est passé via l'en-tête X-DataR0w-Role : convention d'interface pour
+usage interne, pas une authentification forte. Avant toute exposition publique
+durable, remplacer par une vraie auth (et resserrer CORS côté app.py).
+"""
 from __future__ import annotations
 
 from enum import Enum
