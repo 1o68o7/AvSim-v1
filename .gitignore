@@ -1,0 +1,5 @@
+**/__pycache__/
+.pytest_cache/
+src/avsim.egg-info/
+web/dist/
+web/node_modules/

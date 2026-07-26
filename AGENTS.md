@@ -10,8 +10,8 @@ Lis `STATE.md` puis `ROADMAP-PRODUCTION.md`. Phase 0 (fermeture v1) est
 (`F_peak` au-dessus de la plage eau — piste `I_oar` / traînée / pertes palette).
 
 Puis `brief-simulateur-v2.md` §2 (classes), §3 (enveloppe), §4 (fermeture),
-§9.2–§9.4 (plausibility / scaling / triangulation), §11 (ordre). Ignore §10
-et au-delà — web app et dashboards viennent après, pas maintenant.
+§9.2–§9.4. Interface : `docs/brief-interface-utilisateur.md` (Phase 7
+démarrée — badges Simulé / Validée / Bêta obligatoires).
 
 ## Build & test
 ```
@@ -22,11 +22,10 @@ Les simulations de validation multi-classes passent par
 `load_params(boat_class=...)`, pas `load_params()` nu (defaults seuls).
 
 ## Phase en cours
-Phase 1 : écrire `test_plausibility.py`, `test_class_scaling.py`,
-`test_triangulation.py` (brief : écrire d'abord, faire échouer). Ne pas
-avancer `sensors/`, `estimation/`, `analysis/`, `api/`, `web/` tant que
-plausibility / class_scaling ne sont pas traités (triangulation : skip OK si
-table D6 absente).
+Phase 7 UI/API démarrée (brief interface). Dette ouverte : Phase 1
+(`test_plausibility`, `test_class_scaling`, triangulation skip D6).
+Ne pas avancer `sensors/`, `estimation/`, `analysis/` sans triage explicite.
+Les 6 classes hors 8+/1x restent badge **Bêta** jusqu'à `test_class_scaling`.
 
 ## Interdits
 - Ne jamais modifier une valeur de `params/defaults.yaml` ou

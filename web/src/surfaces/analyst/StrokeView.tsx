@@ -1,0 +1,194 @@
+import { useMemo, useState } from "react";
+import Plot from "react-plotly.js";
+import { BoatSchematic } from "../../components/BoatSchematic";
+import { StatusBadge, classBadgeKind } from "../../components/StatusBadge";
+import { useApp } from "../../state";
+
+export function StrokeView() {
+  const { result } = useApp();
+  const [uCursor, setUCursor] = useState(0.4);
+  const [showRefs, setShowRefs] = useState(false);
+
+  const idx = useMemo(() => {
+    if (!result) return 0;
+    const u = result.series.u;
+    let best = 0;
+    let bestD = Infinity;
+    for (let i = 0; i < u.length; i++) {
+      const d = Math.abs(u[i] - uCursor);
+      if (d < bestD) {
+        bestD = d;
+        best = i;
+      }
+    }
+    return best;
+  }, [result, uCursor]);
+
+  if (!result) {
+    return (
+      <div className="panel">
+        <h2>Coup</h2>
+        <p className="muted">
+          Aucune simulation — lancez-en une depuis <strong>Bateau</strong>.
+        </p>
+      </div>
+    );
+  }
+
+  const { series, boat, validation } = result;
+  const thetaNow = series.theta_deg[idx] ?? 0;
+  const shapes = showRefs
+    ? [
+        {
+          type: "line" as const,
+          x0: 0.17,
+          x1: 0.17,
+          y0: 0,
+          y1: 1,
+          yref: "paper" as const,
+          line: { dash: "dot", color: "rgba(212,196,168,0.7)" },
+        },
+        {
+          type: "line" as const,
+          x0: 0.4,
+          x1: 0.4,
+          y0: 0,
+          y1: 1,
+          yref: "paper" as const,
+          line: { dash: "dot", color: "rgba(58,155,176,0.8)" },
+        },
+      ]
+    : [];
+
+  return (
+    <div>
+      <div className="topbar">
+        <div>
+          <h2>Coup</h2>
+          <p className="muted">
+            Force & angle vs fraction d&apos;arc u — <StatusBadge kind="sim" />
+          </p>
+        </div>
+        <StatusBadge kind={classBadgeKind(validation.status)} label={validation.label} />
+      </div>
+      {validation.status === "beta" && (
+        <div className="banner beta">
+          Classe {validation.code} — Bêta non calibrée
+        </div>
+      )}
+
+      <div className="panel" style={{ marginBottom: "0.8rem" }}>
+        <label>
+          <input
+            type="checkbox"
+            checked={showRefs}
+            onChange={(e) => setShowRefs(e.target.checked)}
+          />{" "}
+          Repères sourcés (Catch Slip / F_u_peak…) — overlay optionnel, pas des
+          mesures de ce coup
+        </label>
+        <div style={{ marginTop: 8 }}>
+          <label className="muted">
+            Curseur u = {uCursor.toFixed(2)} (θ = {thetaNow.toFixed(1)}°)
+          </label>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={uCursor}
+            onChange={(e) => setUCursor(Number(e.target.value))}
+            style={{ width: "100%" }}
+          />
+        </div>
+      </div>
+
+      <div className="grid-2">
+        <div className="panel">
+          <Plot
+            data={[
+              {
+                x: series.u,
+                y: series.handle_force_N,
+                name: "F poignée",
+                type: "scatter",
+                mode: "lines",
+                line: { color: "#3a9bb0", width: 2 },
+                xaxis: "x",
+                yaxis: "y",
+              },
+              {
+                x: series.u,
+                y: series.theta_deg,
+                name: "θ aviron",
+                type: "scatter",
+                mode: "lines",
+                line: { color: "#d4c4a8", width: 2 },
+                xaxis: "x",
+                yaxis: "y2",
+              },
+            ]}
+            layout={{
+              paper_bgcolor: "rgba(0,0,0,0)",
+              plot_bgcolor: "rgba(6,16,24,0.35)",
+              font: { color: "#e8f1f4", family: "Source Sans 3" },
+              margin: { t: 30, r: 50, b: 40, l: 50 },
+              height: 360,
+              showlegend: true,
+              legend: { orientation: "h" },
+              xaxis: { title: "u (fraction d'arc)", gridcolor: "rgba(255,255,255,0.08)" },
+              yaxis: {
+                title: "F (N)",
+                gridcolor: "rgba(255,255,255,0.08)",
+                domain: [0.55, 1],
+              },
+              yaxis2: {
+                title: "θ (°)",
+                gridcolor: "rgba(255,255,255,0.08)",
+                domain: [0, 0.45],
+              },
+              shapes: [
+                ...shapes,
+                {
+                  type: "line",
+                  x0: uCursor,
+                  x1: uCursor,
+                  y0: 0,
+                  y1: 1,
+                  yref: "paper",
+                  line: { color: "rgba(232,241,244,0.55)", width: 1 },
+                },
+              ],
+              annotations: showRefs
+                ? [
+                    {
+                      x: 0.4,
+                      y: 1,
+                      yref: "paper",
+                      text: "F_u_peak≈0.40",
+                      showarrow: false,
+                      font: { size: 10, color: "#9bd3df" },
+                    },
+                  ]
+                : [],
+            }}
+            config={{ displayModeBar: false, responsive: true }}
+            style={{ width: "100%" }}
+          />
+        </div>
+        <div className="panel">
+          <BoatSchematic
+            nRowers={boat.n_rowers}
+            sculling={boat.sculling}
+            coxed={boat.coxed}
+            thetaDeg={thetaNow}
+          />
+          <p className="muted" style={{ marginTop: 8 }}>
+            geometry_source: {boat.geometry_source} · catch{" "}
+            {boat.theta_catch_deg}° → finish {boat.theta_finish_deg}°
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}

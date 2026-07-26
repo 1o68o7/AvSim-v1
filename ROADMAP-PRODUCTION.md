@@ -57,7 +57,18 @@ Sobol → observability → detectability → Pareto.
 
 ## Phase 7 — Produit local (`io/`, `cli.py`, `api/`, `web/`)
 
-Interface **en dernier** (brief §11.10). Pas avant triangulation crédible.
+Brief UI : `docs/brief-interface-utilisateur.md`.
+
+| Item | Statut |
+|---|---|
+| API FastAPI (`/classes`, `/params`, `/validate`, `/simulate`, rôles) | **démarré** |
+| UI Analyste 🟢 Bateau / Coup / Bilan / Équipage | **démarré** |
+| UI Analyste 🟡 Capteurs / Observabilité / … | maquettes |
+| Surface Produit (rejeu) | maquettes (replay CLI pas encore codé) |
+| CLI `avsim` | pas commencé |
+
+Note : Phase 1 (plausibility / scaling) reste ouverte ; l'UI marque les 6
+classes smoke-only en **Bêta — non calibrée**.
 
 ## Phase 8 — Hardware / bus réel
 

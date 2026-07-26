@@ -120,6 +120,16 @@ l'attaque) — `blade_normal_speed` encourageant mais autre grandeur.
 
 ## Suite
 
-Chantier diagnostic §9.2 / η **clos**. Prochaine page : **CLI**.
-Voir aussi `ROADMAP-PRODUCTION.md` (Phase 1 tests plausibilité / triangulation
-toujours en attente, bloqués data MANQUES D6 pour la triangulation).
+Chantier diagnostic §9.2 / η **clos**.
+
+**Phase 7 démarrée** (brief `docs/brief-interface-utilisateur.md`) : API
+FastAPI + UI React (surfaces Analyste 🟢 / Produit maquette). Badges
+Simulé + Validée/Bêta par classe. Phase 1 (`test_plausibility` /
+`test_class_scaling`) reste en dette — les 6 classes bêta ne sont pas
+présentées à égalité avec 8+/1x.
+
+```
+pip install -e '.[api]' --break-system-packages
+python -m avsim.api          # :8000
+cd web && npm install && npm run dev   # :5173
+```
