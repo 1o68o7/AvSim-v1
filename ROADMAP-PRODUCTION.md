@@ -62,7 +62,8 @@ Brief UI : `docs/brief-interface-utilisateur.md`.
 | Item | Statut |
 |---|---|
 | API FastAPI (`/classes`, `/params`, `/validate`, `/simulate`, rôles) | **démarré** |
-| UI Analyste 🟢 Bateau / Coup / Bilan / Équipage | **démarré** |
+| `/api/pose` + `StrokeGeometry` (latéral, géométrie Python) | **fait** |
+| UI Analyste 🟢 Bateau / Coup / Bilan / Équipage | **démarré** (Coup branché pose) |
 | UI Analyste 🟡 Capteurs / Observabilité / … | maquettes |
 | Surface Produit (rejeu) | maquettes (replay CLI pas encore codé) |
 | CLI `avsim` | pas commencé |

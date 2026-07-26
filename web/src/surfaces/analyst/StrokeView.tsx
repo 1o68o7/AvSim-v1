@@ -1,13 +1,46 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Plot from "react-plotly.js";
-import { BoatSchematic } from "../../components/BoatSchematic";
+import { ApiError, api } from "../../api";
+import {
+  StrokeGeometry,
+  type PoseFrame,
+} from "../../components/StrokeGeometry";
 import { StatusBadge, classBadgeKind } from "../../components/StatusBadge";
 import { useApp } from "../../state";
 
+function frameAtU(frames: PoseFrame[], u: number): PoseFrame | null {
+  if (!frames.length) return null;
+  let best = frames[0];
+  let bestD = Math.abs(frames[0].u - u);
+  for (const f of frames) {
+    const d = Math.abs(f.u - u);
+    if (d < bestD) {
+      best = f;
+      bestD = d;
+    }
+  }
+  return best;
+}
+
 export function StrokeView() {
-  const { result } = useApp();
+  const { role, result, boatClass, networkError, setNetworkError } = useApp();
   const [uCursor, setUCursor] = useState(0.4);
   const [showRefs, setShowRefs] = useState(false);
+  const [frames, setFrames] = useState<PoseFrame[]>([]);
+  const [poseLoading, setPoseLoading] = useState(false);
+
+  useEffect(() => {
+    if (!role || !result) return;
+    setPoseLoading(true);
+    api
+      .poseSeries(role, boatClass, 41)
+      .then((r) => {
+        setFrames(r.frames);
+        setNetworkError(null);
+      })
+      .catch((e: ApiError) => setNetworkError(e.message))
+      .finally(() => setPoseLoading(false));
+  }, [role, boatClass, result, setNetworkError]);
 
   const idx = useMemo(() => {
     if (!result) return 0;
@@ -23,6 +56,8 @@ export function StrokeView() {
     }
     return best;
   }, [result, uCursor]);
+
+  const pose = useMemo(() => frameAtU(frames, uCursor), [frames, uCursor]);
 
   if (!result) {
     return (
@@ -66,7 +101,7 @@ export function StrokeView() {
         <div>
           <h2>Coup</h2>
           <p className="muted">
-            Force & angle vs fraction d&apos;arc u — <StatusBadge kind="sim" />
+            Force & angle vs u — <StatusBadge kind="sim" /> · géométrie serveur
           </p>
         </div>
         <StatusBadge kind={classBadgeKind(validation.status)} label={validation.label} />
@@ -76,6 +111,9 @@ export function StrokeView() {
           Classe {validation.code} — Bêta non calibrée
         </div>
       )}
+      {networkError && (
+        <div className="banner network">{networkError}</div>
+      )}
 
       <div className="panel" style={{ marginBottom: "0.8rem" }}>
         <label>
@@ -84,12 +122,13 @@ export function StrokeView() {
             checked={showRefs}
             onChange={(e) => setShowRefs(e.target.checked)}
           />{" "}
-          Repères sourcés (Catch Slip / F_u_peak…) — overlay optionnel, pas des
+          Repères sourcés (F_u_rise_70 / F_u_peak) — overlay optionnel, pas des
           mesures de ce coup
         </label>
         <div style={{ marginTop: 8 }}>
           <label className="muted">
-            Curseur u = {uCursor.toFixed(2)} (θ = {thetaNow.toFixed(1)}°)
+            Curseur u = {uCursor.toFixed(2)} (θ simu = {thetaNow.toFixed(1)}°
+            {pose ? ` · θ pose = ${pose.theta_deg.toFixed(1)}°` : ""})
           </label>
           <input
             type="range"
@@ -136,7 +175,10 @@ export function StrokeView() {
               height: 360,
               showlegend: true,
               legend: { orientation: "h" },
-              xaxis: { title: "u (fraction d'arc)", gridcolor: "rgba(255,255,255,0.08)" },
+              xaxis: {
+                title: "u (fraction d'arc)",
+                gridcolor: "rgba(255,255,255,0.08)",
+              },
               yaxis: {
                 title: "F (N)",
                 gridcolor: "rgba(255,255,255,0.08)",
@@ -177,15 +219,11 @@ export function StrokeView() {
           />
         </div>
         <div className="panel">
-          <BoatSchematic
-            nRowers={boat.n_rowers}
-            sculling={boat.sculling}
-            coxed={boat.coxed}
-            thetaDeg={thetaNow}
-          />
+          <StrokeGeometry frame={pose} loading={poseLoading} />
           <p className="muted" style={{ marginTop: 8 }}>
-            geometry_source: {boat.geometry_source} · catch{" "}
-            {boat.theta_catch_deg}° → finish {boat.theta_finish_deg}°
+            StrokeGeometry ← <code>/api/pose</code> (
+            {boat.geometry_source}) · catch {boat.theta_catch_deg}° → finish{" "}
+            {boat.theta_finish_deg}° · BoatSchematic (dessus) reste séparé
           </p>
         </div>
       </div>

@@ -18,6 +18,7 @@ from avsim.core.catalog import (
     load_class_annotated,
 )
 from avsim.core.params import load_class
+from avsim.core.pose import pose_at_u, pose_series
 from avsim.core.solver import simulate
 
 from .roles import Role, analyst_only, require_role
@@ -220,6 +221,48 @@ def run_simulate(body: SimulateRequest, role: Role = Depends(require_role)):
         raise HTTPException(404, str(exc)) from exc
     except Exception as exc:  # noqa: BLE001 — remonter au client UI
         raise HTTPException(500, f"{type(exc).__name__}: {exc}") from exc
+
+
+@app.get("/api/pose")
+def get_pose(
+    boat_class: str,
+    u: float = 0.0,
+    drive: bool = True,
+    hull_builder: str | None = None,
+    hull_mould: str | None = None,
+    role: Role = Depends(require_role),
+):
+    """Pose sagittale à u — géométrie Python (StrokeGeometry), pas d'IK TS."""
+    try:
+        return pose_at_u(
+            boat_class, u, drive=drive,
+            hull_builder=hull_builder, hull_mould=hull_mould,
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+
+@app.get("/api/pose/series")
+def get_pose_series(
+    boat_class: str,
+    n: int = 41,
+    drive: bool = True,
+    hull_builder: str | None = None,
+    hull_mould: str | None = None,
+    role: Role = Depends(require_role),
+):
+    """Série de poses u=0..1 pour animer StrokeGeometry."""
+    try:
+        return pose_series(
+            boat_class, n=n, drive=drive,
+            hull_builder=hull_builder, hull_mould=hull_mould,
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
 
 
 @app.post("/api/jobs/sweep")
