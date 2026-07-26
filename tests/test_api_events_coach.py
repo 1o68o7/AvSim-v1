@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+import copy
 import json
+from datetime import datetime, timedelta, timezone
 
 from fastapi.testclient import TestClient
 
 from avsim.api.app import app
-from avsim.io.events import STORE
+from avsim.core.params import load_class
+from avsim.core.solver import simulate
+from avsim.io.events import STORE, StrokeMark
+from avsim.io.replay import stroke_frame
 
 
 def _parse_sse(body: str) -> list[dict]:
@@ -17,6 +22,31 @@ def _parse_sse(body: str) -> list[dict]:
             if line.startswith("data: "):
                 frames.append(json.loads(line[6:]))
     return frames
+
+
+def _marks_from_run(
+    rate_spm: float,
+    *,
+    n_keep: int = 3,
+    boat_class: str = "2x",
+) -> list[dict]:
+    """Derniers coups gardés d'un run 2x à cadence imposée (technique.rate_spm)."""
+    P = copy.deepcopy(load_class(boat_class))
+    P["numerics"]["n_strokes"] = n_keep + 2
+    P["numerics"]["n_discard"] = 2
+    P["technique"]["rate_spm"] = float(rate_spm)
+    res = simulate(P)
+    assert res.n_keep >= n_keep
+    out: list[dict] = []
+    for i in range(res.n_keep - n_keep, res.n_keep):
+        fr = stroke_frame(
+            res.stroke(i),
+            boat_class=boat_class,
+            stroke_index=i,
+            params=P,
+        )
+        out.append(fr)
+    return out
 
 
 def test_events_schema_and_compare_no_mode_d_threshold() -> None:
@@ -94,6 +124,84 @@ def test_events_schema_and_compare_no_mode_d_threshold() -> None:
     assert "phase_lag_ms" in sess["strokes"][0]
     stamps = [m["t_utc"] for m in sess["strokes"]]
     assert len(set(stamps)) == len(stamps)
+
+
+def test_compare_detects_injected_cadence_delta_two_runs() -> None:
+    """Δ cadence non nul et du bon signe — deux runs distincts (rate_spm).
+
+    Avant = run technique.rate_spm=32 ; après = 40. Pas deux moitiés d'une
+    même session stationnaire. Prouve que compare mesure une vraie variation.
+    """
+    client = TestClient(app)
+    h = {"X-DataR0w-Role": "product"}
+    n = 3
+    rate_lo, rate_hi = 32.0, 40.0
+    before_fr = _marks_from_run(rate_lo, n_keep=n)
+    after_fr = _marks_from_run(rate_hi, n_keep=n)
+    assert all(abs(f["cadence_spm"] - rate_lo) < 0.5 for f in before_fr)
+    assert all(abs(f["cadence_spm"] - rate_hi) < 0.5 for f in after_fr)
+
+    sid = client.post("/api/sessions", headers=h, json={"boat_class": "2x"}).json()[
+        "session_id"
+    ]
+    t0 = datetime.now(timezone.utc).replace(microsecond=0)
+    # Indices : 0..n-1 avant | n pivot (exclu du Δ) | n+1..2n après
+    seq: list[tuple[int, dict]] = []
+    for i, fr in enumerate(before_fr):
+        seq.append((i, fr))
+    pivot_fr = dict(before_fr[-1])
+    pivot_fr["cadence_spm"] = 0.5 * (rate_lo + rate_hi)
+    seq.append((n, pivot_fr))
+    for j, fr in enumerate(after_fr):
+        seq.append((n + 1 + j, fr))
+
+    for stroke_index, fr in seq:
+        STORE.add_stroke_mark(
+            sid,
+            StrokeMark(
+                stroke_index=stroke_index,
+                t_utc=(t0 + timedelta(seconds=2 * stroke_index)).isoformat(),
+                cadence_spm=float(fr["cadence_spm"]),
+                v_ms=float(fr["v_ms"]),
+                check_factor=float(fr["check_factor"]),
+                arc_deg=float(fr["arc_deg"]),
+                phase_lag_ms=float(fr["phase_lag_ms"]),
+                energy=dict(fr["energy"]),
+            ),
+        )
+
+    pivot_t = (t0 + timedelta(seconds=2 * n)).isoformat()
+    eid = client.post(
+        f"/api/sessions/{sid}/events",
+        headers=h,
+        json={
+            "source": "coach_voice",
+            "tag": "cadence",
+            "transcript": "monte la cadence",
+            "t_utc": pivot_t,
+        },
+    ).json()["event_id"]
+
+    cmp_ = client.get(
+        f"/api/sessions/{sid}/compare",
+        params={"event_id": eid, "n": n, "metric": "cadence_spm"},
+        headers=h,
+    )
+    assert cmp_.status_code == 200
+    data = cmp_.json()
+    assert data["nearest_stroke_index"] == n
+    assert data["before"]["stroke_indices"] == list(range(0, n))
+    assert data["after"]["stroke_indices"] == list(range(n + 1, 2 * n + 1))
+    assert data["before"]["mean"] is not None
+    assert data["after"]["mean"] is not None
+    assert data["delta"] is not None
+    # Variation réelle : après > avant, Δ ≈ +8 spm
+    assert data["delta"] > 0, data
+    assert data["delta"] > 5.0, data
+    assert abs(data["delta"] - (rate_hi - rate_lo)) < 1.0, data
+    assert data["significance"]["calibrated"] is False
+    assert "Mode D" in data["significance"]["message"]
+    assert "threshold" not in data["significance"]
 
 
 def test_pose_series_2x() -> None:
