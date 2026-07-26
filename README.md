@@ -26,3 +26,11 @@ cd web && npm install && npm run dev   # http://127.0.0.1:5173
 
 Toute sortie simulateur affiche le badge **Simulé**. Classes hors `8+`/`1x` :
 badge **Bêta — non calibrée**.
+
+### CLI
+
+```bash
+pip install -e . --break-system-packages
+avsim run --class 8+ --param technique__F_peak_N=1100 --strokes 6 --discard 2 --out /tmp/r.npz
+avsim replay --realtime --result /tmp/r.npz   # NDJSON coup à cadence T
+```

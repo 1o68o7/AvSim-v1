@@ -1,4 +1,4 @@
-"""CLI minimale avsim — mode `run`.
+"""CLI minimale avsim — modes `run` et `replay --realtime`.
 
 Réutilise load_params / override / simulate. Aucune nouvelle logique de calcul
 des grandeurs Phase 2 (§9.2) : elles viennent de Stroke.energy().
@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -170,10 +171,63 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def stroke_frame(st, *, boat_class: str, stroke_index: int) -> dict[str, Any]:
+    """Une trame coup — même grain que le flux matériel futur (Surface Produit)."""
+    en = st.energy()
+    return {
+        "kind": "stroke",
+        "source": "simulated",
+        "boat_class": boat_class,
+        "stroke_index": stroke_index,
+        "T_s": float(en["stroke_period_s"]),
+        "energy": phase2_metrics(st),
+        "series": {
+            "t_s": [float(x) for x in st.t],
+            "V_ms": [float(x) for x in st.V],
+        },
+    }
+
+
+def cmd_replay(args: argparse.Namespace) -> int:
+    """Rejoue un Result coup par coup ; --realtime cadence à T (stroke_period)."""
+    if not args.realtime:
+        raise SystemExit("replay : --realtime requis (cadence T pour Surface Produit)")
+
+    if args.result:
+        res = load_result(Path(args.result))
+        boat_class = (
+            res.P.get("meta", {}).get("boat_class")
+            or res.P.get("meta", {}).get("code", "?")
+        )
+    else:
+        if not args.boat_class:
+            raise SystemExit("replay : --class ou --result requis")
+        P = build_params(
+            args.boat_class,
+            param_items=args.param,
+            n_strokes=args.strokes,
+            n_discard=args.discard,
+        )
+        res = simulate(P)
+        boat_class = args.boat_class
+
+    sleep = time.sleep
+    for i in range(res.n_keep):
+        t_wall0 = time.perf_counter()
+        st = res.stroke(i)
+        frame = stroke_frame(st, boat_class=str(boat_class), stroke_index=i)
+        print(json.dumps(frame, default=_json_default), flush=True)
+        elapsed = time.perf_counter() - t_wall0
+        delay = float(frame["T_s"]) - elapsed
+        if delay > 0:
+            sleep(delay)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="avsim",
-        description="CLI DataR0w — simulation (source=simulated).",
+        description="CLI DataR0w — simulation et rejeu temps réel (source=simulated).",
     )
     sub = p.add_subparsers(dest="command", required=True)
 
@@ -195,6 +249,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="Chemin .npz pour sauvegarder le Result (replay)",
     )
     run.set_defaults(func=cmd_run)
+
+    rep = sub.add_parser(
+        "replay",
+        help="Rejouer un Result coup par coup (flux pour Surface Produit)",
+    )
+    rep.add_argument(
+        "--realtime",
+        action="store_true",
+        help="Cadencer chaque coup à sa durée réelle T (stroke_period_s)",
+    )
+    rep.add_argument(
+        "--result",
+        type=str,
+        default=None,
+        help="Result .npz produit par `avsim run --out`",
+    )
+    rep.add_argument("--class", dest="boat_class", default=None, help="Si pas de --result")
+    rep.add_argument("--param", action="append", default=[], metavar="section__nom=valeur")
+    rep.add_argument("--strokes", type=int, default=None)
+    rep.add_argument("--discard", type=int, default=None)
+    rep.set_defaults(func=cmd_replay)
 
     return p
 

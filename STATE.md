@@ -132,10 +132,14 @@ présentées à égalité avec 8+/1x.
 / `--discard` — réutilise `load_params`/`override`/`simulate` ; affiche les
 6 grandeurs Phase 2 (`Stroke.energy()`), option `--out` pour replay.
 
+**CLI `avsim replay --realtime`** : rejoue un Result (via `--result` ou
+re-sim) coup par coup, sleep(T) ; NDJSON `source=simulated` pour Team /
+Coach live / Coach replay (même grain que le flux matériel futur).
+
 ### Prochaine étape
 
-1. **`avsim replay --realtime`** — rejouer un Result à cadence T.
-2. Surface Produit (Team / Coach) consommateur du flux.
+1. Surface Produit (Team / Coach) consommateur du flux replay.
+2. Perf `/simulate` (~17 s 8+).
 
 ```
 pip install -e '.[api]' --break-system-packages
