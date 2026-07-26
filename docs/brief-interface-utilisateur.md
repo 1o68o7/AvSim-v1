@@ -239,16 +239,38 @@ prématuré — c'est le chemin prévu.
 
 ### 3.1 Rameur
 
-**But** : ce que le rameur voit à son poste (probablement téléphone fixé
-au pied de nage, ou montre).
+**But** : comprendre sa propre technique et sa progression, seul, après la
+séance ou entre deux blocs — pas une comparaison à d'autres rameurs, pas
+de jargon d'ingénierie (contrainte explicite du document personas §3).
 
-**Composants** :
-- Feedback coup+1 haptique — pas d'écran nécessaire pour cette fonction
-  elle-même, mais une vue de calibration/configuration existe : intensité,
-  activer/désactiver, niveau (auto-local vs équipage, cf. document
-  personas).
-- Écran minimal optionnel : cadence actuelle, distance parcourue,
-  timing relatif à l'équipage (retard/avance en ms).
+**Point d'entrée** : clic sur son poste depuis `BoatSchematic` (déjà fait,
+réutilisé tel quel).
+
+**Pendant la séance** : uniquement le signal haptique (matériel, hors
+UI) — pas d'écran actif requis pour cette fonction.
+
+**Composants (après la séance)** :
+- Courbe de force du dernier coup (pic, position, forme) superposée aux
+  10 coups précédents — un graphique Plotly simple, pas
+  `StrokeGeometry` (qui montre la géométrie spatiale, pas la courbe de
+  force dans le temps ; les deux composants sont différents, ne pas les
+  confondre comme on l'a fait une fois pour `BoatSchematic`).
+- Décalage de phase vs le rameur de nage (poste de référence du bateau),
+  en ms.
+- Indice de progression à conditions comparables — une tendance sur
+  plusieurs séances, pas une valeur absolue isolée.
+- Journal des coups signalés en haptique pendant la séance, superposé à
+  la courbe de force — réutilise la table `events` déjà construite pour
+  Coach (§3.3), avec `source="haptic_alert"` en plus de `source="coach_voice"`
+  plutôt qu'un second schéma.
+
+**Badge obligatoire, distinct de Simulé/Bêta** : toute grandeur exprimée
+en watts porte un badge « **indice** » tant que la calibration de traînée
+réelle (D3, cf. `MANQUES.md`) n'est pas faite — la courbe de force et le
+séquençage sont des mesures directes fiables dès aujourd'hui, la
+puissance ne l'est pas encore. Ne pas fusionner ce badge avec
+Simulé/Mesuré (§4.2) : ce sont deux informations différentes (source de
+la donnée vs fiabilité de la calibration).
 
 ### 3.2 Team (cockpit temps réel embarqué)
 
