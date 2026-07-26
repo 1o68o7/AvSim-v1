@@ -11,17 +11,17 @@ Voir `STATE.md`. `pytest tests/` 16/16, 8+ et 1x.
 
 | Fichier | Brief | Contenu |
 |---|---|---|
-| `tests/test_plausibility.py` | §9.2 | v_mean ±8 % `v_ref`, P/rameur, η, parts bilan, check_factor, slip — **par classe** via `boat_class=` |
-| `tests/test_class_scaling.py` | §2.4 / §9.3 | `k_drag` skiff ∈ [3,0 ; 3,6] ; P/rameur ∈ [420 ; 560] W sur les 8 classes |
-| `tests/test_triangulation.py` | §9.4 | decomposition puissance dans la dispersion Atkinson / van Holst / Roosendaal |
+| `core/boat_class.py` | §2.4 | `scale_from_8plus(M_tot)` — **fait** (Étape 0) |
+| `tests/test_plausibility.py` | §9.2 | v_mean ±8 % `v_ref`, P/rameur, η, parts bilan, check_factor, slip — **par classe** ; η 8+/1x en `xfail` documenté |
+| `tests/test_class_scaling.py` | §2.4 / §9.3 | `k_drag` skiff ∈ [3,0 ; 3,6] **vert** ; P/rameur ∈ [420 ; 560] W **rouge** (574–614 W) |
+| `tests/test_triangulation.py` | §9.4 | skip quantitatif — entrées appariées Atkinson/van Holst absentes de comprslt.htm |
 
-**Bloquant triangulation** : table de référence absente (`docs/MANQUES.md` D6).
-Écrire le test + le schéma `data/` attendu ; marquer skip explicite tant que
-la table n'est pas sourcée — ne pas inventer les chiffres.
+**Bloquant triangulation** : chiffres de *sortie* Atkinson/Kleshnev connus
+(shelwork.htm) ; **entrées** appariées non publiées en clair (D6 partiel).
+Skip documenté — ne pas inventer les entrées.
 
-Critère de sortie Phase 1 : les trois fichiers existent ; plausibility et
-class_scaling **échouent pour de vraies raisons physiques** (pas des imports
-cassés) ; triangulation en skip documenté ou vert si data arrivée.
+Critère Phase 1 (fichiers existent + échecs physiques) : **atteint**.
+Seuils non assouplis. Sortie « verts » reportée au triage §9.2 / calib.
 
 Ne pas avancer Phase 3+ tant que plausibility / scaling sont rouges
 (sauf skip triangulation pour manque data).
@@ -38,9 +38,9 @@ Ne pas avancer Phase 3+ tant que plausibility / scaling sont rouges
 ## Phase 3 — Enveloppe & classe (spec brief §3 / §2)
 
 - `core/envelope.py` — contrôles a priori / a posteriori
-- `core/boat_class.py` — si encore utile hors `params.load_class`
+- `core/boat_class.py` — `scale_from_8plus` **fait** ; enveloppe toujours ouverte
 
-Spécifiés dans le brief, **pas écrits**.
+Spécifiés dans le brief ; enveloppe **pas écrite**.
 
 ## Phase 4 — Capteurs (`sensors/`)
 
