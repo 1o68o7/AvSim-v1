@@ -34,9 +34,9 @@ export function CoachReplayView() {
   const [events, setEvents] = useState<CoachEvent[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [compare, setCompare] = useState<CompareResult | null>(null);
-  const [metric, setMetric] = useState<"v_ms" | "cadence_spm" | "check_factor">(
-    "v_ms",
-  );
+  const [metric, setMetric] = useState<
+    "arc_deg" | "cadence_spm" | "phase_lag_ms"
+  >("cadence_spm");
   const [nWin, setNWin] = useState(3);
   const [uCursor, setUCursor] = useState(0.4);
   const [frames, setFrames] = useState<PoseFrame[]>([]);
@@ -204,9 +204,9 @@ export function CoachReplayView() {
                   setMetric(e.target.value as typeof metric)
                 }
               >
-                <option value="v_ms">vitesse</option>
-                <option value="cadence_spm">cadence</option>
-                <option value="check_factor">check_factor</option>
+                <option value="arc_deg">longueur d&apos;arc (°)</option>
+                <option value="cadence_spm">cadence (c/min)</option>
+                <option value="phase_lag_ms">décalage de phase (ms)</option>
               </select>
               <span />
             </label>

@@ -17,6 +17,7 @@ export function CoachLiveView() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [crew, setCrew] = useState<SeatRow[]>([]);
   const [sync, setSync] = useState<SyncAlert | null>(null);
+  const [checkFactor, setCheckFactor] = useState<number | null>(null);
   const [stroke, setStroke] = useState<number | null>(null);
   const [status, setStatus] = useState<"idle" | "running" | "ended" | "error">(
     "idle",
@@ -64,6 +65,9 @@ export function CoachLiveView() {
             setStroke(frame.stroke_index);
             setCrew(frame.crew ?? []);
             setSync(frame.sync_alert ?? null);
+            setCheckFactor(
+              frame.check_factor ?? frame.energy?.check_factor ?? null,
+            );
           } else if (frame.kind === "end") {
             setStatus("ended");
           }
@@ -205,8 +209,17 @@ export function CoachLiveView() {
         })}
       </div>
 
+      <div className="team-controls" style={{ marginTop: "0.75rem" }}>
+        <span className="muted">
+          check_factor bateau :{" "}
+          <strong>
+            {checkFactor == null ? "—" : checkFactor.toFixed(2)} m/s
+          </strong>{" "}
+          (Simulé)
+        </span>
+      </div>
       {sync && (
-        <p className="muted" style={{ marginTop: "0.75rem" }}>
+        <p className="muted" style={{ marginTop: "0.5rem" }}>
           {sync.note}
         </p>
       )}

@@ -136,6 +136,9 @@ export type ReplayFrame =
       cadence_spm: number;
       v_ms: number;
       distance_m: number;
+      arc_deg?: number;
+      phase_lag_ms?: number;
+      check_factor?: number;
       energy: Record<string, number>;
       crew?: CrewSeatLive[];
       sync_alert?: SyncAlert;

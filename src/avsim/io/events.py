@@ -41,6 +41,8 @@ class StrokeMark:
     cadence_spm: float
     v_ms: float
     check_factor: float
+    arc_deg: float = 0.0  # longueur d'arc (θ_catch − θ_finish) réalisée
+    phase_lag_ms: float = 0.0  # |décalage| max vs médiane d'attaque
     energy: dict[str, float] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:

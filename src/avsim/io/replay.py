@@ -93,6 +93,14 @@ def stroke_frame(
         # Result.stroke ne porte pas P — le caller passe params=
         P = {}
     crew, sync = _crew_density(st, P)
+    # Longueur d'arc réalisée (poste 0) : Δθ drive en degrés
+    th0 = np.degrees(np.asarray(st.theta[0], dtype=float))
+    drive0 = np.asarray(st.immersion[0]) > 0.01
+    if np.any(drive0):
+        arc_deg = float(np.max(th0[drive0]) - np.min(th0[drive0]))
+    else:
+        arc_deg = float(np.max(th0) - np.min(th0)) if th0.size else 0.0
+    phase_lag_ms = float(abs(sync["timing_ms"]))
     return {
         "kind": "stroke",
         "source": "simulated",
@@ -102,6 +110,9 @@ def stroke_frame(
         "cadence_spm": 60.0 / max(T, 1e-9),
         "v_ms": v_mean,
         "distance_m": float(distance_m),
+        "arc_deg": arc_deg,
+        "phase_lag_ms": phase_lag_ms,
+        "check_factor": float(en["check_factor"]),
         "energy": phase2_metrics(st),
         "crew": crew,
         "sync_alert": sync,

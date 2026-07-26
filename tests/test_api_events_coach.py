@@ -72,17 +72,28 @@ def test_events_schema_and_compare_no_mode_d_threshold() -> None:
     assert body["session_id"] == sid
     eid = body["event_id"]
 
-    cmp_ = client.get(
-        f"/api/sessions/{sid}/compare",
-        params={"event_id": eid, "n": 2, "metric": "v_ms"},
-        headers=h,
-    )
-    assert cmp_.status_code == 200
-    data = cmp_.json()
-    assert data["significance"]["calibrated"] is False
-    assert "Mode D" in data["significance"]["message"]
-    assert "threshold" not in data
-    assert "threshold" not in data["significance"]
+    for metric in ("arc_deg", "cadence_spm", "phase_lag_ms"):
+        cmp_ = client.get(
+            f"/api/sessions/{sid}/compare",
+            params={"event_id": eid, "n": 2, "metric": metric},
+            headers=h,
+        )
+        assert cmp_.status_code == 200, metric
+        data = cmp_.json()
+        assert data["metric"] == metric
+        assert data["before"]["values"], metric
+        assert data["after"]["values"], metric
+        assert data["delta"] is not None, metric
+        assert data["significance"]["calibrated"] is False
+        assert "Mode D" in data["significance"]["message"]
+        assert "threshold" not in data
+        assert "threshold" not in data["significance"]
+    # Marks portent arc + décalage ; timestamps distincts (jointure)
+    sess = client.get(f"/api/sessions/{sid}", headers=h).json()
+    assert sess["strokes"][0]["arc_deg"] > 0
+    assert "phase_lag_ms" in sess["strokes"][0]
+    stamps = [m["t_utc"] for m in sess["strokes"]]
+    assert len(set(stamps)) == len(stamps)
 
 
 def test_pose_series_2x() -> None:

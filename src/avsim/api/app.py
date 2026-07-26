@@ -5,6 +5,7 @@ import asyncio
 import copy
 import json
 import time
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import numpy as np
@@ -24,7 +25,7 @@ from avsim.core.catalog import (
 from avsim.core.params import load_class
 from avsim.core.pose import pose_at_u, pose_series
 from avsim.core.solver import simulate
-from avsim.io.events import STORE, StrokeMark, utc_now_second
+from avsim.io.events import STORE, StrokeMark
 from avsim.io.replay import stroke_distance_m, stroke_frame
 
 from .roles import Role, analyst_only, require_role
@@ -362,7 +363,10 @@ def compare_around_event(
     session_id: str,
     event_id: str,
     n: int = Query(3, ge=1, le=20, description="Fenêtre N coups avant/après"),
-    metric: str = Query("v_ms", description="v_ms | cadence_spm | check_factor"),
+    metric: str = Query(
+        "cadence_spm",
+        description="arc_deg | cadence_spm | phase_lag_ms",
+    ),
     role: Role = Depends(require_role),
 ):
     """Écart brut avant/après — **sans** seuil Mode D (non disponible)."""
@@ -373,19 +377,20 @@ def compare_around_event(
     ev = next((e for e in sess.events if e.event_id == event_id), None)
     if ev is None:
         raise HTTPException(404, f"event inconnu : {event_id}")
-    if metric not in ("v_ms", "cadence_spm", "check_factor"):
-        raise HTTPException(400, f"metric inconnue : {metric}")
+    allowed = ("arc_deg", "cadence_spm", "phase_lag_ms")
+    if metric not in allowed:
+        raise HTTPException(400, f"metric inconnue : {metric} (attendu {allowed})")
     idx = STORE.nearest_stroke_index(session_id, ev.t_utc)
     if idx is None:
         raise HTTPException(400, "aucun coup enregistré pour joindre l'événement")
     by_i = {m.stroke_index: m for m in sess.strokes}
 
     def _val(m: StrokeMark) -> float:
-        if metric == "v_ms":
-            return float(m.v_ms)
+        if metric == "arc_deg":
+            return float(m.arc_deg)
         if metric == "cadence_spm":
             return float(m.cadence_spm)
-        return float(m.check_factor)
+        return float(m.phase_lag_ms)
 
     before_idx = [i for i in range(idx - n, idx) if i in by_i]
     after_idx = [i for i in range(idx + 1, idx + 1 + n) if i in by_i]
@@ -472,6 +477,10 @@ async def replay_stream(
         yield f"data: {json.dumps(session, default=_json_default)}\n\n"
 
         distance = 0.0
+        # Timeline simulée pour joindre events↔coups (précision seconde).
+        # En realtime=false, utc_now_second() collapserait tous les marks.
+        t0_wall = datetime.now(timezone.utc).replace(microsecond=0)
+        cum_s = 0.0
         for i in range(res.n_keep):
             t0 = time.perf_counter()
             st = res.stroke(i)
@@ -484,18 +493,24 @@ async def replay_stream(
                 params=P,
             )
             if session_id is not None:
+                t_utc = (
+                    t0_wall + timedelta(seconds=int(round(cum_s)))
+                ).isoformat()
                 STORE.add_stroke_mark(
                     session_id,
                     StrokeMark(
                         stroke_index=i,
-                        t_utc=utc_now_second(),
+                        t_utc=t_utc,
                         cadence_spm=float(frame["cadence_spm"]),
                         v_ms=float(frame["v_ms"]),
-                        check_factor=float(frame["energy"]["check_factor"]),
+                        check_factor=float(frame["check_factor"]),
+                        arc_deg=float(frame["arc_deg"]),
+                        phase_lag_ms=float(frame["phase_lag_ms"]),
                         energy=dict(frame["energy"]),
                     ),
                 )
             yield f"data: {json.dumps(frame, default=_json_default)}\n\n"
+            cum_s += float(frame["T_s"])
             if realtime:
                 delay = float(frame["T_s"]) - (time.perf_counter() - t0)
                 if delay > 0:
