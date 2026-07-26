@@ -45,7 +45,6 @@ interne ; à revoir avant toute exposition au-delà de ce cercle.
 
 **Deux surfaces, un seul backend, séparation stricte.** Analyste (moi/toi,
 qui décide des capteurs à acheter) et Produit (rameur/team/coach, qui
-
 utilise le système sur l'eau) ne partagent aucune vue, mais consomment la
 même API FastAPI. Ne jamais mélanger les deux dans un même composant.
 
@@ -199,21 +198,61 @@ exploitable sur les grandeurs simulées.
   nombre de lignes affichées (garde-fou contre une régression du
   chargeur, silencieuse sinon).
 
-### 2.5 Vue « Capteurs » 🟡 — bloquée sur Phase 4
+### 2.5 Vue « Capteurs » 🟢 — Phase 4 faite, à construire pour de vrai
 
-Maquette uniquement : liste des 13 capteurs (déjà documentés dans le
-dossier hardware), avec mention explicite **« modèles de bruit non
-implémentés — Phase 4 de la roadmap »**. Ne pas construire de vraie
-logique tant que `sensors/` n'existe pas.
+**Ancien statut périmé** : cette vue était bloquée sur Phase 4, marquée
+maquette. Phase 4 est faite (`sensors/`, 12 capteurs, `sensors/bus.py`)
+depuis plusieurs PR — cette vue doit passer en réel.
 
-### 2.6 Vue « Observabilité » 🟡 — bloquée sur Phase 5
+**But** : montrer où chaque capteur se trouve sur le bateau et sur le
+rameur, ce qu'il mesure, à quelle fréquence, et à quoi il sert
+concrètement dans l'outil — pas seulement une liste de fiches techniques.
+
+**Deux niveaux de vue, pas un seul diagramme** :
+
+1. **Vue bateau** — réutilise `BoatSchematic` (§4.1a, déjà fait), avec des
+   marqueurs superposés par poste (force dame, angle dame, coulisse,
+   force pieds ×2) et des marqueurs uniques niveau coque (IMU coque,
+   impeller, GNSS, température eau) et environnement (anémomètre rive,
+   anémomètre embarqué). Base géométrique déjà construite pour
+   `capteurs_implantation.svg` (vue de dessus, docs/) — reprendre la même
+   disposition plutôt que d'en inventer une nouvelle.
+
+2. **Vue rameur** — un schéma simplifié du corps (pas `StrokeGeometry`,
+   trop détaillé et animé pour cet usage ; une silhouette statique
+   suffit) montrant précisément où chaque capteur porté ou proche du
+   poste se situe : pod dorsal (bas du dos), force/angle dame (à la
+   dame, pas sur le corps), coulisse (sous le siège), force pieds (au
+   cale-pied).
+
+**Pour chaque capteur, au clic ou au survol** :
+- Type de donnée et fréquence d'échantillonnage (table exacte dans
+  `brief-phase4-capteurs-virtuels.md` — ne pas réinventer les chiffres)
+- Coût et masse
+- **Utilité concrète dans l'outil**, pas une phrase générique : relier
+  chaque capteur à ce qu'il alimente réellement. Exemple avec des
+  données qu'on a maintenant : *« coulisse → première mesure ajoutée par
+  le mode Observabilité (pilote 2x), réduit l'erreur sur le CdM de
+  0,40 m à 0,11 m pour 12 € »* — tiré de `data/observability_2x_pilot.json`,
+  pas une estimation inventée. Pour les capteurs jamais passés par Mode C
+  (car pilote limité à 2x pour l'instant) : dire clairement « utilité pas
+  encore quantifiée — Mode C limité à 2x aujourd'hui », pas un chiffre
+  extrapolé.
+
+**Erreurs à ne pas reproduire** (déjà commises une fois cette semaine, cf.
+le bug de l'aviron courbé) : si un capteur a une position à la fois sur
+le bateau et proche du corps (ex. force pieds), vérifier que les deux
+vues restent cohérentes entre elles plutôt que dessinées indépendamment.
+
+### 2.6 Vue « Observabilité » 🟢 — pilote 2x fait, cf. §2.5 pour le lien
 
 **C'est le livrable central du projet** (brief §14) — la vue qui répond
-aux questions d'achat de capteurs. Maquette avec front de Pareto
-coût/erreur en placeholder, légendé **« nécessite le mode Observabilité,
-pas encore implémenté »**. Ne pas simuler de fausses données pour
-« montrer à quoi ça ressemblera » — un graphique vide légendé vaut mieux
-qu'un graphique qui a l'air réel et ne l'est pas.
+aux questions d'achat de capteurs. **Faite pour `2x`** (`GET /api/analysis/observability`,
+`data/observability_2x_pilot.json`) — front de Pareto coût/erreur réel,
+bandeau permanent « Pilote classe 2x uniquement ». Pour les 7 autres
+classes, reste en placeholder légendé, honnête sur l'absence de données —
+ne pas extrapoler le résultat `2x` aux autres classes tant qu'elles
+restent bloquées (cf. `STATE.md`).
 
 ### 2.7 Vue « Sensibilité » 🟡 — bloquée sur Phase 5 (Sobol)
 
@@ -239,16 +278,38 @@ prématuré — c'est le chemin prévu.
 
 ### 3.1 Rameur
 
-**But** : ce que le rameur voit à son poste (probablement téléphone fixé
-au pied de nage, ou montre).
+**But** : comprendre sa propre technique et sa progression, seul, après la
+séance ou entre deux blocs — pas une comparaison à d'autres rameurs, pas
+de jargon d'ingénierie (contrainte explicite du document personas §3).
 
-**Composants** :
-- Feedback coup+1 haptique — pas d'écran nécessaire pour cette fonction
-  elle-même, mais une vue de calibration/configuration existe : intensité,
-  activer/désactiver, niveau (auto-local vs équipage, cf. document
-  personas).
-- Écran minimal optionnel : cadence actuelle, distance parcourue,
-  timing relatif à l'équipage (retard/avance en ms).
+**Point d'entrée** : clic sur son poste depuis `BoatSchematic` (déjà fait,
+réutilisé tel quel).
+
+**Pendant la séance** : uniquement le signal haptique (matériel, hors
+UI) — pas d'écran actif requis pour cette fonction.
+
+**Composants (après la séance)** :
+- Courbe de force du dernier coup (pic, position, forme) superposée aux
+  10 coups précédents — un graphique Plotly simple, pas
+  `StrokeGeometry` (qui montre la géométrie spatiale, pas la courbe de
+  force dans le temps ; les deux composants sont différents, ne pas les
+  confondre comme on l'a fait une fois pour `BoatSchematic`).
+- Décalage de phase vs le rameur de nage (poste de référence du bateau),
+  en ms.
+- Indice de progression à conditions comparables — une tendance sur
+  plusieurs séances, pas une valeur absolue isolée.
+- Journal des coups signalés en haptique pendant la séance, superposé à
+  la courbe de force — réutilise la table `events` déjà construite pour
+  Coach (§3.3), avec `source="haptic_alert"` en plus de `source="coach_voice"`
+  plutôt qu'un second schéma.
+
+**Badge obligatoire, distinct de Simulé/Bêta** : toute grandeur exprimée
+en watts porte un badge « **indice** » tant que la calibration de traînée
+réelle (D3, cf. `MANQUES.md`) n'est pas faite — la courbe de force et le
+séquençage sont des mesures directes fiables dès aujourd'hui, la
+puissance ne l'est pas encore. Ne pas fusionner ce badge avec
+Simulé/Mesuré (§4.2) : ce sont deux informations différentes (source de
+la donnée vs fiabilité de la calibration).
 
 ### 3.2 Team (cockpit temps réel embarqué)
 
