@@ -278,34 +278,32 @@ def evaluate_subset(
     *,
     seed: int = 0,
 ) -> dict[str, float]:
-    """RMSE moyen V et x_com sur les vérités pour un sous-ensemble."""
-    if not subset:
-        # aucune mesure — erreur = écart au prior EKF
-        err_v, err_c = [], []
-        for th in truths:
-            ekf = DashboardEKF(EKFConfig(v0=float(np.mean(th.V)), x_com0=0.0))
-            out = ekf.run(th.t)
-            err_v.append(float(np.sqrt(np.mean((out["V"] - th.V) ** 2))))
-            err_c.append(float(np.sqrt(np.mean((out["x_com"] - th.x_com) ** 2))))
-        return {
-            "rmse_V": float(np.mean(err_v)),
-            "rmse_com": float(np.mean(err_c)),
-            "rmse_combined": float(np.mean(err_v) + 10.0 * np.mean(err_c)),
-        }
+    """RMSE moyen V et x_com sur les vérités pour un sous-ensemble.
+
+    Init EKF **identique** pour tout sous-ensemble (y compris ``[]``) :
+    ``v0 = mean(V)``, ``x_com0 = 0``. Prior défendable (meilleure
+    constante pour V ; CdM centré) — pas de cas spécial ``[]`` vs capteurs
+    qui biaise ``rmse_V`` (cf. artefact V[0] vs mean).
+    """
     err_v, err_c = [], []
     for th in truths:
-        meas = sense_subset(th, subset, seed=seed)
+        if subset:
+            meas = sense_subset(th, subset, seed=seed)
+            t = meas["t"]
+            kwargs = dict(
+                v_meas=meas["v_meas"],
+                v_R=meas["v_R"],
+                com_meas=meas["com_meas"],
+                com_R=meas["com_R"],
+                accel=meas["accel"],
+            )
+        else:
+            t = th.t
+            kwargs = {}
         ekf = DashboardEKF(
-            EKFConfig(v0=float(th.V[0]), x_com0=float(th.x_com[0]))
+            EKFConfig(v0=float(np.mean(th.V)), x_com0=0.0)
         )
-        out = ekf.run(
-            meas["t"],
-            v_meas=meas["v_meas"],
-            v_R=meas["v_R"],
-            com_meas=meas["com_meas"],
-            com_R=meas["com_R"],
-            accel=meas["accel"],
-        )
+        out = ekf.run(t, **kwargs)
         err_v.append(float(np.sqrt(np.mean((out["V"] - th.V) ** 2))))
         err_c.append(float(np.sqrt(np.mean((out["x_com"] - th.x_com) ** 2))))
     rmse_V = float(np.mean(err_v))

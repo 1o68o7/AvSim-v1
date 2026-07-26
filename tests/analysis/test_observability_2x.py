@@ -66,6 +66,16 @@ def test_com_sensor_beats_empty_on_com():
     assert with_c["rmse_com"] < empty["rmse_com"]
 
 
+def test_coulisse_alone_does_not_worsen_rmse_V():
+    """Init unifiée : coulisse (canal CdM) ne doit plus gonfler rmse_V."""
+    truths = _synthetic_truths(5)
+    empty = evaluate_subset(truths, [])
+    with_c = evaluate_subset(truths, ["coulisse"], seed=3)
+    # V non observé + même prior → RMSE_V identique (pas d'artefact V[0])
+    assert abs(with_c["rmse_V"] - empty["rmse_V"]) < 1e-9
+    assert with_c["rmse_com"] < empty["rmse_com"]
+
+
 @pytest.mark.slow
 def test_run_mode_c_2x_small_live_sims():
     """Smoke : 2 vérités simulées 2x + glouton (lent — marqué slow)."""
