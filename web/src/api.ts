@@ -102,6 +102,20 @@ export type SimulateResult = {
   };
 };
 
+export type CrewSeatLive = {
+  seat: number;
+  F_peak_N: number;
+  P_mean_W: number;
+  phase_offset_ms: number;
+  timing_ms: number;
+};
+
+export type SyncAlert = {
+  seat: number;
+  timing_ms: number;
+  note: string;
+};
+
 export type ReplayFrame =
   | {
       kind: "session";
@@ -110,6 +124,7 @@ export type ReplayFrame =
       n_strokes: number;
       n_discard: number;
       n_keep: number;
+      session_id?: string | null;
       validation: ClassInfo;
     }
   | {
@@ -122,9 +137,44 @@ export type ReplayFrame =
       v_ms: number;
       distance_m: number;
       energy: Record<string, number>;
+      crew?: CrewSeatLive[];
+      sync_alert?: SyncAlert;
       series: { t_s: number[]; V_ms: number[] };
     }
   | { kind: "end"; source: "simulated" };
+
+export type CoachEvent = {
+  event_id: string;
+  t_utc: string;
+  source: string;
+  audio_ref: string | null;
+  transcript: string | null;
+  tag: string | null;
+  session_id: string;
+  nearest_stroke_index?: number | null;
+};
+
+export type SessionSummary = {
+  session_id: string;
+  boat_class: string;
+  t_start_utc: string;
+  source: string;
+  n_strokes: number;
+  n_events: number;
+};
+
+export type CompareResult = {
+  session_id: string;
+  event_id: string;
+  nearest_stroke_index: number;
+  metric: string;
+  n: number;
+  before: { stroke_indices: number[]; values: number[]; mean: number | null };
+  after: { stroke_indices: number[]; values: number[]; mean: number | null };
+  delta: number | null;
+  significance: { calibrated: boolean; message: string };
+  event: CoachEvent;
+};
 
 /** SSE `/api/replay/stream` — fetch+stream (EventSource ne peut pas poser le rôle). */
 export async function openReplayStream(
@@ -134,6 +184,7 @@ export async function openReplayStream(
     n_strokes?: number;
     n_discard?: number;
     realtime?: boolean;
+    session_id?: string;
     signal?: AbortSignal;
     onFrame: (frame: ReplayFrame) => void;
   },
@@ -143,6 +194,7 @@ export async function openReplayStream(
   if (opts.n_strokes != null) q.set("n_strokes", String(opts.n_strokes));
   if (opts.n_discard != null) q.set("n_discard", String(opts.n_discard));
   if (opts.realtime != null) q.set("realtime", String(opts.realtime));
+  if (opts.session_id) q.set("session_id", opts.session_id);
 
   let res: Response;
   try {
@@ -214,4 +266,68 @@ export const api = {
       method: "POST",
       body: JSON.stringify(body),
     }),
+  poseSeries: (
+    role: Role,
+    boatClass: string,
+    n = 41,
+    opts?: { hull_builder?: string | null; hull_mould?: string | null },
+  ) => {
+    const q = new URLSearchParams({
+      boat_class: boatClass,
+      n: String(n),
+      drive: "true",
+    });
+    if (opts?.hull_builder) q.set("hull_builder", opts.hull_builder);
+    if (opts?.hull_mould) q.set("hull_mould", opts.hull_mould);
+    return request<{
+      source: string;
+      boat_class: string;
+      frames: import("./components/StrokeGeometry").PoseFrame[];
+    }>(role, `/api/pose/series?${q}`);
+  },
+  createSession: (role: Role, boat_class = "2x") =>
+    request<SessionSummary & { strokes: unknown[]; events: CoachEvent[] }>(
+      role,
+      "/api/sessions",
+      { method: "POST", body: JSON.stringify({ boat_class }) },
+    ),
+  listSessions: (role: Role) =>
+    request<{ sessions: SessionSummary[] }>(role, "/api/sessions"),
+  getSession: (role: Role, sessionId: string) =>
+    request<
+      SessionSummary & {
+        strokes: unknown[];
+        events: CoachEvent[];
+      }
+    >(role, `/api/sessions/${encodeURIComponent(sessionId)}`),
+  postEvent: (
+    role: Role,
+    sessionId: string,
+    body: {
+      source?: string;
+      audio_ref?: string | null;
+      transcript?: string | null;
+      tag?: string | null;
+      t_utc?: string | null;
+    },
+  ) =>
+    request<CoachEvent>(
+      role,
+      `/api/sessions/${encodeURIComponent(sessionId)}/events`,
+      { method: "POST", body: JSON.stringify(body) },
+    ),
+  compareEvent: (
+    role: Role,
+    sessionId: string,
+    eventId: string,
+    opts?: { n?: number; metric?: string },
+  ) => {
+    const q = new URLSearchParams({ event_id: eventId });
+    if (opts?.n != null) q.set("n", String(opts.n));
+    if (opts?.metric) q.set("metric", opts.metric);
+    return request<CompareResult>(
+      role,
+      `/api/sessions/${encodeURIComponent(sessionId)}/compare?${q}`,
+    );
+  },
 };

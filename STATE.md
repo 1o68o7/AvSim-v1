@@ -186,8 +186,10 @@ Gate `is_admissible(..., ignore_known_1dof_limits=True)` — η et
 
 **Décision** : on **ne** ouvre **pas** de diagnostic sur ces quatre règles
 maintenant. Priorité basculée sur la **Surface Produit** (rejeu temps
-réel → vue Team). Les REJECT restants restent visibles / documentés ;
-ils ne bloquent pas le prototype d'affichage.
+réel → Team, Coach live, Coach replay). Les REJECT restants restent
+visibles / documentés ; ils ne bloquent pas le prototype d'affichage.
+Comparaisons avant/après Coach replay : **écart brut seulement** —
+Mode D (Détectabilité) absent, pas de seuil inventé.
 
 **Phase 7** (brief `docs/brief-interface-utilisateur.md`) : API FastAPI +
 UI React (Analyste 🟢 / Produit). Badges Simulé + Validée/Bêta. Phase 1

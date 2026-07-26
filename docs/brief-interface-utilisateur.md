@@ -1,6 +1,7 @@
 # Brief interface utilisateur — DataR0w
 
 *25 juillet 2026 · à destination de Cursor · Phase 7 de ROADMAP-PRODUCTION.md*
+*Mis à jour : Surface Produit Team / Coach (§3.2–3.4)*
 
 ---
 
@@ -44,7 +45,7 @@ jamais les présenter à égalité avec `8+`/`1x`.
 
 ## Surfaces
 
-Voir sections 2 (Analyste) et 3 (Produit) du brief original agent.
+Voir sections 2 (Analyste) et 3 (Produit).
 Vues Analyste 🟢 : Bateau, Coup, Bilan, Équipage.
 Vues Analyste 🟡 : Capteurs, Observabilité, Sensibilité, Détectabilité.
 Surface Produit 🟡 (prototype rejeu) : Rameur, Team, Coach live, Coach Replay.
@@ -54,6 +55,7 @@ Surface Produit 🟡 (prototype rejeu) : Rameur, Team, Coach live, Coach Replay.
 - Schéma de bateau adaptatif (1–8, couple/pointe)
 - Badge de statut (validé / bêta / simulé / mesuré)
 - Indicateur de calcul en cours
+- `StrokeGeometry` (vue latérale via `/api/pose` — géométrie Python unique)
 
 ## Ordre de construction
 
@@ -64,3 +66,66 @@ Surface Produit 🟡 (prototype rejeu) : Rameur, Team, Coach live, Coach Replay.
 5. Vue Équipage
 6. Surface Produit (rejeu)
 7. Maquettes 🟡
+
+---
+
+## 3. Surface Produit (rejeu)
+
+Flux commun : `GET /api/replay/stream` (SSE) = même grain que
+`avsim replay --realtime`. Badge **Simulé** permanent. Classe de
+validation préférée pour le prototype : **2x** (seule classe admissible
+hors limites 1DOF connues, cf. STATE.md).
+
+### 3.2 Team 🟢
+
+Cockpit embarqué (canal A) — 3 chiffres gros : cadence, vitesse, distance.
+Voir `docs/avsim-personas-temps-reel.md` §4.
+
+### 3.3 Coach live 🟢
+
+Canal B — même flux SSE que Team, **densité par poste** (force pic, timing
+d'attaque vs médiane, alerte de décalage **brut**). Bouton d'annotation
+vocale qui écrit dans la table `events`.
+
+**Table `events`** (schéma exact — personas §6) :
+
+```
+events
+  event_id       identifiant
+  t_utc          horodatage absolu (horloge téléphone, précision seconde)
+  source         'coach_voice' | (extensible)
+  audio_ref      référence au clip audio, optionnel
+  transcript     texte, optionnel
+  tag            catégorie ('longueur', 'cadence', 'relax'…)
+  session_id     clé de jointure vers la séance
+```
+
+Pas de synchro dédiée : la seconde suffit pour joindre « le coach a dit X »
+au coup N.
+
+### 3.4 Coach Replay 🟢
+
+`StrokeGeometry` (même composant que Vue Coup analyste) + événements
+superposés sur une timeline. Clic sur un événement → comparaison
+avant/après sur une fenêtre de N coups.
+
+**IMPORTANT — Mode D absent.** Le seuil de significativité devait venir du
+mode Détectabilité (Phase 5 Mode D), **non disponible** (Phase 5 bloquée,
+STATE.md). **Ne pas inventer de seuil de substitution.** Afficher l'écart
+brut avec la mention explicite :
+
+> Signification non calibrée — Mode D non disponible
+
+---
+
+## API Produit (complément)
+
+| Méthode | Chemin | Rôle |
+|---|---|---|
+| GET | `/api/replay/stream` | SSE coups (+ `session_id` optionnel) |
+| POST | `/api/sessions` | Crée une séance |
+| GET | `/api/sessions` | Liste |
+| GET | `/api/sessions/{id}` | Détail + strokes + events |
+| POST | `/api/sessions/{id}/events` | Annotation |
+| GET | `/api/sessions/{id}/compare` | Avant/après brut (sans seuil Mode D) |
+| GET | `/api/pose` · `/api/pose/series` | StrokeGeometry |

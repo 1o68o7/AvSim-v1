@@ -22,7 +22,9 @@ from avsim.core.catalog import (
     load_class_annotated,
 )
 from avsim.core.params import load_class
+from avsim.core.pose import pose_at_u, pose_series
 from avsim.core.solver import simulate
+from avsim.io.events import STORE, StrokeMark, utc_now_second
 from avsim.io.replay import stroke_distance_m, stroke_frame
 
 from .roles import Role, analyst_only, require_role
@@ -240,6 +242,182 @@ def jobs_sweep(role: Role = Depends(require_role)):
     )
 
 
+@app.get("/api/pose")
+def get_pose(
+    boat_class: str,
+    u: float = 0.0,
+    drive: bool = True,
+    hull_builder: str | None = None,
+    hull_mould: str | None = None,
+    role: Role = Depends(require_role),
+):
+    """Pose sagittale à u — géométrie Python (StrokeGeometry), pas d'IK TS."""
+    _ = role
+    try:
+        return pose_at_u(
+            boat_class, u, drive=drive,
+            hull_builder=hull_builder, hull_mould=hull_mould,
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+
+@app.get("/api/pose/series")
+def get_pose_series(
+    boat_class: str,
+    n: int = 41,
+    drive: bool = True,
+    hull_builder: str | None = None,
+    hull_mould: str | None = None,
+    role: Role = Depends(require_role),
+):
+    """Série de poses u=0..1 pour animer StrokeGeometry."""
+    _ = role
+    try:
+        return pose_series(
+            boat_class, n=n, drive=drive,
+            hull_builder=hull_builder, hull_mould=hull_mould,
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+
+class SessionCreate(BaseModel):
+    boat_class: str = "2x"
+
+
+class EventCreate(BaseModel):
+    source: str = "coach_voice"
+    audio_ref: str | None = None
+    transcript: str | None = None
+    tag: str | None = None
+    t_utc: str | None = None
+
+
+@app.post("/api/sessions")
+def create_session(body: SessionCreate, role: Role = Depends(require_role)):
+    """Crée une séance Produit (rejeu) pour y attacher des events."""
+    _ = role
+    try:
+        load_class(body.boat_class)
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    sess = STORE.create_session(body.boat_class)
+    return sess.to_dict()
+
+
+@app.get("/api/sessions")
+def list_sessions(role: Role = Depends(require_role)):
+    _ = role
+    return {"sessions": STORE.list_sessions()}
+
+
+@app.get("/api/sessions/{session_id}")
+def get_session(session_id: str, role: Role = Depends(require_role)):
+    _ = role
+    sess = STORE.get(session_id)
+    if sess is None:
+        raise HTTPException(404, f"session inconnue : {session_id}")
+    return sess.to_dict()
+
+
+@app.get("/api/sessions/{session_id}/events")
+def list_events(session_id: str, role: Role = Depends(require_role)):
+    _ = role
+    sess = STORE.get(session_id)
+    if sess is None:
+        raise HTTPException(404, f"session inconnue : {session_id}")
+    return {"session_id": session_id, "events": [e.to_dict() for e in sess.events]}
+
+
+@app.post("/api/sessions/{session_id}/events")
+def post_event(
+    session_id: str,
+    body: EventCreate,
+    role: Role = Depends(require_role),
+):
+    """Annotation vocale / marqueur — schéma events (personas §6)."""
+    _ = role
+    try:
+        ev = STORE.add_event(
+            session_id,
+            source=body.source,
+            audio_ref=body.audio_ref,
+            transcript=body.transcript,
+            tag=body.tag,
+            t_utc=body.t_utc,
+        )
+    except KeyError as exc:
+        raise HTTPException(404, f"session inconnue : {session_id}") from exc
+    nearest = STORE.nearest_stroke_index(session_id, ev.t_utc)
+    return {**ev.to_dict(), "nearest_stroke_index": nearest}
+
+
+@app.get("/api/sessions/{session_id}/compare")
+def compare_around_event(
+    session_id: str,
+    event_id: str,
+    n: int = Query(3, ge=1, le=20, description="Fenêtre N coups avant/après"),
+    metric: str = Query("v_ms", description="v_ms | cadence_spm | check_factor"),
+    role: Role = Depends(require_role),
+):
+    """Écart brut avant/après — **sans** seuil Mode D (non disponible)."""
+    _ = role
+    sess = STORE.get(session_id)
+    if sess is None:
+        raise HTTPException(404, f"session inconnue : {session_id}")
+    ev = next((e for e in sess.events if e.event_id == event_id), None)
+    if ev is None:
+        raise HTTPException(404, f"event inconnu : {event_id}")
+    if metric not in ("v_ms", "cadence_spm", "check_factor"):
+        raise HTTPException(400, f"metric inconnue : {metric}")
+    idx = STORE.nearest_stroke_index(session_id, ev.t_utc)
+    if idx is None:
+        raise HTTPException(400, "aucun coup enregistré pour joindre l'événement")
+    by_i = {m.stroke_index: m for m in sess.strokes}
+
+    def _val(m: StrokeMark) -> float:
+        if metric == "v_ms":
+            return float(m.v_ms)
+        if metric == "cadence_spm":
+            return float(m.cadence_spm)
+        return float(m.check_factor)
+
+    before_idx = [i for i in range(idx - n, idx) if i in by_i]
+    after_idx = [i for i in range(idx + 1, idx + 1 + n) if i in by_i]
+    before_vals = [_val(by_i[i]) for i in before_idx]
+    after_vals = [_val(by_i[i]) for i in after_idx]
+    mean_b = float(np.mean(before_vals)) if before_vals else None
+    mean_a = float(np.mean(after_vals)) if after_vals else None
+    delta = (
+        (mean_a - mean_b)
+        if mean_a is not None and mean_b is not None
+        else None
+    )
+    return {
+        "session_id": session_id,
+        "event_id": event_id,
+        "nearest_stroke_index": idx,
+        "metric": metric,
+        "n": n,
+        "before": {"stroke_indices": before_idx, "values": before_vals, "mean": mean_b},
+        "after": {"stroke_indices": after_idx, "values": after_vals, "mean": mean_a},
+        "delta": delta,
+        "significance": {
+            "calibrated": False,
+            "message": (
+                "Signification non calibrée — Mode D (Détectabilité) non disponible. "
+                "Écart brut affiché sans seuil de détectabilité."
+            ),
+        },
+        "event": ev.to_dict(),
+    }
+
+
 def _json_default(obj: Any) -> Any:
     if isinstance(obj, (np.floating, np.integer)):
         return obj.item()
@@ -257,12 +435,16 @@ async def replay_stream(
         True,
         description="Cadencer chaque coup à T (stroke_period) — false pour tests",
     ),
+    session_id: str | None = Query(
+        None,
+        description="Si fourni, enregistre les coups pour joindre les events",
+    ),
     role: Role = Depends(require_role),
 ):
     """SSE — même trames NDJSON que `avsim replay --realtime`.
 
     Unidirectionnel → SSE (pas WebSocket). `source=simulated` sur chaque
-    événement. Surface Produit / vue Team.
+    événement. Surface Produit / Team / Coach live.
     """
     _ = role  # les deux rôles ; badge Simulé côté client obligatoire
     try:
@@ -272,9 +454,10 @@ async def replay_stream(
     P = copy.deepcopy(P)
     P["numerics"]["n_strokes"] = int(n_strokes)
     P["numerics"]["n_discard"] = int(n_discard)
+    if session_id is not None and STORE.get(session_id) is None:
+        raise HTTPException(404, f"session inconnue : {session_id}")
 
     async def event_gen():
-        # simulate() est CPU-bound — hors boucle événementielle
         res = await asyncio.to_thread(simulate, P)
         session = {
             "kind": "session",
@@ -283,6 +466,7 @@ async def replay_stream(
             "n_strokes": int(n_strokes),
             "n_discard": int(n_discard),
             "n_keep": int(res.n_keep),
+            "session_id": session_id,
             "validation": class_validation_status(boat_class),
         }
         yield f"data: {json.dumps(session, default=_json_default)}\n\n"
@@ -297,7 +481,20 @@ async def replay_stream(
                 boat_class=boat_class,
                 stroke_index=i,
                 distance_m=distance,
+                params=P,
             )
+            if session_id is not None:
+                STORE.add_stroke_mark(
+                    session_id,
+                    StrokeMark(
+                        stroke_index=i,
+                        t_utc=utc_now_second(),
+                        cadence_spm=float(frame["cadence_spm"]),
+                        v_ms=float(frame["v_ms"]),
+                        check_factor=float(frame["energy"]["check_factor"]),
+                        energy=dict(frame["energy"]),
+                    ),
+                )
             yield f"data: {json.dumps(frame, default=_json_default)}\n\n"
             if realtime:
                 delay = float(frame["T_s"]) - (time.perf_counter() - t0)

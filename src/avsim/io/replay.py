@@ -29,17 +29,70 @@ def phase2_metrics(stroke) -> dict[str, float]:
     return {k: float(en[k]) for k in PHASE2_KEYS}
 
 
+def _crew_density(st, P: dict[str, Any] | None) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Densité par poste pour Coach live — force, timing, décalage brut.
+
+    Aucun seuil de significativité (Mode D absent) : on signale seulement
+    le poste au plus grand |timing_ms| vs médiane d'attaque du coup.
+    """
+    n = int(st.handle_force.shape[0])
+    t = np.asarray(st.t, dtype=float)
+    T = float(st.energy()["stroke_period_s"])
+    offsets = (P or {}).get("crew", {}).get("phase_offset_ms", [0.0] * n)
+    catch_t: list[float] = []
+    for i in range(n):
+        drive = np.asarray(st.immersion[i]) > 0.01
+        if np.any(drive):
+            catch_t.append(float(t[np.where(drive)[0][0]]))
+        else:
+            catch_t.append(float(t[0]))
+    t_med = float(np.median(catch_t)) if catch_t else float(t[0])
+    seats: list[dict[str, Any]] = []
+    alert_seat = 1
+    alert_lag = 0.0
+    for i in range(n):
+        F_peak = float(np.max(np.abs(st.handle_force[i])))
+        e_i = float(np.trapezoid(st.handle_power[i], t))
+        timing_ms = (catch_t[i] - t_med) * 1000.0
+        off = float(offsets[i]) if i < len(offsets) else 0.0
+        if abs(timing_ms) >= abs(alert_lag):
+            alert_lag = timing_ms
+            alert_seat = i + 1
+        seats.append({
+            "seat": i + 1,
+            "F_peak_N": F_peak,
+            "P_mean_W": e_i / max(T, 1e-9),
+            "phase_offset_ms": off,
+            "timing_ms": timing_ms,
+        })
+    sync = {
+        "seat": alert_seat,
+        "timing_ms": alert_lag,
+        "note": (
+            "Décalage brut vs médiane d'attaque — signification non calibrée "
+            "(Mode D / Détectabilité non disponible)."
+        ),
+    }
+    return seats, sync
+
+
 def stroke_frame(
     st,
     *,
     boat_class: str,
     stroke_index: int,
     distance_m: float = 0.0,
+    params: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Une trame coup — même grain que le flux matériel futur."""
     en = st.energy()
     T = float(en["stroke_period_s"])
     v_mean = float(en["v_mean_ms"])
+    P = params if params is not None else getattr(st, "P", None)
+    if P is None:
+        # Result.stroke ne porte pas P — le caller passe params=
+        P = {}
+    crew, sync = _crew_density(st, P)
     return {
         "kind": "stroke",
         "source": "simulated",
@@ -50,6 +103,8 @@ def stroke_frame(
         "v_ms": v_mean,
         "distance_m": float(distance_m),
         "energy": phase2_metrics(st),
+        "crew": crew,
+        "sync_alert": sync,
         "series": {
             "t_s": [float(x) for x in st.t],
             "V_ms": [float(x) for x in st.V],
@@ -85,6 +140,7 @@ def iter_stroke_frames(
             boat_class=boat_class,
             stroke_index=i,
             distance_m=distance,
+            params=res.P,
         )
         yield frame
         if realtime:
