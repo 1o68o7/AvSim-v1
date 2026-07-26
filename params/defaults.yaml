@@ -75,13 +75,12 @@ technique:
   # Profil F_h(u), u = fraction d'arc (theta_catch → theta_finish), pas le temps.
   # Sources forme : Kleshnev / BioRow ; Nolte (ed.), Rowing Faster 2e ed., Table 9.2 ;
   #                 Cerne et al. 2013 (timing relatif du pic et plateau >70 %).
-  # F_peak_N — bateau (pas ergometre) :
-  #   Ancienne 1100 N = pics ERG (McGregor et al. 2004 ; Colloud et al. 2006,
-  #   pics 800-1100 N) : non comparable a l'eau (pas de glisse coque).
-  #   Sur l'eau, rythme de course : 500-700 N (Steinacker, via CMJ/2000 m elites ;
-  #   Holt et al., 47 courses 2000 m, force moyenne mesuree 503 N en 2-).
-  #   Valeur retenue : 650 N (milieu de fourchette eau). src L.
-  F_peak_N:         {v: 650.0, min: 500.0, max: 1100.0, src: L}
+  # F_peak_N — erg-range (McGregor/Colloud), au-dessus de la plage on-water
+  #   sourcee (Steinacker/Holt 500-700N) ; retenue empiriquement car 650N ne
+  #   produit pas de cycle de propulsion viable meme avec amorcage (voir
+  #   diagnostic du 25/07) ; ecart non explique, piste ouverte : I_oar,
+  #   trainee ou pertes de palette potentiellement surestimes ailleurs.
+  F_peak_N:         {v: 1100.0, min: 500.0, max: 1100.0, src: L}
   F_u_peak:         {v: 0.40,  min: 0.30,  max: 0.50,  src: L}   # pic vers u≈0.40
   F_u_rise_70:      {v: 0.17,  min: 0.10,  max: 0.25,  src: L}   # 70 % du pic avant u=0.17
   F_high_width:     {v: 0.35,  min: 0.30,  max: 0.40,  src: L}   # largeur u avec F>70 % pic

@@ -57,9 +57,20 @@ def _ratio(name: str) -> float:
     raise KeyError(name)
 
 
+def _clip(x, lo, hi):
+    """Clip scalaire en Python pur ; np.clip seulement si tableau."""
+    if np.ndim(x) == 0:
+        return max(float(lo), min(float(hi), float(x)))
+    return np.clip(x, lo, hi)
+
+
 def smootherstep(u):
     """Interpolation C2 : derivees premiere ET seconde nulles aux bornes."""
-    u = np.clip(u, 0.0, 1.0)
+    u = _clip(u, 0.0, 1.0)
+    if np.ndim(u) == 0:
+        u = float(u)
+        return u * u * u * (u * (6.0 * u - 15.0) + 10.0)
+    u = np.asarray(u, dtype=float)
     return u * u * u * (u * (6.0 * u - 15.0) + 10.0)
 
 
@@ -93,7 +104,7 @@ def _window_cruise(tau, start, end, blend: float = 0.16):
     start = float(start)
     end = max(float(end), start + 1e-6)
     width = end - start
-    bf = float(np.clip(blend, 1e-3, 0.49))
+    bf = max(1e-3, min(0.49, float(blend)))
     b = bf * width
     t1, t2 = start + b, end - b
     # Deplacement symetrique des blends + croisiere : v_c = 1/(width - b)
@@ -217,16 +228,22 @@ class BodyModel:
         x_hip = x_seat
         x_shoulder = x_hip + self.L_trunk * np.sin(phi)
         e_raw = x_shoulder - x_handle
-        e = np.clip(e_raw, self.e_min, self.e_max)
+        e = _clip(e_raw, self.e_min, self.e_max)
         x_hand = x_handle  # la main suit la poignee (maitre)
 
         dx = x_hip - self.x_ankle
         dz = self.z_hip
         d = np.hypot(dx, dz)
         reach = self.L_shank + self.L_thigh
-        d = np.clip(d, abs(self.L_shank - self.L_thigh) + 1e-6, reach - 1e-6)
+        d_lo = abs(self.L_shank - self.L_thigh) + 1e-6
+        d_hi = reach - 1e-6
+        d = _clip(d, d_lo, d_hi)
         a = (d * d + self.L_shank ** 2 - self.L_thigh ** 2) / (2.0 * d)
-        hgt = np.sqrt(np.maximum(self.L_shank ** 2 - a * a, 0.0))
+        h2 = self.L_shank ** 2 - a * a
+        if np.ndim(h2) == 0:
+            hgt = np.sqrt(max(float(h2), 0.0))
+        else:
+            hgt = np.sqrt(np.maximum(h2, 0.0))
         ux, uz = dx / d, dz / d
         x_knee = self.x_ankle + a * ux - hgt * uz
 
@@ -239,7 +256,7 @@ class BodyModel:
     def handle_progress(self, x_handle):
         """u in [0,1] le long de la course de poignee attaque → degage."""
         span = self._handle_span if abs(self._handle_span) > 1e-12 else 1.0
-        return np.clip((np.asarray(x_handle, float) - self.x_handle_catch) / span, 0.0, 1.0)
+        return _clip((np.asarray(x_handle, float) - self.x_handle_catch) / span, 0.0, 1.0)
 
     def _com_from_joints(self, j):
         x_shank = j["x_knee"] + _ratio("shank") * (self.x_ankle - j["x_knee"])

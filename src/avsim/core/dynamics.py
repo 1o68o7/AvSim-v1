@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .body import BodyModel, smootherstep
+from .body import BodyModel, smootherstep, _clip
 from .forces import aero_drag, blade_force, hull_drag, rho_air, rho_water, nu_water
 from .geometry import blade_position, handle_position, moment_z
 
@@ -34,6 +34,11 @@ def handle_force_profile(
       - F > 70 % du pic sur une largeur ~ high_width.
     Parametres lus depuis technique.* (defaults.yaml), sources Kleshnev /
     Rowing Faster Table 9.2 / Cerne et al. 2013. Nul hors ]0, 1[.
+
+    Note : F(0)=0 dans ce profil ; le demarrage du drive repose sur le
+    clamp u_eff=max(u_geom, u_rise_70) dans Crew.oar_accelerations.
+    Tentative F(0)=0.13*F_peak (Kleshnev) sans clamp : drive > periode a
+    1100 N (25/07) — clamp conserve en attendant une refonte du bootstrap.
     """
     u = np.asarray(u, dtype=float)
     u_peak = float(np.clip(u_peak, 0.05, 0.95))
@@ -152,7 +157,7 @@ class Crew:
         if not np.isfinite(t_f):
             return self.theta_finish, 0.0, 0.0
         dur = max(t_c - t_f, 1e-4)
-        s = np.clip((t - t_f) / dur, 0.0, 1.0)
+        s = max(0.0, min(1.0, (t - t_f) / dur))
         # Brief §4.4 : arrivee a (theta_catch, omega=0).
         return quintic_hermite(
             s, self.th_at_finish[i], self.w_at_finish[i],
@@ -189,7 +194,8 @@ class Crew:
         # Limiter les pics d'acceleration du CdM (transitions de fenetre /
         # Hermite) : au-dela de ~30 m/s² le corps humain ne suit plus, et le
         # terme inertiel pollue le cavalement.
-        s_ddot = np.clip(s_ddot, -25.0, 25.0)
+        for i in range(n):
+            s_ddot[i] = max(-25.0, min(25.0, float(s_ddot[i])))
         return s, s_dot, s_ddot
 
     # --------------------------------------------------------------- oar RHS
@@ -237,11 +243,11 @@ class Crew:
             # --- propulsion : F_h(u), u = fraction d'arc (§4.4) ---
             # u=0 a l'attaque, u=1 au degage. Le profil est nul en u=0 ; avec
             # omega=0 et immersion qui monte en blade_ramp_s, le couple palette
-            # peut pousser theta > theta_catch. On evalue alors le profil a
-            # u_eff = max(u_geom, u_rise_70) pour garder un couple moteur
-            # (sinon F reste ~0 et l'arc ne demarre jamais — piege I_oar eleve).
+            # peut pousser theta > theta_catch. Clamp u_eff=max(u_geom, u_rise_70)
+            # pour garder un couple moteur (sinon piege I_oar). Tentative
+            # F(0)=0.13*F_peak sans clamp : drive>periode — clamp conserve.
             u_geom = (self.theta_catch - th[i]) / self._arc_span
-            u_arc = float(np.clip(u_geom, 0.0, 1.0))
+            u_arc = max(0.0, min(1.0, float(u_geom)))
             u_eff = max(u_arc, self.F_u_rise_70) if u_geom < self.F_u_rise_70 else u_arc
             F_pull[i] = float(handle_force_profile(
                 u_eff, self.F_peak, self.F_u_peak,
@@ -357,7 +363,7 @@ class Crew:
         self.mode[i] = self.MODE_RECOVERY
         self.t_finish[i] = t
         self.th_at_finish[i] = float(min(th, self.theta_finish))
-        self.w_at_finish[i] = float(np.clip(w, -0.6, 0.2))
+        self.w_at_finish[i] = max(-0.6, min(0.2, float(w)))
         # Cible Hermite = (theta_catch, 0) — brief §4.4 ; pas d'accrochage V.
         self.w_catch_target[i] = 0.0
         if t - self.t_catch[i] >= self.T - 1e-6:
