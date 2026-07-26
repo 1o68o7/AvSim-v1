@@ -40,7 +40,7 @@ utilise le système sur l'eau) ne partagent aucune vue, mais consomment la
 même API FastAPI. Ne jamais mélanger les deux dans un même composant.
 
 **Rien de fictif à l'écran.** Aucune vue ne doit jamais afficher une donnée
-de capteur simulée comme si ellevenait d'un vrai capteur, ni une sortie de
+de capteur simulée comme si elle venait d'un vrai capteur, ni une sortie de
 simulation présentée comme une mesure. Toute vue alimentée par le
 simulateur porte un badge visuel constant : **« Simulé »**. Toute vue
 alimentée par un vrai flux (Phase 8, matériel) porte **« Mesuré »**. Ce
