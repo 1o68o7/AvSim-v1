@@ -13,6 +13,17 @@ from avsim.core.solver import simulate
 BOAT_CLASSES = ("8+", "1x")
 
 
+@pytest.fixture(autouse=True)
+def _isolated_events_db(tmp_path, monkeypatch):
+    """Chaque test a sa propre SQLite — pas de fuite via le STORE global."""
+    db = tmp_path / "test_events.sqlite"
+    monkeypatch.setenv("AVSIM_EVENTS_DB", str(db))
+    from avsim.io.events import STORE
+
+    STORE.reopen(db)
+    yield
+
+
 @pytest.fixture(scope="module", params=BOAT_CLASSES)
 def boat_class(request):
     return request.param
