@@ -91,6 +91,17 @@ def _hermite_quintic_pos(s, x0, v0, x1, v1):
     return x0 + v0 * s + c3 * s ** 3 + c4 * s ** 4 + c5 * s ** 5
 
 
+def _cruise_blend_frac(
+    start: float,
+    end: float,
+    frac: float,
+    min_abs: float = 0.10,
+) -> float:
+    """Fraction de blend, plafonnée, avec largeur absolue mini (évite pics τ)."""
+    width = max(float(end) - float(start), 1e-6)
+    return float(min(0.45, max(float(frac), float(min_abs) / width)))
+
+
 def _window_cruise(tau, start, end, blend: float = 0.16):
     """Rampe 0→1 a vitesse quasi uniforme au milieu, accel C2 aux bornes.
 
@@ -133,23 +144,84 @@ def _window_cruise(tau, start, end, blend: float = 0.16):
     return out
 
 
-def _recovery_windows(t: dict):
-    """Onsets/fins de retour etages : bras → tronc → coulisse (pas d'empilement).
+def _window_cruise_deriv(
+    s: float,
+    blend: float = 0.22,
+    v0: float = 0.0,
+) -> tuple[float, float, float]:
+    """y, dy/ds, d²y/ds² pour une croisière sur s∈[0,1].
 
-    Les fins sont l'onset du segment suivant — meme famille de bug que le
-    drive (brief §12.2), reactive sous Hermite ou les anciennes largeurs
-    +0,45/+0,50 chevauchaient le pic de ω.
+    `v0` = dy/ds à s=0 (0 = repos ; <0 autorise un léger dépassement
+    d'angle au dégagé, comme le Hermite avec w_at_finish < 0).
+    """
+    s = float(max(0.0, min(1.0, s)))
+    bf = max(1e-3, min(0.49, float(blend)))
+    b = bf
+    t1, t2 = b, 1.0 - b
+    v0 = float(v0)
+    # Plateau : v0*b/2 + v_c*(1-b) = 1 ⇒ v_c = (1 - v0*b/2)/(1-b).
+    # Left hermite (0,v0)→(y1,v_c) ; right (y2,v_c)→(1,0).
+    v_c = (1.0 - 0.5 * v0 * b) / (1.0 - b)
+    if v_c <= 0.0:
+        # v0 trop négatif pour ce blend — repli v0=0
+        v0 = 0.0
+        v_c = 1.0 / (1.0 - b)
+    y1 = 0.5 * (v0 + v_c) * b
+    y2 = 1.0 - 0.5 * v_c * b
+
+    if s <= 0.0:
+        return 0.0, v0, 0.0
+    if s >= 1.0:
+        return 1.0, 0.0, 0.0
+    if t1 < s < t2:
+        return y1 + v_c * (s - t1), v_c, 0.0
+
+    if s <= t1:
+        u = s / b
+        x0, v0u, x1, v1u = 0.0, v0 * b, y1, v_c * b
+    else:
+        u = (s - t2) / b
+        x0, v0u, x1, v1u = y2, v_c * b, 1.0, 0.0
+    rhs1 = x1 - x0 - v0u
+    rhs2 = v1u - v0u
+    c5 = 6.0 * rhs1 - 3.0 * rhs2
+    c4 = rhs2 - 3.0 * rhs1 - 2.0 * c5
+    c3 = rhs1 - c4 - c5
+    u2, u3, u4, u5 = u * u, u ** 3, u ** 4, u ** 5
+    y = x0 + v0u * u + c3 * u3 + c4 * u4 + c5 * u5
+    dy_du = v0u + 3.0 * c3 * u2 + 4.0 * c4 * u3 + 5.0 * c5 * u4
+    d2y_du2 = 6.0 * c3 * u + 12.0 * c4 * u2 + 20.0 * c5 * u3
+    return float(y), float(dy_du / b), float(d2y_du2 / (b * b))
+
+
+def _recovery_windows(t: dict):
+    """Onsets/fins de retour etages : bras → tronc → coulisse.
+
+    Famille brief §12.2 : pas d'empilement d'accel sous le pic de ω.
+    L'entrée de coulisse (blend) doit finir avant tau_r≈0,36 — sinon
+    |a_siège|~100–180 m/s² à stroke τ∈[0,65 ; 0,75] (diag Kleshnev R,
+    BioRow / row2k « Recovery Phase », n=25658).
     """
     skew = max(float(t["rec_slide_skew"]), 1e-3)
     arms_start = float(t["rec_arms_away"])
     trunk_start = float(t["rec_trunk_fwd"])
     slide_start = float(t["rec_slide_start"]) / skew
+    slide_blend = 0.22
+    # entry_end = slide_start + blend*(1 - slide_start) ≤ 0.36
+    target_entry_end = 0.36
+    entry_end = slide_start + slide_blend * (1.0 - slide_start)
+    if entry_end > target_entry_end:
+        slide_start = (target_entry_end - slide_blend) / max(1.0 - slide_blend, 1e-6)
+    slide_start = max(slide_start, trunk_start + 1e-3)
+
     arms_end = max(trunk_start, arms_start + 1e-3)
-    trunk_end = max(slide_start, trunk_start + 1e-3)
+    # Largeur mini du tronc (peut chevaucher le début de coulisse).
+    trunk_end = min(0.55, max(slide_start, trunk_start + 0.18))
     return {
         "arms": (arms_start, arms_end),
         "trunk": (trunk_start, trunk_end),
         "slide": (slide_start, 1.0),
+        "slide_blend": slide_blend,
     }
 
 
@@ -209,11 +281,15 @@ class BodyModel:
             # retour : tau_r = 1-u (0 au degage → 1 a l'attaque)
             tau_r = 1.0 - u
             w = _recovery_windows(t)
-            x_seat = self.L_slide * (1.0 - _window_cruise(tau_r, *w["slide"]))
-            # Tronc aussi en croisiere : un smootherstep serre ([0,12;0,30])
-            # recentrait un pic d'accel tot en debut de retour.
+            slide_b = _cruise_blend_frac(
+                *w["slide"], w.get("slide_blend", 0.22), min_abs=0.10)
+            trunk_b = _cruise_blend_frac(*w["trunk"], 0.22, min_abs=0.10)
+            x_seat = self.L_slide * (
+                1.0 - _window_cruise(tau_r, *w["slide"], blend=slide_b))
+            # Tronc en croisiere + blend abs. mini : evite |a|~150–200 m/s²
+            # a stroke τ∈[0,65;0,75] (transition tronc→coulisse).
             phi = self.phi_f + (self.phi_c - self.phi_f) * _window_cruise(
-                tau_r, *w["trunk"], blend=0.22)
+                tau_r, *w["trunk"], blend=trunk_b)
         return x_seat, phi
 
     def joints_from_handle(self, x_handle, u, *, drive: bool):
@@ -296,19 +372,24 @@ class BodyModel:
         tau_d, tau_r, is_drive = self._split(psi)
 
         rw = _recovery_windows(t)
+        slide_b = _cruise_blend_frac(
+            *rw["slide"], rw.get("slide_blend", 0.22), min_abs=0.10)
+        trunk_b = _cruise_blend_frac(*rw["trunk"], 0.22, min_abs=0.10)
+        arms_b = _cruise_blend_frac(*rw["arms"], 0.22, min_abs=0.10)
         seat_d = self.L_slide * _window(tau_d, 0.0, t["seq_legs_end"])
-        seat_r = self.L_slide * (1.0 - _window_cruise(tau_r, *rw["slide"]))
+        seat_r = self.L_slide * (
+            1.0 - _window_cruise(tau_r, *rw["slide"], blend=slide_b))
         x_seat = np.where(is_drive, seat_d, seat_r)
 
         phi_d = self.phi_c + (self.phi_f - self.phi_c) * _window(
             tau_d, t["seq_trunk_onset"], t["seq_trunk_end"])
         phi_r = self.phi_f + (self.phi_c - self.phi_f) * _window_cruise(
-            tau_r, *rw["trunk"], blend=0.22)
+            tau_r, *rw["trunk"], blend=trunk_b)
         phi = np.where(is_drive, phi_d, phi_r)
 
         e_d = self.e_ext + (self.e_flex - self.e_ext) * _window(tau_d, t["seq_arms_onset"], 1.0)
         e_r = self.e_flex + (self.e_ext - self.e_flex) * _window_cruise(
-            tau_r, *rw["arms"], blend=0.22)
+            tau_r, *rw["arms"], blend=arms_b)
         e = np.where(is_drive, e_d, e_r)
 
         x_hip = x_seat
