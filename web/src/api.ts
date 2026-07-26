@@ -65,6 +65,33 @@ export type ClassInfo = {
   v_ref_ms: number | null;
 };
 
+export type StrokeBarMetrics = {
+  length_norm: number;
+  catch_white: number;
+  immersed: number;
+  finish_white: number;
+  catch_angle_deg?: number;
+  L_slide_m?: number;
+};
+
+export type CrewSeatSeries = {
+  seat: number;
+  phase_offset_ms: number;
+  E_handle_J: number;
+  P_mean_W: number;
+  stroke_bar?: StrokeBarMetrics;
+  drive?: {
+    u: number[];
+    handle_force_N: number[];
+    theta_deg: number[];
+    theta_dot_deg_s: number[];
+  };
+  fish?: {
+    theta_deg: number[];
+    theta_dot_deg_s: number[];
+  };
+};
+
 export type SimulateResult = {
   source: "simulated";
   stroke_index: number;
@@ -82,22 +109,20 @@ export type SimulateResult = {
     t_s: number[];
     u: number[];
     theta_deg: number[];
+    theta_dot_deg_s?: number[];
     handle_force_N: number[];
     V_ms: number[];
+    A_ms2?: number[];
     immersion: number[];
   };
-  crew: Array<{
-    seat: number;
-    phase_offset_ms: number;
-    E_handle_J: number;
-    P_mean_W: number;
-  }>;
+  crew: CrewSeatSeries[];
   boat: {
     n_rowers: number;
     sculling: boolean;
     coxed: boolean;
     theta_catch_deg: number;
     theta_finish_deg: number;
+    L_slide_m?: number;
     geometry_source: string;
   };
 };
@@ -108,6 +133,9 @@ export type CrewSeatLive = {
   P_mean_W: number;
   phase_offset_ms: number;
   timing_ms: number;
+  stroke_bar?: StrokeBarMetrics;
+  drive?: CrewSeatSeries["drive"];
+  fish?: CrewSeatSeries["fish"];
 };
 
 export type SyncAlert = {
@@ -139,10 +167,18 @@ export type ReplayFrame =
       arc_deg?: number;
       phase_lag_ms?: number;
       check_factor?: number;
+      P_rower_mean_W?: number;
       energy: Record<string, number>;
       crew?: CrewSeatLive[];
       sync_alert?: SyncAlert;
-      series: { t_s: number[]; V_ms: number[] };
+      series: {
+        t_s: number[];
+        V_ms: number[];
+        A_ms2?: number[];
+        theta_deg?: number[];
+        theta_dot_deg_s?: number[];
+        handle_force_N?: number[];
+      };
     }
   | { kind: "end"; source: "simulated" };
 

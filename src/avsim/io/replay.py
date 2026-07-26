@@ -12,6 +12,7 @@ from typing import Any
 import numpy as np
 
 from avsim.core.solver import Result
+from avsim.io.coaching_viz import crew_coaching_payload
 
 # Six grandeurs Phase 2 / §9.2 déjà dans Stroke.energy() — affichage seul.
 PHASE2_KEYS = (
@@ -101,6 +102,24 @@ def stroke_frame(
     else:
         arc_deg = float(np.max(th0) - np.min(th0)) if th0.size else 0.0
     phase_lag_ms = float(abs(sync["timing_ms"]))
+    # Enrichissement coaching (barres / nesting / poisson) — même source
+    coaching = crew_coaching_payload(st, P) if P else []
+    # Fusion densité Coach live + métriques barre
+    by_seat = {c["seat"]: c for c in coaching}
+    crew_rich = []
+    for row in crew:
+        extra = by_seat.get(row["seat"], {})
+        crew_rich.append({
+            **row,
+            "stroke_bar": extra.get("stroke_bar"),
+            "drive": extra.get("drive"),
+            "fish": extra.get("fish"),
+        })
+    t = np.asarray(st.t, dtype=float)
+    V = np.asarray(st.V, dtype=float)
+    A = np.gradient(V, t) if t.size > 1 else np.zeros_like(V)
+    th0 = np.asarray(st.theta[0], dtype=float)
+    w0 = np.asarray(st.theta_dot[0], dtype=float)
     return {
         "kind": "stroke",
         "source": "simulated",
@@ -113,12 +132,17 @@ def stroke_frame(
         "arc_deg": arc_deg,
         "phase_lag_ms": phase_lag_ms,
         "check_factor": float(en["check_factor"]),
+        "P_rower_mean_W": float(en.get("P_rower_mean_W", 0.0)),
         "energy": phase2_metrics(st),
-        "crew": crew,
+        "crew": crew_rich,
         "sync_alert": sync,
         "series": {
-            "t_s": [float(x) for x in st.t],
-            "V_ms": [float(x) for x in st.V],
+            "t_s": [float(x) for x in t],
+            "V_ms": [float(x) for x in V],
+            "A_ms2": [float(x) for x in A],
+            "theta_deg": [float(x) for x in np.degrees(th0)],
+            "theta_dot_deg_s": [float(x) for x in np.degrees(w0)],
+            "handle_force_N": [float(x) for x in st.handle_force[0]],
         },
     }
 

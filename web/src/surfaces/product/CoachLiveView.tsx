@@ -8,6 +8,7 @@ import {
   type SyncAlert,
 } from "../../api";
 import { StatusBadge } from "../../components/StatusBadge";
+import { StrokeLengthBar } from "../../components/StrokeLengthBar";
 import { useApp } from "../../state";
 
 type SeatRow = CrewSeatLive;
@@ -201,6 +202,9 @@ export function CoachLiveView() {
                 <span>P moy.</span>
                 <strong>{s.P_mean_W.toFixed(0)} W</strong>
               </div>
+              {s.stroke_bar && (
+                <StrokeLengthBar bar={s.stroke_bar} compact />
+              )}
               {alert && (
                 <div className="coach-seat-flag">Plus grand décalage (brut)</div>
               )}

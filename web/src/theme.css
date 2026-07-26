@@ -322,6 +322,108 @@ table.data td {
   }
 }
 
+/* --- Barre longueur de coup (Peach/FM, brief visuels) --- */
+
+.stroke-bar {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0.35rem 0;
+}
+
+.stroke-bar.compact {
+  margin: 0.2rem 0;
+}
+
+.stroke-bar-label {
+  font-size: 0.8rem;
+  color: var(--mist);
+  font-weight: 600;
+}
+
+.stroke-bar-track-wrap {
+  width: 100%;
+  height: 14px;
+  background: rgba(6, 16, 24, 0.35);
+  border: 1px solid var(--line);
+}
+
+.stroke-bar-track {
+  display: flex;
+  height: 100%;
+  min-width: 12%;
+}
+
+.stroke-bar-seg.white {
+  background: rgba(232, 241, 244, 0.12);
+}
+
+.stroke-bar-seg.immersed {
+  background: linear-gradient(
+    90deg,
+    rgba(58, 155, 176, 0.55),
+    rgba(58, 155, 176, 0.85)
+  );
+}
+
+.stroke-bar-stack {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.stroke-bar-legend {
+  font-size: 0.78rem;
+  margin: 0 0 0.4rem;
+}
+
+/* Team 4 quadrants (brief §5) */
+.team-quad {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(160px, 1fr) minmax(160px, 1fr);
+  gap: 0.65rem;
+  min-height: 52vh;
+}
+
+@media (max-width: 700px) {
+  .team-quad {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    min-height: unset;
+  }
+}
+
+.team-quad-cell {
+  display: grid;
+  align-content: start;
+  gap: 0.35rem;
+  padding: 0.65rem 0.75rem;
+  background: rgba(6, 16, 24, 0.45);
+  border-bottom: 3px solid rgba(58, 155, 176, 0.45);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.team-quad-cell h3 {
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mist);
+  font-weight: 600;
+}
+
+.team-quad-digits {
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 0.6rem;
+  min-height: 140px;
+}
+
+.team-quad-digits .team-metric-value {
+  font-size: clamp(2.4rem, 8vw, 3.8rem);
+}
+
 /* --- Surface Produit / Team cockpit --- */
 
 .product-shell .banner code {
