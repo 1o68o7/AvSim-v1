@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .body import BodyModel, smootherstep, _clip
+from .body import BodyModel, smootherstep
 from .forces import aero_drag, blade_force, hull_drag, rho_air, rho_water, nu_water
 from .geometry import blade_position, handle_position, moment_z
 
@@ -103,6 +103,8 @@ class Crew:
         self.body = BodyModel(P)
         self.T = 60.0 / P["technique"]["rate_spm"]
         self.ramp = float(P["technique"]["blade_ramp_s"])
+        self.catch_slip = np.radians(float(P["technique"].get("catch_slip_deg", 3.0)))
+        self.leave_deg = float(P["technique"].get("leave_deg", 25.0))
         self.offsets = np.asarray(P["crew"]["phase_offset_ms"], float) / 1000.0
         self.masses = np.asarray(P["crew"]["mass_kg"], float)
         self.n = len(self.masses)
@@ -202,20 +204,20 @@ class Crew:
     def _immersion(self, i, t, th):
         """Immersion [0,1] pendant la propulsion (brief §3.6).
 
-        Entree : rampe temporelle sur blade_ramp_s depuis l'attaque.
-        Sortie : rampe temporelle symetrique approchee via la proximite
-        angulaire du degage (theta_finish) — pas de dependance a une
-        fraction d'arc d'entree.
+        Entree : Catch Slip angulaire (Kleshnev) — pleine immersion ≈3°
+        apres l'attaque, pas une rampe temporelle arbitraire.
+        Sortie : proximite angulaire du degage (fenetre leave, defaut 25°).
         """
         if self.mode[i] != self.MODE_DRIVE:
             return 0.0
-        r = max(self.ramp, 1e-6)
-        t_since = max(t - self.t_catch[i], 0.0)
-        enter_t = float(smootherstep(t_since / r))
-        # Sortie progressive vers theta_finish (fenetre ~25 deg, lissage).
-        leave = float(smootherstep((th - self.theta_finish) / max(
-            np.radians(25.0), 1e-6)))
-        return enter_t * leave
+        enter = float(smootherstep(
+            (self.theta_catch - th) / max(self.catch_slip, 1e-6)))
+        if self.leave_deg <= 0.0:
+            leave = 1.0
+        else:
+            leave = float(smootherstep((th - self.theta_finish) / max(
+                np.radians(self.leave_deg), 1e-6)))
+        return enter * leave
 
     def oar_accelerations(self, t, V, th, w, rho_w):
         """theta'' et efforts associes pour tous les postes."""

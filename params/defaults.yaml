@@ -71,7 +71,11 @@ technique:
   rec_slide_skew:   {v: 1.00,  min: 0.60,  max: 1.80,  src: E}   # >1 = coulisse precipitee
   angvel_skew:      {v: 0.42,  min: 0.30,  max: 0.55,  src: E}   # position du pic de vitesse angulaire
   kin_harmonics:    {v: 8,      min: 5,     max: 14,    src: E}   # bande passante corporelle
-  blade_ramp_s:     {v: 0.020, min: 0.010, max: 0.035, src: E}   # entree/sortie de palette
+  blade_ramp_s:     {v: 0.020, min: 0.010, max: 0.035, src: E}   # legacy temporel (non utilise)
+  # Catch Slip : angle attaque → pleine immersion (Kleshnev / BioRow ≈3°).
+  catch_slip_deg:   {v: 3.0,   min: 2.0,   max: 8.0,   src: L}
+  # Fenetre angulaire de sortie de palette vers theta_finish (a valider).
+  leave_deg:        {v: 25.0,  min: 0.0,   max: 40.0,  src: E}
   # Profil F_h(u), u = fraction d'arc (theta_catch → theta_finish), pas le temps.
   # Sources forme : Kleshnev / BioRow ; Nolte (ed.), Rowing Faster 2e ed., Table 9.2 ;
   #                 Cerne et al. 2013 (timing relatif du pic et plateau >70 %).
