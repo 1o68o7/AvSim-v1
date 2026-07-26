@@ -31,18 +31,24 @@ Tout ce qui suit a été résolu au fil de la session, chacun avec une source :
 `tests/conftest.py` : `boat_class` ∈ {`8+`, `1x`} → `load_params(boat_class=)`.
 Plus de `load_params()` nu dans les tests de physique.
 
-**Compte réel** (`pytest tests/ -v`, 2026-07-26) : **29 passed, 1 failed,
-1 skipped** (31 collected).
+**Compte réel** (`pytest tests/ -v`, après fix bilan aviron) : **30 passed,
+1 skipped** (31 collected) sur **8+ et 1x**.
 
 | Résultat | Test |
 |---|---|
-| FAILED | `test_rower_work_equals_losses[8+]` — résidu **2,60 %** (seuil 1 %) avec `I_oar=6,16` |
 | SKIPPED | `test_phase_offset_actually_shifts_seat[1x]` — `n_rowers < 2` |
-| PASSED | tout le reste sur **8+ et 1x**, y compris `test_rower_work_equals_losses[1x]` |
+| PASSED | tout le reste, y compris `test_rower_work_equals_losses[8+]` et `[1x]` |
 
-Le résidu 8+ (~220 J/coup) n'est **pas** Δ(½ I ω²) (~1 J). Écart
-`E_rower − E_oar_identity` du même ordre — à diagnostiquer avant toute
-retouche `k_drag` / `CdA` / `F_peak`.
+### Diagnostic résidu ~220 J (résolu)
+
+Le terme `½ I ω²` n'était **pas** des deux côtés du bilan :
+- **Propulsion** : `E_rower` via `-L_in F ω` inclut le travail qui accélère l'aviron
+- **Dégagé** : clamp `w_at_finish ∈ [-0,6 ; 0,2]` détruit ~200 J (8+, I=6,16) hors intégrale
+- **Retour** : Hermite avec `F_pull=0` → puissance contrainte `I α ω` absente de `E_rower`
+
+Correction : puissance retour `I α ω` dans `handle_power` ; sauts de KE
+(`E_oar_ke_jump_J`) déduits de `E_rower_J`. Identité aviron sur α dynamique
+(plus `np.gradient`). Clamp Hermite **conservé** (sans lui le 1x diverge).
 
 ## Point ouvert — le vrai sujet de la suite
 

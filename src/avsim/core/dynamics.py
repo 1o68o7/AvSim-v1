@@ -372,6 +372,7 @@ class Crew:
             "foot": F_foot,
             "immersion": info["immersion"],
             "fx": fx, "fy": fy, "p_loss": info["p_loss"],
+            "thdd": thdd,
         }
 
     # --------------------------------------------------------------- events API
@@ -385,6 +386,10 @@ class Crew:
         self.mode[i] = self.MODE_RECOVERY
         self.t_finish[i] = t
         self.th_at_finish[i] = float(min(th, self.theta_finish))
+        # Hermite amorce a omega borne : sans plafond, |ω|~3 rad/s au degage
+        # produit un retour trop violent (COM) et casse le regime 1x. Le saut
+        # de 1/2 I ω^2 correspondant est comptabilise dans Stroke.energy()
+        # (E_oar_ke_jump_J) et retire de E_rower_J pour fermer le bilan.
         self.w_at_finish[i] = max(-0.6, min(0.2, float(w)))
         # Cible Hermite = (theta_catch, 0) — brief §4.4 ; pas d'accrochage V.
         self.w_catch_target[i] = 0.0

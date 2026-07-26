@@ -37,6 +37,7 @@ class Stroke:
     m_total: float
     handle_power: np.ndarray
     oar_power_identity: np.ndarray  # diagnostic seul — pas un substitut de E_rower
+    I_oar: float
 
     def drive_mask(self) -> np.ndarray:
         return self.immersion[0] > 0.5
@@ -47,8 +48,21 @@ class Stroke:
         E_hull = np.trapezoid(self.D_hull * self.V, t)
         E_aero = np.trapezoid(self.D_aero * self.V, t)
         E_blade_loss = np.trapezoid(self.P_blade_loss.sum(axis=0), t)
-        E_handle = np.trapezoid(self.handle_power.sum(axis=0), t)
-        E_id = np.trapezoid(self.oar_power_identity, t)
+        E_handle = float(np.trapezoid(self.handle_power.sum(axis=0), t))
+        E_id = float(np.trapezoid(self.oar_power_identity, t))
+        # Sauts discrets de Σ 1/2 I ω_i^2 (clamp w_at_finish au degage,
+        # omega=0 a l'attaque) : energie retiree hors puissance continue.
+        # Deduit de E_rower pour fermer rameur = pertes + dEk.
+        Ke = 0.5 * float(self.I_oar) * (self.theta_dot ** 2).sum(axis=0)
+        dKe = np.diff(Ke)
+        n_seats = self.handle_force.shape[0]
+        # Sauts de contrainte (clamp w_at_finish, omega=0 a l'attaque).
+        # Seuil ~ 1/2 I n (equiv. Δ(ω²)=1) : au-dessus des pas Hermite
+        # continus, en-dessous du clamp degage (~ ω=3 → 0,6).
+        thr = max(5.0, 0.5 * float(self.I_oar) * n_seats)
+        jump_drops = np.clip(-dKe - thr, 0.0, None)
+        E_ke_jump = float(jump_drops.sum())
+        E_rower = E_handle - E_ke_jump
         dEk = E_prop - E_hull - E_aero
         T = t[-1] - t[0]
         eta = E_prop / (E_prop + E_blade_loss) if (E_prop + E_blade_loss) > 0 else np.nan
@@ -57,11 +71,12 @@ class Stroke:
             "E_hull_drag_J": float(E_hull),
             "E_aero_J": float(E_aero),
             "E_blade_loss_J": float(E_blade_loss),
-            "E_rower_J": float(E_handle),
-            "E_oar_identity_J": float(E_id),  # diagnostic, jamais substitut
+            "E_rower_J": float(E_rower),
+            "E_oar_identity_J": float(E_id),
+            "E_oar_ke_jump_J": float(E_ke_jump),
             "dE_kinetic_J": float(dEk),
             "eta_blade": float(eta),
-            "P_rower_mean_W": float(E_handle / T / self.handle_force.shape[0]),
+            "P_rower_mean_W": float(E_rower / T / n_seats),
             "v_mean_ms": float(self.V.mean()),
             "v_min_ms": float(self.V.min()),
             "v_max_ms": float(self.V.max()),
@@ -124,6 +139,7 @@ class Result:
                 c.t_next_catch[i] = c.t_catch[i] + c.T
                 c.t_finish[i] = np.nan
 
+            thdd = np.zeros((n, nt))
             for k in range(nt):
                 for i in range(n):
                     prev = int(modes[i, k - 1]) if k > 0 else int(modes[i, 0])
@@ -134,9 +150,12 @@ class Result:
                         c.t_next_catch[i] = c.t_catch[i] + c.T
                         c.t_finish[i] = np.nan
                     elif cur == c.MODE_RECOVERY and (k == 0 or prev == c.MODE_DRIVE):
-                        c.t_finish[i] = float(t[k])
-                        c.th_at_finish[i] = float(th[i, k])
-                        c.w_at_finish[i] = float(w[i, k])
+                        # Meme ancrage que begin_recovery (clamp omega inclus) :
+                        # le sample propulsion precedent, pas le point deja snappe.
+                        k_fin = k - 1 if k > 0 else k
+                        c.t_finish[i] = float(t[k_fin])
+                        c.th_at_finish[i] = float(min(th[i, k_fin], c.theta_finish))
+                        c.w_at_finish[i] = max(-0.6, min(0.2, float(w[i, k_fin])))
 
                 info = c.internal_forces(
                     float(t[k]), float(V[k]), th[:, k], w[:, k], rho_w)
@@ -146,6 +165,7 @@ class Result:
                 F_handle[:, k] = info["handle"]
                 pin_n[:, k] = info["pin_normal"]
                 foot[:, k] = info["foot"]
+                thdd[:, k] = info["thdd"]
                 x_h = handle_position(th[:, k], c.L_in)[0]
                 u = c.body.handle_progress(x_h)
                 for i in range(n):
@@ -160,18 +180,18 @@ class Result:
         V_g = V + e["current_ms"]
         D_a, _ = aero_drag(V_g, self.P, rho_a, e["wind_axial_ms"])
 
-        # Puissance rameur independante — travail a la poignee sur l'aviron.
-        # Avec Q_poignee = -L_in * F_pull (dynamics), P_i = Q_i * omega_i
-        #   = -L_in * F_handle_i * omega_i.
-        # Equivalent a F·v_poignee relatif au pin (referentiel coque).
-        # Note : le F·v referentiel-eau de session 1 (vhx = V - L cos ω, …)
-        # avec F_handle traction-positive ajoute un terme -F·V et inverse le
-        # signe du travail rotatif ; ce n'est plus coherent avec Q = -L_in F.
-        # Ne jamais substituer par l'identite Iθ''ω+F_prop V+P_blade (circulaire).
+        # Puissance rameur independante.
+        # Propulsion : Q_poignee = -L_in * F_pull ⇒ P = -L_in * F_handle * ω.
+        # Retour : F_pull=0 (cinematique Hermite) mais le couple requis pour
+        # suivre α_Hermite est Q = I_oar·α (M_palette=0) ⇒ P = I_oar·α·ω.
+        # Sans ce terme, Δ(½ I ω²) accumulee en propulsion (~220 J a I=6,16)
+        # disparait du bilan au degage / pendant le retour.
         p_handle = -c.L_in * F_handle * w
+        for i in range(n):
+            rec = modes[i] == c.MODE_RECOVERY
+            p_handle[i, rec] = c.I_oar * thdd[i, rec] * w[i, rec]
 
-        # Diagnostic seul : identite de l'aviron (ne remplace pas E_rower)
-        thdd = np.gradient(w, t, axis=1)
+        # Diagnostic : identite aviron avec α dynamique (pas np.gradient).
         p_identity = (
             (c.I_oar * thdd * w).sum(axis=0)
             + fx.sum(axis=0) * V
@@ -185,7 +205,7 @@ class Result:
             handle_force=F_handle, pin_force=pin_n, foot_force=foot,
             com_rel=com_w, immersion=imm, D_hull=D_h, D_aero=D_a,
             m_total=c.m_boat + c.M, handle_power=p_handle,
-            oar_power_identity=p_identity)
+            oar_power_identity=p_identity, I_oar=float(c.I_oar))
 
 
 def _snap_recovery(crew: Crew, t: float, y: np.ndarray) -> np.ndarray:
