@@ -56,7 +56,37 @@ Correction : puissance retour `I α ω` dans `handle_power` ; sauts de KE
 `check_factor` pas encore dans les fourchettes du brief. `F_peak` retenu au-dessus
 de la plage sourcée en est le symptôme le plus probable — piste à creuser :
 `I_oar`, coefficient de traînée, ou pertes de palette surestimés quelque part
-dans le bilan. Pas encore diagnostiqué.
+dans le bilan.
+
+### η_blade ≈ 0,62 — écart réel (définition OK, 2026-07-26)
+
+Cible brief §9.2 « Rendement de palette | 0,75 – 0,85 » : **pas de citation
+inline** dans le tableau. Provenance la plus proche, déjà dans le corpus
+Kleshnev du projet : *Kleshnev, Rowing Biomechanics (2006), §« Propulsion and
+blade efficiency », Table 3* (AIS, 1470 crew-samples 1998–2005) — 8+ ≈ **81,4 %**,
+événements olympiques ≈ 78–87 %. Cohérent avec §4.1 (« 0,80 ») et
+« part pertes palette 15–25 % » (= 1−η).
+
+**Définition Kleshnev** : *propulsive efficiency of the blade* =
+`P_propulsive / P_handle`, avec `P_propulsive + P_waste = P_handle` ;
+`P_waste = F_blade · v_blade` (eau) ; `v_blade` dérivé angle + **vitesse bateau**
+(Affeld 1993 / Kleshnev 1999).
+
+**Définition code** (`Stroke.energy`) :
+`eta_blade = E_prop / (E_prop + E_blade_loss)` avec
+`E_prop = ∫ F_prop·V dt`, `E_blade_loss = ∫ −(F·v_rel) dt`, intégrale coup
+complet (pertes quasi nulles hors drive).
+
+**Les deux définitions correspondent** (à ~1 pt près : sur le drive,
+`1 − E_loss/E_handle ≈ 0,63` vs `eta_blade ≈ 0,62` ; le petit écart = Δ(½Iω²)
+aviron). Exclure catch/leave (`imm>0,95`) ne remonte qu’à ≈0,66 — **ne ferme
+pas** l’écart vers 0,75–0,85.
+
+Donc **η≈0,62 est un écart physique réel**, pas un artefact de définition.
+Mécanisme localisé (diagnostic α) : dégradation `C_D/C_L` sur
+**`u ∈ [0,22 ; 0,52]`** (≈55 % de `E_blade_loss`). **Non résolu** — aucun
+paramètre YAML modifié. Pas de knob d’efficacité libre (Caplan + géométrie
+sourcée).
 
 **Pas encore vérifié** : le repère angulaire de Kleshnev (glissement ≈3° après
 l'attaque) n'a pas été confronté directement — `blade_normal_speed` (0,94-1,04 m/s)
@@ -68,7 +98,7 @@ est encourageant mais mesure autre chose que ce repère précis.
 |---|---|---|
 | v_mean | ~4,87–5,05 | 5,78–6,78 (`v_ref=6,28` ±8 %) |
 | P_rower | ~620 W | 420–540 |
-| η_blade | ~0,63 | 0,75–0,85 |
+| η_blade | **~0,62** (écart réel, déf. OK) | 0,75–0,85 |
 | part hydro | ~47 % | 70–80 |
 | part blade | ~48 % | 15–25 |
 | part aero | ~4,5 % | 5–10 |
