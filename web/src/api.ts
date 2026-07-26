@@ -179,6 +179,58 @@ export type CompareResult = {
   event: CoachEvent;
 };
 
+export type RameurStrokeCurve = {
+  stroke_index: number;
+  t_s: number[];
+  handle_force_N: number[];
+  F_peak_N: number;
+  t_peak_s: number;
+  phase_lag_ms_vs_stroke: number;
+  P_mean_W: number;
+  cadence_spm: number;
+};
+
+export type RameurReview = {
+  source: "simulated";
+  boat_class: string;
+  seat: number;
+  stroke_seat: number;
+  reference_label: string;
+  n_prev: number;
+  strokes: RameurStrokeCurve[];
+  last_phase_lag_ms: number | null;
+  last_P_mean_W: number | null;
+  power_calibration: { status: "indice"; message: string };
+  boat: { n_rowers: number; sculling: boolean; coxed: boolean };
+  validation: ClassInfo;
+  session_id?: string | null;
+  haptic_events: CoachEvent[];
+};
+
+export type ProgressionResult = {
+  source: "simulated";
+  boat_class: string;
+  metric: string;
+  metric_badge: "indice";
+  points: Array<{
+    session_id: string;
+    t_start_utc: string;
+    n_strokes: number;
+    cadence_spm_mean: number;
+    P_mean_W: number;
+  }>;
+  trend: {
+    n_sessions: number;
+    cadence_anchor_spm: number;
+    cadence_tol_spm: number;
+    P_first_W: number;
+    P_last_W: number;
+    delta_W: number;
+    direction: "up" | "down" | "flat";
+  } | null;
+  note: string;
+};
+
 /** SSE `/api/replay/stream` — fetch+stream (EventSource ne peut pas poser le rôle). */
 export async function openReplayStream(
   role: Role,
@@ -332,5 +384,29 @@ export const api = {
       role,
       `/api/sessions/${encodeURIComponent(sessionId)}/compare?${q}`,
     );
+  },
+  rameurReview: (
+    role: Role,
+    opts: {
+      boat_class?: string;
+      seat?: number;
+      n_prev?: number;
+      session_id?: string | null;
+    } = {},
+  ) => {
+    const q = new URLSearchParams({
+      boat_class: opts.boat_class ?? "2x",
+      seat: String(opts.seat ?? 1),
+      n_prev: String(opts.n_prev ?? 10),
+    });
+    if (opts.session_id) q.set("session_id", opts.session_id);
+    return request<RameurReview>(role, `/api/rameur/review?${q}`);
+  },
+  rameurProgression: (role: Role, boat_class = "2x", cadence_tol_spm = 2) => {
+    const q = new URLSearchParams({
+      boat_class,
+      cadence_tol_spm: String(cadence_tol_spm),
+    });
+    return request<ProgressionResult>(role, `/api/rameur/progression?${q}`);
   },
 };

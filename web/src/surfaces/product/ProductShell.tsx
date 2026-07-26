@@ -5,6 +5,8 @@ import { useApp } from "../../state";
 export { TeamView } from "./TeamView";
 export { CoachLiveView } from "./CoachLiveView";
 export { CoachReplayView } from "./CoachReplayView";
+export { RameurView } from "./RameurView";
+export { RameurView as RowerView } from "./RameurView";
 
 const links = [
   { to: "/product/rameur", label: "Rameur" },
@@ -51,25 +53,3 @@ export function ProductShell() {
   );
 }
 
-export function RowerView() {
-  return (
-    <div className="panel">
-      <h2>Rameur</h2>
-      <p className="muted">
-        Calibration haptique coup+1 + écran minimal (cadence, distance, timing).
-        Prototypage via rejeu simulé.
-      </p>
-      <div
-        style={{
-          marginTop: "1rem",
-          padding: "2rem",
-          textAlign: "center",
-          border: "1px dashed rgba(232,241,244,0.25)",
-          borderRadius: 6,
-        }}
-      >
-        En attente du branchement rejeu
-      </div>
-    </div>
-  );
-}

@@ -140,6 +140,12 @@ button.ghost {
   color: #f0c27a;
   background: rgba(154, 91, 26, 0.3);
 }
+/* Calibration puissance (D3) — ne pas confondre avec Simulé/Mesuré */
+.badge.indice {
+  color: #e0c48a;
+  background: rgba(180, 130, 40, 0.28);
+  border-style: dashed;
+}
 
 .app-shell {
   max-width: 1200px;
