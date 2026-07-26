@@ -177,11 +177,21 @@ Chantiers diagnostic §9.2 / η, check_factor (largeur) **et**
 power_instantaneous (F_peak) **clos** — trois limites documentées, pas
 de nouvelle correction physique sur ces leviers.
 
-**Phase 7 démarrée** (brief `docs/brief-interface-utilisateur.md`) : API
-FastAPI + UI React (surfaces Analyste 🟢 / Produit maquette). Badges
-Simulé + Validée/Bêta par classe. Phase 1 (`test_plausibility` /
-`test_class_scaling`) reste en dette — les 6 classes bêta ne sont pas
-présentées à égalité avec 8+/1x.
+### Constat envelope Phase 5 (mesure, pas un chantier)
+
+Gate `is_admissible(..., ignore_known_1dof_limits=True)` — η et
+`power_instantaneous` exclus : **7/8 classes encore rejetées** ; seule
+**2x** passe. REJECT restants (non diagnostiqués) :
+`blade_slip` 4/8, `power_mean` 4/8, `froude` 3/8, `slide_speed_peak` 1/8.
+
+**Décision** : on **ne** ouvre **pas** de diagnostic sur ces quatre règles
+maintenant. Priorité basculée sur la **Surface Produit** (rejeu temps
+réel → vue Team). Les REJECT restants restent visibles / documentés ;
+ils ne bloquent pas le prototype d'affichage.
+
+**Phase 7** (brief `docs/brief-interface-utilisateur.md`) : API FastAPI +
+UI React (Analyste 🟢 / Produit). Badges Simulé + Validée/Bêta. Phase 1
+reste en dette — les 6 classes bêta ne sont pas à égalité avec 8+/1x.
 
 ```
 pip install -e '.[api]' --break-system-packages

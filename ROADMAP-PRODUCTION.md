@@ -75,8 +75,8 @@ Brief UI : `docs/brief-interface-utilisateur.md`.
 | API FastAPI (`/classes`, `/params`, `/validate`, `/simulate`, rôles) | **démarré** |
 | UI Analyste 🟢 Bateau / Coup / Bilan / Équipage | **démarré** |
 | UI Analyste 🟡 Capteurs / Observabilité / … | maquettes |
-| Surface Produit (rejeu) | maquettes (replay CLI pas encore codé) |
-| CLI `avsim` | pas commencé |
+| Surface Produit (rejeu) | **Team** branchée sur SSE `/api/replay/stream` (2x) ; autres vues maquettes |
+| CLI `avsim` | `run` + `replay --realtime` (NDJSON coup à cadence T) |
 
 Note : Phase 1 (plausibility / scaling) reste ouverte ; l'UI marque les 6
 classes smoke-only en **Bêta — non calibrée**.

@@ -321,3 +321,91 @@ table.data td {
     background-position: -100% 0;
   }
 }
+
+/* --- Surface Produit / Team cockpit --- */
+
+.product-shell .banner code {
+  font-size: 0.85em;
+}
+
+.team-cockpit {
+  display: grid;
+  gap: 1.5rem;
+  padding: 0.5rem 0 1rem;
+}
+
+.team-cockpit-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.team-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  min-height: 40vh;
+  align-items: stretch;
+}
+
+@media (max-width: 700px) {
+  .team-metrics {
+    grid-template-columns: 1fr;
+    min-height: unset;
+  }
+}
+
+.team-metric {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 0.15rem;
+  padding: 1.25rem 0.5rem;
+  background: rgba(6, 16, 24, 0.45);
+  border-bottom: 3px solid rgba(58, 155, 176, 0.55);
+  animation: team-in 280ms ease-out;
+}
+
+.team-metric-label {
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mist);
+  font-weight: 600;
+}
+
+.team-metric-value {
+  font-family: var(--font-display);
+  font-size: clamp(3.2rem, 11vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  color: var(--foam);
+  transition: opacity 180ms ease;
+}
+
+.team-metric-unit {
+  font-size: 1rem;
+  color: var(--water-light);
+  font-weight: 600;
+}
+
+.team-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+@keyframes team-in {
+  from {
+    opacity: 0.35;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

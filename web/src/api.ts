@@ -102,6 +102,85 @@ export type SimulateResult = {
   };
 };
 
+export type ReplayFrame =
+  | {
+      kind: "session";
+      source: "simulated";
+      boat_class: string;
+      n_strokes: number;
+      n_discard: number;
+      n_keep: number;
+      validation: ClassInfo;
+    }
+  | {
+      kind: "stroke";
+      source: "simulated";
+      boat_class: string;
+      stroke_index: number;
+      T_s: number;
+      cadence_spm: number;
+      v_ms: number;
+      distance_m: number;
+      energy: Record<string, number>;
+      series: { t_s: number[]; V_ms: number[] };
+    }
+  | { kind: "end"; source: "simulated" };
+
+/** SSE `/api/replay/stream` — fetch+stream (EventSource ne peut pas poser le rôle). */
+export async function openReplayStream(
+  role: Role,
+  opts: {
+    boat_class?: string;
+    n_strokes?: number;
+    n_discard?: number;
+    realtime?: boolean;
+    signal?: AbortSignal;
+    onFrame: (frame: ReplayFrame) => void;
+  },
+): Promise<void> {
+  const q = new URLSearchParams();
+  q.set("boat_class", opts.boat_class ?? "2x");
+  if (opts.n_strokes != null) q.set("n_strokes", String(opts.n_strokes));
+  if (opts.n_discard != null) q.set("n_discard", String(opts.n_discard));
+  if (opts.realtime != null) q.set("realtime", String(opts.realtime));
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/api/replay/stream?${q}`, {
+      headers: { "X-DataR0w-Role": role },
+      signal: opts.signal,
+    });
+  } catch (e) {
+    if ((e as Error).name === "AbortError") return;
+    throw new ApiError(0, "Réseau indisponible — API non joignable");
+  }
+  if (!res.ok) {
+    throw new ApiError(res.status, res.statusText || "replay stream failed");
+  }
+  if (!res.body) {
+    throw new ApiError(0, "Pas de corps de flux SSE");
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    let sep: number;
+    while ((sep = buf.indexOf("\n\n")) >= 0) {
+      const block = buf.slice(0, sep);
+      buf = buf.slice(sep + 2);
+      for (const line of block.split("\n")) {
+        if (line.startsWith("data: ")) {
+          opts.onFrame(JSON.parse(line.slice(6)) as ReplayFrame);
+        }
+      }
+    }
+  }
+}
+
 export const api = {
   classes: (role: Role) =>
     request<{ classes: ClassInfo[] }>(role, "/api/classes"),

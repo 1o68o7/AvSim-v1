@@ -1,12 +1,16 @@
 """Application FastAPI — brief interface utilisateur §1 / brief-simulateur §10."""
 from __future__ import annotations
 
+import asyncio
 import copy
+import json
+import time
 from typing import Any
 
 import numpy as np
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from avsim.core.catalog import (
@@ -19,6 +23,7 @@ from avsim.core.catalog import (
 )
 from avsim.core.params import load_class
 from avsim.core.solver import simulate
+from avsim.io.replay import stroke_distance_m, stroke_frame
 
 from .roles import Role, analyst_only, require_role
 
@@ -232,6 +237,82 @@ def jobs_sweep(role: Role = Depends(require_role)):
     raise HTTPException(
         501,
         "Mode sweep / Sobol non implémenté — Phase 5 (analysis/). Maquette UI seulement.",
+    )
+
+
+def _json_default(obj: Any) -> Any:
+    if isinstance(obj, (np.floating, np.integer)):
+        return obj.item()
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    raise TypeError(f"non JSON-serialisable : {type(obj)}")
+
+
+@app.get("/api/replay/stream")
+async def replay_stream(
+    boat_class: str = Query("2x", description="Classe à rejouer (défaut 2x)"),
+    n_strokes: int = Query(12, ge=2, le=40),
+    n_discard: int = Query(4, ge=1, le=20),
+    realtime: bool = Query(
+        True,
+        description="Cadencer chaque coup à T (stroke_period) — false pour tests",
+    ),
+    role: Role = Depends(require_role),
+):
+    """SSE — même trames NDJSON que `avsim replay --realtime`.
+
+    Unidirectionnel → SSE (pas WebSocket). `source=simulated` sur chaque
+    événement. Surface Produit / vue Team.
+    """
+    _ = role  # les deux rôles ; badge Simulé côté client obligatoire
+    try:
+        P = load_class(boat_class)
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    P = copy.deepcopy(P)
+    P["numerics"]["n_strokes"] = int(n_strokes)
+    P["numerics"]["n_discard"] = int(n_discard)
+
+    async def event_gen():
+        # simulate() est CPU-bound — hors boucle événementielle
+        res = await asyncio.to_thread(simulate, P)
+        session = {
+            "kind": "session",
+            "source": "simulated",
+            "boat_class": boat_class,
+            "n_strokes": int(n_strokes),
+            "n_discard": int(n_discard),
+            "n_keep": int(res.n_keep),
+            "validation": class_validation_status(boat_class),
+        }
+        yield f"data: {json.dumps(session, default=_json_default)}\n\n"
+
+        distance = 0.0
+        for i in range(res.n_keep):
+            t0 = time.perf_counter()
+            st = res.stroke(i)
+            distance += stroke_distance_m(st)
+            frame = stroke_frame(
+                st,
+                boat_class=boat_class,
+                stroke_index=i,
+                distance_m=distance,
+            )
+            yield f"data: {json.dumps(frame, default=_json_default)}\n\n"
+            if realtime:
+                delay = float(frame["T_s"]) - (time.perf_counter() - t0)
+                if delay > 0:
+                    await asyncio.sleep(delay)
+        yield f"data: {json.dumps({'kind': 'end', 'source': 'simulated'})}\n\n"
+
+    return StreamingResponse(
+        event_gen(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
     )
 
 
