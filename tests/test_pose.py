@@ -33,6 +33,20 @@ def test_pose_handle_matches_oar_geometry_8plus():
     assert p1["theta_deg"] < p["theta_deg"]
 
 
+@pytest.mark.parametrize("code", ("2x", "8+"))
+@pytest.mark.parametrize("u", (0.0, 0.25, 0.5, 0.75, 1.0))
+def test_oar_handle_pin_blade_colinear_same_z(code, u):
+    """Tige rigide : poignée, pivot, palette strictement même z (vue sagittale)."""
+    p = pose_at_u(code, u)
+    zh = p["oar"]["handle"]["z"]
+    zp = p["oar"]["pin"]["z"]
+    zb = p["oar"]["blade"]["z"]
+    assert abs(zh - zp) < 1e-12
+    assert abs(zb - zp) < 1e-12
+    assert "immersion" in p["oar"]
+    assert 0.0 <= p["oar"]["immersion"] <= 1.0
+
+
 def test_pose_series_length():
     s = pose_series("1x", n=11)
     assert len(s["frames"]) == 11

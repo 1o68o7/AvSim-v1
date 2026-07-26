@@ -76,9 +76,11 @@ def pose_at_u(
     x_head = x_hip + 1.05 * body.L_trunk * float(np.sin(phi))
     z_head = z_hip + 1.05 * body.L_trunk * float(np.cos(phi))
 
-    # Palette : x = L_out·sinθ (noyau) ; z = immersion visuelle (hors modèle 2D)
+    # Aviron = tige rigide colinéaire (comme vue-sagittale-rameur-aviron.svg) :
+    # même z pour poignée / pivot / palette ; seul x varie avec θ.
+    # L'immersion n'entre PAS dans la ligne de l'aviron — indicateur séparé.
     immerse = 1.0 if drive else 0.0
-    z_blade = -0.08 * immerse - 0.02 * max(0.0, 1.0 - abs(float(np.cos(theta))))
+    z_blade = z_pin
 
     hull_len = float(P["boat"].get("loa_m", 10.0))
     bow = 0.45 * hull_len
@@ -107,6 +109,8 @@ def pose_at_u(
             "blade": {"x": float(x_b), "y": float(y_b), "z": z_blade},
             "L_in_m": float(rig["L_in_m"]),
             "L_out_m": float(rig["L_out_m"]),
+            # Indicateur visuel distinct (pas une cote de la tige).
+            "immersion": float(immerse),
         },
         "hull": {
             "bow_x": bow,
