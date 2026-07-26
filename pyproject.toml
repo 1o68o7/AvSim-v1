@@ -7,6 +7,9 @@ dependencies = ["numpy", "scipy", "pandas", "pyyaml"]
 [project.optional-dependencies]
 api = ["fastapi", "uvicorn[standard]", "pydantic", "httpx"]
 
+[project.scripts]
+avsim = "avsim.cli:main"
+
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"

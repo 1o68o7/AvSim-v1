@@ -50,7 +50,20 @@ Correction : puissance retour `I α ω` dans `handle_power` ; sauts de KE
 (`E_oar_ke_jump_J`) déduits de `E_rower_J`. Identité aviron sur α dynamique
 (plus `np.gradient`). Clamp Hermite **conservé** (sans lui le 1x diverge).
 
-## Point ouvert — chantier §9.2 / η clos (diagnostic)
+## Limites connues du modèle 1DOF (η, check_factor, power_instantaneous)
+
+Écarts **réels et compris** face aux cibles §9.2 / enveloppe — pas des bugs
+de seuil. η et check_factor : `xfail` sur 8+/1x dans
+`tests/test_plausibility.py`, pistes différées dans `ROADMAP-PRODUCTION.md`.
+`power_instantaneous` : butée dure réellement dépassée (reste REJECT),
+conséquence de `F_peak=1100 N` déjà accepté — ne pas reclasser en WARNING.
+Gate Phase 5 : `envelope.is_admissible(..., ignore_known_1dof_limits=True)`
+exclut η + power_instantaneous uniquement (défaut strict inchangé).
+Le modèle reste valide pour comparer des configurations de capteurs
+(l'objectif du projet) ; les lectures absolues (watts, cavalement) sont
+sous-estimées / sur-estimées selon le poste.
+
+### η_blade ≈ 0,62 — chantier §9.2 / η clos (diagnostic)
 
 Les 4 suspects (`I_oar`, `k_drag`, pertes de palette comme knob, arc
 catch/finish) ont été examinés avec diagnostic réel : **3 innocents**, **1
@@ -59,11 +72,51 @@ catch/finish) ont été examinés avec diagnostic réel : **3 innocents**, **1
 de l'incidence de palette pendant le drive (le « aircraft principle »
 documenté au tout début du projet) ; à la différence d'un vrai rameur,
 notre aviron ne corrige pas `α` en temps réel, donc il traverse la zone
-`C_D/C_L` défavorable (`u∈[0,22 ; 0,52]`) sans compensation. Conséquence
-pratique : le modèle reste valide pour comparer des configurations de
-capteurs entre elles (l'objectif du projet), mais sous-estime le rendement
-absolu — à garder en tête pour toute lecture de watts absolus, pas pour
-les comparaisons relatives.
+`C_D/C_L` défavorable (`u∈[0,22 ; 0,52]`) sans compensation.
+
+### check_factor ≈ 3,1–3,2 — levier « largeur » épuisé
+
+Après les correctifs de forme (retour R Kleshnev + transition coulisse,
+cruise jambes/tronc drive), `cf = Vmax_retour − Vmin_drive` reste
+**~3,1–3,2** (cible §9.2 8+ : `[0,50 ; 0,80]`). Mécanisme établi :
+
+- saturations `s''=±25` aux transitions tronc→slide et fin jambes ;
+- **empilement CdM** (tronc + coulisse) grossi par le warp temporel
+  Hermite au carré `(dτ_r/dt)²` — pas une seule fenêtre trop étroite.
+
+Sweep « élargir les blends » (`docs/diag-transition-width.md`) : aucune
+config n'approche `cf ≲ 1,5–2` ; slide reste `|a|~70–80 m/s²` même au
+blend max. **Levier largeur épuisé** — pas de correctif blend appliqué.
+Pistes restantes (autre nature) : désempiler tronc/slide dans l'espace
+CdM, ou revoir le warp Hermite / le rôle du clamp. Voir aussi
+`docs/diag-vmin-drive.md`, `docs/diag-cf-cycle-overview.md`.
+
+### power_instantaneous ≈ 2,1–2,8 kW — conséquence de `F_peak=1100 N`
+
+Butée enveloppe `physio.power_instantaneous` : **1500 W** (REJECT dur).
+Mesure (8 classes) : pic **2146–2796 W** (+646 à +1296), **8/8 REJECT**.
+
+Mécanisme (diagnostic 2026-07-26, rapport seul) :
+
+- pic en **drive**, collé au pic de `F_handle≈1100 N` (Δτ ≤ 0,006), pas
+  au pic de `v_h` (Δτ ≈ 0,20) ;
+- `P = F·v_h` exact (ex. 8+ : 1099 N × 2,54 m/s = 2796 W) ;
+- plateau large (~250–305 ms au-dessus de 1500 W), **pas** un spike
+  clamp/fenêtre ; retour max 841–1060 W sous le seuil.
+
+C'est le **même symptôme déjà accepté** : `F_peak=1100 N` est au-dessus
+de la plage eau sourcée (500–700 N, Steinacker/Holt) et reste retenu
+parce qu'aucun cycle viable n'existe dans cette plage (voir sweep
+ci-dessous / point ouvert historique). **Ne pas** rétrograder la règle
+en WARNING — la butée est réellement dépassée ; distinct de η (modèle
+palette) et de cf (WARNING `speed_fluctuation` seulement).
+
+Effets collatéraux du même `F_peak` (indépendants du check P_inst) :
+
+- `physio.power_mean_2000m` REJECT (>600 W) : **4/4 sweep** (P̄≈609–611),
+  0/4 scull (WARNING) — cousin direct de la puissance trop haute ;
+- `mech.froude` REJECT (Fr < 0,40) : 3/8 (8+, 4x, 8x) — `v_mean` encore
+  trop basse vs `L_wl`, pas levé en ignorant P_inst.
 
 ### Notes de clôture (2026-07-26)
 
@@ -114,19 +167,33 @@ l'attaque) — `blade_normal_speed` encourageant mais autre grandeur.
 | part hydro | ~47 % | 70–80 |
 | part blade | ~48 % | 15–25 |
 | part aero | ~4,5 % | 5–10 |
-| check_factor | ~3,7 | 0,50–0,80 |
+| check_factor | **~3,1–3,2** (après fixes forme ; ~3,7 avant) | 0,50–0,80 |
 | slip \|v_n\| moyen | ~2,3 | 0,4–1,4 |
 | steady drift | ~0,02 % | <0,5 % |
 
 ## Suite
 
-Chantier diagnostic §9.2 / η **clos**.
+Chantiers diagnostic §9.2 / η, check_factor (largeur) **et**
+power_instantaneous (F_peak) **clos** — trois limites documentées, pas
+de nouvelle correction physique sur ces leviers.
 
-**Phase 7 démarrée** (brief `docs/brief-interface-utilisateur.md`) : API
-FastAPI + UI React (surfaces Analyste 🟢 / Produit maquette). Badges
-Simulé + Validée/Bêta par classe. Phase 1 (`test_plausibility` /
-`test_class_scaling`) reste en dette — les 6 classes bêta ne sont pas
-présentées à égalité avec 8+/1x.
+### Constat envelope Phase 5 (mesure, pas un chantier)
+
+Gate `is_admissible(..., ignore_known_1dof_limits=True)` — η et
+`power_instantaneous` exclus : **7/8 classes encore rejetées** ; seule
+**2x** passe. REJECT restants (non diagnostiqués) :
+`blade_slip` 4/8, `power_mean` 4/8, `froude` 3/8, `slide_speed_peak` 1/8.
+
+**Décision** : on **ne** ouvre **pas** de diagnostic sur ces quatre règles
+maintenant. Priorité basculée sur la **Surface Produit** (rejeu temps
+réel → Team, Coach live, Coach replay). Les REJECT restants restent
+visibles / documentés ; ils ne bloquent pas le prototype d'affichage.
+Comparaisons avant/après Coach replay : **écart brut seulement** —
+Mode D (Détectabilité) absent, pas de seuil inventé.
+
+**Phase 7** (brief `docs/brief-interface-utilisateur.md`) : API FastAPI +
+UI React (Analyste 🟢 / Produit). Badges Simulé + Validée/Bêta. Phase 1
+reste en dette — les 6 classes bêta ne sont pas à égalité avec 8+/1x.
 
 ```
 pip install -e '.[api]' --break-system-packages

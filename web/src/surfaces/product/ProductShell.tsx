@@ -2,6 +2,10 @@ import { NavLink, Outlet } from "react-router-dom";
 import { StatusBadge } from "../../components/StatusBadge";
 import { useApp } from "../../state";
 
+export { TeamView } from "./TeamView";
+export { CoachLiveView } from "./CoachLiveView";
+export { CoachReplayView } from "./CoachReplayView";
+
 const links = [
   { to: "/product/rameur", label: "Rameur" },
   { to: "/product/team", label: "Team" },
@@ -12,12 +16,12 @@ const links = [
 export function ProductShell() {
   const { setRole } = useApp();
   return (
-    <div className="app-shell">
+    <div className="app-shell product-shell">
       <div className="topbar">
         <div>
           <div className="brand">DataR0w</div>
           <div className="muted">
-            Surface Produit · prototype rejeu · <StatusBadge kind="sim" />
+            Surface Produit · rejeu · <StatusBadge kind="sim" />
           </div>
         </div>
         <button type="button" className="ghost" onClick={() => setRole(null)}>
@@ -25,9 +29,9 @@ export function ProductShell() {
         </button>
       </div>
       <div className="banner info">
-        `avsim replay --realtime` n&apos;est pas encore codé. Ces vues sont
-        constructibles contre le simulateur en mode rejeu — maquettes stables
-        pour la navigation, sans faux flux « Mesuré ».
+        Flux <code>GET /api/replay/stream</code> — même grain que{" "}
+        <code>avsim replay --realtime</code>. Toujours <StatusBadge kind="sim" />
+        , jamais « Mesuré ».
       </div>
       <nav className="nav">
         {links.map((l) => (
@@ -47,17 +51,14 @@ export function ProductShell() {
   );
 }
 
-function ProductPage({
-  title,
-  body,
-}: {
-  title: string;
-  body: string;
-}) {
+export function RowerView() {
   return (
     <div className="panel">
-      <h2>{title}</h2>
-      <p className="muted">{body}</p>
+      <h2>Rameur</h2>
+      <p className="muted">
+        Calibration haptique coup+1 + écran minimal (cadence, distance, timing).
+        Prototypage via rejeu simulé.
+      </p>
       <div
         style={{
           marginTop: "1rem",
@@ -67,44 +68,8 @@ function ProductPage({
           borderRadius: 6,
         }}
       >
-        En attente du mode rejeu temps réel
+        En attente du branchement rejeu
       </div>
     </div>
-  );
-}
-
-export function RowerView() {
-  return (
-    <ProductPage
-      title="Rameur"
-      body="Calibration haptique coup+1 + écran minimal (cadence, distance, timing). Prototypage via rejeu simulé."
-    />
-  );
-}
-
-export function TeamView() {
-  return (
-    <ProductPage
-      title="Team"
-      body="Cockpit embarqué canal A — gros caractères, synchro équipage."
-    />
-  );
-}
-
-export function CoachLiveView() {
-  return (
-    <ProductPage
-      title="Coach live"
-      body="Canal B — multi-métriques + annotation vocale timecodée."
-    />
-  );
-}
-
-export function CoachReplayView() {
-  return (
-    <ProductPage
-      title="Coach Replay"
-      body="Réutilise le composant Vue Coup Analyste + annotations — branché quand le rejeu existe."
-    />
   );
 }

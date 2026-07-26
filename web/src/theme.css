@@ -321,3 +321,182 @@ table.data td {
     background-position: -100% 0;
   }
 }
+
+/* --- Surface Produit / Team cockpit --- */
+
+.product-shell .banner code {
+  font-size: 0.85em;
+}
+
+.team-cockpit {
+  display: grid;
+  gap: 1.5rem;
+  padding: 0.5rem 0 1rem;
+}
+
+.team-cockpit-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.team-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  min-height: 40vh;
+  align-items: stretch;
+}
+
+@media (max-width: 700px) {
+  .team-metrics {
+    grid-template-columns: 1fr;
+    min-height: unset;
+  }
+}
+
+.team-metric {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 0.15rem;
+  padding: 1.25rem 0.5rem;
+  background: rgba(6, 16, 24, 0.45);
+  border-bottom: 3px solid rgba(58, 155, 176, 0.55);
+  animation: team-in 280ms ease-out;
+}
+
+.team-metric-label {
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mist);
+  font-weight: 600;
+}
+
+.team-metric-value {
+  font-family: var(--font-display);
+  font-size: clamp(3.2rem, 11vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  color: var(--foam);
+  transition: opacity 180ms ease;
+}
+
+.team-metric-unit {
+  font-size: 1rem;
+  color: var(--water-light);
+  font-weight: 600;
+}
+
+.team-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+@keyframes team-in {
+  from {
+    opacity: 0.35;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- Coach live / replay --- */
+
+.coach-seat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.65rem;
+}
+
+.coach-seat {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.85rem;
+  background: rgba(6, 16, 24, 0.4);
+}
+
+.coach-seat.alert {
+  border-color: rgba(196, 92, 38, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(196, 92, 38, 0.25);
+}
+
+.coach-seat-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin-bottom: 0.4rem;
+}
+
+.coach-seat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+  color: var(--mist);
+  margin: 0.2rem 0;
+}
+
+.coach-seat-row strong {
+  color: var(--foam);
+  font-variant-numeric: tabular-nums;
+}
+
+.coach-seat-flag {
+  margin-top: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #f0c27a;
+}
+
+.coach-replay-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr;
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .coach-replay-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.event-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+  max-height: 280px;
+  overflow: auto;
+}
+
+.event-chip {
+  width: 100%;
+  text-align: left;
+  display: grid;
+  gap: 0.15rem;
+  background: rgba(6, 16, 24, 0.35);
+  border: 1px solid var(--line);
+}
+
+.event-chip.active {
+  border-color: rgba(58, 155, 176, 0.75);
+  background: rgba(18, 96, 122, 0.35);
+}
+
+.event-chip-t {
+  font-size: 0.78rem;
+  color: var(--mist);
+  font-variant-numeric: tabular-nums;
+}

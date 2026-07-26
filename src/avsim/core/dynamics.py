@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .body import BodyModel, smootherstep
+from .body import BodyModel, _window_cruise_deriv, smootherstep
 from .forces import aero_drag, blade_force, hull_drag, rho_air, rho_water, nu_water
 from .geometry import blade_position, handle_position, moment_z
 
@@ -180,17 +180,39 @@ class Crew:
 
     # --------------------------------------------------------------- recovery
     def _recovery_state(self, i, t):
-        """theta, omega, alpha prescrits pendant le retour (Hermite §4.4)."""
+        """theta, omega, alpha pendant le retour — croisière C2 (§4.4).
+
+        Remplace le Hermite quintique pur (R≈50 %, triangle) par la même
+        famille `_window_cruise` que les fenêtres siège/tronc. Les courbes
+        mesurees (Kleshnev BioRow n=25658) ont R∈[55 %;70 %] au retour.
+
+        `v0` dérive de `w_at_finish` (clampé) : ω initial négatif ⇒ léger
+        dépassement de theta_finish, comme l'ancien Hermite — requis pour
+        le franchissement discret dégagé.
+        `angvel_skew` (YAML) règle le blend : blend = clip(skew−0,14).
+        """
         t_f = self.t_finish[i]
         t_c = self.t_next_catch[i]
         if not np.isfinite(t_f):
             return self.theta_finish, 0.0, 0.0
         dur = max(t_c - t_f, 1e-4)
         s = max(0.0, min(1.0, (t - t_f) / dur))
-        # Brief §4.4 : arrivee a (theta_catch, omega=0).
-        return quintic_hermite(
-            s, self.th_at_finish[i], self.w_at_finish[i],
-            self.theta_catch, 0.0, dur)
+        th0 = self.th_at_finish[i]
+        th1 = self.theta_catch
+        span = th1 - th0
+        if abs(span) < 1e-12:
+            return th1, 0.0, 0.0
+        skew = float(self.P["technique"].get("angvel_skew", 0.42))
+        # blend ↑ → forme plus triangulaire → R ↓. skew=0,42 → blend=0,28
+        # place R_handle dans 55–70 % (Kleshnev BioRow n=25658).
+        blend = float(np.clip(skew - 0.14, 0.20, 0.34))
+        w0 = float(self.w_at_finish[i])
+        v0_s = w0 * dur / span  # dy/ds
+        y, dy_ds, d2y_ds2 = _window_cruise_deriv(s, blend=blend, v0=v0_s)
+        th = th0 + span * y
+        w = span * dy_ds / dur
+        a = span * d2y_ds2 / (dur * dur)
+        return float(th), float(w), float(a)
 
     # --------------------------------------------------------------- body / COM
     def _com_and_deriv(self, th, w, alpha, drive_mask):

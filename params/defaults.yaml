@@ -69,7 +69,7 @@ technique:
   rec_trunk_fwd:    {v: 0.12,  min: 0.05,  max: 0.35,  src: L}
   rec_slide_start:  {v: 0.30,  min: 0.20,  max: 0.55,  src: L}
   rec_slide_skew:   {v: 1.00,  min: 0.60,  max: 1.80,  src: E}   # >1 = coulisse precipitee
-  angvel_skew:      {v: 0.42,  min: 0.30,  max: 0.55,  src: E}   # position du pic de vitesse angulaire
+  angvel_skew:      {v: 0.42,  min: 0.30,  max: 0.55,  src: E}   # blend croisière retour = skew−0,14
   kin_harmonics:    {v: 8,      min: 5,     max: 14,    src: E}   # bande passante corporelle
   blade_ramp_s:     {v: 0.020, min: 0.010, max: 0.035, src: E}   # legacy temporel (non utilise)
   # Catch Slip : angle attaque → pleine immersion (Kleshnev / BioRow ≈3°).

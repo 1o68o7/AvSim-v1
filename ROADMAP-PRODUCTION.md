@@ -11,7 +11,7 @@ Voir `STATE.md`. `pytest tests/` 16/16, 8+ et 1x.
 
 | Fichier | Brief | Contenu |
 |---|---|---|
-| `tests/test_plausibility.py` | §9.2 | v_mean ±8 % `v_ref`, P/rameur, η, parts bilan, check_factor, slip — **par classe** via `boat_class=` |
+| `tests/test_plausibility.py` | §9.2 | v_mean ±8 % `v_ref`, P/rameur, η, parts bilan, check_factor, slip — **par classe** via `boat_class=` ; η et cf 8+/1x en `xfail` documenté (limites 1DOF) |
 | `tests/test_class_scaling.py` | §2.4 / §9.3 | `k_drag` skiff ∈ [3,0 ; 3,6] ; P/rameur ∈ [420 ; 560] W sur les 8 classes |
 | `tests/test_triangulation.py` | §9.4 | decomposition puissance dans la dispersion Atkinson / van Holst / Roosendaal |
 
@@ -25,6 +25,17 @@ cassés) ; triangulation en skip documenté ou vert si data arrivée.
 
 Ne pas avancer Phase 3+ tant que plausibility / scaling sont rouges
 (sauf skip triangulation pour manque data).
+
+### Piste différée — limites 1DOF (η, check_factor)
+
+Écarts compris du modèle 1DOF — documentés dans `STATE.md`, `xfail` sur
+8+/1x (`KNOWN_ETA_GAP_CLASSES` / `KNOWN_CF_GAP_CLASSES`). **Pas** un
+assouplissement de seuil. On ne les ferme pas maintenant.
+
+| Grandeur | Ce qu'il faudrait pour fermer | Pourquoi pas maintenant |
+|---|---|---|
+| `η_blade` (~0,62 vs 0,75–0,85) | Contrôle actif de l'incidence palette pendant le drive (« aircraft principle ») — autre DOF / loi α(t) | Le 1DOF est volontaire ; comparaisons relatives de configs capteurs restent valides ; watts absolus sous-estimés |
+| `check_factor` (~3,1 vs 0,50–0,80) | Désempiler tronc/slide dans l'espace CdM, ou revoir le warp Hermite / le clamp `s''±25` | Sweep largeur de blends **épuisé** (`docs/diag-transition-width.md`) : empilement CdM × Hermite², pas un blend trop étroit |
 
 ## Phase 2 — Performance & diagnostic §9.2
 
@@ -64,8 +75,8 @@ Brief UI : `docs/brief-interface-utilisateur.md`.
 | API FastAPI (`/classes`, `/params`, `/validate`, `/simulate`, rôles) | **démarré** |
 | UI Analyste 🟢 Bateau / Coup / Bilan / Équipage | **démarré** |
 | UI Analyste 🟡 Capteurs / Observabilité / … | maquettes |
-| Surface Produit (rejeu) | maquettes (replay CLI pas encore codé) |
-| CLI `avsim` | pas commencé |
+| Surface Produit (rejeu) | **Team** + **Coach live/replay** (SSE, events, StrokeGeometry) sur 2x |
+| CLI `avsim` | `run` + `replay --realtime` (NDJSON coup à cadence T) |
 
 Note : Phase 1 (plausibility / scaling) reste ouverte ; l'UI marque les 6
 classes smoke-only en **Bêta — non calibrée**.
