@@ -50,17 +50,33 @@ Correction : puissance retour `I α ω` dans `handle_power` ; sauts de KE
 (`E_oar_ke_jump_J`) déduits de `E_rower_J`. Identité aviron sur α dynamique
 (plus `np.gradient`). Clamp Hermite **conservé** (sans lui le 1x diverge).
 
-## Point ouvert — le vrai sujet de la suite
+## Point ouvert — chantier §9.2 / η clos (diagnostic)
 
-**Phase 2 §9.2 (plausibilité) reste hors cibles** : `v_mean`, rendement de palette,
-`check_factor` pas encore dans les fourchettes du brief. `F_peak` retenu au-dessus
-de la plage sourcée en est le symptôme le plus probable — piste à creuser :
-`I_oar`, coefficient de traînée, ou pertes de palette surestimés quelque part
-dans le bilan. Pas encore diagnostiqué.
+Les 4 suspects (`I_oar`, `k_drag`, pertes de palette comme knob, arc
+catch/finish) ont été examinés avec diagnostic réel : **3 innocents**, **1
+(arc) confirmé conforme à Kleshnev à ~1° près**. `η≈0,62` est un écart
+**réel et compris**, pas un bug : le modèle 1DOF n'a pas de contrôle actif
+de l'incidence de palette pendant le drive (le « aircraft principle »
+documenté au tout début du projet) ; à la différence d'un vrai rameur,
+notre aviron ne corrige pas `α` en temps réel, donc il traverse la zone
+`C_D/C_L` défavorable (`u∈[0,22 ; 0,52]`) sans compensation. Conséquence
+pratique : le modèle reste valide pour comparer des configurations de
+capteurs entre elles (l'objectif du projet), mais sous-estime le rendement
+absolu — à garder en tête pour toute lecture de watts absolus, pas pour
+les comparaisons relatives.
 
-**Pas encore vérifié** : le repère angulaire de Kleshnev (glissement ≈3° après
-l'attaque) n'a pas été confronté directement — `blade_normal_speed` (0,94-1,04 m/s)
-est encourageant mais mesure autre chose que ce repère précis.
+### Notes de clôture (2026-07-26)
+
+- Cible §9.2 `0,75–0,85` : pas de citation inline ; provenance = Kleshnev
+  2006 Table 3 (AIS) ~78–87 % (8+ ≈ 81,4 %). Définition code
+  `E_prop/(E_prop+E_blade_loss)` alignée sur Kleshnev `P_prop/P_handle`
+  (±1 pt).
+- `k_drag` × `F_peak` balayé : hypothèse traînée écartée.
+- Arc `+58/−34` (92°) ≈ men sweep Kleshnev `56,8/34,3` (91,2°).
+- Pas de facteur d'efficacité palette libre (Caplan + géométrie sourcée).
+
+**Pas encore vérifié** : le repère angulaire Catch Slip Kleshnev (≈3° après
+l'attaque) — `blade_normal_speed` encourageant mais autre grandeur.
 
 ### Snapshot §9.2 (8+, F_peak=1100, Catch Slip, leave=25)
 
@@ -68,7 +84,7 @@ est encourageant mais mesure autre chose que ce repère précis.
 |---|---|---|
 | v_mean | ~4,87–5,05 | 5,78–6,78 (`v_ref=6,28` ±8 %) |
 | P_rower | ~620 W | 420–540 |
-| η_blade | ~0,63 | 0,75–0,85 |
+| η_blade | **~0,62** (écart réel, déf. OK) | 0,75–0,85 |
 | part hydro | ~47 % | 70–80 |
 | part blade | ~48 % | 15–25 |
 | part aero | ~4,5 % | 5–10 |
@@ -78,7 +94,6 @@ est encourageant mais mesure autre chose que ce repère précis.
 
 ## Suite
 
-Voir `ROADMAP-PRODUCTION.md`. Prochaine étape : Phase 1 — écrire
-`test_plausibility.py`, `test_class_scaling.py`, `test_triangulation.py`
-(ce dernier = test le plus important du projet, jamais écrit ; bloqué data :
-MANQUES D6).
+Chantier diagnostic §9.2 / η **clos**. Prochaine page : **CLI**.
+Voir aussi `ROADMAP-PRODUCTION.md` (Phase 1 tests plausibilité / triangulation
+toujours en attente, bloqués data MANQUES D6 pour la triangulation).
