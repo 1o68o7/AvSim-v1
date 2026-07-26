@@ -32,8 +32,37 @@ class Violation:
     message: str  # rédigé pour l'utilisateur, pas pour le journal
 
 
-def is_admissible(violations: list[Violation]) -> bool:
-    return not any(v.severity is Severity.REJECT for v in violations)
+# Limites 1DOF documentées (STATE.md) — butées réellement dépassées /
+# écarts compris. Exclues du gate REJECT seulement si
+# `ignore_known_1dof_limits=True` (usage Phase 5 : Sobol / observabilité
+# sur un espace encore exploratoire malgré η bas et F_peak=1100 N).
+# Ne pas y mettre check_factor : déjà WARNING (`mech.speed_fluctuation`).
+KNOWN_1DOF_LIMIT_RULES: frozenset[str] = frozenset({
+    "mech.eta_blade",
+    "physio.power_instantaneous",
+})
+
+
+def is_admissible(
+    violations: list[Violation],
+    *,
+    ignore_known_1dof_limits: bool = False,
+) -> bool:
+    """True ssi aucune violation REJECT (mode strict par défaut).
+
+    `ignore_known_1dof_limits=True` — **Phase 5 uniquement** : ignore les
+    REJECT des règles listées dans `KNOWN_1DOF_LIMIT_RULES` (η palette +
+    power_instantaneous / F_peak=1100 N). Voir STATE.md « Limites connues
+    du modèle 1DOF ». Le défaut (`False`) reste le gate §3.3 inchangé —
+    pas un assouplissement silencieux des seuils.
+    """
+    for v in violations:
+        if v.severity is not Severity.REJECT:
+            continue
+        if ignore_known_1dof_limits and v.rule in KNOWN_1DOF_LIMIT_RULES:
+            continue
+        return False
+    return True
 
 
 def _warn_or_ok(

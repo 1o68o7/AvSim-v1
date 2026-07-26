@@ -50,11 +50,15 @@ Correction : puissance retour `I α ω` dans `handle_power` ; sauts de KE
 (`E_oar_ke_jump_J`) déduits de `E_rower_J`. Identité aviron sur α dynamique
 (plus `np.gradient`). Clamp Hermite **conservé** (sans lui le 1x diverge).
 
-## Limites connues du modèle 1DOF (η et check_factor)
+## Limites connues du modèle 1DOF (η, check_factor, power_instantaneous)
 
-Deux écarts **réels et compris** face aux cibles §9.2 / enveloppe — pas des
-bugs de seuil. Même traitement : documentés ici, `xfail` sur 8+/1x dans
+Écarts **réels et compris** face aux cibles §9.2 / enveloppe — pas des bugs
+de seuil. η et check_factor : `xfail` sur 8+/1x dans
 `tests/test_plausibility.py`, pistes différées dans `ROADMAP-PRODUCTION.md`.
+`power_instantaneous` : butée dure réellement dépassée (reste REJECT),
+conséquence de `F_peak=1100 N` déjà accepté — ne pas reclasser en WARNING.
+Gate Phase 5 : `envelope.is_admissible(..., ignore_known_1dof_limits=True)`
+exclut η + power_instantaneous uniquement (défaut strict inchangé).
 Le modèle reste valide pour comparer des configurations de capteurs
 (l'objectif du projet) ; les lectures absolues (watts, cavalement) sont
 sous-estimées / sur-estimées selon le poste.
@@ -86,6 +90,33 @@ blend max. **Levier largeur épuisé** — pas de correctif blend appliqué.
 Pistes restantes (autre nature) : désempiler tronc/slide dans l'espace
 CdM, ou revoir le warp Hermite / le rôle du clamp. Voir aussi
 `docs/diag-vmin-drive.md`, `docs/diag-cf-cycle-overview.md`.
+
+### power_instantaneous ≈ 2,1–2,8 kW — conséquence de `F_peak=1100 N`
+
+Butée enveloppe `physio.power_instantaneous` : **1500 W** (REJECT dur).
+Mesure (8 classes) : pic **2146–2796 W** (+646 à +1296), **8/8 REJECT**.
+
+Mécanisme (diagnostic 2026-07-26, rapport seul) :
+
+- pic en **drive**, collé au pic de `F_handle≈1100 N` (Δτ ≤ 0,006), pas
+  au pic de `v_h` (Δτ ≈ 0,20) ;
+- `P = F·v_h` exact (ex. 8+ : 1099 N × 2,54 m/s = 2796 W) ;
+- plateau large (~250–305 ms au-dessus de 1500 W), **pas** un spike
+  clamp/fenêtre ; retour max 841–1060 W sous le seuil.
+
+C'est le **même symptôme déjà accepté** : `F_peak=1100 N` est au-dessus
+de la plage eau sourcée (500–700 N, Steinacker/Holt) et reste retenu
+parce qu'aucun cycle viable n'existe dans cette plage (voir sweep
+ci-dessous / point ouvert historique). **Ne pas** rétrograder la règle
+en WARNING — la butée est réellement dépassée ; distinct de η (modèle
+palette) et de cf (WARNING `speed_fluctuation` seulement).
+
+Effets collatéraux du même `F_peak` (indépendants du check P_inst) :
+
+- `physio.power_mean_2000m` REJECT (>600 W) : **4/4 sweep** (P̄≈609–611),
+  0/4 scull (WARNING) — cousin direct de la puissance trop haute ;
+- `mech.froude` REJECT (Fr < 0,40) : 3/8 (8+, 4x, 8x) — `v_mean` encore
+  trop basse vs `L_wl`, pas levé en ignorant P_inst.
 
 ### Notes de clôture (2026-07-26)
 
@@ -142,9 +173,9 @@ l'attaque) — `blade_normal_speed` encourageant mais autre grandeur.
 
 ## Suite
 
-Chantiers diagnostic §9.2 / η **et** check_factor (largeur) **clos** —
-deux limites 1DOF documentées, pas de nouvelle correction physique sur
-ces leviers.
+Chantiers diagnostic §9.2 / η, check_factor (largeur) **et**
+power_instantaneous (F_peak) **clos** — trois limites documentées, pas
+de nouvelle correction physique sur ces leviers.
 
 **Phase 7 démarrée** (brief `docs/brief-interface-utilisateur.md`) : API
 FastAPI + UI React (surfaces Analyste 🟢 / Produit maquette). Badges

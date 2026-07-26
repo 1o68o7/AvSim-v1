@@ -56,6 +56,28 @@ def test_is_admissible_false_on_reject() -> None:
     assert not is_admissible(v)
 
 
+def test_is_admissible_phase5_ignores_known_1dof_limits_only() -> None:
+    """Phase 5 : η + power_instantaneous ignorés ; autres REJECT restent."""
+    from avsim.core.envelope import KNOWN_1DOF_LIMIT_RULES, Violation
+
+    assert KNOWN_1DOF_LIMIT_RULES == {
+        "mech.eta_blade",
+        "physio.power_instantaneous",
+    }
+    known = [
+        Violation("mech.eta_blade", Severity.REJECT, 0.5, 0.68, "η"),
+        Violation("physio.power_instantaneous", Severity.REJECT, 2800.0, 1500.0, "P"),
+    ]
+    other = Violation("mech.froude", Severity.REJECT, 0.3, 0.4, "Fr")
+    assert is_admissible(known, ignore_known_1dof_limits=True)
+    assert not is_admissible(known)  # défaut strict
+    assert not is_admissible(known + [other], ignore_known_1dof_limits=True)
+    assert is_admissible(
+        known + [Violation("mech.speed_fluctuation", Severity.WARNING, 1.5, 0.4, "cf")],
+        ignore_known_1dof_limits=True,
+    )
+
+
 # ---------------------------------------------------------------------------
 # check_inputs — une règle à la fois
 # ---------------------------------------------------------------------------
