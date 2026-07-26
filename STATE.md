@@ -26,12 +26,23 @@ Tout ce qui suit a été résolu au fil de la session, chacun avec une source :
 | Performance étape 1 | `np.clip` scalaire → `max/min`, ×2,1 |
 | Performance étape 2 | tabulation `com_x(θ)` (drive/retour, 3001 pts) à l'init de `Crew` — **faite** (`334da14`) |
 
-### Note chargeur vs fixture tests
+### Fixtures multi-classes (corrigé)
 
-Les fixtures `pytest` appellent encore `load_params()` **sans** `boat_class` →
-`defaults.yaml` seul (`I_oar=1,30`). `load_params(boat_class="8+")` fusionne
-la classe (`I_oar=6,16` Empacher/estim.). Les deux convergent aujourd'hui
-(diag court) ; la suite Phase 1 doit simuler via `boat_class=` explicitement.
+`tests/conftest.py` : `boat_class` ∈ {`8+`, `1x`} → `load_params(boat_class=)`.
+Plus de `load_params()` nu dans les tests de physique.
+
+**Compte réel** (`pytest tests/ -v`, 2026-07-26) : **29 passed, 1 failed,
+1 skipped** (31 collected).
+
+| Résultat | Test |
+|---|---|
+| FAILED | `test_rower_work_equals_losses[8+]` — résidu **2,60 %** (seuil 1 %) avec `I_oar=6,16` |
+| SKIPPED | `test_phase_offset_actually_shifts_seat[1x]` — `n_rowers < 2` |
+| PASSED | tout le reste sur **8+ et 1x**, y compris `test_rower_work_equals_losses[1x]` |
+
+Le résidu 8+ (~220 J/coup) n'est **pas** Δ(½ I ω²) (~1 J). Écart
+`E_rower − E_oar_identity` du même ordre — à diagnostiquer avant toute
+retouche `k_drag` / `CdA` / `F_peak`.
 
 ## Point ouvert — le vrai sujet de la suite
 
