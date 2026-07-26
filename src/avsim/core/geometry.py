@@ -41,6 +41,11 @@ def blade_velocity_water(theta, theta_dot, V, L_out: float):
 
     Retourne (vx, vy). vx < 0 pendant la propulsion : la palette glisse vers la
     poupe, c'est ce glissement qui propulse.
+
+    Note cinematique : |v_tip| >= V |sin theta|. A l'attaque (theta≈58 deg) le
+    plancher vaut ≈0,85 V meme palette « plantee » — le residu est du glissement
+    de chant (le long de la corde), pas du glissement propulsif. Pour le
+    glissement a travers l'eau, utiliser `blade_normal_speed`.
     """
     vx = V + L_out * np.cos(theta) * theta_dot
     vy = -L_out * np.sin(theta) * theta_dot
@@ -54,6 +59,18 @@ def blade_normal(theta):
     vers la proue.
     """
     return np.cos(theta), -np.sin(theta)
+
+
+def blade_normal_speed(theta, theta_dot, V, L_out: float):
+    """Vitesse de glissement a travers l'eau (composante selon la normale).
+
+    v_n = v_tip · n. Nulle quand la palette est plantee (seul un ecoulement de
+    chant demeure, |v_tip| = V |sin theta|). Signee : v_n < 0 = glissement vers
+    la poupe (propulsif) quand n pointe vers la proue.
+    """
+    vx, vy = blade_velocity_water(theta, theta_dot, V, L_out)
+    nx, ny = blade_normal(theta)
+    return vx * nx + vy * ny
 
 
 def blade_chord(theta):

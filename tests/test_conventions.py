@@ -8,7 +8,12 @@ import pytest
 
 from avsim.core.params import load_params
 from avsim.core.body import BodyModel, segment_table
-from avsim.core.geometry import oar_angle_from_handle, blade_position, blade_velocity_water
+from avsim.core.geometry import (
+    oar_angle_from_handle,
+    blade_position,
+    blade_velocity_water,
+    blade_normal_speed,
+)
 from avsim.core.solver import simulate
 
 
@@ -62,21 +67,24 @@ def test_handle_travel_maps_back_to_angles(P):
 
 
 def test_blade_near_stationary_in_water_at_catch(P):
-    """Test central du brief 3.1.
+    """Test central du brief 3.1 / §9.1.
 
-    A l'attaque, la vitesse de la palette par rapport a l'eau doit etre faible.
-    C'est ce qui distingue un modele juste d'un modele au signe inverse : si la
-    convention est fausse, on trouve ici deux fois la vitesse du bateau.
+    A l'attaque, le glissement a travers l'eau (composante normale) doit etre
+    faible — palette plantee. On ne peut pas utiliser |v_tip| : la cinematique
+    impose |v_tip| >= V |sin theta| ≈ 0,85 V a theta_catch=58 deg meme plantee
+    (ecoulement de chant). Une convention de signe inverse donne |v_n| de l'ordre
+    de V |cos theta| ≈ 0,5 V a plusieurs m/s, pas un voisinage de zero.
     """
     res = simulate(P)
     st = res.last_stroke()
     idx = st.drive_mask()
-    speed = np.hypot(*blade_velocity_water(
-        st.theta[0][idx], st.theta_dot[0][idx], st.V[idx], P["rig"]["L_out_m"]))
+    L = P["rig"]["L_out_m"]
+    v_n = np.abs(blade_normal_speed(
+        st.theta[0][idx], st.theta_dot[0][idx], st.V[idx], L))
     # premiers 8 % de la propulsion = juste apres l'attaque
     n_early = max(3, int(0.08 * idx.sum()))
-    assert speed[:n_early].mean() < 1.5, (
-        f"vitesse palette/eau a l'attaque = {speed[:n_early].mean():.2f} m/s, "
+    assert v_n[:n_early].mean() < 1.5, (
+        f"|v_n| palette/eau a l'attaque = {v_n[:n_early].mean():.2f} m/s, "
         "attendu < 1.5 — verifier la convention de signe")
 
 
