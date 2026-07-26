@@ -2,8 +2,13 @@
 
 ## Phase 0 : fermeture v1 — TERMINÉE
 
-`pytest tests/` : **16/16 verts** sur `main` (`bfeb780`), vérifié sur 8+ ET 1x.
-Première fois que la validation porte sur deux classes, pas seulement 8+.
+`pytest tests/` historique (`bfeb780`) : **16/16 verts** mais uniquement via
+`load_params()` **sans** `boat_class` → `defaults.yaml` (`I_oar=1,30`), pas le
+vrai 8+ (`I_oar=6,16`). Le « vérifié 8+ et 1x » de Phase 0 close était un
+**override manuel** hors fixture (mesure `|v_n|` seule), pas la suite pytest.
+
+Fixtures corrigées (`tests/conftest.py`, params `8+` / `1x`) : compte réel
+ci-dessous — un échec apparaît dès que le vrai `I_oar=6,16` est confronté.
 
 Tout ce qui suit a été résolu au fil de la session, chacun avec une source :
 
@@ -21,12 +26,29 @@ Tout ce qui suit a été résolu au fil de la session, chacun avec une source :
 | Performance étape 1 | `np.clip` scalaire → `max/min`, ×2,1 |
 | Performance étape 2 | tabulation `com_x(θ)` (drive/retour, 3001 pts) à l'init de `Crew` — **faite** (`334da14`) |
 
-### Note chargeur vs fixture tests
+### Fixtures multi-classes (corrigé)
 
-Les fixtures `pytest` appellent encore `load_params()` **sans** `boat_class` →
-`defaults.yaml` seul (`I_oar=1,30`). `load_params(boat_class="8+")` fusionne
-la classe (`I_oar=6,16` Empacher/estim.). Les deux convergent aujourd'hui
-(diag court) ; la suite Phase 1 doit simuler via `boat_class=` explicitement.
+`tests/conftest.py` : `boat_class` ∈ {`8+`, `1x`} → `load_params(boat_class=)`.
+Plus de `load_params()` nu dans les tests de physique.
+
+**Compte réel** (`pytest tests/ -v`, après fix bilan aviron) : **30 passed,
+1 skipped** (31 collected) sur **8+ et 1x**.
+
+| Résultat | Test |
+|---|---|
+| SKIPPED | `test_phase_offset_actually_shifts_seat[1x]` — `n_rowers < 2` |
+| PASSED | tout le reste, y compris `test_rower_work_equals_losses[8+]` et `[1x]` |
+
+### Diagnostic résidu ~220 J (résolu)
+
+Le terme `½ I ω²` n'était **pas** des deux côtés du bilan :
+- **Propulsion** : `E_rower` via `-L_in F ω` inclut le travail qui accélère l'aviron
+- **Dégagé** : clamp `w_at_finish ∈ [-0,6 ; 0,2]` détruit ~200 J (8+, I=6,16) hors intégrale
+- **Retour** : Hermite avec `F_pull=0` → puissance contrainte `I α ω` absente de `E_rower`
+
+Correction : puissance retour `I α ω` dans `handle_power` ; sauts de KE
+(`E_oar_ke_jump_J`) déduits de `E_rower_J`. Identité aviron sur α dynamique
+(plus `np.gradient`). Clamp Hermite **conservé** (sans lui le 1x diverge).
 
 ## Point ouvert — le vrai sujet de la suite
 
