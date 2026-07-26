@@ -40,7 +40,7 @@ Ces quatre-là se traitent en code, sans donnée extérieure. C'est le chemin cr
 | D3 | **Coefficient de traînée réel** | échelle absolue du bilan énergétique | **essais de décélération libre** |
 | D4 | **CdA aérodynamique** | 60 % d'incertitude sur 5-10 % du bilan | essais + anémomètre, ou accepter l'incertitude |
 | D5 | **Coefficients de palette mesurés** | fichier actuel = approximation analytique | Caplan & Gardner (2007), à retrouver |
-| D6 | **Table de triangulation** Atkinson / van Holst / Roosendaal | le test de crédibilité central du modèle | article de comparaison publié |
+| D6 | **Table de triangulation** Atkinson / van Holst / Roosendaal | le test de crédibilité central du modèle | article de comparaison publié — **sorties** Atkinson/Kleshnev sur shelwork.htm ; **entrées** appariées listées sans valeurs sur comprslt.htm (2026-07-26) → skip quantitatif documenté |
 
 **D3 est le vrai verrou.** Sans lui, le bilan énergétique reste un indice
 relatif et ne passe jamais en watts absolus — donc le dashboard entraîneur

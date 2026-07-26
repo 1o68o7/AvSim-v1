@@ -124,9 +124,32 @@ Chantier diagnostic §9.2 / η **clos**.
 
 **Phase 7 démarrée** (brief `docs/brief-interface-utilisateur.md`) : API
 FastAPI + UI React (surfaces Analyste 🟢 / Produit maquette). Badges
-Simulé + Validée/Bêta par classe. Phase 1 (`test_plausibility` /
-`test_class_scaling`) reste en dette — les 6 classes bêta ne sont pas
-présentées à égalité avec 8+/1x.
+Simulé + Validée/Bêta par classe.
+
+### Phase 1 — tests de crédibilité (écrits, échecs physiques)
+
+Étape 0 : `core/boat_class.scale_from_8plus(M_tot)` — calée sur 855 kg
+seulement ; YAML drag ↔ échelle **< 1 %** sur les 8 classes ; k_drag 1x ≈ 3,15.
+
+Régime établi `n_strokes=20`, `n_discard=10` (2026-07-26) :
+
+| Classe | v_mean / v_ref | P/rameur | η | hydro | blade | aero | cf | slip |
+|---|---|---|---|---|---|---|---|---|
+| 1x | 2,94 / 5,12 | 579 | 0,42† | 0,25 | 0,73 | 0,02 | 3,50 | 1,42 |
+| 2- | 3,92 / 5,47 | 614 | 0,55 | 0,39 | 0,57 | 0,04 | 3,72 | 1,54 |
+| 2x | 3,26 / 5,56 | 577 | 0,45 | 0,26 | 0,72 | 0,02 | 3,59 | 1,39✓ |
+| 4- | 4,47 / 5,92 | 611 | 0,59 | 0,44 | 0,52 | 0,04 | 3,84 | 1,50 |
+| 4x | 3,56 / 6,02 | 574 | 0,46 | 0,26 | 0,71 | 0,02 | 3,67 | 1,37✓ |
+| 4+ | 4,25 / 5,57 | 613 | 0,59 | 0,42 | 0,54 | 0,04 | 3,40 | 1,49 |
+| 8+ | 4,91 / 6,28 | 609 | 0,62† | 0,47 | 0,49 | 0,04 | 3,72 | 1,46 |
+| 8x | 3,78 / 6,35 | 574 | 0,48 | 0,26 | 0,72 | 0,02 | 3,54 | 1,34✓ |
+
+† `xfail` documenté (écart 1DOF connu). Aucun seuil assoupli.
+`pytest` Phase 1 : **67 failed, 11 passed, 2 skipped, 2 xfailed**.
+
+Triangulation (§9.4) : entrées appariées Atkinson/van Holst **non
+reconstituables** (comprslt.htm = liste de champs sans valeurs) → skip
+quantitatif explicite, pas d'approximation silencieuse.
 
 ```
 pip install -e '.[api]' --break-system-packages
