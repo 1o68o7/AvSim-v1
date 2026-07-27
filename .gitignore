@@ -3,3 +3,6 @@
 src/avsim.egg-info/
 web/dist/
 web/node_modules/
+# EventStore SQLite local (AVSIM_EVENTS_DB) — ne pas versionner
+data/*.sqlite
+data/*.sqlite-*
