@@ -44,6 +44,8 @@ class StrokeMark:
     arc_deg: float = 0.0  # longueur d'arc (θ_catch − θ_finish) réalisée
     phase_lag_ms: float = 0.0  # |décalage| max vs médiane d'attaque
     energy: dict[str, float] = field(default_factory=dict)
+    # Barres longueur de coup (§1) — une par poste, pour Coach Replay
+    stroke_bars: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

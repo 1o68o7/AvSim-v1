@@ -25,6 +25,7 @@ from avsim.core.catalog import (
 from avsim.core.params import load_class
 from avsim.core.pose import pose_at_u, pose_series
 from avsim.core.solver import simulate
+from avsim.io.coaching_viz import crew_stroke_bars
 from avsim.io.events import STORE, StrokeMark
 from avsim.io.replay import stroke_distance_m, stroke_frame
 
@@ -96,17 +97,7 @@ def _stroke_payload(st, idx: int, P: dict) -> dict[str, Any]:
         T_drive = float(t[ix[-1]] - t[ix[0]])
 
     n = int(P["meta"]["n_rowers"])
-    crew_rows = []
-    for i in range(n):
-        offsets = P.get("crew", {}).get("phase_offset_ms", [0] * n)
-        off = float(offsets[i]) if i < len(offsets) else 0.0
-        e_i = float(np.trapezoid(st.handle_power[i], t))
-        crew_rows.append({
-            "seat": i + 1,
-            "phase_offset_ms": off,
-            "E_handle_J": e_i,
-            "P_mean_W": e_i / max(en["stroke_period_s"], 1e-9),
-        })
+    crew_rows = crew_stroke_bars(st, P)
 
     code = P["meta"].get("boat_class") or P["meta"].get("code")
     v_ref = V_REF_MS.get(code)
@@ -143,6 +134,7 @@ def _stroke_payload(st, idx: int, P: dict) -> dict[str, Any]:
             "coxed": bool(P["meta"].get("coxed", False)),
             "theta_catch_deg": float(P["rig"]["theta_catch_deg"]),
             "theta_finish_deg": float(P["rig"]["theta_finish_deg"]),
+            "L_slide_m": float(P["rig"]["L_slide_m"]),
             "geometry_source": P.get("geometry_source", "composite"),
         },
     }
@@ -507,6 +499,7 @@ async def replay_stream(
                         arc_deg=float(frame["arc_deg"]),
                         phase_lag_ms=float(frame["phase_lag_ms"]),
                         energy=dict(frame["energy"]),
+                        stroke_bars=list(frame.get("stroke_bars") or []),
                     ),
                 )
             yield f"data: {json.dumps(frame, default=_json_default)}\n\n"
