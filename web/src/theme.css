@@ -1,9 +1,12 @@
-@import "./tokens.css";
+/* Layout legacy AvSim — chrome shadcn vit dans index.css.
+   Alias pour que .panel / .nav continuent de fonctionner
+   jusqu'à reconstruction écrans (prompts suivants). */
 
 :root {
-  /* Couleurs sémantiques badges / alertes (données, pas chrome Render) */
-  --ink: #0c1a22;
-  --ink-soft: #1a3340;
+  --foam: var(--foreground);
+  --mist: var(--muted-foreground);
+  --line: var(--border);
+  --water-light: var(--primary);
   --water-deep: #0a3a4a;
   --water-mid: #12607a;
   --sand: #d4c4a8;
@@ -14,6 +17,24 @@
   --sim: #1e6b7a;
   --beta: #9a5b1a;
   --validated: #2f7d4a;
+  --ink: #0c1a22;
+  --ink-soft: #1a3340;
+  --panel: var(--card);
+  --color-text-primary: var(--foreground);
+  --color-text-secondary: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-accent: var(--primary);
+  --color-accent-hover: color-mix(in oklab, var(--primary) 28%, transparent);
+  --color-panel: var(--card);
+  --color-link: var(--primary);
+  --color-background: var(--background);
+  --font-body: var(--font-sans);
+  --font-display: var(--font-sans);
+  --radius-6: calc(var(--radius) * 0.96);
+  --radius-8: var(--radius);
+  --radius-pill: 9999px;
+  --global-transition: 350ms cubic-bezier(0.9, 0.1, 0.1, 0.9);
+  --accent-surface: color-mix(in oklab, var(--primary) 18%, transparent);
 }
 
 * {
@@ -27,14 +48,7 @@ body,
   min-height: 100%;
 }
 
-body {
-  font-family: var(--font-body);
-  color: var(--color-text-primary);
-  background: var(--color-background);
-  transition:
-    background var(--global-transition),
-    color var(--global-transition);
-}
+/* body bg/color : index.css (shadcn) — ne pas écraser */
 
 h1,
 h2,
@@ -119,46 +133,6 @@ button.ghost:hover:not(:disabled) {
 .banner.info {
   border-color: rgba(58, 155, 176, 0.45);
   background: rgba(18, 96, 122, 0.25);
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-pill);
-  border: 1px solid currentColor;
-  transition:
-    color var(--global-transition),
-    background var(--global-transition),
-    border-color var(--global-transition);
-}
-
-.badge.sim {
-  color: #9bd3df;
-  background: rgba(30, 107, 122, 0.35);
-}
-.badge.measured {
-  color: #b8e0c2;
-  background: rgba(47, 125, 74, 0.3);
-}
-.badge.validated {
-  color: #b8e0c2;
-  background: rgba(47, 125, 74, 0.3);
-}
-.badge.beta {
-  color: #f0c27a;
-  background: rgba(154, 91, 26, 0.3);
-}
-/* Calibration puissance (D3) — ne pas confondre avec Simulé/Mesuré */
-.badge.indice {
-  color: #e0c48a;
-  background: rgba(180, 130, 40, 0.28);
-  border-style: dashed;
 }
 
 .app-shell {

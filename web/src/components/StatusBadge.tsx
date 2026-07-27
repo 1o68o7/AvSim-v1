@@ -1,3 +1,10 @@
+/**
+ * Badge de statut DataR0w — fondation shadcn/ui (remplace l'ancien StatusBadge CSS).
+ * Variantes métier via className sur Badge Radix, pas de styles maison.
+ */
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
 type Kind = "sim" | "measured" | "validated" | "beta" | "indice";
 
 const LABELS: Record<Kind, string> = {
@@ -9,6 +16,16 @@ const LABELS: Record<Kind, string> = {
   indice: "indice",
 };
 
+/** Couleurs sémantiques métier (pas chrome DA) — indice = bordure pointillée. */
+const KIND_CLASS: Record<Kind, string> = {
+  sim: "border-transparent bg-primary/25 text-primary",
+  measured: "border-transparent bg-emerald-500/20 text-emerald-300",
+  validated: "border-transparent bg-emerald-500/20 text-emerald-300",
+  beta: "border-transparent bg-amber-500/20 text-amber-200",
+  indice:
+    "border-dashed border-amber-400/80 bg-amber-500/15 text-amber-200",
+};
+
 export function StatusBadge({
   kind,
   label,
@@ -16,7 +33,11 @@ export function StatusBadge({
   kind: Kind;
   label?: string;
 }) {
-  return <span className={`badge ${kind}`}>{label ?? LABELS[kind]}</span>;
+  return (
+    <Badge variant="outline" className={cn(KIND_CLASS[kind])}>
+      {label ?? LABELS[kind]}
+    </Badge>
+  );
 }
 
 export function classBadgeKind(

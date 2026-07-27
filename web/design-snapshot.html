@@ -1,35 +1,19 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <title>AvSim design snapshot</title>
-    <link rel="stylesheet" href="../src/tokens.css" />
+    <title>AvSim shadcn foundation snapshot</title>
+    <link rel="stylesheet" href="../src/index.css" />
     <link rel="stylesheet" href="../src/theme.css" />
   </head>
   <body>
     <div class="app-shell">
-      <h2>Bilan · tokens Render</h2>
-      <p class="muted">Panneau, badges, boutons — chrome UI (séries Plotly inchangées).</p>
+      <h2>Fondation shadcn/ui</h2>
+      <p class="muted">Card / Badge / Button — chrome shadcn (écrans legacy encore en .panel).</p>
       <div class="panel" style="margin-top: 1rem">
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem">
-          <span class="badge sim">Simulé</span>
-          <span class="badge beta">Bêta</span>
-          <span class="badge validated">Validée</span>
-          <span class="badge indice">indice</span>
-        </div>
+        <div id="badges" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem"></div>
         <button type="button">Action primaire</button>
         <button type="button" class="ghost" style="margin-left: 0.5rem">Ghost</button>
-        <div class="metric-row" style="margin-top: 1rem">
-          <div class="metric ok">
-            <div class="label">v_mean</div>
-            <div class="value">4.82</div>
-            <div class="target">m/s</div>
-          </div>
-          <div class="metric warn">
-            <div class="label">check</div>
-            <div class="value">1.12</div>
-          </div>
-        </div>
       </div>
     </div>
   </body>

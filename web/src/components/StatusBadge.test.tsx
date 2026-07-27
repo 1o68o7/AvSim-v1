@@ -1,5 +1,5 @@
 /**
- * Régression §5 : le CSS TeamView ne doit pas supprimer .badge.indice (D3).
+ * Régression : Badge shadcn + statut indice (bordure pointillée).
  */
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
@@ -9,24 +9,25 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { StatusBadge } from "./StatusBadge";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const themeCss = readFileSync(resolve(here, "../theme.css"), "utf8");
-const tokensCss = readFileSync(resolve(here, "../tokens.css"), "utf8");
+const indexCss = readFileSync(resolve(here, "../index.css"), "utf8");
+const badgeSrc = readFileSync(resolve(here, "./StatusBadge.tsx"), "utf8");
 
-describe("badge indice — RameurView / D3", () => {
-  it("theme.css contient la règle .badge.indice (bordure pointillée)", () => {
-    expect(themeCss).toMatch(/\.badge\.indice\s*\{[^}]*border-style:\s*dashed/s);
-    expect(themeCss).toMatch(/\.badge\.indice\s*\{[^}]*color:\s*#e0c48a/s);
+describe("shadcn foundation + badge indice", () => {
+  it("index.css : primary AvSim + radius shadcn 0.625rem", () => {
+    expect(indexCss).toMatch(/--radius:\s*0\.625rem/);
+    expect(indexCss).toMatch(/--primary:\s*oklch\(0\.642 0\.094 214\.8\)/);
+    expect(indexCss).toMatch(/\.dark\s*\{/);
   });
 
-  it("tokens.css définit les variables sémantiques Render-like", () => {
-    expect(tokensCss).toMatch(/--color-background:/);
-    expect(tokensCss).toMatch(/--color-accent:/);
-    expect(tokensCss).toMatch(/--global-transition:/);
-    expect(tokensCss).toMatch(/Inter/);
+  it("StatusBadge s'appuie sur @/components/ui/badge (pas CSS maison .badge)", () => {
+    expect(badgeSrc).toMatch(/from "@\/components\/ui\/badge"/);
+    expect(badgeSrc).toMatch(/border-dashed/);
   });
 
-  it("StatusBadge kind=indice rend le libellé visible dans le DOM", () => {
+  it("StatusBadge kind=indice rend le libellé et data-slot badge", () => {
     const html = renderToStaticMarkup(<StatusBadge kind="indice" />);
-    expect(html).toBe('<span class="badge indice">indice</span>');
+    expect(html).toContain("indice");
+    expect(html).toContain('data-slot="badge"');
+    expect(html).toContain("border-dashed");
   });
 });
