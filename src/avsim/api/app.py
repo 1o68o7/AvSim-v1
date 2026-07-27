@@ -102,6 +102,10 @@ def _stroke_payload(st, idx: int, P: dict) -> dict[str, Any]:
         ix = np.where(drive)[0]
         T_drive = float(t[ix[-1]] - t[ix[0]])
 
+    # Pistes sync §4 — accélération bateau + ω poignée (poste 0)
+    A = np.gradient(np.asarray(st.V, dtype=float), np.asarray(t, dtype=float))
+    omega0 = np.degrees(np.asarray(st.theta_dot[0], dtype=float))
+
     n = int(P["meta"]["n_rowers"])
     crew_rows = crew_stroke_bars(st, P)
 
@@ -129,8 +133,10 @@ def _stroke_payload(st, idx: int, P: dict) -> dict[str, Any]:
             "t_s": _series(t),
             "u": _series(u),
             "theta_deg": _series(np.degrees(th0)),
+            "theta_dot_deg_s": _series(omega0),
             "handle_force_N": _series(fh0),
             "V_ms": _series(st.V),
+            "A_ms2": _series(A),
             "immersion": _series(imm0),
         },
         "crew": crew_rows,

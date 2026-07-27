@@ -105,8 +105,10 @@ export type SimulateResult = {
     t_s: number[];
     u: number[];
     theta_deg: number[];
+    theta_dot_deg_s: number[];
     handle_force_N: number[];
     V_ms: number[];
+    A_ms2: number[];
     immersion: number[];
   };
   crew: Array<{

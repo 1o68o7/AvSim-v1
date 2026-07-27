@@ -37,6 +37,16 @@ export function StrokeView() {
 
   const { series, boat, validation } = result;
   const thetaNow = series.theta_deg[idx] ?? 0;
+  const A = series.A_ms2 ?? [];
+  const cursorShape = {
+    type: "line" as const,
+    x0: uCursor,
+    x1: uCursor,
+    y0: 0,
+    y1: 1,
+    yref: "paper" as const,
+    line: { color: "rgba(232,241,244,0.55)", width: 1 },
+  };
   const shapes = showRefs
     ? [
         {
@@ -57,8 +67,9 @@ export function StrokeView() {
           yref: "paper" as const,
           line: { dash: "dot", color: "rgba(58,155,176,0.8)" },
         },
+        cursorShape,
       ]
-    : [];
+    : [cursorShape];
 
   return (
     <div>
@@ -66,7 +77,7 @@ export function StrokeView() {
         <div>
           <h2>Coup</h2>
           <p className="muted">
-            Force & angle vs fraction d&apos;arc u — <StatusBadge kind="sim" />
+            Force, θ, V, a — curseur u unique — <StatusBadge kind="sim" />
           </p>
         </div>
         <StatusBadge kind={classBadgeKind(validation.status)} label={validation.label} />
@@ -127,38 +138,61 @@ export function StrokeView() {
                 xaxis: "x",
                 yaxis: "y2",
               },
+              {
+                x: series.u,
+                y: series.V_ms,
+                name: "V bateau",
+                type: "scatter",
+                mode: "lines",
+                line: { color: "#9bd3df", width: 1.8 },
+                xaxis: "x",
+                yaxis: "y3",
+              },
+              {
+                x: series.u,
+                y: A,
+                name: "a bateau",
+                type: "scatter",
+                mode: "lines",
+                line: { color: "#c45c26", width: 1.6 },
+                xaxis: "x",
+                yaxis: "y4",
+              },
             ]}
             layout={{
               paper_bgcolor: "rgba(0,0,0,0)",
               plot_bgcolor: "rgba(6,16,24,0.35)",
-              font: { color: "#e8f1f4", family: "Source Sans 3" },
-              margin: { t: 30, r: 50, b: 40, l: 50 },
-              height: 360,
+              font: { color: "#e8f1f4", family: "Source Sans 3", size: 11 },
+              margin: { t: 28, r: 48, b: 40, l: 48 },
+              height: 520,
               showlegend: true,
-              legend: { orientation: "h" },
-              xaxis: { title: "u (fraction d'arc)", gridcolor: "rgba(255,255,255,0.08)" },
+              legend: { orientation: "h", y: 1.08 },
+              xaxis: {
+                title: "u (fraction d'arc)",
+                gridcolor: "rgba(255,255,255,0.08)",
+                domain: [0, 1],
+              },
               yaxis: {
                 title: "F (N)",
                 gridcolor: "rgba(255,255,255,0.08)",
-                domain: [0.55, 1],
+                domain: [0.78, 1],
               },
               yaxis2: {
                 title: "θ (°)",
                 gridcolor: "rgba(255,255,255,0.08)",
-                domain: [0, 0.45],
+                domain: [0.52, 0.74],
               },
-              shapes: [
-                ...shapes,
-                {
-                  type: "line",
-                  x0: uCursor,
-                  x1: uCursor,
-                  y0: 0,
-                  y1: 1,
-                  yref: "paper",
-                  line: { color: "rgba(232,241,244,0.55)", width: 1 },
-                },
-              ],
+              yaxis3: {
+                title: "V (m/s)",
+                gridcolor: "rgba(255,255,255,0.08)",
+                domain: [0.26, 0.48],
+              },
+              yaxis4: {
+                title: "a (m/s²)",
+                gridcolor: "rgba(255,255,255,0.08)",
+                domain: [0, 0.22],
+              },
+              shapes,
               annotations: showRefs
                 ? [
                     {
