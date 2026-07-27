@@ -75,6 +75,19 @@ export type StrokeBarMetrics = {
   immersion_threshold?: number;
 };
 
+export type DriveSeries = {
+  u: number[];
+  handle_force_N: number[];
+  theta_deg?: number[];
+  theta_dot_deg_s?: number[];
+};
+
+export type StrokeBarSeat = {
+  seat: number;
+  stroke_bar: StrokeBarMetrics;
+  drive?: DriveSeries;
+};
+
 export type SimulateResult = {
   source: "simulated";
   stroke_index: number;
@@ -102,6 +115,7 @@ export type SimulateResult = {
     E_handle_J: number;
     P_mean_W: number;
     stroke_bar?: StrokeBarMetrics;
+    drive?: DriveSeries;
   }>;
   boat: {
     n_rowers: number;
@@ -156,7 +170,7 @@ export type ReplayFrame =
       crew?: CrewSeatLive[];
       sync_alert?: SyncAlert;
       series: { t_s: number[]; V_ms: number[] };
-      stroke_bars?: Array<{ seat: number; stroke_bar: StrokeBarMetrics }>;
+      stroke_bars?: StrokeBarSeat[];
     }
   | { kind: "end"; source: "simulated" };
 
@@ -180,7 +194,7 @@ export type SessionStrokeMark = {
   arc_deg?: number;
   phase_lag_ms?: number;
   energy?: Record<string, number>;
-  stroke_bars?: Array<{ seat: number; stroke_bar: StrokeBarMetrics }>;
+  stroke_bars?: StrokeBarSeat[];
 };
 
 export type SessionSummary = {

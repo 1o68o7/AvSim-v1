@@ -12,6 +12,7 @@ import {
   StrokeGeometry,
   type PoseFrame,
 } from "../../components/StrokeGeometry";
+import { CrewForceOverlay } from "../../components/CrewForceOverlay";
 import { StatusBadge } from "../../components/StatusBadge";
 import { StrokeLengthBarStack } from "../../components/StrokeLengthBar";
 import { useApp } from "../../state";
@@ -50,8 +51,8 @@ export function CoachReplayView() {
   const pose = useMemo(() => frameAtU(frames, uCursor), [frames, uCursor]);
 
   /** Barres du coup le plus proche de l'event sélectionné, sinon dernier coup. */
-  const replayBars = useMemo(() => {
-    if (!strokes.length) return [] as Array<{ seat: number; bar: StrokeBarMetrics }>;
+  const replayStroke = useMemo(() => {
+    if (!strokes.length) return null;
     let mark = strokes[strokes.length - 1];
     if (selected && compare) {
       const hit = strokes.find(
@@ -59,10 +60,22 @@ export function CoachReplayView() {
       );
       if (hit) mark = hit;
     }
-    return (mark.stroke_bars ?? [])
+    return mark;
+  }, [strokes, selected, compare]);
+
+  const replayBars = useMemo(() => {
+    if (!replayStroke) return [] as Array<{ seat: number; bar: StrokeBarMetrics }>;
+    return (replayStroke.stroke_bars ?? [])
       .filter((b) => b.stroke_bar)
       .map((b) => ({ seat: b.seat, bar: b.stroke_bar }));
-  }, [strokes, selected, compare]);
+  }, [replayStroke]);
+
+  const replayDriveSeats = useMemo(() => {
+    if (!replayStroke) return [];
+    return (replayStroke.stroke_bars ?? [])
+      .filter((b) => b.drive && b.drive.u.length > 0)
+      .map((b) => ({ seat: b.seat, drive: b.drive }));
+  }, [replayStroke]);
 
   async function refreshSessions() {
     if (!role) return;
@@ -201,6 +214,24 @@ export function CoachReplayView() {
             ) : (
               <p className="muted">
                 Aucune barre — lancez un rejeu Coach live lié à cette séance.
+              </p>
+            )}
+          </div>
+
+          <div className="panel" style={{ marginTop: "0.75rem" }}>
+            <h3>Nesting — forces superposées</h3>
+            <p className="muted">
+              Coup le plus proche de l&apos;annotation (sinon dernier) —{" "}
+              <StatusBadge kind="sim" />
+            </p>
+            {replayDriveSeats.length ? (
+              <CrewForceOverlay
+                seats={replayDriveSeats}
+                emptyMessage="Aucune série drive — relancez Coach live sur cette séance."
+              />
+            ) : (
+              <p className="muted">
+                Aucune série drive — relancez Coach live (après mise à jour §2).
               </p>
             )}
           </div>

@@ -93,6 +93,8 @@ def stroke_frame(
     if P is None:
         # Result.stroke ne porte pas P — le caller passe params=
         P = {}
+    coaching_rows = crew_stroke_bars(st, P) if P else []
+    coaching_by_seat = {r["seat"]: r for r in coaching_rows}
     crew, sync = _crew_density(st, P)
     # Longueur d'arc réalisée (poste 0) : Δθ drive en degrés
     th0 = np.degrees(np.asarray(st.theta[0], dtype=float))
@@ -102,12 +104,12 @@ def stroke_frame(
     else:
         arc_deg = float(np.max(th0) - np.min(th0)) if th0.size else 0.0
     phase_lag_ms = float(abs(sync["timing_ms"]))
-    bars_by_seat = {
-        r["seat"]: r["stroke_bar"]
-        for r in (crew_stroke_bars(st, P) if P else [])
-    }
     crew_rich = [
-        {**row, "stroke_bar": bars_by_seat.get(row["seat"])}
+        {
+            **row,
+            "stroke_bar": coaching_by_seat.get(row["seat"], {}).get("stroke_bar"),
+            "drive": coaching_by_seat.get(row["seat"], {}).get("drive"),
+        }
         for row in crew
     ]
     return {
@@ -131,8 +133,12 @@ def stroke_frame(
         },
         # Copie plate pour persistance StrokeMark / Coach Replay
         "stroke_bars": [
-            {"seat": s, "stroke_bar": b}
-            for s, b in sorted(bars_by_seat.items())
+            {
+                "seat": r["seat"],
+                "stroke_bar": r["stroke_bar"],
+                "drive": r.get("drive"),
+            }
+            for r in sorted(coaching_rows, key=lambda x: x["seat"])
         ],
     }
 

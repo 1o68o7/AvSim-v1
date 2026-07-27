@@ -1,9 +1,10 @@
 import { BoatSchematic } from "../../components/BoatSchematic";
+import { CrewForceOverlay } from "../../components/CrewForceOverlay";
 import { StatusBadge, classBadgeKind } from "../../components/StatusBadge";
 import { StrokeLengthBarStack } from "../../components/StrokeLengthBar";
 import { useApp } from "../../state";
 
-/** Vue Équipage — barres longueur de coup (§1), une par poste. */
+/** Vue Équipage — barres longueur de coup (§1) + nesting forces (§2). */
 export function CrewView() {
   const { result } = useApp();
 
@@ -75,15 +76,25 @@ export function CrewView() {
         </div>
       </div>
 
-      <div className="panel" style={{ marginTop: "0.8rem" }}>
-        <h3>Longueur de coup</h3>
-        <p className="muted">
-          Pattern Peach/FM — lecture immédiate, sans chiffre.{" "}
-          <StatusBadge kind="sim" />
-        </p>
-        <StrokeLengthBarStack
-          bars={crew.map((r) => ({ seat: r.seat, bar: r.stroke_bar }))}
-        />
+      <div className="grid-2" style={{ marginTop: "0.8rem" }}>
+        <div className="panel">
+          <h3>Longueur de coup</h3>
+          <p className="muted">
+            Pattern Peach/FM — lecture immédiate, sans chiffre.{" "}
+            <StatusBadge kind="sim" />
+          </p>
+          <StrokeLengthBarStack
+            bars={crew.map((r) => ({ seat: r.seat, bar: r.stroke_bar }))}
+          />
+        </div>
+        <div className="panel">
+          <h3>Nesting — forces superposées</h3>
+          <p className="muted">
+            Pics alignés = synchro ; décalage visible sans chiffre. Axe u
+            (fraction d&apos;arc). <StatusBadge kind="sim" />
+          </p>
+          <CrewForceOverlay seats={crew} />
+        </div>
       </div>
     </div>
   );

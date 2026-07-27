@@ -1,11 +1,9 @@
-"""Barre de longueur de coup — brief-visuels-coaching-sources.md §1.
+"""Visuels coaching équipage — brief-visuels-coaching-sources §1 + §2.
 
-Seuil d'immersion effective : ``immersion > 0.5`` — même convention que
-``Stroke.drive_mask`` (palette effectivement en prise). Le catch slip
-angulaire (dynamics) produit le blanc initial ; la fenêtre leave produit
-le blanc de sortie (washing out).
+§1 barre : seuil d'immersion effective ``immersion >= 0.5`` (``Stroke.drive_mask``).
+§2 nesting : ``drive_series`` — F vs u sur la propulsion seule.
 
-Pas de nesting / poisson / Team 4Q ici — étape 1 seule.
+Pas de poisson / pistes V/a / Team 4Q ici.
 """
 from __future__ import annotations
 
@@ -73,8 +71,41 @@ def stroke_length_bar(
     }
 
 
+def drive_series(
+    theta: np.ndarray,
+    force: np.ndarray,
+    immersion: np.ndarray,
+    theta_dot: np.ndarray,
+    *,
+    th_catch: float,
+    th_finish: float,
+) -> dict[str, list[float]]:
+    """Séries propulsion vs u (nesting) — pas le retour (u redescend)."""
+    th = np.asarray(theta, dtype=float)
+    F = np.asarray(force, dtype=float)
+    imm = np.asarray(immersion, dtype=float)
+    w = np.asarray(theta_dot, dtype=float)
+    u = seat_u(th, th_catch, th_finish)
+    drive = imm > 0.01
+    if not drive.any():
+        return {
+            "u": [],
+            "handle_force_N": [],
+            "theta_deg": [],
+            "theta_dot_deg_s": [],
+        }
+    # ordre croissant en u pour Plotly
+    order = np.argsort(u[drive])
+    return {
+        "u": [float(x) for x in u[drive][order]],
+        "handle_force_N": [float(x) for x in F[drive][order]],
+        "theta_deg": [float(x) for x in np.degrees(th[drive][order])],
+        "theta_dot_deg_s": [float(x) for x in np.degrees(w[drive][order])],
+    }
+
+
 def crew_stroke_bars(st: Any, P: dict[str, Any]) -> list[dict[str, Any]]:
-    """Une barre par poste — enrichissement crew pour API / SSE."""
+    """Barre + drive par poste — enrichissement crew pour API / SSE."""
     n = int(st.handle_force.shape[0])
     th_c = float(np.radians(P["rig"]["theta_catch_deg"]))
     th_f = float(np.radians(P["rig"]["theta_finish_deg"]))
@@ -93,11 +124,20 @@ def crew_stroke_bars(st: Any, P: dict[str, Any]) -> list[dict[str, Any]]:
             th_finish=th_f,
             L_slide_m=L_slide,
         )
+        drive = drive_series(
+            st.theta[i],
+            st.handle_force[i],
+            st.immersion[i],
+            st.theta_dot[i],
+            th_catch=th_c,
+            th_finish=th_f,
+        )
         rows.append({
             "seat": i + 1,
             "phase_offset_ms": off,
             "E_handle_J": e_i,
             "P_mean_W": e_i / max(T, 1e-9),
             "stroke_bar": bar,
+            "drive": drive,
         })
     return rows
