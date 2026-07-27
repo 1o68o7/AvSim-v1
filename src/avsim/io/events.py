@@ -11,7 +11,8 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Literal
 
-EventSource = Literal["coach_voice"]
+# Champ extensible — valeurs connues aujourd'hui ; d'autres sources possibles.
+EventSource = Literal["coach_voice", "haptic_alert"]
 
 
 def utc_now_second() -> str:

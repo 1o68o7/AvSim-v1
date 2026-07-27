@@ -27,6 +27,11 @@ from avsim.core.pose import pose_at_u, pose_series
 from avsim.core.solver import simulate
 from avsim.io.coaching_viz import crew_stroke_bars
 from avsim.io.events import STORE, StrokeMark
+from avsim.io.rameur import (
+    haptic_events_for_session,
+    progression_multi_session,
+    seat_force_history,
+)
 from avsim.io.replay import stroke_distance_m, stroke_frame
 
 from .roles import Role, analyst_only, require_role
@@ -284,11 +289,57 @@ class SessionCreate(BaseModel):
 
 
 class EventCreate(BaseModel):
+    # Extensible : coach_voice | haptic_alert | …
     source: str = "coach_voice"
     audio_ref: str | None = None
     transcript: str | None = None
     tag: str | None = None
     t_utc: str | None = None
+
+
+@app.get("/api/rameur/review")
+def rameur_review(
+    boat_class: str = Query("2x"),
+    seat: int = Query(1, ge=1, le=8),
+    n_prev: int = Query(10, ge=1, le=20),
+    session_id: str | None = Query(
+        None,
+        description="Si fourni, joint les events source=haptic_alert",
+    ),
+    role: Role = Depends(require_role),
+):
+    """Vue Rameur §3.1 — courbe F dernier coup + n_prev, phase vs nage."""
+    _ = role
+    try:
+        payload = seat_force_history(
+            boat_class=boat_class, seat=seat, n_prev=n_prev,
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    haptic: list[dict[str, Any]] = []
+    if session_id is not None:
+        try:
+            haptic = haptic_events_for_session(session_id)
+        except KeyError as exc:
+            raise HTTPException(404, f"session inconnue : {session_id}") from exc
+    payload["session_id"] = session_id
+    payload["haptic_events"] = haptic
+    return payload
+
+
+@app.get("/api/rameur/progression")
+def rameur_progression(
+    boat_class: str = Query("2x"),
+    cadence_tol_spm: float = Query(2.0, ge=0.0, le=10.0),
+    role: Role = Depends(require_role),
+):
+    """Indice de progression multi-séances (conditions comparables)."""
+    _ = role
+    return progression_multi_session(
+        boat_class=boat_class, cadence_tol_spm=cadence_tol_spm,
+    )
 
 
 @app.post("/api/sessions")
