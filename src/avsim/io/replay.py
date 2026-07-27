@@ -112,6 +112,12 @@ def stroke_frame(
         }
         for row in crew
     ]
+    t = np.asarray(st.t, dtype=float)
+    V = np.asarray(st.V, dtype=float)
+    A = np.gradient(V, t) if t.size > 1 else np.zeros_like(V)
+    th0_rad = np.asarray(st.theta[0], dtype=float)
+    w0 = np.asarray(st.theta_dot[0], dtype=float)
+    fh0 = np.asarray(st.handle_force[0], dtype=float)
     return {
         "kind": "stroke",
         "source": "simulated",
@@ -124,12 +130,17 @@ def stroke_frame(
         "arc_deg": arc_deg,
         "phase_lag_ms": phase_lag_ms,
         "check_factor": float(en["check_factor"]),
+        "P_rower_mean_W": float(en["P_rower_mean_W"]),
         "energy": phase2_metrics(st),
         "crew": crew_rich,
         "sync_alert": sync,
         "series": {
-            "t_s": [float(x) for x in st.t],
-            "V_ms": [float(x) for x in st.V],
+            "t_s": [float(x) for x in t],
+            "V_ms": [float(x) for x in V],
+            "A_ms2": [float(x) for x in A],
+            "theta_deg": [float(x) for x in np.degrees(th0_rad)],
+            "theta_dot_deg_s": [float(x) for x in np.degrees(w0)],
+            "handle_force_N": [float(x) for x in fh0],
         },
         # Copie plate pour persistance StrokeMark / Coach Replay
         "stroke_bars": [

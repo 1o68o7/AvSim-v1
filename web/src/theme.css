@@ -381,6 +381,55 @@ table.data td {
   margin: 0 0 0.4rem;
 }
 
+/* Team 4 quadrants (brief §5) */
+.team-quad {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(160px, 1fr) minmax(160px, 1fr);
+  gap: 0.65rem;
+  min-height: 52vh;
+}
+
+@media (max-width: 700px) {
+  .team-quad {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    min-height: unset;
+  }
+}
+
+.team-quad-cell {
+  display: grid;
+  align-content: start;
+  gap: 0.35rem;
+  padding: 0.65rem 0.75rem;
+  background: rgba(6, 16, 24, 0.45);
+  border-bottom: 3px solid rgba(58, 155, 176, 0.45);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.team-quad-cell h3 {
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mist);
+  font-weight: 600;
+}
+
+.team-quad-digits {
+  display: grid;
+  place-content: center;
+  text-align: center;
+  gap: 0.6rem;
+  min-height: 140px;
+}
+
+.team-quad-digits .team-metric-value {
+  font-size: clamp(2.4rem, 8vw, 3.8rem);
+}
+
 /* --- Surface Produit / Team cockpit --- */
 
 .product-shell .banner code {

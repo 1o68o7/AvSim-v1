@@ -145,6 +145,15 @@ export type SyncAlert = {
   note: string;
 };
 
+export type ReplayStrokeSeries = {
+  t_s: number[];
+  V_ms: number[];
+  A_ms2?: number[];
+  theta_deg?: number[];
+  theta_dot_deg_s?: number[];
+  handle_force_N?: number[];
+};
+
 export type ReplayFrame =
   | {
       kind: "session";
@@ -168,10 +177,11 @@ export type ReplayFrame =
       arc_deg?: number;
       phase_lag_ms?: number;
       check_factor?: number;
+      P_rower_mean_W?: number;
       energy: Record<string, number>;
       crew?: CrewSeatLive[];
       sync_alert?: SyncAlert;
-      series: { t_s: number[]; V_ms: number[] };
+      series: ReplayStrokeSeries;
       stroke_bars?: StrokeBarSeat[];
     }
   | { kind: "end"; source: "simulated" };
