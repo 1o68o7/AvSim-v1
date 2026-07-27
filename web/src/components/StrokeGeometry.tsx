@@ -20,6 +20,8 @@ export type PoseFrame = {
     pin: PosePoint;
     handle: PosePoint & { y?: number };
     blade: PosePoint & { y?: number };
+    /** 0..1 — indicateur visuel séparé, pas une cote de la tige. */
+    immersion?: number;
   };
   hull: {
     bow_x: number;
@@ -184,7 +186,7 @@ export function StrokeGeometry({
         stroke="rgba(232,241,244,0.5)"
         strokeWidth="1.2"
       />
-      {/* aviron : pin → poignée → palette (x du noyau) */}
+      {/* aviron rigide : poignée–pivot–palette colinéaires (même z serveur) */}
       <line
         x1={blade.px}
         y1={blade.py}
@@ -211,6 +213,28 @@ export function StrokeGeometry({
         fill="#3a9bb0"
         opacity="0.9"
       />
+      {/* Immersion : teinte / tiret sous la pointe — hors trait rigide */}
+      {(oar.immersion ?? 0) > 0.01 && (
+        <g aria-label="immersion palette">
+          <line
+            x1={blade.px}
+            y1={blade.py}
+            x2={blade.px}
+            y2={blade.py + 14}
+            stroke="rgba(58,155,176,0.85)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray="3 2"
+          />
+          <ellipse
+            cx={blade.px}
+            cy={blade.py + 16}
+            rx="7"
+            ry="3"
+            fill="rgba(18,96,122,0.55)"
+          />
+        </g>
+      )}
       {joint(pin, 3.5)}
       {/* corps */}
       {limb(ankle, knee)}
