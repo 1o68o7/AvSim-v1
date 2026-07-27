@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import Plot from "react-plotly.js";
 import { BoatSchematic } from "../../components/BoatSchematic";
+import { FishCurvePanel } from "../../components/FishCurvePanel";
 import { StatusBadge, classBadgeKind } from "../../components/StatusBadge";
 import { useApp } from "../../state";
 
@@ -35,7 +36,7 @@ export function StrokeView() {
     );
   }
 
-  const { series, boat, validation } = result;
+  const { series, boat, validation, crew } = result;
   const thetaNow = series.theta_deg[idx] ?? 0;
   const A = series.A_ms2 ?? [];
   const cursorShape = {
@@ -221,6 +222,13 @@ export function StrokeView() {
             geometry_source: {boat.geometry_source} · catch{" "}
             {boat.theta_catch_deg}° → finish {boat.theta_finish_deg}°
           </p>
+
+          <h3 style={{ marginTop: "1rem" }}>Courbe « poisson »</h3>
+          <p className="muted">
+            ω(θ) cycle complet — asymétrie drive/retour ≈ signature
+            check_factor. <StatusBadge kind="sim" />
+          </p>
+          <FishCurvePanel fish={crew[0]?.fish} cursorThetaDeg={thetaNow} />
         </div>
       </div>
     </div>

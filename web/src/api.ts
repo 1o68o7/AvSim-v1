@@ -82,6 +82,11 @@ export type DriveSeries = {
   theta_dot_deg_s?: number[];
 };
 
+export type FishSeries = {
+  theta_deg: number[];
+  theta_dot_deg_s: number[];
+};
+
 export type StrokeBarSeat = {
   seat: number;
   stroke_bar: StrokeBarMetrics;
@@ -118,6 +123,7 @@ export type SimulateResult = {
     P_mean_W: number;
     stroke_bar?: StrokeBarMetrics;
     drive?: DriveSeries;
+    fish?: FishSeries;
   }>;
   boat: {
     n_rowers: number;

@@ -1,9 +1,10 @@
-"""Visuels coaching équipage — brief-visuels-coaching-sources §1 + §2.
+"""Visuels coaching équipage — brief-visuels-coaching-sources §1–§3.
 
-§1 barre : seuil d'immersion effective ``immersion >= 0.5`` (``Stroke.drive_mask``).
+§1 barre : seuil d'immersion effective ``immersion >= 0.5``.
 §2 nesting : ``drive_series`` — F vs u sur la propulsion seule.
+§3 poisson : ``fish_curve`` — ω(θ) cycle complet.
 
-Pas de poisson / pistes V/a / Team 4Q ici.
+Pas de pistes V/a Team 4Q ici (replay / StrokeView).
 """
 from __future__ import annotations
 
@@ -104,8 +105,21 @@ def drive_series(
     }
 
 
+def fish_curve(
+    theta: np.ndarray,
+    theta_dot: np.ndarray,
+) -> dict[str, list[float]]:
+    """Courbe poisson : ω(θ) cycle complet (brief §3)."""
+    th = np.degrees(np.asarray(theta, dtype=float))
+    w = np.degrees(np.asarray(theta_dot, dtype=float))
+    return {
+        "theta_deg": [float(x) for x in th],
+        "theta_dot_deg_s": [float(x) for x in w],
+    }
+
+
 def crew_stroke_bars(st: Any, P: dict[str, Any]) -> list[dict[str, Any]]:
-    """Barre + drive par poste — enrichissement crew pour API / SSE."""
+    """Barre + drive + poisson par poste — enrichissement crew pour API / SSE."""
     n = int(st.handle_force.shape[0])
     th_c = float(np.radians(P["rig"]["theta_catch_deg"]))
     th_f = float(np.radians(P["rig"]["theta_finish_deg"]))
@@ -132,6 +146,7 @@ def crew_stroke_bars(st: Any, P: dict[str, Any]) -> list[dict[str, Any]]:
             th_catch=th_c,
             th_finish=th_f,
         )
+        fish = fish_curve(st.theta[i], st.theta_dot[i])
         rows.append({
             "seat": i + 1,
             "phase_offset_ms": off,
@@ -139,5 +154,6 @@ def crew_stroke_bars(st: Any, P: dict[str, Any]) -> list[dict[str, Any]]:
             "P_mean_W": e_i / max(T, 1e-9),
             "stroke_bar": bar,
             "drive": drive,
+            "fish": fish,
         })
     return rows
