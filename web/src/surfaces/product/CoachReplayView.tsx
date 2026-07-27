@@ -4,13 +4,16 @@ import {
   api,
   type CompareResult,
   type CoachEvent,
+  type SessionStrokeMark,
   type SessionSummary,
+  type StrokeBarMetrics,
 } from "../../api";
 import {
   StrokeGeometry,
   type PoseFrame,
 } from "../../components/StrokeGeometry";
 import { StatusBadge } from "../../components/StatusBadge";
+import { StrokeLengthBarStack } from "../../components/StrokeLengthBar";
 import { useApp } from "../../state";
 
 function frameAtU(frames: PoseFrame[], u: number): PoseFrame | null {
@@ -32,6 +35,7 @@ export function CoachReplayView() {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [sessionId, setSessionId] = useState<string>("");
   const [events, setEvents] = useState<CoachEvent[]>([]);
+  const [strokes, setStrokes] = useState<SessionStrokeMark[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [compare, setCompare] = useState<CompareResult | null>(null);
   const [metric, setMetric] = useState<
@@ -44,6 +48,21 @@ export function CoachReplayView() {
   const [error, setError] = useState<string | null>(null);
 
   const pose = useMemo(() => frameAtU(frames, uCursor), [frames, uCursor]);
+
+  /** Barres du coup le plus proche de l'event sélectionné, sinon dernier coup. */
+  const replayBars = useMemo(() => {
+    if (!strokes.length) return [] as Array<{ seat: number; bar: StrokeBarMetrics }>;
+    let mark = strokes[strokes.length - 1];
+    if (selected && compare) {
+      const hit = strokes.find(
+        (s) => s.stroke_index === compare.nearest_stroke_index,
+      );
+      if (hit) mark = hit;
+    }
+    return (mark.stroke_bars ?? [])
+      .filter((b) => b.stroke_bar)
+      .map((b) => ({ seat: b.seat, bar: b.stroke_bar }));
+  }, [strokes, selected, compare]);
 
   async function refreshSessions() {
     if (!role) return;
@@ -66,11 +85,15 @@ export function CoachReplayView() {
   useEffect(() => {
     if (!role || !sessionId) {
       setEvents([]);
+      setStrokes([]);
       return;
     }
     api
       .getSession(role, sessionId)
-      .then((s) => setEvents(s.events))
+      .then((s) => {
+        setEvents(s.events);
+        setStrokes(s.strokes ?? []);
+      })
       .catch((e: ApiError) => setError(e.message));
   }, [role, sessionId]);
 
@@ -166,6 +189,21 @@ export function CoachReplayView() {
               style={{ width: "100%" }}
             />
           </label>
+
+          <div className="panel" style={{ marginTop: "0.75rem" }}>
+            <h3>Longueur de coup</h3>
+            <p className="muted">
+              Coup le plus proche de l&apos;annotation (sinon dernier) —{" "}
+              <StatusBadge kind="sim" />
+            </p>
+            {replayBars.length ? (
+              <StrokeLengthBarStack bars={replayBars} />
+            ) : (
+              <p className="muted">
+                Aucune barre — lancez un rejeu Coach live lié à cette séance.
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="panel">

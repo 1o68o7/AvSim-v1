@@ -65,6 +65,16 @@ export type ClassInfo = {
   v_ref_ms: number | null;
 };
 
+export type StrokeBarMetrics = {
+  length_norm: number;
+  catch_white: number;
+  immersed: number;
+  finish_white: number;
+  catch_angle_deg?: number;
+  L_slide_m?: number;
+  immersion_threshold?: number;
+};
+
 export type SimulateResult = {
   source: "simulated";
   stroke_index: number;
@@ -91,6 +101,7 @@ export type SimulateResult = {
     phase_offset_ms: number;
     E_handle_J: number;
     P_mean_W: number;
+    stroke_bar?: StrokeBarMetrics;
   }>;
   boat: {
     n_rowers: number;
@@ -98,6 +109,7 @@ export type SimulateResult = {
     coxed: boolean;
     theta_catch_deg: number;
     theta_finish_deg: number;
+    L_slide_m?: number;
     geometry_source: string;
   };
 };
@@ -108,6 +120,7 @@ export type CrewSeatLive = {
   P_mean_W: number;
   phase_offset_ms: number;
   timing_ms: number;
+  stroke_bar?: StrokeBarMetrics;
 };
 
 export type SyncAlert = {
@@ -143,6 +156,7 @@ export type ReplayFrame =
       crew?: CrewSeatLive[];
       sync_alert?: SyncAlert;
       series: { t_s: number[]; V_ms: number[] };
+      stroke_bars?: Array<{ seat: number; stroke_bar: StrokeBarMetrics }>;
     }
   | { kind: "end"; source: "simulated" };
 
@@ -155,6 +169,18 @@ export type CoachEvent = {
   tag: string | null;
   session_id: string;
   nearest_stroke_index?: number | null;
+};
+
+export type SessionStrokeMark = {
+  stroke_index: number;
+  t_utc: string;
+  cadence_spm: number;
+  v_ms: number;
+  check_factor: number;
+  arc_deg?: number;
+  phase_lag_ms?: number;
+  energy?: Record<string, number>;
+  stroke_bars?: Array<{ seat: number; stroke_bar: StrokeBarMetrics }>;
 };
 
 export type SessionSummary = {
@@ -299,7 +325,7 @@ export const api = {
   getSession: (role: Role, sessionId: string) =>
     request<
       SessionSummary & {
-        strokes: unknown[];
+        strokes: SessionStrokeMark[];
         events: CoachEvent[];
       }
     >(role, `/api/sessions/${encodeURIComponent(sessionId)}`),

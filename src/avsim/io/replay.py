@@ -12,6 +12,7 @@ from typing import Any
 import numpy as np
 
 from avsim.core.solver import Result
+from avsim.io.coaching_viz import crew_stroke_bars
 
 # Six grandeurs Phase 2 / §9.2 déjà dans Stroke.energy() — affichage seul.
 PHASE2_KEYS = (
@@ -101,6 +102,14 @@ def stroke_frame(
     else:
         arc_deg = float(np.max(th0) - np.min(th0)) if th0.size else 0.0
     phase_lag_ms = float(abs(sync["timing_ms"]))
+    bars_by_seat = {
+        r["seat"]: r["stroke_bar"]
+        for r in (crew_stroke_bars(st, P) if P else [])
+    }
+    crew_rich = [
+        {**row, "stroke_bar": bars_by_seat.get(row["seat"])}
+        for row in crew
+    ]
     return {
         "kind": "stroke",
         "source": "simulated",
@@ -114,12 +123,17 @@ def stroke_frame(
         "phase_lag_ms": phase_lag_ms,
         "check_factor": float(en["check_factor"]),
         "energy": phase2_metrics(st),
-        "crew": crew,
+        "crew": crew_rich,
         "sync_alert": sync,
         "series": {
             "t_s": [float(x) for x in st.t],
             "V_ms": [float(x) for x in st.V],
         },
+        # Copie plate pour persistance StrokeMark / Coach Replay
+        "stroke_bars": [
+            {"seat": s, "stroke_bar": b}
+            for s, b in sorted(bars_by_seat.items())
+        ],
     }
 
 
