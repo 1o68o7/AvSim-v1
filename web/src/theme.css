@@ -1,13 +1,11 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap");
+@import "./tokens.css";
 
 :root {
+  /* Couleurs sémantiques badges / alertes (données, pas chrome Render) */
   --ink: #0c1a22;
   --ink-soft: #1a3340;
-  --foam: #e8f1f4;
-  --mist: #b7c9d1;
   --water-deep: #0a3a4a;
   --water-mid: #12607a;
-  --water-light: #3a9bb0;
   --sand: #d4c4a8;
   --alert: #c45c26;
   --ok: #2f7d4a;
@@ -16,11 +14,6 @@
   --sim: #1e6b7a;
   --beta: #9a5b1a;
   --validated: #2f7d4a;
-  --panel: rgba(232, 241, 244, 0.08);
-  --line: rgba(232, 241, 244, 0.18);
-  --font-display: "Fraunces", Georgia, serif;
-  --font-body: "Source Sans 3", "Segoe UI", sans-serif;
-  --radius: 6px;
 }
 
 * {
@@ -36,25 +29,29 @@ body,
 
 body {
   font-family: var(--font-body);
-  color: var(--foam);
-  background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(58, 155, 176, 0.28), transparent 55%),
-    radial-gradient(900px 500px at 90% 0%, rgba(212, 196, 168, 0.12), transparent 50%),
-    linear-gradient(165deg, #061018 0%, var(--water-deep) 45%, #082430 100%);
-  background-attachment: fixed;
+  color: var(--color-text-primary);
+  background: var(--color-background);
+  transition:
+    background var(--global-transition),
+    color var(--global-transition);
 }
 
 h1,
 h2,
 h3 {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 300;
   letter-spacing: -0.02em;
   margin: 0 0 0.4rem;
 }
 
 a {
-  color: var(--water-light);
+  color: var(--color-link);
+  transition: color var(--global-transition), background var(--global-transition);
+}
+
+a:hover {
+  color: var(--color-accent);
 }
 
 button,
@@ -65,11 +62,20 @@ input {
 
 button {
   cursor: pointer;
-  border: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(58, 155, 176, 0.35), rgba(18, 96, 122, 0.55));
-  color: var(--foam);
-  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  background: var(--accent-surface);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-6);
   padding: 0.55rem 1rem;
+  transition:
+    border-color var(--global-transition),
+    background var(--global-transition),
+    color var(--global-transition);
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  background: var(--color-accent-hover);
 }
 
 button:disabled {
@@ -81,19 +87,23 @@ button.ghost {
   background: transparent;
 }
 
+button.ghost:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
 .panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-8);
   padding: 1rem 1.1rem;
-  backdrop-filter: blur(6px);
 }
 
 .banner {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-8);
   padding: 0.65rem 0.9rem;
   margin: 0.6rem 0;
+  transition: border-color var(--global-transition), background var(--global-transition);
 }
 
 .banner.beta {
@@ -116,12 +126,16 @@ button.ghost {
   align-items: center;
   gap: 0.35rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   padding: 0.2rem 0.5rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid currentColor;
+  transition:
+    color var(--global-transition),
+    background var(--global-transition),
+    border-color var(--global-transition);
 }
 
 .badge.sim {
@@ -175,16 +189,26 @@ button.ghost {
 
 .nav a {
   text-decoration: none;
-  color: var(--mist);
+  color: var(--color-text-secondary);
   padding: 0.35rem 0.7rem;
-  border-radius: var(--radius);
+  border-radius: var(--radius-6);
   border: 1px solid transparent;
+  transition:
+    color var(--global-transition),
+    border-color var(--global-transition),
+    background var(--global-transition);
+}
+
+.nav a:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+  background: var(--color-accent-hover);
 }
 
 .nav a.active {
-  color: var(--foam);
-  border-color: var(--line);
-  background: rgba(232, 241, 244, 0.08);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+  background: var(--color-accent-hover);
 }
 
 .nav a.soon {
@@ -210,10 +234,11 @@ button.ghost {
 }
 
 .metric {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-8);
   padding: 0.7rem 0.8rem;
-  background: rgba(6, 16, 24, 0.35);
+  background: var(--color-panel);
+  transition: border-color var(--global-transition);
 }
 
 .metric .label {
@@ -223,6 +248,7 @@ button.ghost {
 .metric .value {
   font-family: var(--font-display);
   font-size: 1.45rem;
+  font-weight: 300;
 }
 .metric .target {
   font-size: 0.75rem;
@@ -266,13 +292,18 @@ button.ghost {
   text-align: left;
   padding: 1.4rem;
   min-height: 10rem;
-  background: linear-gradient(160deg, rgba(18, 96, 122, 0.45), rgba(6, 16, 24, 0.55));
-  transition: transform 160ms ease, border-color 160ms ease;
+  background: var(--color-panel);
+  border-radius: var(--radius-8);
+  transition:
+    transform var(--global-transition),
+    border-color var(--global-transition),
+    background var(--global-transition);
 }
 
 .role-choice:hover {
   transform: translateY(-2px);
-  border-color: rgba(58, 155, 176, 0.7);
+  border-color: var(--color-accent);
+  background: var(--color-accent-hover);
 }
 
 table.data {
@@ -403,10 +434,12 @@ table.data td {
   align-content: start;
   gap: 0.35rem;
   padding: 0.65rem 0.75rem;
-  background: rgba(6, 16, 24, 0.45);
-  border-bottom: 3px solid rgba(58, 155, 176, 0.45);
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-8);
   min-height: 0;
   overflow: hidden;
+  transition: border-color var(--global-transition);
 }
 
 .team-quad-cell h3 {
@@ -471,33 +504,34 @@ table.data td {
   text-align: center;
   gap: 0.15rem;
   padding: 1.25rem 0.5rem;
-  background: rgba(6, 16, 24, 0.45);
-  border-bottom: 3px solid rgba(58, 155, 176, 0.55);
-  animation: team-in 280ms ease-out;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-8);
+  animation: team-in var(--global-transition) ease-out;
 }
 
 .team-metric-label {
   font-size: 0.95rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--mist);
-  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-weight: 500;
 }
 
 .team-metric-value {
   font-family: var(--font-display);
   font-size: clamp(3.2rem, 11vw, 5.5rem);
-  font-weight: 700;
+  font-weight: 300;
   line-height: 1.05;
   font-variant-numeric: tabular-nums;
-  color: var(--foam);
-  transition: opacity 180ms ease;
+  color: var(--color-text-primary);
+  transition: opacity var(--global-transition);
 }
 
 .team-metric-unit {
   font-size: 1rem;
-  color: var(--water-light);
-  font-weight: 600;
+  color: var(--color-accent);
+  font-weight: 500;
 }
 
 .team-controls {
@@ -527,10 +561,11 @@ table.data td {
 }
 
 .coach-seat {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-8);
   padding: 0.75rem 0.85rem;
-  background: rgba(6, 16, 24, 0.4);
+  background: var(--color-panel);
+  transition: border-color var(--global-transition);
 }
 
 .coach-seat.alert {
@@ -594,13 +629,17 @@ table.data td {
   text-align: left;
   display: grid;
   gap: 0.15rem;
-  background: rgba(6, 16, 24, 0.35);
-  border: 1px solid var(--line);
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-6);
+  transition:
+    border-color var(--global-transition),
+    background var(--global-transition);
 }
 
 .event-chip.active {
-  border-color: rgba(58, 155, 176, 0.75);
-  background: rgba(18, 96, 122, 0.35);
+  border-color: var(--color-accent);
+  background: var(--color-accent-hover);
 }
 
 .event-chip-t {
