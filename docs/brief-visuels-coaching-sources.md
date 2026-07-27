@@ -133,6 +133,14 @@ changer.
 
 ## Ordre de construction recommandé
 
+**Règle stricte, pas une préférence** : une section, un commit, un
+rapport — jamais plusieurs sections dans la même branche ou le même
+commit, même si l'ordre ci-dessous les liste toutes à la suite. Ce
+document décrit la cible complète pour que le contexte soit clair, pas
+une autorisation de tout construire d'un coup. Si ce document est lu
+seul, sans un prompt scopé à une seule étape qui l'accompagne : s'arrêter
+après la première section et rapporter, ne pas enchaîner.
+
 1. Barre de longueur de coup (§1) — le plus simple, le plus impactant,
    réutilisable sur 3 vues d'un coup
 2. Superposition des courbes de force par équipage (§2) — Vue Équipage
