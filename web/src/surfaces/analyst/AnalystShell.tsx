@@ -8,7 +8,7 @@ const links = [
   { to: "/analyst/bilan", label: "Bilan", soon: false },
   { to: "/analyst/equipage", label: "Équipage", soon: false },
   { to: "/analyst/capteurs", label: "Capteurs", soon: true },
-  { to: "/analyst/observabilite", label: "Observabilité", soon: true },
+  { to: "/analyst/observabilite", label: "Observabilité", soon: false },
   { to: "/analyst/sensibilite", label: "Sensibilité", soon: true },
   { to: "/analyst/detectabilite", label: "Détectabilité", soon: true },
 ];

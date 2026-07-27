@@ -6,6 +6,7 @@ import copy
 import json
 import time
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -238,6 +239,37 @@ def jobs_sweep(role: Role = Depends(require_role)):
         501,
         "Mode sweep / Sobol non implémenté — Phase 5 (analysis/). Maquette UI seulement.",
     )
+
+
+@app.get("/api/analysis/observability")
+def get_observability(role: Role = Depends(require_role)):
+    """Mode C — résultat pilote 2x précalculé (pas un recalcul live).
+
+    Étiquetage permanent : pilote classe 2x uniquement — les 7 autres
+    classes restent bloquées, cf. STATE.md.
+    """
+    analyst_only(role)
+    # data/ à la racine du dépôt (install editable ou cwd projet)
+    candidates = [
+        Path.cwd() / "data" / "observability_2x_pilot.json",
+        Path(__file__).resolve().parents[3] / "data" / "observability_2x_pilot.json",
+    ]
+    path = next((p for p in candidates if p.is_file()), None)
+    if path is None:
+        raise HTTPException(
+            404,
+            "Résultat Mode C 2x introuvable (data/observability_2x_pilot.json). "
+            "Pilote classe 2x uniquement — les 7 autres classes restent bloquées.",
+        )
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    # Garantir le bandeau même si le JSON est relu ailleurs
+    payload.setdefault(
+        "pilot_label",
+        "Pilote classe 2x uniquement — les 7 autres classes restent bloquées, "
+        "cf. STATE.md. Non représentatif des autres classes tant que Phase 1 "
+        "n'avance pas plus loin.",
+    )
+    return payload
 
 
 @app.get("/api/pose")

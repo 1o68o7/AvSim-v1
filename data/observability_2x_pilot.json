@@ -1,0 +1,171 @@
+{
+  "pilot_label": "Pilote classe 2x uniquement \u2014 les 7 autres classes restent bloqu\u00e9es, cf. STATE.md. Non repr\u00e9sentatif des autres classes tant que Phase 1 n'avance pas plus loin.",
+  "boat_class": "2x",
+  "n_truths": 200,
+  "greedy_path": [
+    {
+      "subset": [],
+      "cost_eur": 0.0,
+      "mass_g": 0.0,
+      "rmse_V": 0.933305711099385,
+      "rmse_com": 0.39851532728965766,
+      "rmse_combined": 4.918458983995961,
+      "added": null
+    },
+    {
+      "subset": [
+        "coulisse"
+      ],
+      "cost_eur": 12.0,
+      "mass_g": 8.0,
+      "rmse_V": 0.933305711099385,
+      "rmse_com": 0.10549554726264491,
+      "rmse_combined": 1.9882611837258342,
+      "added": "coulisse"
+    },
+    {
+      "subset": [
+        "coulisse",
+        "gnss_rtk"
+      ],
+      "cost_eur": 282.0,
+      "mass_g": 68.0,
+      "rmse_V": 0.1660976132008173,
+      "rmse_com": 0.10549554726264491,
+      "rmse_combined": 1.2210530858272666,
+      "added": "gnss_rtk"
+    },
+    {
+      "subset": [
+        "coulisse",
+        "gnss_rtk",
+        "pod_dorsal"
+      ],
+      "cost_eur": 310.0,
+      "mass_g": 98.0,
+      "rmse_V": 0.1660976132008173,
+      "rmse_com": 0.0990838548154546,
+      "rmse_combined": 1.1569361613553635,
+      "added": "pod_dorsal"
+    },
+    {
+      "subset": [
+        "coulisse",
+        "gnss_rtk",
+        "pod_dorsal",
+        "imu_coque"
+      ],
+      "cost_eur": 338.0,
+      "mass_g": 123.0,
+      "rmse_V": 0.10816455185136739,
+      "rmse_com": 0.0990838548154546,
+      "rmse_combined": 1.0990031000059135,
+      "added": "imu_coque"
+    }
+  ],
+  "sensor_gains": [
+    {
+      "sensor_id": "coulisse",
+      "label": "Coulisse ToF",
+      "channel": "com",
+      "cost_eur": 12.0,
+      "mass_g": 8.0,
+      "gain_rmse_combined": 2.930197800270127,
+      "gain_rmse_V": 0.0,
+      "gain_rmse_com": 0.29301978002701273,
+      "order": 1
+    },
+    {
+      "sensor_id": "gnss_rtk",
+      "label": "GNSS RTK",
+      "channel": "velocity",
+      "cost_eur": 270.0,
+      "mass_g": 60.0,
+      "gain_rmse_combined": 0.7672080978985676,
+      "gain_rmse_V": 0.7672080978985677,
+      "gain_rmse_com": 0.0,
+      "order": 2
+    },
+    {
+      "sensor_id": "pod_dorsal",
+      "label": "Pod dorsal",
+      "channel": "com",
+      "cost_eur": 28.0,
+      "mass_g": 30.0,
+      "gain_rmse_combined": 0.06411692447190309,
+      "gain_rmse_V": 0.0,
+      "gain_rmse_com": 0.006411692447190309,
+      "order": 3
+    },
+    {
+      "sensor_id": "imu_coque",
+      "label": "IMU coque",
+      "channel": "accel",
+      "cost_eur": 28.0,
+      "mass_g": 25.0,
+      "gain_rmse_combined": 0.05793306134944998,
+      "gain_rmse_V": 0.05793306134944992,
+      "gain_rmse_com": 0.0,
+      "order": 4
+    }
+  ],
+  "pareto_cost_error": [
+    {
+      "subset": [],
+      "cost_eur": 0.0,
+      "mass_g": 0.0,
+      "rmse_V": 0.933305711099385,
+      "rmse_com": 0.39851532728965766,
+      "rmse_combined": 4.918458983995961
+    },
+    {
+      "subset": [
+        "coulisse"
+      ],
+      "cost_eur": 12.0,
+      "mass_g": 8.0,
+      "rmse_V": 0.933305711099385,
+      "rmse_com": 0.10549554726264491,
+      "rmse_combined": 1.9882611837258342
+    },
+    {
+      "subset": [
+        "coulisse",
+        "gnss_rtk"
+      ],
+      "cost_eur": 282.0,
+      "mass_g": 68.0,
+      "rmse_V": 0.1660976132008173,
+      "rmse_com": 0.10549554726264491,
+      "rmse_combined": 1.2210530858272666
+    },
+    {
+      "subset": [
+        "coulisse",
+        "gnss_rtk",
+        "pod_dorsal"
+      ],
+      "cost_eur": 310.0,
+      "mass_g": 98.0,
+      "rmse_V": 0.1660976132008173,
+      "rmse_com": 0.0990838548154546,
+      "rmse_combined": 1.1569361613553635
+    },
+    {
+      "subset": [
+        "coulisse",
+        "gnss_rtk",
+        "pod_dorsal",
+        "imu_coque"
+      ],
+      "cost_eur": 338.0,
+      "mass_g": 123.0,
+      "rmse_V": 0.10816455185136739,
+      "rmse_com": 0.0990838548154546,
+      "rmse_combined": 1.0990031000059135
+    }
+  ],
+  "elapsed_s": 760.0515795200045,
+  "source": "simulated",
+  "note": "Pilote classe 2x uniquement \u2014 les 7 autres classes restent bloqu\u00e9es, cf. STATE.md. Non repr\u00e9sentatif des autres classes tant que Phase 1 n'avance pas plus loin."
+}

@@ -8,10 +8,10 @@ import { BalanceView } from "./surfaces/analyst/BalanceView";
 import { CrewView } from "./surfaces/analyst/CrewView";
 import {
   DetectabilityView,
-  ObservabilityView,
   SensitivityView,
   SensorsView,
 } from "./surfaces/analyst/BlockedViews";
+import { ObservabilityView } from "./surfaces/analyst/ObservabilityView";
 import {
   CoachLiveView,
   CoachReplayView,

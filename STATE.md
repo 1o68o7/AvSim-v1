@@ -191,6 +191,19 @@ visibles / documentés ; ils ne bloquent pas le prototype d'affichage.
 Comparaisons avant/après Coach replay : **écart brut seulement** —
 Mode D (Détectabilité) absent, pas de seuil inventé.
 
+### Mode C Observabilité — pilote 2x uniquement
+
+Mode C tourne **pour de vrai** sur **2x seulement** (seule classe qui
+passe l'enveloppe avec `ignore_known_1dof_limits=True`). Les **7 autres
+classes restent bloquées** par les limites 1DOF ci-dessus.
+
+- EKF minimal `estimation/ekf.py` → `[V, x_com]`
+- 200 vérités terrain 2x, sélection gloutonne (pas 4096 sous-ensembles)
+- Résultat : `data/observability_2x_pilot.json` + vue Analyste
+  `/analyst/observabilite` (bandeau permanent)
+- **Non représentatif** des autres classes tant que Phase 1 n'avance
+  pas plus loin.
+
 **Phase 7** (brief `docs/brief-interface-utilisateur.md`) : API FastAPI +
 UI React (Analyste 🟢 / Produit). Badges Simulé + Validée/Bêta. Phase 1
 reste en dette — les 6 classes bêta ne sont pas à égalité avec 8+/1x.

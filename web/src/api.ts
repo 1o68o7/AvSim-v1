@@ -314,6 +314,41 @@ export async function openReplayStream(
   }
 }
 
+/** Mode C — pilote 2x uniquement (pas représentatif des autres classes). */
+export type ObservabilitySubsetScore = {
+  subset: string[];
+  cost_eur: number;
+  mass_g: number;
+  rmse_V: number;
+  rmse_com: number;
+  rmse_combined: number;
+  added?: string | null;
+};
+
+export type ObservabilityGain = {
+  sensor_id: string;
+  label: string;
+  channel: string;
+  cost_eur: number;
+  mass_g: number;
+  gain_rmse_combined: number;
+  gain_rmse_V: number;
+  gain_rmse_com: number;
+  order: number;
+};
+
+export type ObservabilityResult = {
+  pilot_label: string;
+  boat_class: string;
+  n_truths: number;
+  greedy_path: ObservabilitySubsetScore[];
+  sensor_gains: ObservabilityGain[];
+  pareto_cost_error: ObservabilitySubsetScore[];
+  elapsed_s?: number | null;
+  source?: string;
+  note?: string;
+};
+
 export const api = {
   classes: (role: Role) =>
     request<{ classes: ClassInfo[] }>(role, "/api/classes"),
@@ -435,4 +470,7 @@ export const api = {
     });
     return request<ProgressionResult>(role, `/api/rameur/progression?${q}`);
   },
+  /** Mode C précalculé — pilote 2x uniquement. */
+  observability: (role: Role) =>
+    request<ObservabilityResult>(role, "/api/analysis/observability"),
 };
