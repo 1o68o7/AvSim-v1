@@ -4,7 +4,9 @@
 Complète `STATE.md` (physique) et `docs/ETAT-DATAROW.md` (chantiers).  
 Ceci n'est **pas** l'UI Analyste ni l'aide à l'achat capteurs.*
 
-Coller ce fichier dans Stitch tel quel. Une app, trois profils, sept écrans.
+DA **verrouillée** le 16/09 : instrument cockpit paysage 3 colonnes (maquette validée).  
+Prompt de correction Stitch : `docs/STITCH-PROMPT-CORRECTION.md`.  
+Le projet Stitch portrait `1264451048753434333` n'est **pas** la référence.
 
 ---
 
@@ -25,7 +27,8 @@ Nom de travail à l'écran : **DataR0w** (pas « AvSim », pas « Analyste »).
 | Fixation | Support au **cale-pied**, ou au **portant** s'il passe au-dessus. Téléphone **paysage**, axe long // axe bateau |
 | Niveau | Support réglé mécaniquement à l'horizontale. L'app fait une **tare gîte à quai**, pas un offset inventé à chaque coup |
 | Coach live | **4G/5G** bateau → cloud → téléphone coach. Trou réseau = log local, sync à quai |
-| Stack UI | Native iOS + Android (Flutter par défaut si non tranché). Stitch dessine, pas le framework |
+| Stack UI | Native iOS + Android (Flutter par défaut si non tranché) |
+| DA | Cockpit instrument, fond `#0B0E12`, 3 colonnes, **pas** Material / fitness |
 | Aide à l'achat capteurs | Outil **maison**, hors ce pack |
 
 ---
@@ -34,7 +37,7 @@ Nom de travail à l'écran : **DataR0w** (pas « AvSim », pas « Analyste »).
 
 | Surface | Public | Dans Stitch ? |
 |---|---|---|
-| **Club** | Rameur, Barreur, Coach | **Oui** — ce document |
+| **Club** | Rameur, Barreur, Coach | **Oui** |
 | **Maison** | Analyste, Pareto capteurs, YAML | **Non** |
 
 ---
@@ -48,7 +51,7 @@ Session unique. Trois fenêtres.
 **Afficher**
 
 - Gros : cadence (coups/min), vitesse GPS, distance **ou** temps (un seul des deux en gros)
-- Moyen : **gîte** (horizon artificiel / bille, axe bateau)
+- Moyen : **gîte** (horizon artificiel / bille, axe bateau) — libellé `GÎTE`, jamais « inclinaison talon »
 - Petit : état capteurs (OK / perdu), batterie téléphone, pastille réseau (4G / hors ligne)
 
 **Ne jamais afficher au rameur**
@@ -76,99 +79,68 @@ Légende obligatoire sous la vitesse : `sol — pas eau` (GPS ≠ vitesse surfac
 
 **Ne pas afficher** : réglage physique, Observabilité, badges labo.
 
-Consigne **vers** le rameur pendant le live : **hors MVP** (annotation locale coach seulement). À débloquer plus tard.
+Consigne **vers** le rameur pendant le live : **hors MVP**.
 
 ---
 
 ## 4. Les 7 écrans à dessiner
 
-Orientation **paysage** pour 3, 4, 5. Portrait OK pour 1, 2, 6, 7.
-
-Cible : iPhone 15 / Pixel classe 6,1" paysage ≈ 844×390 pt. Contraste WCAG AAA sur les 3 gros chiffres. Fond sombre (soleil sur l'eau). Pas de glassmorphism. Pas de sidebar desktop.
+Orientation **paysage 844×390** pour 3, 4, 5. Portrait OK pour 1, 2, 6, 7 **seulement si** la DA reste cockpit (pas de retour Material).
 
 ### Écran 1 — Entrée / profil
 
 - Logo DataR0w
-- Trois cartes : **Rameur** | **Coach** | **Barreur**
-- Barreur **grisé** + mention `besoin d'un bateau barré` tant que la classe = 1x
+- Trois rangées plates (pas de cartes élevées) : **Rameur** | **Coach** | **Barreur**
+- Barreur **grisé** + `besoin d'un bateau barré` tant que classe = 1x
 - Pas de sélecteur Analyste
 
-### Écran 2 — Pré-session (portrait ou paysage)
+### Écran 2 — Pré-session
 
-- Classe : `1x` sélectionné ; autres classes visibles mais secondaires
+- Classe : `1x` sélectionné
 - Bassin (texte libre v1)
-- Liste capteurs : `GPS` `IMU` + emplacements BLE vides (`— aucun`)
-- Bouton plein largeur : **Tare gîte (30 s)** — bateau à quai, coque calée
+- Capteurs : `GPS` `IMU` + BLE `— aucun`
+- **Tare gîte (30 s)** — bateau à quai, coque calée
 - État tare : `non faite` / `OK ±0,2°`
 - CTA : **Démarrer la session**
 
-### Écran 3 — Rameur live (paysage) — écran roi
+### Écran 3 — Rameur live (paysage) — écran roi · DA validée
 
-Trois colonnes stables, pas de scroll.
+Trois colonnes, pas de scroll.
 
 ```
 ┌───────────────┬────────────┬───────────┐
-│  28 /min           │   GÎTE         │  ● GPS  │
-│  4.2 m/s  sol      │   [horizon]    │  ● IMU  │
-│  1.24 km           │   +1.4° trib.  │  4G  62%│
+│  28                 │   GÎTE         │  ● GPS  │
+│  coups/min          │   [horizon]    │  ● IMU  │
+│  4.2                │   ±3°          │  4G     │
+│  m/s sol — pas eau  │   +1.4° trib.  │  62%    │
+│  1.24 km            │                │  STOP   │
 └───────────────┴────────────┴───────────┘
 ```
 
-- Chiffres nav : très gros, mono, blanc sur noir
-- Gîte : horizon type avion léger, **l'eau est la référence visuelle**, pas un graphe Plotly
-- Bande de tolérance gîte ±X° (X = 3° v1, réglable plus tard, pas un knob sur cet écran)
-- Zone statut : pastilles, pas de texte long
-- Bouton discret `Stop` coin bas (confirmation 1 tap de plus)
+### Écran 4 — Rameur alerte
 
-### Écran 4 — Rameur alerte (variante de 3)
-
-Même layout. Une barre haute pleine largeur, une cause, une couleur.
-
-- `Gîte — trop tribords` **ou**
-- `Cadence — rupture`
-
-Pas de stack d'alertes. Disparaît dès que la condition retombe 2 s.
+Même layout. Bandeau haut `#E8C547` : `GÎTE — trop tribords` **ou** `Cadence — rupture`. Une seule cause.
 
 ### Écran 5 — Coach live
 
-- Gauche (60 %) : carte (trace GPS du bateau), nord en haut
-- Droite : cadence, V sol, gîte instantanée, pastille lien (`live` / `retard 8 s` / `hors ligne`)
-- Bas : **Annoter** gros — 1 tap écrit un événement `t=now` (texte optionnel après, pas obligatoire au tap)
-- Max 3 chips d'alerte (mêmes règles que le rameur)
-- Aucun bouton « envoyer au bateau »
+- Gauche 60 % : carte sombre, une trace GPS
+- Droite : cadence, V sol, gîte, chip `live` / `retard` / `hors ligne`
+- Bas : **ANNOTER**
+- Pas de « envoyer au bateau »
 
 ### Écran 6 — Coach replay
 
-- Timeline horizontale de la séance (play / pause / ±10 s)
-- 2 courbes max au choix : cadence | V sol | gîte  (pas 13 traces)
-- Marqueurs d'annotation sur la timeline
-- Liste annotations à droite
-- Comparer deux extraits : **écart brut** (`Δ cadence = +2`) sans verdict
+Timeline + 2 courbes max (cadence | V sol | gîte) + annotations. Écarts bruts seulement.
 
-### Écran 7 — Quai / fin de séance
+### Écran 7 — Quai
 
-Quatre chiffres seulement : durée, distance GPS, cadence moyenne, gîte RMS.
-
-- État sync : `envoyé` / `en attente réseau`
-- Partager au coach du club (lien session)
-- Retour accueil
-
-Pas de PDF labo, pas de bilan énergétique.
+Durée, distance GPS, cadence moyenne, gîte RMS. Sync. Partage coach.
 
 ---
 
-## 5. Extension autres bateaux (même pack)
+## 5. Extension autres bateaux
 
-Ne pas dessiner 7 écrans × 8 classes.
-
-Règles :
-
-- Écran 1 : Barreur actif si classe ∈ {`4+`, `8+`}
-- Écran 3 / 5 : un **schéma bateau** 1 / 2 / 4 / 8 cases à la place du vide statut si `n_rowers > 1`
-- Couleur d'une case = OK / décroche (cadence poste vs bateau) — seulement quand un capteur poste existe
-- 1x : pas de schéma, on garde les pastilles
-
-Stitch : fournir le schéma 1x (rien), 2x (2 cases), 8+ (8 cases + triangle barreur). Assez pour interpoler.
+Mêmes 7 écrans. Schéma 2 / 8 cases seulement si `n_rowers > 1`. Barreur si `4+` / `8+`.
 
 ---
 
@@ -179,51 +151,38 @@ Stitch : fournir le schéma 1x (rien), 2x (2 cases), 8+ (8 cases + triangle barr
 | GPS téléphone | oui | Mesuré |
 | IMU téléphone (gîte, cadence approx.) | oui | Mesuré |
 | BLE force / angle | slot vide | — |
-| Modèle physique AvSim | **interdit** sur Club | (Maison seulement) |
+| Modèle physique AvSim | **interdit** sur Club | Maison seulement |
 
-Si un jour un chiffre vient du simulateur (démo sans bateau) : badge **Simulé** obligatoire, même typo que le web actuel.
-
-Cadence IMU ≠ catch slip Kleshnev. **Ne pas** étiqueter « slip ».
+Cadence IMU ≠ catch slip. Ne pas étiqueter « slip ».
 
 ---
 
-## 7. Ton visuel
+## 7. Ton visuel — figé
 
-- Nautique instrument, pas dashboard SaaS
-- Noir / gris charbon / un accent (jaune alertes, bleu live)
-- Typo chiffres : tabulaire, largeur fixe
-- Zones tactiles ≥ 48 dp (doigts mouillés)
-- Aucune pub, aucun onboarding de 8 slides
-- Langue : français. Mots courts.
+| Token | Valeur |
+|---|---|
+| Fond | `#0B0E12` |
+| Chiffres | blanc, tabular |
+| Labels | `#9AA0A6`, 11 px |
+| Filets | `#2A2F36` |
+| Alerte | `#E8C547` |
+| Canvas live | **844 × 390** |
 
-Référence d'ambiance : afficheur de bateau / horizon cockpit, pas Strava.
-
----
-
-## 8. Hors scope Stitch (ne pas inventer d'écran)
-
-- Analyste / Observabilité / Sensibilité / Pareto
-- Réglage `F_peak`, YAML, constructeur de coque
-- Haptique Coup+1 (plus tard)
-- LoRa, station de rive, anémomètre
-- Compte club complexe, paiement
-- 3D bateau
+Interdit : cartes Material, ombres, blur, violet, teal, tab bar, hamburger.
+Référence : cockpit / horizon, pas Strava.
 
 ---
 
-## 9. Prompt Stitch (bloc à coller)
+## 8. Hors scope Stitch
 
-```
-App native aviron, nom DataR0w. Smartphone fixé au cale-pied en PAYSAGE.
-3 profils : Rameur, Coach, Barreur (grisé sur skiff).
-7 écrans : (1) choix profil (2) pré-session + tare gîte 30s (3) rameur live
-3 colonnes cadence/V/distance + horizon gîte + pastilles capteurs
-(4) même écran + 1 bandeau alerte (5) coach live carte + annoter
-(6) coach replay 2 courbes + annotations (7) résumé quai 4 chiffres.
-Fond noir, gros chiffres blancs, contraste soleil, pas de sidebar,
-pas de watts, pas de settings labo. Français. iPhone 15 paysage.
-Prévoir variante schéma 2 cases et 8 cases pour plus tard.
-```
+Analyste, Pareto, YAML, haptique Coup+1, LoRa, 3D, paiement.
+
+---
+
+## 9. Prompts
+
+- Pack initial (périmé pour la DA) : ne plus coller le bloc court « 7 écrans » sans contrainte canvas.
+- **Correction à coller maintenant** : `docs/STITCH-PROMPT-CORRECTION.md`
 
 ---
 
@@ -231,8 +190,7 @@ Prévoir variante schéma 2 cases et 8 cases pour plus tard.
 
 | Fichier | Rôle |
 |---|---|
-| `STATE.md` | Vérité physique simulateur — ne pas la copier dans l'app club |
+| `docs/STITCH-PROMPT-CORRECTION.md` | Prompt de correction DA — source à coller |
+| `STATE.md` | Vérité physique simulateur |
 | `docs/ETAT-DATAROW.md` | Trois chantiers |
-| `docs/MANQUES.md` | Trous données / hardware |
-| `docs/avsim-personas-temps-reel.md` | Conception longue — ce brief **réduit** au MVP |
-| `web/` | Prototype desktop — **ne pas** cloner pixel à pixel |
+| `web/` | Prototype desktop — ne pas cloner |
