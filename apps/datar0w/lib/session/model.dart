@@ -49,4 +49,22 @@ class SessionSample {
       };
 
   String toJsonLine() => jsonEncode(toJson());
+
+  static SessionSample fromJson(Map<String, dynamic> j) {
+    return SessionSample(
+      t: (j['t'] as num).toInt(),
+      lat: (j['lat'] as num?)?.toDouble(),
+      lon: (j['lon'] as num?)?.toDouble(),
+      alt: (j['alt'] as num?)?.toDouble(),
+      sog: (j['sog'] as num?)?.toDouble(),
+      cog: (j['cog'] as num?)?.toDouble(),
+      accH: (j['acc_h'] as num?)?.toDouble(),
+      distM: (j['dist_m'] as num?)?.toDouble() ?? 0,
+      giteDeg: (j['gite_deg'] as num?)?.toDouble(),
+      pitchDeg: (j['pitch_deg'] as num?)?.toDouble(),
+      cadenceSpm: (j['cadence_spm'] as num?)?.toDouble(),
+      batt: (j['batt'] as num?)?.toInt(),
+      net: j['net'] as String? ?? 'hors ligne',
+    );
+  }
 }

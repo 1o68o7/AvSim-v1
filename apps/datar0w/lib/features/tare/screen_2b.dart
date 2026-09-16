@@ -1,19 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router.dart';
+import '../../session/live_hub.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 
-/// Tare 30 s + offset = lot C. Ici navigation + axe BÂBORD | TRIBORD.
-class TareScreen extends StatelessWidget {
+class TareScreen extends ConsumerStatefulWidget {
   const TareScreen({super.key});
 
   @override
+  ConsumerState<TareScreen> createState() => _TareScreenState();
+}
+
+class _TareScreenState extends ConsumerState<TareScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(liveHubProvider.notifier).listenImu();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final s = ref.watch(liveHubProvider);
+    final live = s.tareOk ? s.giteDeg : s.rollDeg;
+    final shown = (live ?? 0).clamp(-15.0, 15.0);
+    final status = switch (s.tareStatus) {
+      TareStatus.none => 'NON FAITE',
+      TareStatus.running => 'EN COURS  ${s.tareElapsedS} s / 30',
+      TareStatus.ok =>
+        'OK  offset ${s.tareOffset!.toStringAsFixed(2)}°  σ ${s.tareSigma?.toStringAsFixed(3)}°',
+      TareStatus.failed =>
+        'RECOMMENCER  σ ${s.tareSigma?.toStringAsFixed(2) ?? '—'}°  (≥ 0,2°)',
+    };
+
     return DeckScaffold(
       title: 'DATAROW / 2B',
-      subtitle: 'Tare gîte — lot C',
+      subtitle: 'Tare gîte · référentiel rameur',
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -31,26 +57,86 @@ class TareScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
-              '0.0°',
-              style: TextStyle(fontSize: 48, fontWeight: FontWeight.w700),
+            Text(
+              '${shown.toStringAsFixed(1)}°',
+              style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w700),
             ),
             const Text(
-              'référentiel rameur',
+              'LECTURE ASSIETTE LIVE',
+              style: TextStyle(color: DeckColors.label, fontSize: 11),
+            ),
+            const SizedBox(height: 16),
+            _HeelBar(valueDeg: shown),
+            const SizedBox(height: 8),
+            const Text(
+              'TOLÉRANCE  σ < 0,2°  ·  30 s',
               style: TextStyle(color: DeckColors.label, fontSize: 11),
             ),
             const Spacer(),
-            const Text(
-              'STATUT : non faite (tare 30 s au lot C)',
-              style: TextStyle(color: DeckColors.label),
+            FilledButton(
+              onPressed: s.tareStatus == TareStatus.running
+                  ? null
+                  : () => ref.read(liveHubProvider.notifier).beginTare(),
+              child: Text(
+                s.tareStatus == TareStatus.failed
+                    ? 'RECOMMENCER TARE (30 S)'
+                    : 'TARE GÎTE (30 S)',
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'STATUT ÉTALONNAGE : $status',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: DeckColors.label, fontSize: 12),
             ),
             const SizedBox(height: 12),
             FilledButton(
-              onPressed: () => context.go(AppRoutes.live),
-              child: const Text('DÉMARRER LA SESSION (DEV LOT B)'),
+              onPressed: s.tareOk
+                  ? () async {
+                      final ok =
+                          await ref.read(liveHubProvider.notifier).startSession();
+                      if (!context.mounted || !ok) return;
+                      context.go(AppRoutes.live);
+                    }
+                  : null,
+              child: const Text('DÉMARRER LA SESSION'),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _HeelBar extends StatelessWidget {
+  const _HeelBar({required this.valueDeg});
+
+  final double valueDeg;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = ((valueDeg + 15) / 30).clamp(0.0, 1.0);
+    return SizedBox(
+      height: 28,
+      child: Stack(
+        alignment: Alignment.centerLeft,
+        children: [
+          Container(
+            height: 4,
+            color: DeckColors.hairline,
+          ),
+          Align(
+            alignment: Alignment(t * 2 - 1, 0),
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: DeckColors.amber,
+                border: Border.all(color: DeckColors.text),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

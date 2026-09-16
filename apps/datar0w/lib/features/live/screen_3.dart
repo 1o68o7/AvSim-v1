@@ -15,18 +15,11 @@ class LiveScreen extends ConsumerStatefulWidget {
 
 class _LiveScreenState extends ConsumerState<LiveScreen> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(liveHubProvider.notifier).start();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final s = ref.watch(liveHubProvider);
+    final gite = s.giteDeg;
     final roll = s.rollDeg;
-    final alertTribord = roll != null && roll > 3;
+    final alertTribord = gite != null && gite > 3;
 
     return Scaffold(
       backgroundColor: DeckColors.bg,
@@ -66,7 +59,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                     label: s.gpsLost ? 'GPS perdu' : 'GPS',
                   ),
                   const SizedBox(width: 8),
-                  _Chip(ok: roll != null, label: 'IMU'),
+                  _Chip(ok: roll != null && s.tareOk, label: 'IMU'),
                 ],
               ),
             ),
@@ -102,10 +95,10 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                     '${(s.distM / 1000).toStringAsFixed(3)} km',
                   ),
                   _kv(
-                    'ROLL BRUT',
-                    roll == null
-                        ? '—'
-                        : '${roll.toStringAsFixed(1)}° (tare lot C)',
+                    'GÎTE',
+                    gite == null
+                        ? 'tare requise'
+                        : '${gite.toStringAsFixed(1)}°  (roll − offset)',
                   ),
                   _kv(
                     'LAT / LON',

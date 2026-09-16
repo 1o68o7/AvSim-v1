@@ -10,6 +10,9 @@ import '../sensors/net.dart';
 import '../sensors/permissions.dart';
 import 'model.dart';
 import 'store.dart';
+import 'tare_math.dart';
+
+enum TareStatus { none, running, ok, failed }
 
 class LiveHubState {
   const LiveHubState({
@@ -28,6 +31,12 @@ class LiveHubState {
     this.sessionDir,
     this.sampleCount = 0,
     this.gpsLost = true,
+    this.tareStatus = TareStatus.none,
+    this.tareOffset,
+    this.tareSigma,
+    this.tareElapsedS = 0,
+    this.logging = false,
+    this.code,
   });
 
   final bool locationOk;
@@ -45,6 +54,20 @@ class LiveHubState {
   final String? sessionDir;
   final int sampleCount;
   final bool gpsLost;
+  final TareStatus tareStatus;
+  final double? tareOffset;
+  final double? tareSigma;
+  final int tareElapsedS;
+  final bool logging;
+  final String? code;
+
+  bool get tareOk => tareStatus == TareStatus.ok && tareOffset != null;
+
+  /// Gîte live = roll − offset (lot C). Sans tare : null.
+  double? get giteDeg {
+    if (rollDeg == null || tareOffset == null) return null;
+    return rollDeg! - tareOffset!;
+  }
 
   LiveHubState copyWith({
     bool? locationOk,
@@ -62,6 +85,12 @@ class LiveHubState {
     String? sessionDir,
     int? sampleCount,
     bool? gpsLost,
+    TareStatus? tareStatus,
+    double? tareOffset,
+    double? tareSigma,
+    int? tareElapsedS,
+    bool? logging,
+    String? code,
   }) {
     return LiveHubState(
       locationOk: locationOk ?? this.locationOk,
@@ -79,6 +108,12 @@ class LiveHubState {
       sessionDir: sessionDir ?? this.sessionDir,
       sampleCount: sampleCount ?? this.sampleCount,
       gpsLost: gpsLost ?? this.gpsLost,
+      tareStatus: tareStatus ?? this.tareStatus,
+      tareOffset: tareOffset ?? this.tareOffset,
+      tareSigma: tareSigma ?? this.tareSigma,
+      tareElapsedS: tareElapsedS ?? this.tareElapsedS,
+      logging: logging ?? this.logging,
+      code: code ?? this.code,
     );
   }
 }
@@ -89,24 +124,84 @@ class LiveHub extends Notifier<LiveHubState> {
   final BatteryService _battery = BatteryService();
   final NetService _net = NetService();
 
-  final List<StreamSubscription<dynamic>> _subs = [];
+  final List<StreamSubscription<dynamic>> _imuSubs = [];
+  final List<StreamSubscription<dynamic>> _sessionSubs = [];
   Timer? _tick;
+  Timer? _tareTicker;
   SessionStore? _store;
   GpsFix? _lastFix;
   GpsFix? _lastGoodFix;
   double _dist = 0;
   DateTime? _lastGpsAt;
+  bool _imuOn = false;
+  double? _emaRoll;
+  final List<double> _tareWindow = [];
+  DateTime? _tareStartedAt;
 
   @override
   LiveHubState build() {
     ref.onDispose(() {
-      unawaited(_stop());
+      unawaited(_disposeAll());
     });
     return const LiveHubState();
   }
 
-  Future<void> start() async {
-    if (_store != null) return;
+  Future<void> listenImu() async {
+    if (_imuOn) return;
+    _imuOn = true;
+    _imuSubs.add(
+      _imu.rollStream().listen(
+        (s) {
+          _emaRoll = _emaRoll == null
+              ? s.rollDeg
+              : emaFilter(_emaRoll!, s.rollDeg);
+          if (state.tareStatus == TareStatus.running && _emaRoll != null) {
+            _tareWindow.add(_emaRoll!);
+          }
+          state = state.copyWith(rollDeg: s.rollDeg, pitchDeg: s.pitchDeg);
+        },
+        onError: (_) {},
+      ),
+    );
+  }
+
+  void beginTare() {
+    if (state.tareStatus == TareStatus.running) return;
+    _tareWindow.clear();
+    _tareStartedAt = DateTime.now();
+    state = state.copyWith(
+      tareStatus: TareStatus.running,
+      tareElapsedS: 0,
+      tareSigma: null,
+    );
+    _tareTicker?.cancel();
+    _tareTicker = Timer.periodic(const Duration(seconds: 1), (_) {
+      final start = _tareStartedAt;
+      if (start == null) return;
+      final s = DateTime.now().difference(start).inSeconds;
+      state = state.copyWith(tareElapsedS: s.clamp(0, 30));
+      if (s >= 30) {
+        _finishTare();
+      }
+    });
+  }
+
+  void _finishTare() {
+    _tareTicker?.cancel();
+    _tareTicker = null;
+    final result = computeTare(_tareWindow);
+    _tareWindow.clear();
+    state = state.copyWith(
+      tareStatus: result.ok ? TareStatus.ok : TareStatus.failed,
+      tareOffset: result.ok ? result.offsetDeg : state.tareOffset,
+      tareSigma: result.sigmaDeg.isFinite ? result.sigmaDeg : null,
+      tareElapsedS: 30,
+    );
+  }
+
+  /// Démarrer : meta.json (offset) + logger 1 Hz. Pas avant tare OK.
+  Future<bool> startSession() async {
+    if (!state.tareOk || _store != null) return false;
     final perm = await AppPermissions.requestSession();
     state = state.copyWith(
       locationOk: perm.locationOk,
@@ -115,21 +210,25 @@ class LiveHub extends Notifier<LiveHubState> {
 
     final id = 's${DateTime.now().millisecondsSinceEpoch}';
     final store = SessionStore(id);
-    final dir = await store.open();
+    final dir = await store.open(tareOffset: state.tareOffset!);
     _store = store;
-    state = state.copyWith(sessionId: id, sessionDir: dir.path);
+    _dist = 0;
+    _lastFix = null;
+    _lastGoodFix = null;
+    _lastGpsAt = null;
 
-    _subs.add(
-      _imu.rollStream().listen(
-        (s) {
-          state = state.copyWith(rollDeg: s.rollDeg, pitchDeg: s.pitchDeg);
-        },
-        onError: (_) {},
-      ),
+    state = state.copyWith(
+      sessionId: id,
+      sessionDir: dir.path,
+      logging: true,
+      sampleCount: 0,
+      distM: 0,
     );
 
+    await listenImu();
+
     if (perm.locationOk) {
-      _subs.add(
+      _sessionSubs.add(
         _gps.stream().listen(
           (fix) {
             _lastFix = fix;
@@ -162,13 +261,15 @@ class LiveHub extends Notifier<LiveHubState> {
       );
     }
 
-    _subs.add(_net.stream().listen((n) => state = state.copyWith(net: n)));
+    _sessionSubs.add(_net.stream().listen((n) => state = state.copyWith(net: n)));
     state = state.copyWith(net: await _net.current());
 
     _tick = Timer.periodic(const Duration(seconds: 1), (_) => _writeSample());
+    return true;
   }
 
   Future<void> _writeSample() async {
+    if (!state.logging || _store == null) return;
     final stale = _lastGpsAt == null ||
         DateTime.now().difference(_lastGpsAt!) > const Duration(seconds: 3);
     if (stale) {
@@ -185,7 +286,7 @@ class LiveHub extends Notifier<LiveHubState> {
       cog: stale ? null : fix?.cog,
       accH: stale ? null : fix?.accH,
       distM: _dist,
-      giteDeg: state.rollDeg,
+      giteDeg: state.giteDeg,
       pitchDeg: state.pitchDeg,
       cadenceSpm: null,
       batt: batt,
@@ -198,15 +299,27 @@ class LiveHub extends Notifier<LiveHubState> {
     );
   }
 
-  Future<void> _stop() async {
+  Future<void> stopSession() async {
     _tick?.cancel();
     _tick = null;
-    for (final s in _subs) {
+    for (final s in _sessionSubs) {
       await s.cancel();
     }
-    _subs.clear();
+    _sessionSubs.clear();
+    await _store?.markEnded();
     await _store?.close();
     _store = null;
+    state = state.copyWith(logging: false);
+  }
+
+  Future<void> _disposeAll() async {
+    _tareTicker?.cancel();
+    await stopSession();
+    for (final s in _imuSubs) {
+      await s.cancel();
+    }
+    _imuSubs.clear();
+    _imuOn = false;
   }
 }
 
