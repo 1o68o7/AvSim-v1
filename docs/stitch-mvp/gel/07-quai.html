@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><style>
+  @layer base {
+    html, body {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #0B0E12;
+      color: #E1E2E8;
+      font-family: 'JetBrains Mono', monospace;
+      -webkit-font-smoothing: antialiased;
+      font-feature-settings: "tnum" on, "zero" on;
+    }
+    body {
+      overscroll-behavior-y: none;
+    }
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .pt-safe {
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    main > :first-child {
+      margin-top: 0 !important;
+    }
+    main > :last-child {
+      margin-bottom: 0 !important;
+    }
+  }
+  ::-webkit-scrollbar {
+    display: none;
+  }
+</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "background": "#0B0E12",
+          "surface": "#0B0E12",
+          "surface-container": "#111418",
+          "surface-container-low": "#111418",
+          "surface-container-high": "#1D2024",
+          "surface-container-highest": "#272A2F",
+          "on-surface": "#E1E2E8",
+          "on-surface-variant": "#8E939D",
+          "primary": "#E8C547",
+          "on-primary": "#0B0E12",
+          "primary-container": "#2A240C",
+          "on-primary-container": "#FFE07C",
+          "border-avionics": "#2A2F36",
+          "outline": "#41474D",
+          "tertiary": "#4EBD79",
+          "on-tertiary": "#003418"
+        },
+        fontFamily: {
+          mono: ['"JetBrains Mono"', 'monospace'],
+          'body-md': ['"JetBrains Mono"', 'monospace'],
+          'headline-sm': ['"JetBrains Mono"', 'monospace'],
+          'label-sm': ['"JetBrains Mono"', 'monospace'],
+          'label-md': ['"JetBrains Mono"', 'monospace'],
+          'label-lg': ['"JetBrains Mono"', 'monospace']
+        }
+      }
+    }
+  };
+</script></head><body class="bg-[#0B0E12] text-[#E1E2E8] font-mono flex flex-col min-h-screen selection:bg-[#E8C547] selection:text-[#0B0E12] max-w-[390px] mx-auto relative border-x border-[#1D2024]"><header class="fixed top-0 max-w-[390px] w-full z-50 pt-safe bg-[#0B0E12]/95 backdrop-blur-md border-b border-[#2A2F36]"><div class="h-14 px-4 flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-none bg-[#E8C547]"></div><span class="text-[14px] font-bold text-[#E1E2E8] tracking-widest uppercase">QUAI</span></div><span class="text-[10px] font-medium text-[#8E939D] tracking-wider">SESSION #SKF-8841</span></div></header><main class="flex-1 flex flex-col justify-between w-full pt-16 pb-8 px-4 bg-[#0B0E12]"><div class="flex flex-col justify-between flex-1 w-full py-4"><div class="flex flex-col gap-6"><div class="pt-2"><span class="text-[11px] font-bold text-[#E8C547] tracking-widest uppercase block">RÉSUMÉ D'ACTIVITÉ</span><span class="text-[10px] text-[#8E939D] tracking-wider mt-1 block">07:14 — 07:56</span></div><div class="grid grid-cols-2 gap-3"><div class="bg-[#111418] border border-[#2A2F36] p-4 flex flex-col justify-between min-h-[110px]"><span class="text-[10px] font-medium text-[#8E939D] tracking-widest uppercase">DURÉE</span><div class="mt-2"><span class="text-[28px] font-bold text-[#E1E2E8] tracking-tight leading-none">42:15</span></div><span class="text-[9px] text-[#8E939D] mt-1">MIN</span></div><div class="bg-[#111418] border border-[#2A2F36] p-4 flex flex-col justify-between min-h-[110px]"><span class="text-[10px] font-medium text-[#8E939D] tracking-widest uppercase">DISTANCE GPS</span><div class="mt-2"><span class="text-[28px] font-bold text-[#E1E2E8] tracking-tight leading-none">8.42</span></div><span class="text-[9px] text-[#8E939D] mt-1">KM</span></div><div class="bg-[#111418] border border-[#2A2F36] p-4 flex flex-col justify-between min-h-[110px]"><span class="text-[10px] font-medium text-[#8E939D] tracking-widest uppercase">CADENCE MOYENNE</span><div class="mt-2"><span class="text-[28px] font-bold text-[#E1E2E8] tracking-tight leading-none">28</span></div><span class="text-[9px] text-[#8E939D] mt-1">SPM</span></div><div class="bg-[#111418] border border-[#2A2F36] p-4 flex flex-col justify-between min-h-[110px]"><span class="text-[10px] font-medium text-[#8E939D] tracking-widest uppercase">GÎTE RMS</span><div class="mt-2"><span class="text-[28px] font-bold text-[#E1E2E8] tracking-tight leading-none">1.2</span></div><span class="text-[9px] text-[#8E939D] mt-1">DEGRÉS (°)</span></div></div><div class="flex items-center justify-center"><div class="inline-flex items-center gap-2 px-3 py-1.5 border border-[#2A2F36] bg-[#111418]"><span class="w-2 h-2 rounded-full bg-[#E8C547]"></span><span class="text-[10px] font-medium tracking-wider text-[#8E939D] uppercase">en attente réseau</span></div></div></div><div class="flex flex-col gap-3 pt-6"><button class="w-full h-12 bg-[#E8C547] text-[#0B0E12] font-mono text-[11px] font-extrabold uppercase tracking-widest flex items-center justify-center transition-colors" id="btn-share-coach">Partager au coach</button><button class="w-full h-12 bg-[#111418] text-[#E1E2E8] font-mono text-[11px] font-bold uppercase tracking-widest flex items-center justify-center border border-[#2A2F36] transition-colors" id="btn-return-home">Retour accueil</button></div></div>
+</main></body></html>
