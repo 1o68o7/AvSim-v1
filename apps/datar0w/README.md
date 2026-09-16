@@ -12,7 +12,8 @@ Maquettes : `docs/stitch-mvp/GEL.md` (Deck). Ne pas porter les HTML « jeter ».
 | A | Scaffold, thème Deck, `go_router` 1 / 2A / 2B / 3 / 5 / 6 / 6r / 7 |
 | B | Permissions + overlay GPS/roll brut + `sessions/{id}/samples.jsonl` |
 | C | Tare 30 s, σ < 0,2°, offset `meta.json`, Démarrer off sinon, gîte = roll − offset |
-| D–G | STOP 2×, replay, coach join, API — **pas encore** |
+| D | STOP 2× en 3 s → stop logger → quai. Alerte jaune si gîte > +3° tribords |
+| E–G | Replay, coach join, API — **pas encore** |
 
 ## Run (device réel, ciel ouvert)
 

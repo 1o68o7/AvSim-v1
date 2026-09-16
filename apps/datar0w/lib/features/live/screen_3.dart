@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router.dart';
+import '../../session/double_press_stop.dart';
 import '../../session/live_hub.dart';
 import '../../theme/deck_theme.dart';
 
@@ -14,6 +15,23 @@ class LiveScreen extends ConsumerStatefulWidget {
 }
 
 class _LiveScreenState extends ConsumerState<LiveScreen> {
+  final _stop = DoublePressStop();
+  bool _stopArmed = false;
+
+  Future<void> _onStop() async {
+    final done = _stop.press();
+    if (!done) {
+      setState(() => _stopArmed = true);
+      Future<void>.delayed(const Duration(seconds: 3), () {
+        if (mounted) setState(() => _stopArmed = false);
+      });
+      return;
+    }
+    await ref.read(liveHubProvider.notifier).stopSession();
+    if (!mounted) return;
+    context.go(AppRoutes.quai);
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(liveHubProvider);
@@ -128,8 +146,16 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
             Padding(
               padding: const EdgeInsets.all(16),
               child: OutlinedButton(
-                onPressed: () => context.go(AppRoutes.quai),
-                child: const Text('STOP → QUAI (double appui lot D)'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: _stopArmed ? DeckColors.alert : null,
+                  side: BorderSide(
+                    color: _stopArmed ? DeckColors.alert : DeckColors.hairline,
+                  ),
+                ),
+                onPressed: _onStop,
+                child: Text(
+                  _stopArmed ? 'STOP — RETOUCHER (3 S)' : 'STOP  ·  TOUCHER 2×',
+                ),
               ),
             ),
           ],
