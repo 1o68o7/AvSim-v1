@@ -8,6 +8,8 @@ import '../sensors/gps.dart';
 import '../sensors/imu.dart';
 import '../sensors/net.dart';
 import '../sensors/permissions.dart';
+import 'api_client.dart';
+import 'code.dart';
 import 'model.dart';
 import 'store.dart';
 import 'tare_math.dart';
@@ -37,6 +39,7 @@ class LiveHubState {
     this.tareElapsedS = 0,
     this.logging = false,
     this.code,
+    this.coachSessionId,
   });
 
   final bool locationOk;
@@ -60,6 +63,7 @@ class LiveHubState {
   final int tareElapsedS;
   final bool logging;
   final String? code;
+  final String? coachSessionId;
 
   bool get tareOk => tareStatus == TareStatus.ok && tareOffset != null;
 
@@ -91,6 +95,7 @@ class LiveHubState {
     int? tareElapsedS,
     bool? logging,
     String? code,
+    String? coachSessionId,
   }) {
     return LiveHubState(
       locationOk: locationOk ?? this.locationOk,
@@ -114,6 +119,7 @@ class LiveHubState {
       tareElapsedS: tareElapsedS ?? this.tareElapsedS,
       logging: logging ?? this.logging,
       code: code ?? this.code,
+      coachSessionId: coachSessionId ?? this.coachSessionId,
     );
   }
 }
@@ -129,6 +135,8 @@ class LiveHub extends Notifier<LiveHubState> {
   Timer? _tick;
   Timer? _tareTicker;
   SessionStore? _store;
+  final SessionApi _api = SessionApi();
+  final List<SessionSample> recorded = [];
   GpsFix? _lastFix;
   GpsFix? _lastGoodFix;
   double _dist = 0;
@@ -209,9 +217,11 @@ class LiveHub extends Notifier<LiveHubState> {
     );
 
     final id = 's${DateTime.now().millisecondsSinceEpoch}';
+    final code = generateSessionCode();
     final store = SessionStore(id);
-    final dir = await store.open(tareOffset: state.tareOffset!);
+    final dir = await store.open(tareOffset: state.tareOffset!, code: code);
     _store = store;
+    recorded.clear();
     _dist = 0;
     _lastFix = null;
     _lastGoodFix = null;
@@ -223,7 +233,9 @@ class LiveHub extends Notifier<LiveHubState> {
       logging: true,
       sampleCount: 0,
       distM: 0,
+      code: code,
     );
+    unawaited(_api.createSession(id: id, code: code));
 
     await listenImu();
 
@@ -293,6 +305,8 @@ class LiveHub extends Notifier<LiveHubState> {
       net: state.net,
     );
     _store?.append(sample);
+    recorded.add(sample);
+    unawaited(_api.tick(id: state.sessionId!, sample: sample));
     state = state.copyWith(
       batt: batt,
       sampleCount: state.sampleCount + 1,
@@ -310,6 +324,39 @@ class LiveHub extends Notifier<LiveHubState> {
     await _store?.close();
     _store = null;
     state = state.copyWith(logging: false);
+  }
+
+  Future<String?> joinAsCoach(String rawCode) async {
+    final code = rawCode.trim().toUpperCase();
+    if (code.isEmpty) {
+      final last = state.sessionId ?? await SessionStore.latestId();
+      if (last == null) return null;
+      state = state.copyWith(coachSessionId: last);
+      return last;
+    }
+    if (state.code?.toUpperCase() == code && state.sessionId != null) {
+      state = state.copyWith(coachSessionId: state.sessionId);
+      return state.sessionId;
+    }
+    final id = await SessionStore.findIdByCode(code);
+    if (id == null) return null;
+    state = state.copyWith(coachSessionId: id);
+    return id;
+  }
+
+  Future<void> annotate() async {
+    final id = state.sessionId;
+    if (id == null || _store == null) return;
+    final note = {
+      't': DateTime.now().millisecondsSinceEpoch,
+      'lat': state.lat,
+      'lon': state.lon,
+      'sog': state.sog,
+      'dist_m': state.distM,
+      'gite_deg': state.giteDeg,
+    };
+    await _store!.appendNote(note);
+    unawaited(_api.note(id: id, note: note));
   }
 
   Future<void> _disposeAll() async {

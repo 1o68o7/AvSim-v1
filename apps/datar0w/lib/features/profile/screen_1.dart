@@ -35,7 +35,7 @@ class ProfileScreen extends StatelessWidget {
           _RoleCard(
             title: 'COACH',
             subtitle: 'Suivi direct bord de bassin',
-            onTap: () => context.go(AppRoutes.coachLive),
+            onTap: () => context.go(AppRoutes.coachJoin),
           ),
           const SizedBox(height: 12),
           const _RoleCard(

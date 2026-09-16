@@ -82,6 +82,19 @@ class SessionStore {
     return dir;
   }
 
+  Future<void> appendNote(Map<String, dynamic> note) async {
+    final dir = directory;
+    if (dir == null) return;
+    final f = File('${dir.path}/notes.json');
+    var list = <dynamic>[];
+    if (f.existsSync()) {
+      final raw = jsonDecode(await f.readAsString());
+      if (raw is List) list = List<dynamic>.from(raw);
+    }
+    list.add(note);
+    await f.writeAsString(const JsonEncoder.withIndent('  ').convert(list));
+  }
+
   Future<void> _writeMeta() async {
     final dir = directory;
     final m = meta;

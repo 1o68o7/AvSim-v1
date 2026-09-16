@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import 'features/coach/screen_5.dart';
+import 'features/coach/screen_join.dart';
 import 'features/live/screen_3.dart';
 import 'features/presession/screen_2a.dart';
 import 'features/profile/screen_1.dart';
@@ -14,6 +15,7 @@ abstract final class AppRoutes {
   static const presession = '/presession';
   static const tare = '/tare';
   static const live = '/live';
+  static const coachJoin = '/coach-join';
   static const coachLive = '/coach';
   static const coachReplay = '/replay-coach';
   static const rowerReplay = '/replay';
@@ -42,6 +44,11 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.live,
       name: '3-live',
       builder: (context, state) => const LiveScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.coachJoin,
+      name: 'coach-join',
+      builder: (context, state) => const CoachJoinScreen(),
     ),
     GoRoute(
       path: AppRoutes.coachLive,

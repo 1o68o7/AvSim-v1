@@ -72,6 +72,18 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                     ),
                   ),
                   const Spacer(),
+                  if (s.code != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Text(
+                        s.code!,
+                        style: const TextStyle(
+                          color: DeckColors.amber,
+                          letterSpacing: 2,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
                   _Chip(
                     ok: !s.gpsLost && s.locationOk,
                     label: s.gpsLost ? 'GPS perdu' : 'GPS',

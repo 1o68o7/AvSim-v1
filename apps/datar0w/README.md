@@ -14,7 +14,8 @@ Maquettes : `docs/stitch-mvp/GEL.md` (Deck). Ne pas porter les HTML « jeter ».
 | C | Tare 30 s, σ < 0,2°, offset `meta.json`, Démarrer off sinon, gîte = roll − offset |
 | D | STOP 2× en 3 s → stop logger → quai. Alerte jaune si gîte > +3° tribords |
 | E | Quai 4 chiffres + Replay + Partager jsonl. 6/6r : carte, curseur, 2 courbes, pas d’interp. GPS |
-| F–G | Coach join, API — **pas encore** |
+| F | Code 6 car. à Démarrer, join coach local, écran 5 carte + ANNOTER. HTTP si `DATAROW_API_BASE` |
+| G | API FastAPI `/datarow` — **pas encore** (client seulement si base URL) |
 
 ## Run (device réel, ciel ouvert)
 
@@ -31,7 +32,8 @@ flutter run
 - Vitesse toujours légendée **sol — pas eau**. Cadence peut être `—` (nullable).
 - Alerte gîte : bandeau `#E8C547` si **gîte** (roll − offset) > +3° tribords.
 - Tare 2B : 30 s, σ < 0,2°, sinon recommencer. Démarrer inactif tant que tare ≠ OK.
-- Fichier séance créé à **Démarrer** : `Documents/sessions/{id}/meta.json` (`tare_offset`) + `samples.jsonl` 1 Hz.
+- Fichier séance créé à **Démarrer** : `Documents/sessions/{id}/meta.json` (`tare_offset`, `code`) + `samples.jsonl` 1 Hz.
+- Coach : code 6 caractères, mode **local** (même téléphone). API tick uniquement si `DATAROW_API_BASE` est défini (`--dart-define` ou env).
 
 ## Simulateur
 
