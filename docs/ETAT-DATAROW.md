@@ -1,139 +1,151 @@
 # DataR0w — état des lieux
 
-*24 juillet 2026 · inventaire vérifié, pas récité de mémoire*
+*Révisé le 16 septembre 2026 · aligné sur `STATE.md` (snapshot physique 25–26 juillet 2026) et le code de `main` (`fb8621ff`).*
+
+**Source de vérité pour la physique et les tests :** `STATE.md`, puis `ROADMAP-PRODUCTION.md`.  
+Ce fichier est un inventaire des trois chantiers. S'il diverge de `STATE.md`, `STATE.md` gagne.
+
+La version du 24 juillet 2026 est **périmée**. Elle décrivait encore une fermeture cinématique cassée, `envelope` / `sensors` / `api` / `web` « à écrire », et une couche produit « rien codé ». Tout cela a été dépassé entre le 25 et le 28 juillet.
 
 ---
 
-## 0. Trois chantiers, trois maturités très différentes
+## 0. Trois chantiers, trois maturités
 
 | Chantier | Contenu | Maturité |
 |---|---|---|
-| **A — Hardware télémétrie** | prototype embarqué, capteurs, câblage | spec complète, **en pause volontaire** |
-| **B — Simulateur (avsim)** | sélection de capteurs par simulation | code démarré, **un bug bloquant non corrigé** |
-| **C — Couche produit** | dashboards rameur/team/coach | conçu, **rien codé** |
+| **A — Hardware télémétrie** | prototype embarqué, capteurs, câblage | spec hors noyau simu, **en pause volontaire** (Phase 8) |
+| **B — Simulateur (avsim)** | vérité terrain + sélection de capteurs | Phase 0 **close** ; limites 1DOF **documentées et gelées** |
+| **C — Couche produit** | Rameur / Team / Coach live + replay | Phase 7 **démarrée** — prototype contre rejeu simulé |
+
+Décision produit figée : aucune sortie du simulateur n'est une mesure. Badge **Simulé** obligatoire. Classes hors `8+` / `1x` : badge **Bêta — non calibrée**.
 
 ---
 
 ## 1. Chantier A — Hardware de télémétrie embarquée
 
-Le tout premier travail de ce projet, mis en pause dès qu'on a décidé de
-simuler avant d'acheter.
+Mis en pause dès qu'on a décidé de simuler avant d'acheter. Les documents de spec (bus CAN, ESP32-S3, Pi 5, net-list, BOM) ne vivent **pas** dans ce dépôt.
 
-| Document | Contenu |
-|---|---|
-| `prototype-telemetrie-aviron-huit.md` | spec v0.2 complète : architecture bus CAN, 8 nœuds ESP32-S3 + concentrateur Pi 5, pods dorsaux, pipeline EKF |
-| `V1-implantation-huit-vue-dessus.svg` | implantation capteurs sur le huit |
-| `V5-chaine-donnees-telemetrie.svg` | flux de données, 3 canaux télémétrie |
-| `branchement-noeud-de-poste.svg` / `branchement-systeme-central.svg` | schémas de câblage niveau broche |
-| `netlist-fritzing-telemetrie.md` | 83 connexions numérotées |
-| `panorama-concurrents-aviron.md` | 11 concurrents, brevets expirés, terrain FR vierge |
-| `inventaire-datasets-aviron.md` (v1.1) | Concept2, Strava, Rowsandall, RACEMAP, études académiques ; Quiske analysé comme adjacent, pas concurrent frontal |
+**BOM historique** : ~2 550–3 000 € (huit complet) ou ~910 € (MVP, 2 postes en force).
 
-**BOM chiffrée** : ~2 550-3 000 € (huit complet) ou ~910 € (MVP, pods maison,
-2 postes en force).
-
-**Périmé, volontairement** : la net-list a été auditée et présente 5 trous
-connus (passerelle ESP32 manquante pour les pods, canal LoRa absent, WiFi
-externe absent, PPS non distribué aux nœuds, terminaison 120 Ω à déplacer si
-la station de rive remplace l'anémomètre de proue T0) — plus l'actionneur
-haptique du chantier C, qui s'ajoute maintenant à la nomenclature. Refonte
-reportée jusqu'à ce que le simulateur tranche le jeu de capteurs définitif :
-retoucher le câblage maintenant serait du travail à jeter.
+La net-list avait 5 trous connus (passerelle pods, LoRa, WiFi externe, PPS, terminaison 120 Ω) plus l'actionneur haptique. **Ne pas retoucher le câblage** tant que le simulateur n'a pas tranché le jeu de capteurs : ce serait du travail à jeter. Phase 8 inchangée.
 
 ---
 
-## 2. Chantier B — Simulateur de sélection de capteurs (avsim)
+## 2. Chantier B — Simulateur
 
 ### 2.1 Données de référence — solides
 
 | Donnée | État |
 |---|---|
-| Base de coques | **182 moules, 6 constructeurs** (Filippi, Empacher, Hudson, WinTech, Swift, Vespoli), 8 classes |
-| Anthropométrie | table De Leva (1996), somme vérifiée à 100,0000 % |
-| Coefficients de palette | recalés sur les repères mesurés de Caplan & Gardner (2007), domaine complet 0-180° — **approché**, les valeurs exactes ne sont publiées qu'en courbes non numérisées |
-| Fichiers de classe | 8 fichiers YAML, mécanisme `hull_ref` (composite médian ou moule nommé) |
-| Paramètres physiques | gelés dans `defaults.yaml`, chaque valeur sourcée |
+| Base de coques | 182 moules, 6 constructeurs (Filippi, Empacher, Hudson, WinTech, Swift, Vespoli), 8 classes |
+| Anthropométrie | De Leva (1996), somme 100 % |
+| Coefficients de palette | Caplan & Gardner (2007), domaine 0–180° — **approché** |
+| Fichiers de classe | `params/classes/{1x,2-,2x,4+,4-,4x,8+,8x}.yaml` + `hull_ref` |
+| Paramètres | gelés, chaque valeur sourcée (`src: L / E / N`) — ne pas retoucher pour « faire plus joli » |
 
-### 2.2 Code — 1 010 lignes, statut retesté à l'instant
+### 2.2 Code — Phase 0 close (25 juillet)
 
-**Fonctionne** : conventions géométriques (5 tests sur 7), chargement des
-paramètres, chaîne anthropométrique, hydrodynamique de palette et de coque,
-intégration ODE, décomposition énergétique.
+**Fait (voir table `STATE.md`)**
 
-**Cassé — confirmé par un nouveau passage des tests il y a quelques minutes** :
-la fermeture cinématique reste fausse. 2 tests échouent encore exactement
-comme lors de la dernière session — le glissement de palette a le mauvais
-signe et la mauvaise amplitude à mi-propulsion (`vx = +0,46` au lieu de
-négatif). La cause est diagnostiquée et la solution spécifiée depuis le brief
-v2 (§4.1 — fermeture pilotée par la force plutôt que par la cinématique), mais
-**pas encore implémentée**. La correction de l'angle d'incidence à 0-180°
-faite avec Caplan & Gardner n'a rien cassé, mais n'a pas non plus réglé ce
-problème — ce n'était pas censé le faire, ce sont deux bugs indépendants.
+- Chargeur multi-classes : `load_class` / `load_params(boat_class=)`, `n_rowers` dynamique, `m_cox_kg=0` si non barré
+- Fermeture **pilotée par la force** : `I_oar·θ'' = M_poignée + M_palette` (brief §4.1 — **n'est plus le bug bloquant**)
+- `F_h(u)` Kleshnev/BioRow : `F_u_peak=0,40`, `F_u_rise_70=0,17`, `F_high_width=0,35`
+- `E_rower_J` indépendant (`P = -L_in·F·ω`) ; sauts de KE déduits ; identité aviron OK
+- Fenêtres de retour réétagées ; pic inertiel faux éliminé
+- Tabulation `com_x(θ)` à l'init de `Crew`
+- `envelope.py`, `boat_class.py` écrits ; fixtures `8+` / `1x`
 
-**Autres dettes connues** :
-- performance à 44 s par simulation, cible du brief < 1 s, leviers identifiés mais pas codés
-- `n_rowers` codé en dur à 8 dans `defaults.yaml` — pas encore générique, pourtant requis pour simuler autre chose que le huit
-- `dE_kinetic` calculé comme résidu de l'identité qu'il est censé vérifier, donc son test est trivialement vrai
+Compte tests cité par `STATE.md` (suite physique historique) : **30 passed, 1 skipped** sur `8+` et `1x`. La suite a depuis grandi (API, replay, coaching, observabilité) — relancer `pytest tests/` pour le chiffre courant.
 
-### 2.3 Spécifié, rien codé
+**Limites 1DOF — réelles, comprises, gelées (26 juillet)**
 
-`envelope.py`, `boat_class.py`, `sensors/` (12 modèles de bruit),
-`estimation/ekf.py`, `analysis/` (Sobol, observabilité, détectabilité,
-Pareto), `api/` + `web/`, et le mode `avsim replay --realtime` proposé en fin
-de dernière session.
+Pas des bugs de seuil. Ne pas rouvrir un correctif physique sur ces leviers.
+
+| Grandeur | Modèle | Cible §9.2 | Note |
+|---|---|---|---|
+| `v_mean` (8+) | ~4,91–5,13 m/s | 5,78–6,78 | trop bas |
+| `η_blade` | ~0,62 | 0,75–0,85 | pas de contrôle d'incidence palette |
+| `check_factor` | ~3,1–3,2 | 0,50–0,80 | empilement CdM × warp Hermite ; levier largeur épuisé |
+| `power_instantaneous` | 2,1–2,8 kW | butée 1,5 kW | conséquence de `F_peak=1100 N` |
+| `F_peak` | 1100 N | 500–700 N sur l'eau | aucun cycle viable dans la plage sourcée |
+
+Gate Phase 5 : `is_admissible(..., ignore_known_1dof_limits=True)` exclut η + `P_inst`. Même là : **7/8 classes REJECT** ; seule **2x** passe.
+
+Le modèle reste valide pour **comparer des configs capteurs**. Les watts et le cavalement absolus ne sont pas des lectures d'entraînement.
+
+**Encore ouvert côté physique (pas un retour en arrière)**
+
+- Bootstrap attaque : clamp `u_eff = max(u_geom, u_rise_70)` conservé
+- `drive_fraction = 0,42` fixe (Cerne 2013 non branché)
+- Catch slip angulaire ≈ 3° : paramètre présent, repère non confronté
+- Phase 1 : `test_plausibility` / `test_class_scaling` en dette ; triangulation D6 en skip
+
+### 2.3 Couches autrefois « à écrire » — état réel
+
+| Module | État |
+|---|---|
+| `core/envelope.py`, `core/boat_class.py` | écrits |
+| `sensors/` | 13 capteurs virtuels + bus — code là ; UI Analyste encore maquette |
+| `estimation/ekf.py` | EKF minimal `[V, x_com]` — servi par Mode C 2x |
+| `analysis/` | Observabilité (Mode C) 2x seulement ; Sobol / Mode D absents |
+| `api/` + `web/` | FastAPI + React/Vite/Plotly, deux surfaces |
+| `avsim replay --realtime` | CLI + `GET /api/replay/stream` (SSE) |
+
+Mode C : `data/observability_2x_pilot.json`, vue `/analyst/observabilite`. **Non représentatif** des 7 autres classes.
 
 ---
 
-## 3. Chantier C — Couche produit (personas)
+## 3. Chantier C — Couche produit
 
-`avsim-personas-temps-reel.md` — conception complète, rien codé :
+Conception : `docs/avsim-personas-temps-reel.md` + `docs/brief-interface-utilisateur.md`.
 
-- 3 fiches persona finalisées (Rameur, Team, Coach live + Coach replay)
-- architecture haptique à deux niveaux (auto local vs équipage centralisé), avec budget de latence chiffré par cadence
-- modèle de données pour les ordres vocaux annotés du coach
-- extension proposée du mode Détectabilité pour évaluer la faisabilité temps réel par architecture
+**Codé (prototype contre rejeu simulé, principalement 2x)**
+
+- Surface Analyste : Bateau / Coup / Bilan / Équipage ; Capteurs / Sensibilité / Détectabilité = maquettes honnêtes (graphe vide, pas de placeholder « réaliste »)
+- Surface Produit : Rameur, Team (4 quadrants), Coach live (annotations → table `events`), Coach Replay (`StrokeGeometry`, nesting, compare avant/après)
+- `EventStore` SQLite local (limite Render Free : pas de partage inter-instances)
+- Comparaisons Coach : **écart brut seulement** — Mode D absent, aucun seuil inventé
+
+Ce n'est pas un outil d'entraînement. C'est un banc d'UI alimenté par le simulateur, en attendant la Phase 8.
 
 ---
 
 ## 4. Décisions produit figées
 
-- Multi-classes de bout en bout : 1x, 2x, 2−, 4x, 4−, 4+, 8+, 8x
-- Rendu final en application web (FastAPI + React), locale
-- Sélection constructeur + classe + gréement + gamme, via le mécanisme `hull_ref`
-- Team = cockpit temps réel embarqué ; Coach = live en canot moteur (canal B) + replay post-séance
-- Coup+1 : haptique dès le départ (couvre aussi les bateaux non barrés), vocabulaire à un seul motif pour la v1
-- Bassins de référence envisagés : Bordeaux et Vichy (choix entre les deux non tranché)
+- Multi-classes : 1x, 2x, 2−, 4x, 4−, 4+, 8+, 8x
+- App web FastAPI + React (local et démo Render)
+- Sélection constructeur + classe via `hull_ref`
+- Team = cockpit temps réel ; Coach = live canot (canal B) + replay
+- Coup+1 : haptique dès le départ, un seul motif v1
+- Bassins envisagés : Bordeaux et Vichy — **non tranché**
 
 ## 5. Décisions en attente — le CSV n'est jamais revenu
 
-`questions-simulateur-aviron.csv` (10 questions) a été transmis mais **jamais
-retourné rempli**. Deux décisions produit ont été prises entre-temps par
-échange direct (localisation du coach, modalité coup+1) mais elles ne
-recouvrent pas les 10 questions du fichier. Statut réel :
+`docs/questions-simulateur-aviron.csv` (10 questions) : toujours ouvert.
 
 | # | Question | Statut |
 |---|---|---|
-| Q01 | ordre de validation des classes | ouvert (mais les données coques couvrent déjà les 8 classes) |
+| Q01 | ordre de validation des classes | ouvert (`8+`/`1x` validées pour le badge ; Mode C = 2x seulement) |
 | Q02 | périmètre de l'app (local / club / ligne) | ouvert |
-| Q03 | fidélité du schéma de bateau (statique / animé / 3D) | ouvert |
-| Q04 | origine des profils de force | ouvert |
+| Q03 | fidélité du schéma de bateau | ouvert (schéma 2D + pose Python existent) |
+| Q04 | origine des profils de force | ouvert (`F_h(u)` paramétrique Kleshnev) |
 | Q05 | rameurs identiques ou individualisés | ouvert |
 | Q06 | couple : un angle ou deux | ouvert |
-| Q07 | cotes réelles des bateaux du club | ouvert (partiellement comblé par les données constructeur) |
-| Q08 | état de la station météo de rive | ouvert |
-| Q09 | bassin de référence principal | ouvert (les deux envisagés, pas tranché) |
-| Q10 | accès à un équipage pour la calibration | ouvert — **bloquant pour le bilan énergétique en watts absolus** |
+| Q07 | cotes réelles des bateaux du club | partiellement comblé par le catalogue constructeur |
+| Q08 | station météo de rive | ouvert |
+| Q09 | bassin de référence | ouvert |
+| Q10 | accès équipage pour calibration | ouvert — **bloquant pour les watts absolus** |
 
 ---
 
-## 6. Le prochain geste qui compte le plus
+## 6. Le prochain geste qui compte
 
-Tout le reste — capteurs virtuels, observabilité, application web, dashboards
-persona — dépend d'un moteur physique juste. Or c'est précisément la pièce qui
-reste cassée depuis deux sessions, pendant qu'on a avancé sur les données
-constructeur et la conception produit.
+La fermeture §4.1 n'est plus le chemin critique. Les diagnostics η / `check_factor` / `P_inst` sont clos.
 
-**Avant toute nouvelle extension** : implémenter la fermeture pilotée par la
-force (brief v2 §4.1). C'est un chantier de code pur, aucune dépendance
-externe, spécifié en détail, et tant qu'il n'est pas fait, aucune sortie du
-simulateur — même sur la donnée constructeur la plus solide — n'est fiable.
+Ordre utile maintenant :
+
+1. Ne pas retoucher `F_peak`, η ou `check_factor` dans le 1DOF.
+2. Soit accepter le 1DOF et pousser Phase 4 (brancher `sensors/` dans l'UI Analyste) **sur 2x**.
+3. Soit un 2e DDL d'incidence palette si l'objectif redevient les watts absolus.
+4. Répondre au CSV (surtout Q02 et Q10) avant tout hardware.
+5. D3 (décélération libre) reste le seul chemin vers un bilan en watts réels — voir `docs/MANQUES.md`.
