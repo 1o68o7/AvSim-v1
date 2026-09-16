@@ -13,7 +13,8 @@ Maquettes : `docs/stitch-mvp/GEL.md` (Deck). Ne pas porter les HTML « jeter ».
 | B | Permissions + overlay GPS/roll brut + `sessions/{id}/samples.jsonl` |
 | C | Tare 30 s, σ < 0,2°, offset `meta.json`, Démarrer off sinon, gîte = roll − offset |
 | D | STOP 2× en 3 s → stop logger → quai. Alerte jaune si gîte > +3° tribords |
-| E–G | Replay, coach join, API — **pas encore** |
+| E | Quai 4 chiffres + Replay + Partager jsonl. 6/6r : carte, curseur, 2 courbes, pas d’interp. GPS |
+| F–G | Coach join, API — **pas encore** |
 
 ## Run (device réel, ciel ouvert)
 
