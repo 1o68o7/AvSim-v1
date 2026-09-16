@@ -1,40 +1,201 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router.dart';
+import '../../session/live_hub.dart';
 import '../../theme/deck_theme.dart';
-import '../../widgets/deck_scaffold.dart';
 
-/// Live rameur. Overlay GPS + roll = lot B. Alerte écran 4 = bandeau [DeckColors.alert].
-class LiveScreen extends StatelessWidget {
+class LiveScreen extends ConsumerStatefulWidget {
   const LiveScreen({super.key});
 
   @override
+  ConsumerState<LiveScreen> createState() => _LiveScreenState();
+}
+
+class _LiveScreenState extends ConsumerState<LiveScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(liveHubProvider.notifier).start();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return DeckScaffold(
-      title: 'LIVE 1X',
-      subtitle: 'sol — pas eau · cadence nullable',
-      landscapeHint: true,
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+    final s = ref.watch(liveHubProvider);
+    final roll = s.rollDeg;
+    final alertTribord = roll != null && roll > 3;
+
+    return Scaffold(
+      backgroundColor: DeckColors.bg,
+      body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Cadence  —',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+            if (alertTribord)
+              Container(
+                height: 36,
+                color: DeckColors.alert,
+                alignment: Alignment.center,
+                child: const Text(
+                  'GÎTE — trop tribords',
+                  style: TextStyle(
+                    color: DeckColors.onAlert,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.4,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: Row(
+                children: [
+                  const Text(
+                    'LIVE 1X',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.6,
+                    ),
+                  ),
+                  const Spacer(),
+                  _Chip(
+                    ok: !s.gpsLost && s.locationOk,
+                    label: s.gpsLost ? 'GPS perdu' : 'GPS',
+                  ),
+                  const SizedBox(width: 8),
+                  _Chip(ok: roll != null, label: 'IMU'),
+                ],
+              ),
             ),
-            const Text(
-              'Pas de SOG 10 Hz. Pastille GPS au lot B.',
-              style: TextStyle(color: DeckColors.label),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Text(
+                'sol — pas eau · cadence — · pas de SOG 10 Hz',
+                style: TextStyle(color: DeckColors.label, fontSize: 11),
+              ),
             ),
-            const Spacer(),
-            OutlinedButton(
-              onPressed: () => context.go(AppRoutes.quai),
-              child: const Text('STOP → QUAI (placeholder lot A)'),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  if (s.permissionMessage != null &&
+                      s.permissionMessage!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        s.permissionMessage!,
+                        style: const TextStyle(color: DeckColors.amber),
+                      ),
+                    ),
+                  _kv('CADENCE', '—'),
+                  _kv(
+                    'V SOL',
+                    s.sog == null
+                        ? '—'
+                        : '${s.sog!.toStringAsFixed(2)} m/s',
+                  ),
+                  _kv(
+                    'DISTANCE',
+                    '${(s.distM / 1000).toStringAsFixed(3)} km',
+                  ),
+                  _kv(
+                    'ROLL BRUT',
+                    roll == null
+                        ? '—'
+                        : '${roll.toStringAsFixed(1)}° (tare lot C)',
+                  ),
+                  _kv(
+                    'LAT / LON',
+                    (s.lat == null || s.lon == null)
+                        ? '—'
+                        : '${s.lat!.toStringAsFixed(5)}  ${s.lon!.toStringAsFixed(5)}',
+                  ),
+                  _kv(
+                    'ACC_H',
+                    s.accH == null ? '—' : '${s.accH!.toStringAsFixed(1)} m',
+                  ),
+                  _kv('BATT / NET', '${s.batt ?? '—'} %   ${s.net}'),
+                  _kv(
+                    'FICHIER',
+                    s.sessionDir == null
+                        ? '…'
+                        : '${s.sessionDir}/samples.jsonl  (${s.sampleCount})',
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Gauche = BÂBORD · droite = TRIBORD (réf. rameur)',
+                    style: TextStyle(color: DeckColors.label, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: OutlinedButton(
+                onPressed: () => context.go(AppRoutes.quai),
+                child: const Text('STOP → QUAI (double appui lot D)'),
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _kv(String k, String v) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            k,
+            style: const TextStyle(
+              color: DeckColors.label,
+              fontSize: 10,
+              letterSpacing: 1.3,
+            ),
+          ),
+          Text(
+            v,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              fontFeatures: [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  const _Chip({required this.ok, required this.label});
+
+  final bool ok;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        border: Border.all(color: DeckColors.hairline),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            color: ok ? const Color(0xFF46C275) : DeckColors.hairline,
+          ),
+          const SizedBox(width: 6),
+          Text(label, style: const TextStyle(fontSize: 11)),
+        ],
       ),
     );
   }

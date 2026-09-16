@@ -10,8 +10,8 @@ Maquettes : `docs/stitch-mvp/GEL.md` (Deck). Ne pas porter les HTML « jeter ».
 | Lot | État |
 |---|---|
 | A | Scaffold, thème Deck, `go_router` 1 / 2A / 2B / 3 / 5 / 6 / 6r / 7 |
-| B | Permissions + overlay GPS/roll + `sessions/{id}/samples.jsonl` |
-| C–G | Tare 30 s, live STOP, replay, coach join, API — **pas encore** |
+| B | Permissions + overlay GPS/roll brut + `sessions/{id}/samples.jsonl` |
+| C–G | Tare 30 s, STOP 2×, replay, coach join, API — **pas encore** |
 
 ## Run (device réel, ciel ouvert)
 
@@ -26,7 +26,8 @@ flutter run
 - Montage : téléphone **boulonné au cale-pied, paysage**, écran face au rameur.
   Gauche écran = **BÂBORD**, droite = **TRIBORD** (réf. rameur, yeux vers la poupe).
 - Vitesse toujours légendée **sol — pas eau**. Cadence peut être `—` (nullable).
-- Alerte gîte (écran 4, lot D) : bandeau `#E8C547`, jamais cyan.
+- Alerte gîte : bandeau `#E8C547` `GÎTE — trop tribords` si roll brut > +3° (tare lot C).
+- Fichier séance : `Documents/sessions/{id}/samples.jsonl` (1 Hz). Overlay live = GPS + roll brut.
 
 ## Simulateur
 
