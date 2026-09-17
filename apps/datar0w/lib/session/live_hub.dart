@@ -223,10 +223,25 @@ class LiveHub extends Notifier<LiveHubState> {
   }
 
   /// Rotation UI 0/90/180/270 — suit l’écran (gauche/droite visibles).
-  /// Figée pendant la tare pour que l’offset soit le vrai niveau du téléphone.
+  /// Figée pendant la tare. Si l’orientation change après une tare OK,
+  /// l’offset n’est plus valable (tare en portrait puis séance paysage).
   void setDisplayRotation(int deg) {
     if (state.tareStatus == TareStatus.running) return;
-    _displayRotationDeg = normalizeDisplayRotationDeg(deg);
+    final n = normalizeDisplayRotationDeg(deg);
+    if (state.tareOk &&
+        _tareRotationDeg != null &&
+        n != _tareRotationDeg) {
+      _tareRotationDeg = null;
+      _displayRotationDeg = n;
+      state = state.copyWith(
+        tareStatus: TareStatus.failed,
+        imuHint:
+            'Tare annulée : le téléphone a changé d’orientation. '
+            'Le remettre en position de séance (paysage, cale-pied) et refaire la tare.',
+      );
+      return;
+    }
+    _displayRotationDeg = n;
   }
 
   int get _heelRotationDeg =>
@@ -379,6 +394,14 @@ class LiveHub extends Notifier<LiveHubState> {
 
   void beginTare() {
     if (state.tareStatus == TareStatus.running) return;
+    if (_displayRotationDeg == 0) {
+      state = state.copyWith(
+        imuHint:
+            'Mettre le téléphone en position de séance (paysage, cale-pied) '
+            'avant la tare. Un zéro pris à la verticale ne vaut pas pour le live.',
+      );
+      return;
+    }
     unawaited(listenImu());
     _heel.reset();
     _displayGite = null;
@@ -434,6 +457,14 @@ class LiveHub extends Notifier<LiveHubState> {
   /// Démarrer : meta.json (offset) + logger 1 Hz. Pas avant tare OK.
   Future<bool> startSession() async {
     if (!state.tareOk || _store != null) return false;
+    if (_displayRotationDeg == 0) {
+      state = state.copyWith(
+        imuHint:
+            'Passer en paysage (position de séance) avant Démarrer. '
+            'La tare doit rester celle du cale-pied, pas du portrait.',
+      );
+      return false;
+    }
     final perm = await AppPermissions.requestSession();
     if (perm.locationOk) {
       await AppPermissions.requestBackgroundAfterWhenInUse();
