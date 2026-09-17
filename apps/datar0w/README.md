@@ -7,7 +7,7 @@ Companion téléphone **1x** : GPS / IMU du cale-pied. **Pas une mesure AvSim.**
 | Lot | Contenu |
 |---|---|
 | B | Permissions (refus = message FR). Logger 1 Hz **après Démarrer**. `samples.jsonl` + `imu.jsonl` brut. Distance haversine si `acc_h < 25 m`. Trou GPS si fix perdu. `sol — pas eau`. Cadence `—`. |
-| C | Tare 30 s, σ < 0,2°, `tareOffsetDeg` dans `meta.json`. Démarrer off sinon. Gîte = roll lissé − offset, clamp ±15°. |
+| C | Tare 30 s : moyenne du **niveau IMU** (gravité accéléro), σ < 0,2°, `tareOffsetDeg` dans `meta.json`. Démarrer off sinon. Après tare, 0° = ce niveau. |
 | D | STOP 2× / 3 s → `LiveHub.stop()` → quai. Bandeaux gîte **deux côtés**. |
 | E | Quai 4 chiffres + Replay + Partager **jsonl+meta**. Replay carte, playhead, 2 courbes, pas d’interpolation. |
 

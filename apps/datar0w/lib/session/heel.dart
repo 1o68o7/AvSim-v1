@@ -30,6 +30,12 @@ class HeelFilter {
         wGyro * (filteredDeg! + gyroDegPerS * dt) + (1 - wGyro) * accelRollDeg;
     return filteredDeg!;
   }
+
+  void reset() {
+    filteredDeg = null;
+    rawAccelRollDeg = 0;
+    _last = null;
+  }
 }
 
 double displayDeadband(
@@ -120,3 +126,5 @@ double complementaryGyroWeight({required double dtS, required double tauS}) {
 }
 
 double hypot(double a, double b) => sqrt(a * a + b * b);
+
+double hypot3(double a, double b, double c) => sqrt(a * a + b * b + c * c);

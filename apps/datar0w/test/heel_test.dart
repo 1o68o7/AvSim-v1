@@ -61,6 +61,8 @@ void main() {
     }
     expect(f.filteredDeg!, greaterThan(2));
     expect(f.filteredDeg!, lessThan(10));
+    f.reset();
+    expect(f.filteredDeg, isNull);
   });
 
   testWidgets('bandeau trop tribords vert foncé, trop bâbord rouge', (tester) async {

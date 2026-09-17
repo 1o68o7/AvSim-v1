@@ -43,6 +43,12 @@ class LiveHubState {
     this.code,
     this.coachSessionId,
     this.displayGiteDeg,
+    this.imuOk = false,
+    this.imuHint = 'IMU : en attente du niveau du téléphone…',
+    this.tareSampleCount = 0,
+    this.ax,
+    this.ay,
+    this.az,
   });
 
   final bool locationOk;
@@ -68,6 +74,12 @@ class LiveHubState {
   final String? code;
   final String? coachSessionId;
   final double? displayGiteDeg;
+  final bool imuOk;
+  final String imuHint;
+  final int tareSampleCount;
+  final double? ax;
+  final double? ay;
+  final double? az;
 
   bool get tareOk => tareStatus == TareStatus.ok && tareOffset != null;
 
@@ -101,6 +113,12 @@ class LiveHubState {
     String? code,
     String? coachSessionId,
     double? displayGiteDeg,
+    bool? imuOk,
+    String? imuHint,
+    int? tareSampleCount,
+    double? ax,
+    double? ay,
+    double? az,
   }) {
     return LiveHubState(
       locationOk: locationOk ?? this.locationOk,
@@ -126,6 +144,12 @@ class LiveHubState {
       code: code ?? this.code,
       coachSessionId: coachSessionId ?? this.coachSessionId,
       displayGiteDeg: displayGiteDeg ?? this.displayGiteDeg,
+      imuOk: imuOk ?? this.imuOk,
+      imuHint: imuHint ?? this.imuHint,
+      tareSampleCount: tareSampleCount ?? this.tareSampleCount,
+      ax: ax ?? this.ax,
+      ay: ay ?? this.ay,
+      az: az ?? this.az,
     );
   }
 }
@@ -149,7 +173,8 @@ class LiveHub extends Notifier<LiveHubState> {
   double _dist = 0;
   DateTime? _lastGpsAt;
   bool _imuOn = false;
-  int _displayRotationDeg = 90;
+  int _displayRotationDeg = 0;
+  int? _tareRotationDeg;
   final HeelFilter _heel = HeelFilter();
   ImuFrame? _lastImu;
   DateTime? _lastImuLogAt;
@@ -165,56 +190,96 @@ class LiveHub extends Notifier<LiveHubState> {
     return const LiveHubState();
   }
 
-  /// Rotation UI 0/90/180/270. Cale-pied : 90° (paysage, haut appareil à gauche).
+  /// Rotation UI 0/90/180/270 — suit l’écran (gauche/droite visibles).
+  /// Figée pendant la tare pour que l’offset soit le vrai niveau du téléphone.
   void setDisplayRotation(int deg) {
+    if (state.tareStatus == TareStatus.running) return;
     _displayRotationDeg = normalizeDisplayRotationDeg(deg);
   }
 
+  int get _heelRotationDeg =>
+      _tareRotationDeg ?? _displayRotationDeg;
+
   Future<void> listenImu() async {
+    _uiTimer ??= Timer.periodic(const Duration(milliseconds: 80), (_) {
+      _publishUi();
+    });
     if (_imuOn) return;
     _imuOn = true;
     _imuSubs.add(
       _imu.frameStream().listen(
         (f) {
           _lastImu = f;
+          final roll = screenHeelDeg(
+            f.ax,
+            f.ay,
+            f.az,
+            displayRotationDeg: _heelRotationDeg,
+          );
           _heel.update(
-            accelRollDeg: screenHeelDeg(
-              f.ax,
-              f.ay,
-              f.az,
-              displayRotationDeg: _displayRotationDeg,
-            ),
+            accelRollDeg: roll,
             gyroDegPerS: screenHeelGyroDegPerS(
               f.gx,
               f.gy,
               f.gz,
-              displayRotationDeg: _displayRotationDeg,
+              displayRotationDeg: _heelRotationDeg,
             ),
           );
+          final filtered = _heel.filteredDeg;
+          if (state.tareStatus == TareStatus.running && filtered != null) {
+            _tareWindow.add(filtered);
+          }
           _maybeLogImu(f);
         },
-        onError: (_) {},
+        onError: (Object e) {
+          state = state.copyWith(
+            imuOk: false,
+            imuHint: 'IMU erreur : $e',
+          );
+        },
       ),
     );
-    _uiTimer ??= Timer.periodic(const Duration(milliseconds: 80), (_) {
-      _publishUi();
-    });
   }
 
   void _publishUi() {
+    final imu = _lastImu;
     final f = _heel.filteredDeg;
-    if (f == null) return;
-    if (state.tareStatus == TareStatus.running) {
-      _tareWindow.add(f);
+    if (imu == null && f == null) {
+      if (state.tareStatus == TareStatus.running &&
+          state.tareElapsedS >= 2 &&
+          _tareWindow.isEmpty) {
+        state = state.copyWith(
+          imuHint:
+              'IMU muet : le niveau du téléphone n’est pas lu. Vérifier que le capteur n’est pas bloqué.',
+        );
+      }
+      return;
     }
-    final gite = state.tareOffset == null
-        ? rowerGiteFromImu(f)
+    final running = state.tareStatus == TareStatus.running;
+    final gite = (running || state.tareOffset == null || f == null)
+        ? rowerGiteFromImu(f ?? 0)
         : rowerGiteFromImu(f - state.tareOffset!);
-    _displayGite = clampHeel(displayDeadband(_displayGite, gite));
+    _displayGite = running
+        ? gite
+        : clampHeel(displayDeadband(_displayGite, gite));
+    final mag = imu == null
+        ? null
+        : hypot3(imu.ax, imu.ay, imu.az);
     state = state.copyWith(
       rollDeg: f,
-      pitchDeg: _lastImu?.accelPitchDeg,
+      pitchDeg: imu?.accelPitchDeg,
       displayGiteDeg: _displayGite,
+      imuOk: imu != null,
+      imuHint: imu == null
+          ? state.imuHint
+          : 'IMU niveau  |a|=${mag!.toStringAsFixed(2)} m/s²  '
+              'ax=${imu.ax.toStringAsFixed(2)}  '
+              'ay=${imu.ay.toStringAsFixed(2)}  '
+              'az=${imu.az.toStringAsFixed(2)}',
+      tareSampleCount: _tareWindow.length,
+      ax: imu?.ax,
+      ay: imu?.ay,
+      az: imu?.az,
     );
   }
 
@@ -243,19 +308,29 @@ class LiveHub extends Notifier<LiveHubState> {
 
   void beginTare() {
     if (state.tareStatus == TareStatus.running) return;
+    unawaited(listenImu());
+    _heel.reset();
+    _displayGite = null;
     _tareWindow.clear();
     _tareStartedAt = DateTime.now();
+    _tareRotationDeg = _displayRotationDeg;
     state = state.copyWith(
       tareStatus: TareStatus.running,
       tareElapsedS: 0,
-      tareSigma: null,
+      tareSampleCount: 0,
+      imuHint: state.imuOk
+          ? state.imuHint
+          : 'Tare : lecture du niveau IMU…',
     );
     _tareTicker?.cancel();
     _tareTicker = Timer.periodic(const Duration(seconds: 1), (_) {
       final start = _tareStartedAt;
       if (start == null) return;
       final s = DateTime.now().difference(start).inSeconds;
-      state = state.copyWith(tareElapsedS: s.clamp(0, 30));
+      state = state.copyWith(
+        tareElapsedS: s.clamp(0, 30),
+        tareSampleCount: _tareWindow.length,
+      );
       if (s >= 30) {
         _finishTare();
       }
@@ -266,12 +341,22 @@ class LiveHub extends Notifier<LiveHubState> {
     _tareTicker?.cancel();
     _tareTicker = null;
     final result = computeTare(_tareWindow);
+    final n = _tareWindow.length;
     _tareWindow.clear();
+    if (!result.ok) {
+      _tareRotationDeg = null;
+    }
     state = state.copyWith(
       tareStatus: result.ok ? TareStatus.ok : TareStatus.failed,
       tareOffset: result.ok ? result.offsetDeg : state.tareOffset,
       tareSigma: result.sigmaDeg.isFinite ? result.sigmaDeg : null,
       tareElapsedS: 30,
+      tareSampleCount: n,
+      imuHint: result.ok
+          ? 'Tare OK — zéro = niveau actuel du téléphone (${result.offsetDeg.toStringAsFixed(2)}°)'
+          : (n < 10
+              ? 'Tare refusée : IMU n’a fourni que $n échantillon(s). Le niveau n’est pas enregistré.'
+              : 'Tare refusée : σ ${result.sigmaDeg.toStringAsFixed(2)}° ≥ 0,2° (bateau pas assez calé).'),
     );
   }
 

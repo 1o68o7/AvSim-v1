@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,7 +28,6 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
   @override
   void initState() {
     super.initState();
-    unawaited(lockRowerLandscape());
     WidgetsBinding.instance.addPostFrameCallback((_) => _maybeLoadFile());
   }
 
