@@ -41,8 +41,55 @@ ThemeData buildDeckTheme() {
       foregroundColor: DeckColors.text,
       elevation: 0,
       centerTitle: true,
+      scrolledUnderElevation: 0,
     ),
     dividerColor: DeckColors.hairline,
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: DeckColors.amber,
+        foregroundColor: DeckColors.onAlert,
+        elevation: 0,
+        shape: const RoundedRectangleBorder(),
+        minimumSize: const Size.fromHeight(52),
+        textStyle: const TextStyle(
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.2,
+          fontFamily: 'monospace',
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: DeckColors.label,
+        side: const BorderSide(color: DeckColors.hairline),
+        shape: const RoundedRectangleBorder(),
+        minimumSize: const Size.fromHeight(52),
+        textStyle: const TextStyle(
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.2,
+          fontFamily: 'monospace',
+        ),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: DeckColors.label,
+        shape: const RoundedRectangleBorder(),
+      ),
+    ),
+    inputDecorationTheme: const InputDecorationTheme(
+      filled: true,
+      fillColor: DeckColors.bg,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.zero,
+        borderSide: BorderSide(color: DeckColors.hairline),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.zero,
+        borderSide: BorderSide(color: DeckColors.amber),
+      ),
+      labelStyle: TextStyle(color: DeckColors.label, letterSpacing: 1.2),
+    ),
     textTheme: const TextTheme(
       displayLarge: TextStyle(
         color: DeckColors.text,

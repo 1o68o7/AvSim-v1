@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/deck_theme.dart';
+import 'deck_widgets.dart';
 
 class DeckScaffold extends StatelessWidget {
   const DeckScaffold({
@@ -21,14 +22,17 @@ class DeckScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: DeckColors.bg,
       appBar: AppBar(
+        toolbarHeight: subtitle != null ? 72 : 64,
         title: Column(
           children: [
+            const DataR0wMark(compact: true),
             Text(
               title,
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 10,
                 fontWeight: FontWeight.w700,
-                letterSpacing: 1.6,
+                letterSpacing: 1.4,
+                color: DeckColors.label,
               ),
             ),
             if (subtitle != null)

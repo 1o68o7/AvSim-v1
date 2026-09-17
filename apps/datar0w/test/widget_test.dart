@@ -8,7 +8,7 @@ void main() {
     await tester.pumpWidget(
       const ProviderScope(child: DataR0wApp()),
     );
-    expect(find.text('DataR0w'), findsWidgets);
+    expect(find.textContaining('DATA'), findsWidgets);
     expect(find.text('RAMEUR'), findsOneWidget);
     expect(find.text('COACH'), findsOneWidget);
     expect(find.text('BARREUR'), findsOneWidget);

@@ -7,6 +7,7 @@ import '../../router.dart';
 import '../../session/rower_orientation.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import '../../widgets/deck_widgets.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -15,23 +16,31 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     unawaited(unlockRowerOrientations());
     return DeckScaffold(
-      title: 'DataR0w',
-      subtitle: 'Sélection profil',
+      title: 'SÉLECTION PROFIL',
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
         children: [
           const Text(
-            'POSTE DE CONTRÔLE TÉLÉMÉTRIQUE',
+            'SÉLECTION PROFIL',
             style: TextStyle(
               color: DeckColors.label,
               fontSize: 11,
-              letterSpacing: 1.4,
+              letterSpacing: 1.6,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Poste de contrôle télémétrique',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 16),
           _RoleCard(
             title: 'RAMEUR',
             subtitle: 'Instrument embarqué · Vue cale-pied',
+            icon: Icons.speed,
             highlighted: true,
             onTap: () => context.go(AppRoutes.presession),
           ),
@@ -39,13 +48,16 @@ class ProfileScreen extends StatelessWidget {
           _RoleCard(
             title: 'COACH',
             subtitle: 'Suivi direct bord de bassin',
+            icon: Icons.sports,
             onTap: () => context.go(AppRoutes.coachJoin),
           ),
           const SizedBox(height: 12),
           const _RoleCard(
             title: 'BARREUR',
-            subtitle: "besoin d'un bateau barré",
+            subtitle: 'Cadence & tactique de barre',
+            icon: Icons.directions_boat,
             locked: true,
+            footnote: "besoin d'un bateau barré",
           ),
         ],
       ),
@@ -57,70 +69,110 @@ class _RoleCard extends StatelessWidget {
   const _RoleCard({
     required this.title,
     required this.subtitle,
+    required this.icon,
     this.onTap,
     this.highlighted = false,
     this.locked = false,
+    this.footnote,
   });
 
   final String title;
   final String subtitle;
+  final IconData icon;
   final VoidCallback? onTap;
   final bool highlighted;
   final bool locked;
+  final String? footnote;
 
   @override
   Widget build(BuildContext context) {
     return Opacity(
-      opacity: locked ? 0.55 : 1,
+      opacity: locked ? 0.6 : 1,
       child: Material(
-        color: DeckColors.surfaceHigh,
+        color: locked ? DeckColors.surface : DeckColors.surfaceHigh,
         child: InkWell(
           onTap: locked ? null : onTap,
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(
-                color: highlighted ? DeckColors.amber : DeckColors.hairline,
+                color: highlighted
+                    ? DeckColors.amber.withValues(alpha: 0.6)
+                    : DeckColors.hairline,
               ),
             ),
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                if (highlighted)
-                  Container(
-                    width: 4,
-                    height: 48,
-                    color: DeckColors.amber,
-                    margin: const EdgeInsets.only(right: 12),
-                  ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: locked ? DeckColors.label : DeckColors.text,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.4,
-                        ),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (highlighted)
+                    Container(width: 4, color: DeckColors.amber),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              DeckIconBox(
+                                icon: icon,
+                                accent: highlighted,
+                                muted: locked,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      title,
+                                      style: TextStyle(
+                                        color: locked
+                                            ? DeckColors.label
+                                            : DeckColors.text,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 1.4,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      subtitle,
+                                      style: const TextStyle(
+                                        color: DeckColors.label,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(
+                                locked
+                                    ? Icons.lock_outline
+                                    : Icons.arrow_forward,
+                                color: highlighted
+                                    ? DeckColors.amber
+                                    : DeckColors.label,
+                                size: 20,
+                              ),
+                            ],
+                          ),
+                          if (footnote != null) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              footnote!.toUpperCase(),
+                              style: const TextStyle(
+                                color: DeckColors.label,
+                                fontSize: 10,
+                                letterSpacing: 1.1,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                          color: DeckColors.label,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                Icon(
-                  locked ? Icons.lock_outline : Icons.arrow_forward,
-                  color: highlighted ? DeckColors.amber : DeckColors.label,
-                  size: 20,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

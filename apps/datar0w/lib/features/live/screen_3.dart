@@ -10,6 +10,7 @@ import '../../session/rower_orientation.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/heel_banner.dart';
 import '../../widgets/heel_gauge.dart';
+import '../../widgets/deck_widgets.dart';
 
 class LiveScreen extends ConsumerStatefulWidget {
   const LiveScreen({super.key});
@@ -58,118 +59,42 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             HeelBanner(alert: alert),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: Row(
-                children: [
-                  const Text(
-                    'LIVE 1X',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.6,
-                    ),
-                  ),
-                  const Spacer(),
-                  if (s.code != null)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: Text(
-                        s.code!,
-                        style: const TextStyle(
-                          color: DeckColors.amber,
-                          letterSpacing: 2,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  _Chip(
-                    ok: !s.gpsLost && s.locationOk,
-                    label: s.gpsLost ? 'GPS perdu' : 'GPS',
-                  ),
-                  const SizedBox(width: 8),
-                  _Chip(ok: s.rollDeg != null && s.tareOk, label: 'IMU'),
-                ],
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Text(
-                'sol — pas eau · cadence — · pas de SOG 10 Hz',
-                style: TextStyle(color: DeckColors.label, fontSize: 11),
-              ),
-            ),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  if (s.permissionMessage != null &&
-                      s.permissionMessage!.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Text(
-                        s.permissionMessage!,
-                        style: const TextStyle(color: DeckColors.amber),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final landscape = constraints.maxWidth > 640;
+                  if (landscape) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(flex: 5, child: _metricsColumn(s, expand: true)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            flex: 5,
+                            child: _giteColumn(gite),
+                          ),
+                          const SizedBox(width: 8),
+                          SizedBox(
+                            width: 128,
+                            child: _systemColumn(s, expand: true),
+                          ),
+                        ],
                       ),
-                    ),
-                  _kv('CADENCE', '—'),
-                  _kv(
-                    'V SOL',
-                    s.sog == null
-                        ? '—'
-                        : '${s.sog!.toStringAsFixed(2)} m/s',
-                  ),
-                  _kv(
-                    'DISTANCE',
-                    '${(s.distM / 1000).toStringAsFixed(3)} km',
-                  ),
-                  _kv(
-                    'GÎTE',
-                    gite == null
-                        ? 'tare requise'
-                        : '${gite.toStringAsFixed(1)}°',
-                  ),
-                  const SizedBox(height: 8),
-                  const HeelLabels(),
-                  HeelGauge(giteDeg: gite ?? 0),
-                  const SizedBox(height: 8),
-                  _kv(
-                    'LAT / LON',
-                    (s.lat == null || s.lon == null)
-                        ? '—'
-                        : '${s.lat!.toStringAsFixed(5)}  ${s.lon!.toStringAsFixed(5)}',
-                  ),
-                  _kv(
-                    'ACC_H',
-                    s.accH == null ? '—' : '${s.accH!.toStringAsFixed(1)} m',
-                  ),
-                  _kv('BATT / NET', '${s.batt ?? '—'} %   ${s.net}'),
-                  _kv(
-                    'FICHIER',
-                    s.sessionDir == null
-                        ? '…'
-                        : '${s.sessionDir}/samples.jsonl  (${s.sampleCount})',
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Gauche = TRIBORD (vert) · droite = BÂBORD (rouge) · réf. rameur',
-                    style: TextStyle(color: DeckColors.label, fontSize: 11),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: _stopArmed ? DeckColors.alert : null,
-                  side: BorderSide(
-                    color: _stopArmed ? DeckColors.alert : DeckColors.hairline,
-                  ),
-                ),
-                onPressed: _onStop,
-                child: Text(
-                  _stopArmed ? 'STOP — RETOUCHER (3 S)' : 'STOP  ·  TOUCHER 2×',
-                ),
+                    );
+                  }
+                  return ListView(
+                    padding: const EdgeInsets.all(12),
+                    children: [
+                      SizedBox(height: 280, child: _metricsColumn(s, expand: true)),
+                      const SizedBox(height: 8),
+                      _giteColumn(gite),
+                      const SizedBox(height: 8),
+                      SizedBox(height: 220, child: _systemColumn(s, expand: true)),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -178,58 +103,118 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
     );
   }
 
-  Widget _kv(String k, String v) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            k,
-            style: const TextStyle(
-              color: DeckColors.label,
-              fontSize: 10,
-              letterSpacing: 1.3,
-            ),
+  Widget _metricsColumn(LiveHubState s, {required bool expand}) {
+    return Column(
+      children: [
+        Expanded(
+          child: InstrumentPod(
+            label: 'CADENCE',
+            value: '—',
+            unit: 'COUPS/MIN',
           ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: InstrumentPod(
+            label: 'VITESSE SOL',
+            value: s.sog == null ? '—' : s.sog!.toStringAsFixed(1),
+            unit: 'M/S  ·  SOL — PAS EAU',
+          ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: InstrumentPod(
+            label: 'DISTANCE',
+            value: (s.distM / 1000).toStringAsFixed(2),
+            unit: 'KM  ·  SKF·1X // LIVE',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _giteColumn(double? gite) {
+    return InstrumentPod(
+      label: 'GÎTE',
+      value: gite == null ? 'tare' : '${gite.toStringAsFixed(1)}°',
+      child: Column(
+        children: [
+          const Text(
+            'TOLÉRANCE ±3.0°  ·  RÉF. RAMEUR',
+            style: TextStyle(color: DeckColors.label, fontSize: 9),
+          ),
+          const SizedBox(height: 4),
+          const HeelLabels(),
+          HeelGauge(giteDeg: gite ?? 0),
+          const SizedBox(height: 4),
           Text(
-            v,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              fontFeatures: [FontFeature.tabularFigures()],
+            gite == null
+                ? 'TARE REQUISE'
+                : (gite >= 0
+                    ? 'TRIBORD  +${gite.toStringAsFixed(1)}°'
+                    : 'BÂBORD  ${gite.toStringAsFixed(1)}°'),
+            style: TextStyle(
+              color: gite == null
+                  ? DeckColors.label
+                  : (gite >= 0 ? DeckColors.tribord : DeckColors.babord),
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.2,
+              fontSize: 12,
             ),
           ),
         ],
       ),
     );
   }
-}
 
-class _Chip extends StatelessWidget {
-  const _Chip({required this.ok, required this.label});
-
-  final bool ok;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        border: Border.all(color: DeckColors.hairline),
+  Widget _systemColumn(LiveHubState s, {required bool expand}) {
+    final stop = OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: _stopArmed ? DeckColors.alert : DeckColors.label,
+        side: BorderSide(
+          color: _stopArmed ? DeckColors.alert : DeckColors.hairline,
+        ),
+        minimumSize: const Size(110, 52),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            color: ok ? DeckColors.tribord : DeckColors.hairline,
+      onPressed: _onStop,
+      child: Text(
+        _stopArmed ? 'STOP\nRETOUCHER' : 'STOP\nTOUCHER 2×',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 11, height: 1.2),
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InstrumentPod(
+          label: 'SYSTÈME',
+          value: s.code ?? '—',
+          unit: 'SKF·1X',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              DeckStatusChip(
+                label: s.gpsLost ? 'GPS perdu' : 'GPS',
+                ok: !s.gpsLost && s.locationOk,
+              ),
+              const SizedBox(height: 6),
+              DeckStatusChip(
+                label: 'IMU',
+                ok: s.rollDeg != null && s.tareOk,
+              ),
+              const SizedBox(height: 6),
+              DeckStatusChip(label: s.net, ok: s.net != 'hors ligne'),
+              const SizedBox(height: 6),
+              DeckStatusChip(
+                label: '${s.batt ?? '—'} %',
+                ok: (s.batt ?? 0) > 20,
+              ),
+            ],
           ),
-          const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontSize: 11)),
-        ],
-      ),
+        ),
+        const Spacer(),
+        stop,
+      ],
     );
   }
 }
