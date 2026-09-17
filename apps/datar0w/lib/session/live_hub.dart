@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:environment_sensors/environment_sensors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -290,19 +289,12 @@ class LiveHub extends Notifier<LiveHubState> {
         ),
       );
     } catch (_) {}
-    unawaited(_listenBaro());
-  }
-
-  Future<void> _listenBaro() async {
     try {
-      final env = EnvironmentSensors();
-      final ok = await env.getSensorAvailable(SensorType.Pressure);
-      if (!ok) return;
       _imuSubs.add(
-        env.pressure.listen(
-          (p) {
-            _pHpa = p;
-            _p0Hpa ??= p;
+        barometerEventStream(samplingPeriod: SensorInterval.uiInterval).listen(
+          (e) {
+            _pHpa = e.pressure;
+            _p0Hpa ??= e.pressure;
           },
           onError: (_) {},
         ),
