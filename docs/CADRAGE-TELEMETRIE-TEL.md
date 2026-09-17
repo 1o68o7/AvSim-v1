@@ -58,10 +58,11 @@ Sans P0 : écran noir + trous GPS dès que OxygenOS endort l’app.
 - UI live : optionnel, petit cap ; sinon fichier seulement.
 
 **Baro**  
-- OnePlus 9 a en général un baromètre. Package : `environment_sensors` / API pression `sensors_plus` si dispo.  
-- Colonne `p_hpa` + `alt_baro` relative à la tare (quai = 0).  
+- OnePlus 9 a en général un baromètre. API : `sensors_plus` `barometerEventStream` uniquement.  
+  **Ne pas** ajouter `environment_sensors` (jcenter cassé sous AGP 9 / Gradle 9).  
+- Colonnes `p_hpa` + `alt_baro` relative à la tare (quai = 0).  
 - Utile en replay (creux de vague / faux plat), **pas** pour V.  
-- Si capteur absent : `null`, pas d’erreur.
+- Si capteur / API absents : `null`, pas d’erreur.
 
 **Cadence tél. (option prudente)**  
 - Ne jamais afficher un SPM instable.  

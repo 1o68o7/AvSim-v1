@@ -46,6 +46,8 @@ void main() {
   test('baro relative : même P → 0 m', () {
     expect(altBaroRelM(1013.25, 1013.25), closeTo(0, 0.05));
     expect(altBaroRelM(null, 1013), isNull);
+    expect(altBaroRelM(1013, null), isNull);
+    expect(altBaroRelM(0, 1013), isNull);
   });
 
   test('jsonl P1 clés optionnelles', () {
