@@ -6,6 +6,7 @@ import '../../router.dart';
 import '../../session/live_hub.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import '../../widgets/heel_gauge.dart';
 
 class TareScreen extends ConsumerStatefulWidget {
   const TareScreen({super.key});
@@ -26,8 +27,7 @@ class _TareScreenState extends ConsumerState<TareScreen> {
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(liveHubProvider);
-    final live = s.tareOk ? s.giteDeg : s.rollDeg;
-    final shown = (live ?? 0).clamp(-15.0, 15.0);
+    final shown = s.displayGiteDeg ?? 0;
     final status = switch (s.tareStatus) {
       TareStatus.none => 'NON FAITE',
       TareStatus.running => 'EN COURS  ${s.tareElapsedS} s / 30',
@@ -39,7 +39,7 @@ class _TareScreenState extends ConsumerState<TareScreen> {
 
     return DeckScaffold(
       title: 'DATAROW / 2B',
-      subtitle: 'Tare gîte · référentiel rameur',
+      subtitle: 'Tare gîte · réf. rameur',
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -48,28 +48,22 @@ class _TareScreenState extends ConsumerState<TareScreen> {
               'Bateau à quai, coque calée. Ne pas bouger.',
               style: TextStyle(color: DeckColors.label),
             ),
-            const SizedBox(height: 24),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('BÂBORD', style: TextStyle(color: Color(0xFFE05353))),
-                Text('TRIBORD', style: TextStyle(color: Color(0xFF46C275))),
-              ],
-            ),
+            const SizedBox(height: 16),
+            const HeelLabels(),
             const SizedBox(height: 8),
             Text(
               '${shown.toStringAsFixed(1)}°',
               style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w700),
             ),
             const Text(
-              'LECTURE ASSIETTE LIVE',
+              'LECTURE LISSÉE  ±0,15°  ·  12 Hz',
               style: TextStyle(color: DeckColors.label, fontSize: 11),
             ),
-            const SizedBox(height: 16),
-            _HeelBar(valueDeg: shown),
+            const SizedBox(height: 12),
+            HeelGauge(giteDeg: shown),
             const SizedBox(height: 8),
             const Text(
-              'TOLÉRANCE  σ < 0,2°  ·  30 s',
+              'TOLÉRANCE  σ < 0,2°  ·  30 s  ·  clamp ±15°',
               style: TextStyle(color: DeckColors.label, fontSize: 11),
             ),
             const Spacer(),
@@ -93,8 +87,9 @@ class _TareScreenState extends ConsumerState<TareScreen> {
             FilledButton(
               onPressed: s.tareOk
                   ? () async {
-                      final ok =
-                          await ref.read(liveHubProvider.notifier).startSession();
+                      final ok = await ref
+                          .read(liveHubProvider.notifier)
+                          .startSession();
                       if (!context.mounted || !ok) return;
                       context.go(AppRoutes.live);
                     }
@@ -103,40 +98,6 @@ class _TareScreenState extends ConsumerState<TareScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _HeelBar extends StatelessWidget {
-  const _HeelBar({required this.valueDeg});
-
-  final double valueDeg;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = ((valueDeg + 15) / 30).clamp(0.0, 1.0);
-    return SizedBox(
-      height: 28,
-      child: Stack(
-        alignment: Alignment.centerLeft,
-        children: [
-          Container(
-            height: 4,
-            color: DeckColors.hairline,
-          ),
-          Align(
-            alignment: Alignment(t * 2 - 1, 0),
-            child: Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: DeckColors.amber,
-                border: Border.all(color: DeckColors.text),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

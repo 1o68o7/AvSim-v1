@@ -1,36 +1,36 @@
 # Bâbord / tribord — référentiel DataR0w
 
-*Figé le 16 septembre 2026.*
+*Révisé le 17 septembre 2026 (inversion affichage rameur).*
 
 À l'aviron, bâbord et tribord sont **inversés** par rapport à la navigation classique.
 
 ## Pourquoi
 
-- Marine : on nomme les bords **face à la proue** (sens de la marche). Gauche = bâbord, droite = tribord.
-- Aviron : le rameur regarde la **poupe**. Les bords se nomment **face rameur**.
+- Marine : on nomme les bords **face à la proue**. Gauche = bâbord, droite = tribord.
+- Aviron : le rameur regarde la **poupe**. Écran au cale-pied, face à l'athlète.
 
-Conséquence dans le sens de la marche : le bâbord aviron est à **droite** du bateau, le tribord aviron à **gauche**. On n'utilise jamais le mapping marine dans l'app club.
+Conséquence : le **tribord aviron** est à **gauche** du rameur (et de l'écran),
+le **bâbord aviron** à **droite**. Jamais le mapping marine PORT/STARBOARD dans l'app.
 
-## Écran rameur (téléphone au cale-pied, face au rameur)
+## Écrans rameur 2B / 3 / 4 (cale-pied)
 
-Le rameur lit l'écran comme il voit le bateau.
+| Côté écran (yeux rameur) | Libellé | Couleur |
+|---|---|---|
+| **Gauche** | **TRIBORD** | `#46C275` vert |
+| **Droite** | **BÂBORD** | `#E05353` rouge |
 
-| Côté écran (yeux rameur) | Libellé |
-|---|---|
-| **Gauche** | **BÂBORD** |
-| **Droite** | **TRIBORD** |
+Gîte `+` = coque basse vers la **gauche** = tribords.  
+Gîte `−` = coque basse vers la **droite** = bâbord.
 
-Gîte `+` vers tribord = aiguille / valeur vers la **droite** de l'écran.
-Alerte `GÎTE — trop tribords` = dépassement vers la droite écran.
+Chip : `réf. rameur`.
 
-Ne pas écrire « gauche bateau / droite bateau ». Ne pas dessiner une proue en haut de la jauge qui réinverserait le mapping.
+## Alertes (|gîte| > 3° après tare)
 
-## Écran tare (2B)
+- Trop **bâbord** (droite écran) : bandeau 36 px fond `#E05353`, texte blanc `GÎTE — trop bâbord`
+- Trop **tribord** (gauche écran) : bandeau 36 px fond `#46C275`, texte sombre `GÎTE — trop tribords`
 
-Même axe : gauche `BÂBORD`, droite `TRIBORD`, `0.0°` au centre. Une ligne de légende : `référentiel rameur`.
+Pas d'alerte unique ambre `#E8C547` pour la gîte. L'ambre reste pour le statut non-gîte.
 
-## Écran coach
+## Coach 5 / 6
 
-La carte GPS est nord en haut (géographique). La **gîte chiffrée** reste dans le référentiel rameur (`+1.4° tribords` = même signe que sur l'écran bateau). Pas de second signe « marine ».
-
-Chip discret autorisé : `réf. rameur`.
+Même signe, mêmes couleurs. Pas de vocabulaire marine.

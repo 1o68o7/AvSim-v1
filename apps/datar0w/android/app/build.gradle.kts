@@ -6,8 +6,10 @@ plugins {
 
 android {
     namespace = "io.datar0w.datar0w"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    compileSdk = 37
+    // Pin NDK 30 for this project's Windows SDK (Android Studio GUI).
+    // Do not shell sdkmanager from Gradle (crashes on this setup).
+    ndkVersion = "30.0.16248370"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,6 +12,7 @@ import '../sensors/net.dart';
 import '../sensors/permissions.dart';
 import 'api_client.dart';
 import 'code.dart';
+import 'heel.dart';
 import 'model.dart';
 import 'store.dart';
 import 'tare_math.dart';
@@ -40,6 +43,7 @@ class LiveHubState {
     this.logging = false,
     this.code,
     this.coachSessionId,
+    this.displayGiteDeg,
   });
 
   final bool locationOk;
@@ -64,13 +68,14 @@ class LiveHubState {
   final bool logging;
   final String? code;
   final String? coachSessionId;
+  final double? displayGiteDeg;
 
   bool get tareOk => tareStatus == TareStatus.ok && tareOffset != null;
 
-  /// Gîte live = roll − offset (lot C). Sans tare : null.
+  /// Gîte jsonl / physique affichée : lissé − offset, signe rameur (+ tribords).
   double? get giteDeg {
     if (rollDeg == null || tareOffset == null) return null;
-    return rollDeg! - tareOffset!;
+    return rowerGiteFromImu(rollDeg! - tareOffset!);
   }
 
   LiveHubState copyWith({
@@ -96,6 +101,7 @@ class LiveHubState {
     bool? logging,
     String? code,
     String? coachSessionId,
+    double? displayGiteDeg,
   }) {
     return LiveHubState(
       locationOk: locationOk ?? this.locationOk,
@@ -120,6 +126,7 @@ class LiveHubState {
       logging: logging ?? this.logging,
       code: code ?? this.code,
       coachSessionId: coachSessionId ?? this.coachSessionId,
+      displayGiteDeg: displayGiteDeg ?? this.displayGiteDeg,
     );
   }
 }
@@ -134,6 +141,7 @@ class LiveHub extends Notifier<LiveHubState> {
   final List<StreamSubscription<dynamic>> _sessionSubs = [];
   Timer? _tick;
   Timer? _tareTicker;
+  Timer? _uiTimer;
   SessionStore? _store;
   final SessionApi _api = SessionApi();
   final List<SessionSample> recorded = [];
@@ -142,7 +150,10 @@ class LiveHub extends Notifier<LiveHubState> {
   double _dist = 0;
   DateTime? _lastGpsAt;
   bool _imuOn = false;
-  double? _emaRoll;
+  final HeelFilter _heel = HeelFilter();
+  ImuFrame? _lastImu;
+  DateTime? _lastImuLogAt;
+  double? _displayGite;
   final List<double> _tareWindow = [];
   DateTime? _tareStartedAt;
 
@@ -158,18 +169,60 @@ class LiveHub extends Notifier<LiveHubState> {
     if (_imuOn) return;
     _imuOn = true;
     _imuSubs.add(
-      _imu.rollStream().listen(
-        (s) {
-          _emaRoll = _emaRoll == null
-              ? s.rollDeg
-              : emaFilter(_emaRoll!, s.rollDeg);
-          if (state.tareStatus == TareStatus.running && _emaRoll != null) {
-            _tareWindow.add(_emaRoll!);
-          }
-          state = state.copyWith(rollDeg: s.rollDeg, pitchDeg: s.pitchDeg);
+      _imu.frameStream().listen(
+        (f) {
+          _lastImu = f;
+          _heel.update(
+            accelRollDeg: f.accelRollDeg,
+            gyroDegPerS: f.gx * 180 / pi,
+          );
+          _maybeLogImu(f);
         },
         onError: (_) {},
       ),
+    );
+    _uiTimer ??= Timer.periodic(const Duration(milliseconds: 80), (_) {
+      _publishUi();
+    });
+  }
+
+  void _publishUi() {
+    final f = _heel.filteredDeg;
+    if (f == null) return;
+    if (state.tareStatus == TareStatus.running) {
+      _tareWindow.add(f);
+    }
+    final gite = state.tareOffset == null
+        ? rowerGiteFromImu(f)
+        : rowerGiteFromImu(f - state.tareOffset!);
+    _displayGite = clampHeel(displayDeadband(_displayGite, gite));
+    state = state.copyWith(
+      rollDeg: f,
+      pitchDeg: _lastImu?.accelPitchDeg,
+      displayGiteDeg: _displayGite,
+    );
+  }
+
+  void _maybeLogImu(ImuFrame f) {
+    if (!state.logging || _store == null) return;
+    final now = DateTime.now();
+    if (_lastImuLogAt != null &&
+        now.difference(_lastImuLogAt!) < const Duration(milliseconds: 50)) {
+      return;
+    }
+    _lastImuLogAt = now;
+    _store?.appendImuLine(
+      jsonEncode({
+        't': now.millisecondsSinceEpoch,
+        'ax': f.ax,
+        'ay': f.ay,
+        'az': f.az,
+        'gx': f.gx,
+        'gy': f.gy,
+        'gz': f.gz,
+        'roll_raw': f.accelRollDeg,
+        'pitch_raw': f.accelPitchDeg,
+      }),
     );
   }
 
@@ -299,7 +352,7 @@ class LiveHub extends Notifier<LiveHubState> {
       accH: stale ? null : fix?.accH,
       distM: _dist,
       giteDeg: state.giteDeg,
-      pitchDeg: state.pitchDeg,
+      pitchDeg: _lastImu?.accelPitchDeg ?? state.pitchDeg,
       cadenceSpm: null,
       batt: batt,
       net: state.net,
@@ -312,6 +365,8 @@ class LiveHub extends Notifier<LiveHubState> {
       sampleCount: state.sampleCount + 1,
     );
   }
+
+  Future<void> stop() => stopSession();
 
   Future<void> stopSession() async {
     _tick?.cancel();
@@ -361,6 +416,8 @@ class LiveHub extends Notifier<LiveHubState> {
 
   Future<void> _disposeAll() async {
     _tareTicker?.cancel();
+    _uiTimer?.cancel();
+    _uiTimer = null;
     await stopSession();
     for (final s in _imuSubs) {
       await s.cancel();

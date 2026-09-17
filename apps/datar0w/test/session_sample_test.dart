@@ -18,7 +18,7 @@ void main() {
     expect(m, closeTo(111194, 200));
   });
 
-  test('alerte gîte Deck jaune, pas cyan', () {
+  test('alerte gîte : ambre statut, pas cyan High-Vis', () {
     expect(DeckColors.alert, const Color(0xFFE8C547));
     expect(DeckColors.alert.toARGB32(), isNot(0xFF00E676));
   });

@@ -14,6 +14,9 @@ class AppPermissions {
   /// Localisation when-in-use. Background = plus tard (après grant).
   /// IMU iOS : Info.plist seulement. Tare offset = lot C.
   static Future<PermissionOutcome> requestSession() async {
+    try {
+      await Permission.sensors.request();
+    } catch (_) {}
     final loc = await Permission.locationWhenInUse.request();
     if (loc.isGranted) {
       return const PermissionOutcome(locationOk: true, message: null);

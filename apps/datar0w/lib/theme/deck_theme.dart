@@ -12,6 +12,8 @@ abstract final class DeckColors {
   static const Color amber = Color(0xFFE8C547);
   static const Color alert = Color(0xFFE8C547);
   static const Color onAlert = Color(0xFF0B0E12);
+  static const Color babord = Color(0xFFE05353);
+  static const Color tribord = Color(0xFF46C275);
   static const Color muted = Color(0xFF8E939D);
 }
 

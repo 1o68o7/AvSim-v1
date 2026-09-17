@@ -5,11 +5,14 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../router.dart';
+import '../../session/heel.dart';
 import '../../session/live_hub.dart';
 import '../../session/model.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
 import '../../theme/deck_theme.dart';
+import '../../widgets/heel_banner.dart';
+import '../../widgets/heel_gauge.dart';
 
 class CoachLiveScreen extends ConsumerStatefulWidget {
   const CoachLiveScreen({super.key});
@@ -46,7 +49,9 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
         ? ref.read(liveHubProvider.notifier).recorded
         : _fileSamples;
     final last = samples.isEmpty ? null : samples.last;
-    final gite = live ? hub.giteDeg : last?.giteDeg;
+    final giteUi = live
+        ? (hub.displayGiteDeg ?? hub.giteDeg)
+        : last?.giteDeg;
     final sog = live ? hub.sog : last?.sog;
     final dist = live ? hub.distM : last?.distM ?? 0;
     final lat = live ? hub.lat : last?.lat;
@@ -59,7 +64,11 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
     return Scaffold(
       backgroundColor: DeckColors.bg,
       body: SafeArea(
-        child: Row(
+        child: Column(
+          children: [
+            HeelBanner(alert: heelAlertFor(giteUi)),
+            Expanded(
+              child: Row(
           children: [
             Expanded(
               flex: 6,
@@ -146,8 +155,11 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                     ),
                     Text('DIST  ${(dist / 1000).toStringAsFixed(3)} km'),
                     Text(
-                      'GÎTE  ${gite == null ? '—' : '${gite.toStringAsFixed(1)}°'}',
+                      'GÎTE  ${giteUi == null ? '—' : '${giteUi.toStringAsFixed(1)}°'}',
                     ),
+                    const SizedBox(height: 8),
+                    const HeelLabels(),
+                    HeelGauge(giteDeg: giteUi ?? 0),
                     const Spacer(),
                     FilledButton(
                       onPressed: live
@@ -166,6 +178,9 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                   ],
                 ),
               ),
+            ),
+          ],
+        ),
             ),
           ],
         ),

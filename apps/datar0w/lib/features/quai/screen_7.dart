@@ -20,6 +20,7 @@ class QuaiScreen extends ConsumerStatefulWidget {
 class _QuaiScreenState extends ConsumerState<QuaiScreen> {
   SessionSummary? _summary;
   String? _jsonlPath;
+  String? _metaPath;
   String _chip = 'en attente réseau';
 
   @override
@@ -38,15 +39,19 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
     setState(() {
       _summary = SessionSummary.fromSamples(samples);
       _jsonlPath = '$dir/samples.jsonl';
+      _metaPath = '$dir/meta.json';
       _chip = hub.net == 'hors ligne' ? 'en attente réseau' : hub.net;
     });
   }
 
   Future<void> _share() async {
-    final path = _jsonlPath;
-    if (path == null) return;
+    final jsonl = _jsonlPath;
+    final meta = _metaPath;
+    if (jsonl == null) return;
+    final files = [XFile(jsonl)];
+    if (meta != null) files.add(XFile(meta));
     await SharePlus.instance.share(
-      ShareParams(files: [XFile(path)], text: 'DataR0w séance samples.jsonl'),
+      ShareParams(files: files, text: 'DataR0w séance (samples.jsonl + meta.json)'),
     );
   }
 

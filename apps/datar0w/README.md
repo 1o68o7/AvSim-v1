@@ -1,44 +1,46 @@
 # DataR0w (`apps/datar0w`)
 
 Companion téléphone **1x** : GPS / IMU du cale-pied. **Pas une mesure AvSim.**
-Aucune sortie n’est une vérité terrain du solveur.
 
-Maquettes : `docs/stitch-mvp/GEL.md` (Deck). Ne pas porter les HTML « jeter ».
+## Lots B–E (cette branche)
 
-## Lots
-
-| Lot | État |
+| Lot | Contenu |
 |---|---|
-| A | Scaffold, thème Deck, `go_router` 1 / 2A / 2B / 3 / 5 / 6 / 6r / 7 |
-| B | Permissions + overlay GPS/roll brut + `sessions/{id}/samples.jsonl` |
-| C | Tare 30 s, σ < 0,2°, offset `meta.json`, Démarrer off sinon, gîte = roll − offset |
-| D | STOP 2× en 3 s → stop logger → quai. Alerte jaune si gîte > +3° tribords |
-| E | Quai 4 chiffres + Replay + Partager jsonl. 6/6r : carte, curseur, 2 courbes, pas d’interp. GPS |
-| F | Code 6 car. à Démarrer, join coach local, écran 5 carte + ANNOTER. HTTP si `DATAROW_API_BASE` |
-| G | API FastAPI `/datarow` — **pas encore** (client seulement si base URL) |
+| B | Permissions (refus = message FR). Logger 1 Hz **après Démarrer**. `samples.jsonl` + `imu.jsonl` brut. Distance haversine si `acc_h < 25 m`. Trou GPS si fix perdu. `sol — pas eau`. Cadence `—`. |
+| C | Tare 30 s, σ < 0,2°, `tareOffsetDeg` dans `meta.json`. Démarrer off sinon. Gîte = roll lissé − offset, clamp ±15°. |
+| D | STOP 2× / 3 s → `LiveHub.stop()` → quai. Bandeaux gîte **deux côtés**. |
+| E | Quai 4 chiffres + Replay + Partager **jsonl+meta**. Replay carte, playhead, 2 courbes, pas d’interpolation. |
 
-## Run (device réel, ciel ouvert)
+## Gîte — lissage
+
+- Filtre complémentaire gyro + accéléro, τ ≈ 0,32 s. L’IMU brut **ne** pousse **pas** le gros chiffre.
+- UI 12,5 Hz (80 ms), deadband ±0,15° à l’affichage.
+- Brut dans `imu.jsonl` pendant la séance.
+
+## BÂBORD / TRIBORD (réf. rameur)
+
+Gauche écran = **TRIBORD** vert `#46C275`. Droite = **BÂBORD** rouge `#E05353`.  
+`+` = tribords (gauche). Voir `docs/CONVENTION-BABORD-TRIBORD.md`.
+
+## Run / APK (Android)
+
+Chemin projet **sans espaces** recommandé (`C:\dev\AvSim-v1`).
 
 ```bash
 cd apps/datar0w
 flutter pub get
 flutter run
+flutter build apk --debug
 ```
 
-- iOS : Xcode + signing ; accepter Localisation et Mouvements.
-- Android : activer le GPS ; accepter Fine location puis, plus tard, background.
-- Montage : téléphone **boulonné au cale-pied, paysage**, écran face au rameur.
-  Gauche écran = **BÂBORD**, droite = **TRIBORD** (réf. rameur, yeux vers la poupe).
-- Vitesse toujours légendée **sol — pas eau**. Cadence peut être `—` (nullable).
-- Alerte gîte : bandeau `#E8C547` si **gîte** (roll − offset) > +3° tribords.
-- Tare 2B : 30 s, σ < 0,2°, sinon recommencer. Démarrer inactif tant que tare ≠ OK.
-- Fichier séance créé à **Démarrer** : `Documents/sessions/{id}/meta.json` (`tare_offset`, `code`) + `samples.jsonl` 1 Hz.
-- Coach : code 6 caractères, mode **local** (même téléphone). API tick uniquement si `DATAROW_API_BASE` est défini (`--dart-define` ou env).
+APK : `apps/datar0w/build/app/outputs/flutter-apk/app-debug.apk`
 
-## Simulateur
+SDK : `sdk.dir` dans `android/local.properties` (machine, **non commité**).  
+`compileSdk = 37` (permission_handler_android).  
+NDK **30.0.16248370** via Android Studio → SDK Tools (GUI). **Ne pas** lancer `sdkmanager` en CLI depuis Gradle (crash Windows).
 
-Le simulateur iOS/Android n’a pas d’IMU/GPS fiables. Le lot B se juge sur **téléphone réel**.
+Pas de cible `windows/` desktop.
 
 ## Hors contrat
 
-Watts, η, slip, RTK, 10 Hz GNSS, Analyste, micro/caméra, moteur AvSim.
+Watts, η, slip, RTK, 10 Hz, Analyste, micro/caméra, High-Vis cyan, moteur AvSim.

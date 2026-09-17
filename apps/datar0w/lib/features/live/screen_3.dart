@@ -4,8 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../router.dart';
 import '../../session/double_press_stop.dart';
+import '../../session/heel.dart';
 import '../../session/live_hub.dart';
 import '../../theme/deck_theme.dart';
+import '../../widgets/heel_banner.dart';
+import '../../widgets/heel_gauge.dart';
 
 class LiveScreen extends ConsumerStatefulWidget {
   const LiveScreen({super.key});
@@ -27,7 +30,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
       });
       return;
     }
-    await ref.read(liveHubProvider.notifier).stopSession();
+    await ref.read(liveHubProvider.notifier).stop();
     if (!mounted) return;
     context.go(AppRoutes.quai);
   }
@@ -35,9 +38,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(liveHubProvider);
-    final gite = s.giteDeg;
-    final roll = s.rollDeg;
-    final alertTribord = gite != null && gite > 3;
+    final gite = s.displayGiteDeg ?? s.giteDeg;
+    final alert = heelAlertFor(s.giteDeg);
 
     return Scaffold(
       backgroundColor: DeckColors.bg,
@@ -45,21 +47,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (alertTribord)
-              Container(
-                height: 36,
-                color: DeckColors.alert,
-                alignment: Alignment.center,
-                child: const Text(
-                  'GÎTE — trop tribords',
-                  style: TextStyle(
-                    color: DeckColors.onAlert,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.4,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
+            HeelBanner(alert: alert),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               child: Row(
@@ -89,7 +77,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                     label: s.gpsLost ? 'GPS perdu' : 'GPS',
                   ),
                   const SizedBox(width: 8),
-                  _Chip(ok: roll != null && s.tareOk, label: 'IMU'),
+                  _Chip(ok: s.rollDeg != null && s.tareOk, label: 'IMU'),
                 ],
               ),
             ),
@@ -128,8 +116,12 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                     'GÎTE',
                     gite == null
                         ? 'tare requise'
-                        : '${gite.toStringAsFixed(1)}°  (roll − offset)',
+                        : '${gite.toStringAsFixed(1)}°',
                   ),
+                  const SizedBox(height: 8),
+                  const HeelLabels(),
+                  HeelGauge(giteDeg: gite ?? 0),
+                  const SizedBox(height: 8),
                   _kv(
                     'LAT / LON',
                     (s.lat == null || s.lon == null)
@@ -149,7 +141,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Gauche = BÂBORD · droite = TRIBORD (réf. rameur)',
+                    'Gauche = TRIBORD (vert) · droite = BÂBORD (rouge) · réf. rameur',
                     style: TextStyle(color: DeckColors.label, fontSize: 11),
                   ),
                 ],
@@ -222,7 +214,7 @@ class _Chip extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            color: ok ? const Color(0xFF46C275) : DeckColors.hairline,
+            color: ok ? DeckColors.tribord : DeckColors.hairline,
           ),
           const SizedBox(width: 6),
           Text(label, style: const TextStyle(fontSize: 11)),

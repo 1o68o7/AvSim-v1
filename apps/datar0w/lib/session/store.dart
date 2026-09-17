@@ -29,6 +29,7 @@ class SessionMeta {
         'id': id,
         'classe': classe,
         'bassin': bassin,
+        'tareOffsetDeg': tareOffset,
         'tare_offset': tareOffset,
         'code': code,
         'started_at': startedAt,
@@ -39,7 +40,8 @@ class SessionMeta {
         id: j['id'] as String,
         classe: j['classe'] as String? ?? '1x',
         bassin: j['bassin'] as String?,
-        tareOffset: (j['tare_offset'] as num?)?.toDouble(),
+        tareOffset: (j['tareOffsetDeg'] as num?)?.toDouble() ??
+            (j['tare_offset'] as num?)?.toDouble(),
         code: j['code'] as String?,
         startedAt: j['started_at'] as String?,
         endedAt: j['ended_at'] as String?,
@@ -51,6 +53,7 @@ class SessionStore {
 
   final String id;
   IOSink? _sink;
+  IOSink? _imuSink;
   Directory? directory;
   SessionMeta? meta;
 
@@ -79,6 +82,7 @@ class SessionStore {
     );
     await _writeMeta();
     _sink = File('${dir.path}/samples.jsonl').openWrite(mode: FileMode.append);
+    _imuSink = File('${dir.path}/imu.jsonl').openWrite(mode: FileMode.append);
     return dir;
   }
 
@@ -123,10 +127,17 @@ class SessionStore {
     _sink?.writeln(sample.toJsonLine());
   }
 
+  void appendImuLine(String jsonLine) {
+    _imuSink?.writeln(jsonLine);
+  }
+
   Future<void> close() async {
     await _sink?.flush();
     await _sink?.close();
     _sink = null;
+    await _imuSink?.flush();
+    await _imuSink?.close();
+    _imuSink = null;
   }
 
   static Future<List<SessionSample>> loadSamples(String sessionId) async {
