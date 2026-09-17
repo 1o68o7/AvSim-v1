@@ -9,7 +9,9 @@ import '../../session/live_hub.dart';
 import '../../session/rower_orientation.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import '../../widgets/deck_widgets.dart';
 import '../../widgets/heel_gauge.dart';
+import '../../widgets/tare_ring.dart';
 
 class TareScreen extends ConsumerStatefulWidget {
   const TareScreen({super.key});
@@ -41,18 +43,35 @@ class _TareScreenState extends ConsumerState<TareScreen> {
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(liveHubProvider);
-    final shown = s.displayGiteDeg ?? 0;
-    final running = s.tareStatus == TareStatus.running;
-    final status = switch (s.tareStatus) {
-      TareStatus.none => 'NON FAITE',
-      TareStatus.running =>
-        'EN COURS  ${s.tareElapsedS} s / 30  ·  ${s.tareSampleCount} éch. IMU',
-      TareStatus.ok =>
-        'OK  offset ${s.tareOffset!.toStringAsFixed(2)}°  σ ${s.tareSigma?.toStringAsFixed(3)}°',
-      TareStatus.failed =>
-        'RECOMMENCER  ${s.imuHint}',
-    };
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final landscape = constraints.maxWidth > constraints.maxHeight &&
+            constraints.maxWidth >= 640;
+        if (landscape) {
+          return _LandscapeHud(state: s, onStart: _startSession);
+        }
+        return _PortraitTare(state: s, onStart: _startSession);
+      },
+    );
+  }
 
+  Future<void> _startSession() async {
+    final ok = await ref.read(liveHubProvider.notifier).startSession();
+    if (!mounted || !ok) return;
+    context.go(AppRoutes.live);
+  }
+}
+
+class _PortraitTare extends ConsumerWidget {
+  const _PortraitTare({required this.state, required this.onStart});
+
+  final LiveHubState state;
+  final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final shown = state.displayGiteDeg ?? 0;
+    final running = state.tareStatus == TareStatus.running;
     return DeckScaffold(
       title: 'DATAROW / 2B',
       subtitle: 'Tare gîte · réf. rameur',
@@ -65,10 +84,10 @@ class _TareScreenState extends ConsumerState<TareScreen> {
               child: Column(
                 children: [
                   Text(
-                    s.imuHint,
+                    state.imuHint,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: s.imuOk ? DeckColors.tribord : DeckColors.amber,
+                      color: state.imuOk ? DeckColors.tribord : DeckColors.amber,
                       fontSize: 12,
                     ),
                   ),
@@ -105,7 +124,7 @@ class _TareScreenState extends ConsumerState<TareScreen> {
           ),
           if (running)
             LinearProgressIndicator(
-              value: s.tareElapsedS / 30,
+              value: state.tareElapsedS / 30,
               color: DeckColors.amber,
               backgroundColor: DeckColors.hairline,
             ),
@@ -114,21 +133,10 @@ class _TareScreenState extends ConsumerState<TareScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                FilledButton(
-                  onPressed: running
-                      ? null
-                      : () => ref.read(liveHubProvider.notifier).beginTare(),
-                  child: Text(
-                    s.tareStatus == TareStatus.failed
-                        ? 'RECOMMENCER TARE (30 S)'
-                        : running
-                            ? 'TARE EN COURS… ${s.tareElapsedS} s'
-                            : 'TARE GÎTE (30 S)',
-                  ),
-                ),
+                _TareCta(state: state),
                 const SizedBox(height: 8),
                 Text(
-                  'STATUT ÉTALONNAGE : $status',
+                  'STATUT ÉTALONNAGE : ${_statusLine(state)}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: DeckColors.label,
@@ -137,15 +145,7 @@ class _TareScreenState extends ConsumerState<TareScreen> {
                 ),
                 const SizedBox(height: 12),
                 FilledButton(
-                  onPressed: s.tareOk
-                      ? () async {
-                          final ok = await ref
-                              .read(liveHubProvider.notifier)
-                              .startSession();
-                          if (!context.mounted || !ok) return;
-                          context.go(AppRoutes.live);
-                        }
-                      : null,
+                  onPressed: state.tareOk ? onStart : null,
                   child: const Text('DÉMARRER LA SESSION'),
                 ),
               ],
@@ -155,4 +155,428 @@ class _TareScreenState extends ConsumerState<TareScreen> {
       ),
     );
   }
+}
+
+class _LandscapeHud extends ConsumerWidget {
+  const _LandscapeHud({required this.state, required this.onStart});
+
+  final LiveHubState state;
+  final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final shown = state.displayGiteDeg ?? 0;
+    final running = state.tareStatus == TareStatus.running;
+    final chip = switch (state.tareStatus) {
+      TareStatus.running => 'ÉTALONNAGE ACTIF',
+      TareStatus.ok => 'TARE OK',
+      TareStatus.failed => 'RECOMMENCER',
+      TareStatus.none => 'TARE NON FAITE',
+    };
+    return Scaffold(
+      backgroundColor: DeckColors.bg,
+      body: SafeArea(
+        child: Column(
+          children: [
+            SizedBox(
+              height: 40,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      color: DeckColors.amber,
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'DATAROW / 2B · TARE GÎTE',
+                      style: TextStyle(
+                        color: DeckColors.amber,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Text('|', style: TextStyle(color: DeckColors.hairline)),
+                    ),
+                    const Expanded(
+                      child: Text(
+                        'Bateau à quai, coque calée. Ne pas bouger.',
+                        style: TextStyle(color: DeckColors.label, fontSize: 11),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    DeckStatusChip(
+                      label: chip,
+                      ok: state.tareOk,
+                      alert: running || state.tareStatus == TareStatus.failed,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const Divider(height: 1, color: DeckColors.hairline),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    flex: 55,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Text(
+                            'LECTURE ASSIETTE LIVE',
+                            style: TextStyle(
+                              color: DeckColors.label,
+                              fontSize: 10,
+                              letterSpacing: 1.4,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Text(
+                            state.imuHint,
+                            style: TextStyle(
+                              color: state.imuOk
+                                  ? DeckColors.tribord
+                                  : DeckColors.amber,
+                              fontSize: 10,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              _SideBadge(
+                                label: 'TRIBORD',
+                                sub: '+15.0°',
+                                color: DeckColors.tribord,
+                                left: true,
+                              ),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    const Text(
+                                      'GÎTE INSTANTANÉE',
+                                      style: TextStyle(
+                                        color: DeckColors.amber,
+                                        fontSize: 9,
+                                        letterSpacing: 1.4,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text.rich(
+                                      TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: shown.toStringAsFixed(1),
+                                            style: const TextStyle(
+                                              fontSize: 52,
+                                              fontWeight: FontWeight.w800,
+                                              height: 1,
+                                              fontFeatures: [
+                                                FontFeature.tabularFigures(),
+                                              ],
+                                            ),
+                                          ),
+                                          const TextSpan(
+                                            text: ' °',
+                                            style: TextStyle(
+                                              color: DeckColors.amber,
+                                              fontSize: 28,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Text(
+                                      'NIVEAU TÉLÉPHONE  ·  12 Hz',
+                                      style: TextStyle(
+                                        color: state.imuOk
+                                            ? DeckColors.tribord
+                                            : DeckColors.label,
+                                        fontSize: 9,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              _SideBadge(
+                                label: 'BÂBORD',
+                                sub: '-15.0°',
+                                color: DeckColors.babord,
+                                left: false,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Expanded(child: HeelGauge(giteDeg: shown)),
+                          const Text(
+                            'TRIBORD gauche écran  ·  σ < 0,2°  ·  clamp ±15°',
+                            style: TextStyle(
+                              color: DeckColors.label,
+                              fontSize: 9,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _MiniTelemetry(
+                                  label: 'TANGAGE (PITCH)',
+                                  value: state.pitchDeg == null
+                                      ? '—'
+                                      : '${state.pitchDeg!.toStringAsFixed(1)}°',
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Expanded(
+                                child: _MiniTelemetry(
+                                  label: 'LACET (YAW)',
+                                  value: '—',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Container(width: 1, color: DeckColors.hairline),
+                  Expanded(
+                    flex: 45,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: SingleChildScrollView(
+                        child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Text(
+                            'SÉQUENCE D\'ÉTALONNAGE',
+                            style: TextStyle(
+                              color: DeckColors.amber,
+                              fontSize: 10,
+                              letterSpacing: 1.4,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: DeckColors.hairline),
+                            ),
+                            child: Row(
+                              children: [
+                                TareRing(elapsedS: state.tareElapsedS),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Text(
+                                        running
+                                            ? '${((state.tareElapsedS / 30) * 100).round()}%'
+                                            : state.tareOk
+                                                ? '100%'
+                                                : '0%',
+                                        textAlign: TextAlign.right,
+                                        style: const TextStyle(
+                                          color: DeckColors.amber,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      LinearProgressIndicator(
+                                        value: state.tareElapsedS / 30,
+                                        color: DeckColors.amber,
+                                        backgroundColor: DeckColors.hairline,
+                                        minHeight: 6,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      const Text(
+                                        'Acquisition IMU filtrée 12 Hz (pas 100 Hz brut)',
+                                        style: TextStyle(
+                                          color: DeckColors.label,
+                                          fontSize: 9,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          _TareCta(state: state),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: DeckColors.hairline),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'STATUT ÉTALONNAGE',
+                                  style: TextStyle(
+                                    color: DeckColors.label,
+                                    fontSize: 9,
+                                    letterSpacing: 1.2,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                Text(
+                                  _statusLine(state),
+                                  style: TextStyle(
+                                    color: state.tareOk
+                                        ? DeckColors.tribord
+                                        : DeckColors.label,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          FilledButton(
+                            onPressed: state.tareOk ? onStart : null,
+                            child: const Text('DÉMARRER LA SESSION'),
+                          ),
+                        ],
+                      ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TareCta extends ConsumerWidget {
+  const _TareCta({required this.state});
+
+  final LiveHubState state;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final running = state.tareStatus == TareStatus.running;
+    return FilledButton(
+      onPressed: running
+          ? null
+          : () => ref.read(liveHubProvider.notifier).beginTare(),
+      child: Text(
+        state.tareStatus == TareStatus.failed
+            ? 'RECOMMENCER TARE (30 S)'
+            : running
+                ? 'TARE EN COURS… ${state.tareElapsedS} s'
+                : 'TARE GÎTE (30 S)',
+      ),
+    );
+  }
+}
+
+class _SideBadge extends StatelessWidget {
+  const _SideBadge({
+    required this.label,
+    required this.sub,
+    required this.color,
+    required this.left,
+  });
+
+  final String label;
+  final String sub;
+  final Color color;
+  final bool left;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 84,
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w700,
+              fontSize: 10,
+              letterSpacing: 1.1,
+            ),
+          ),
+          Text(sub, style: TextStyle(color: color.withValues(alpha: 0.8), fontSize: 9)),
+          Icon(
+            left ? Icons.arrow_back : Icons.arrow_forward,
+            color: color,
+            size: 16,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniTelemetry extends StatelessWidget {
+  const _MiniTelemetry({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: DeckColors.surface,
+        border: Border.all(color: DeckColors.hairline),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: DeckColors.label,
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.1,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _statusLine(LiveHubState s) {
+  return switch (s.tareStatus) {
+    TareStatus.none => 'NON FAITE',
+    TareStatus.running =>
+      'EN COURS  ${s.tareElapsedS} s / 30  ·  ${s.tareSampleCount} éch. IMU',
+    TareStatus.ok =>
+      'OK  offset ${s.tareOffset!.toStringAsFixed(2)}°  σ ${s.tareSigma?.toStringAsFixed(3)}°',
+    TareStatus.failed => 'RECOMMENCER  ${s.imuHint}',
+  };
 }

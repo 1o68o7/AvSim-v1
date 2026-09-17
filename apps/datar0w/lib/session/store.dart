@@ -156,6 +156,18 @@ class SessionStore {
     return out;
   }
 
+  static Future<List<SessionNote>> loadNotes(String sessionId) async {
+    final root = await sessionsRoot();
+    final file = File('${root.path}/$sessionId/notes.json');
+    if (!file.existsSync()) return [];
+    final raw = jsonDecode(await file.readAsString());
+    if (raw is! List) return [];
+    return raw
+        .whereType<Map>()
+        .map((e) => SessionNote.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
+
   static Future<SessionMeta?> loadMeta(String sessionId) async {
     final root = await sessionsRoot();
     final file = File('${root.path}/$sessionId/meta.json');

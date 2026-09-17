@@ -68,3 +68,31 @@ class SessionSample {
     );
   }
 }
+
+/// Repère coach (`notes.json`) — jamais inventé.
+class SessionNote {
+  const SessionNote({
+    required this.t,
+    this.lat,
+    this.lon,
+    this.sog,
+    this.distM,
+    this.giteDeg,
+  });
+
+  final int t;
+  final double? lat;
+  final double? lon;
+  final double? sog;
+  final double? distM;
+  final double? giteDeg;
+
+  static SessionNote fromJson(Map<String, dynamic> j) => SessionNote(
+        t: (j['t'] as num).toInt(),
+        lat: (j['lat'] as num?)?.toDouble(),
+        lon: (j['lon'] as num?)?.toDouble(),
+        sog: (j['sog'] as num?)?.toDouble(),
+        distM: (j['dist_m'] as num?)?.toDouble(),
+        giteDeg: (j['gite_deg'] as num?)?.toDouble(),
+      );
+}

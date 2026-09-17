@@ -12,6 +12,7 @@ import '../../session/rower_orientation.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
 import '../../theme/deck_theme.dart';
+import '../../widgets/deck_widgets.dart';
 import '../../widgets/heel_banner.dart';
 import '../../widgets/heel_gauge.dart';
 
@@ -72,6 +73,12 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
     final center = (lat != null && lon != null)
         ? LatLng(lat, lon)
         : (segs.isNotEmpty ? segs.first.first : const LatLng(48.86, 2.35));
+    final coord = (lat != null && lon != null)
+        ? '${lat.toStringAsFixed(4)}°, ${lon.toStringAsFixed(4)}°'
+        : '—';
+    final giteLabel = giteUi == null
+        ? '—'
+        : '${giteUi >= 0 ? '+' : ''}${giteUi.toStringAsFixed(1)}°';
 
     return Scaffold(
       backgroundColor: DeckColors.bg,
@@ -79,120 +86,216 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
         child: Column(
           children: [
             HeelBanner(alert: alert),
-            Expanded(
-              child: Row(
-          children: [
-            Expanded(
-              flex: 6,
-              child: FlutterMap(
-                options: MapOptions(
-                  initialCenter: center,
-                  initialZoom: 15,
-                  backgroundColor: DeckColors.bg,
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                    subdomains: const ['a', 'b', 'c'],
-                    userAgentPackageName: 'io.datar0w.datar0w',
-                  ),
-                  PolylineLayer(
-                    polylines: [
-                      for (final seg in segs)
-                        if (seg.length >= 2)
-                          Polyline(
-                            points: seg,
-                            color: DeckColors.amber,
-                            strokeWidth: 3,
-                          ),
-                    ],
-                  ),
-                  if (lat != null && lon != null)
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: LatLng(lat, lon),
-                          width: 14,
-                          height: 14,
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: DeckColors.amber,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-            Expanded(
-              flex: 4,
+            SizedBox(
+              height: 32,
               child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        const Text(
-                          'COACH LIVE',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          live ? 'LIVE' : 'FICHIER',
-                          style: const TextStyle(
-                            color: DeckColors.amber,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
+                    const DataR0wMark(compact: true),
+                    const SizedBox(width: 8),
                     const Text(
-                      'réf. rameur  ·  sol — pas eau',
-                      style: TextStyle(color: DeckColors.label, fontSize: 10),
+                      '/  COACH LIVE',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.1,
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'CADENCE  —',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    Text(
-                      'V SOL  ${sog == null ? '—' : '${sog.toStringAsFixed(2)} m/s'}',
-                    ),
-                    Text('DIST  ${(dist / 1000).toStringAsFixed(3)} km'),
-                    Text(
-                      'GÎTE  ${giteUi == null ? '—' : '${giteUi.toStringAsFixed(1)}°'}',
-                    ),
-                    const SizedBox(height: 8),
-                    const HeelLabels(),
-                    HeelGauge(giteDeg: giteUi ?? 0),
                     const Spacer(),
-                    FilledButton(
-                      onPressed: live
-                          ? () => ref.read(liveHubProvider.notifier).annotate()
-                          : null,
-                      child: const Text('ANNOTER'),
-                    ),
-                    TextButton(
-                      onPressed: () => context.go(AppRoutes.coachReplay),
-                      child: const Text('Replay'),
-                    ),
-                    TextButton(
-                      onPressed: () => context.go(AppRoutes.profile),
-                      child: const Text('Retour'),
+                    DeckStatusChip(label: live ? 'LIVE' : 'FICHIER', ok: live),
+                    const SizedBox(width: 8),
+                    Text(
+                      hub.code == null ? '1X' : '1X  ${hub.code}',
+                      style: const TextStyle(
+                        color: DeckColors.label,
+                        fontSize: 10,
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
+            const Divider(height: 1, color: DeckColors.hairline),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 6,
+                    child: Stack(
+                      children: [
+                        FlutterMap(
+                          options: MapOptions(
+                            initialCenter: center,
+                            initialZoom: 15,
+                            backgroundColor: DeckColors.bg,
+                          ),
+                          children: [
+                            TileLayer(
+                              urlTemplate:
+                                  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+                              subdomains: const ['a', 'b', 'c'],
+                              userAgentPackageName: 'io.datar0w.datar0w',
+                            ),
+                            PolylineLayer(
+                              polylines: [
+                                for (final seg in segs)
+                                  if (seg.length >= 2)
+                                    Polyline(
+                                      points: seg,
+                                      color: DeckColors.amber,
+                                      strokeWidth: 3,
+                                    ),
+                              ],
+                            ),
+                            if (lat != null && lon != null)
+                              MarkerLayer(
+                                markers: [
+                                  Marker(
+                                    point: LatLng(lat, lon),
+                                    width: 14,
+                                    height: 14,
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        color: DeckColors.amber,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                        Positioned(
+                          left: 8,
+                          top: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: DeckColors.bg.withValues(alpha: 0.9),
+                              border: Border.all(color: DeckColors.hairline),
+                            ),
+                            child: const Text(
+                              '▲ N   NORD EN HAUT',
+                              style: TextStyle(
+                                color: DeckColors.amber,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            color: DeckColors.bg.withValues(alpha: 0.92),
+                            child: Text(
+                              'TRACE GPS  ·  COORD $coord  ·  sol — pas eau',
+                              style: const TextStyle(
+                                color: DeckColors.label,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(width: 1, color: DeckColors.hairline),
+                  Expanded(
+                    flex: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: SingleChildScrollView(
+                        child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              DeckStatusChip(
+                                label: 'RÉF. RAMEUR',
+                                ok: true,
+                              ),
+                              const Spacer(),
+                              Text(
+                                'DIST  ${(dist / 1000).toStringAsFixed(3)} km',
+                                style: const TextStyle(fontSize: 11),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: InstrumentPod(
+                                  label: 'CADENCE',
+                                  value: '—',
+                                  unit: 'SPM  ·  COUP/MIN',
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: InstrumentPod(
+                                  label: 'V. SOL (GPS)',
+                                  value: sog == null
+                                      ? '—'
+                                      : sog.toStringAsFixed(1),
+                                  unit: 'M/S  ·  SOL — PAS EAU',
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          InstrumentPod(
+                            label: 'GÎTE INSTANTANÉE',
+                            value: giteLabel,
+                            child: Column(
+                              children: [
+                                const HeelLabels(),
+                                HeelGauge(giteDeg: giteUi ?? 0),
+                                const Text(
+                                  'TOLÉRANCE ±3.0°  ·  RÉF. RAMEUR',
+                                  style: TextStyle(
+                                    color: DeckColors.label,
+                                    fontSize: 9,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          FilledButton(
+                            onPressed: live
+                                ? () =>
+                                    ref.read(liveHubProvider.notifier).annotate()
+                                : null,
+                            child: const Text('ANNOTER'),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                context.go(AppRoutes.coachReplay),
+                            child: const Text('REPLAY'),
+                          ),
+                          TextButton(
+                            onPressed: () => context.go(AppRoutes.profile),
+                            child: const Text('RETOUR'),
+                          ),
+                        ],
+                      ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

@@ -35,7 +35,7 @@ ThemeData buildDeckTheme() {
     colorScheme: scheme,
     scaffoldBackgroundColor: DeckColors.bg,
     canvasColor: DeckColors.bg,
-    fontFamily: 'monospace',
+    fontFamily: 'JetBrainsMono',
     appBarTheme: const AppBarTheme(
       backgroundColor: DeckColors.bg,
       foregroundColor: DeckColors.text,
@@ -54,7 +54,7 @@ ThemeData buildDeckTheme() {
         textStyle: const TextStyle(
           fontWeight: FontWeight.w700,
           letterSpacing: 1.2,
-          fontFamily: 'monospace',
+          fontFamily: 'JetBrainsMono',
         ),
       ),
     ),
@@ -67,7 +67,7 @@ ThemeData buildDeckTheme() {
         textStyle: const TextStyle(
           fontWeight: FontWeight.w700,
           letterSpacing: 1.2,
-          fontFamily: 'monospace',
+          fontFamily: 'JetBrainsMono',
         ),
       ),
     ),

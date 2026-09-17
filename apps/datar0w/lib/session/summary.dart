@@ -73,6 +73,21 @@ class SessionSummary {
   }
 }
 
+String formatClockRange(String? startedAt, String? endedAt) {
+  String fmt(String? iso) {
+    if (iso == null || iso.isEmpty) return '—';
+    final d = DateTime.tryParse(iso);
+    if (d == null) return '—';
+    final l = d.toLocal();
+    final hh = l.hour.toString().padLeft(2, '0');
+    final mm = l.minute.toString().padLeft(2, '0');
+    return '$hh:$mm';
+  }
+
+  if (startedAt == null && endedAt == null) return '—';
+  return '${fmt(startedAt)} — ${fmt(endedAt)}';
+}
+
 String formatDuration(Duration d) {
   final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
   final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');

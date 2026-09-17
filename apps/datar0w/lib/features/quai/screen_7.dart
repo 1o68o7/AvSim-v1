@@ -12,6 +12,7 @@ import '../../session/store.dart';
 import '../../session/summary.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import '../../widgets/deck_widgets.dart';
 
 class QuaiScreen extends ConsumerStatefulWidget {
   const QuaiScreen({super.key});
@@ -22,6 +23,7 @@ class QuaiScreen extends ConsumerStatefulWidget {
 
 class _QuaiScreenState extends ConsumerState<QuaiScreen> {
   SessionSummary? _summary;
+  SessionMeta? _meta;
   String? _jsonlPath;
   String? _metaPath;
   String _chip = 'en attente réseau';
@@ -38,10 +40,12 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
     final id = hub.sessionId ?? await SessionStore.latestId();
     if (id == null) return;
     final samples = await SessionStore.loadSamples(id);
+    final meta = await SessionStore.loadMeta(id);
     final dir = hub.sessionDir ?? '${(await SessionStore.sessionsRoot()).path}/$id';
     if (!mounted) return;
     setState(() {
       _summary = SessionSummary.fromSamples(samples);
+      _meta = meta;
       _jsonlPath = '$dir/samples.jsonl';
       _metaPath = '$dir/meta.json';
       _chip = hub.net == 'hors ligne' ? 'en attente réseau' : hub.net;
@@ -62,9 +66,10 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
   @override
   Widget build(BuildContext context) {
     final s = _summary;
+    final sessionTag = _meta?.code ?? _meta?.id ?? '—';
     return DeckScaffold(
       title: 'QUAI',
-      subtitle: 'fin de séance',
+      subtitle: 'SESSION #$sessionTag',
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -76,45 +81,50 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
                 color: DeckColors.amber,
                 letterSpacing: 1.4,
                 fontSize: 11,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 16),
+            Text(
+              formatClockRange(_meta?.startedAt, _meta?.endedAt),
+              style: const TextStyle(color: DeckColors.muted, fontSize: 10),
+            ),
+            const SizedBox(height: 12),
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 1.35,
+                childAspectRatio: 1.2,
                 children: [
-                  _tile(
-                    'DURÉE',
-                    s == null ? '—' : formatDuration(s.duration),
-                    'MIN',
+                  InstrumentPod(
+                    label: 'DURÉE',
+                    value: s == null ? '—' : formatDuration(s.duration),
+                    unit: 'MIN',
                   ),
-                  _tile(
-                    'DISTANCE GPS',
-                    s == null ? '—' : (s.distM / 1000).toStringAsFixed(2),
-                    'KM',
+                  InstrumentPod(
+                    label: 'DISTANCE GPS',
+                    value: s == null ? '—' : (s.distM / 1000).toStringAsFixed(2),
+                    unit: 'KM',
                   ),
-                  _tile(
-                    'CADENCE MOYENNE',
-                    s?.cadenceMean == null
+                  InstrumentPod(
+                    label: 'CADENCE MOYENNE',
+                    value: s?.cadenceMean == null
                         ? '—'
                         : s!.cadenceMean!.toStringAsFixed(0),
-                    'SPM',
+                    unit: 'SPM',
                   ),
-                  _tile(
-                    'GÎTE RMS',
-                    s == null ? '—' : s.giteRms.toStringAsFixed(1),
-                    'DEGRÉS (°)',
+                  InstrumentPod(
+                    label: 'GÎTE RMS',
+                    value: s == null ? '—' : s.giteRms.toStringAsFixed(1),
+                    unit: 'DEGRÉS (°)',
                   ),
                 ],
               ),
             ),
             Center(
-              child: Text(
-                _chip.toUpperCase(),
-                style: const TextStyle(color: DeckColors.label, fontSize: 11),
+              child: DeckStatusChip(
+                label: _chip,
+                alert: _chip.contains('attente'),
               ),
             ),
             const SizedBox(height: 12),
@@ -134,38 +144,6 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _tile(String label, String value, String unit) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: DeckColors.surface,
-        border: Border.all(color: DeckColors.hairline),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              color: DeckColors.label,
-              fontSize: 10,
-              letterSpacing: 1.1,
-            ),
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
-          ),
-          Text(
-            unit,
-            style: const TextStyle(color: DeckColors.label, fontSize: 9),
-          ),
-        ],
       ),
     );
   }
