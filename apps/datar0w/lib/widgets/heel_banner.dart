@@ -8,6 +8,14 @@ class HeelBanner extends StatelessWidget {
 
   final HeelAlert alert;
 
+  static Color backgroundFor(HeelAlert alert) => switch (alert) {
+        HeelAlert.babord => DeckColors.babord,
+        HeelAlert.tribord => DeckColors.tribordAlert,
+        HeelAlert.none => Colors.transparent,
+      };
+
+  static Color foregroundFor(HeelAlert alert) => Colors.white;
+
   @override
   Widget build(BuildContext context) {
     if (alert == HeelAlert.none) return const SizedBox.shrink();
@@ -15,12 +23,12 @@ class HeelBanner extends StatelessWidget {
     return Container(
       height: 36,
       width: double.infinity,
-      color: babord ? DeckColors.babord : DeckColors.tribord,
+      color: backgroundFor(alert),
       alignment: Alignment.center,
       child: Text(
         babord ? 'GÎTE — trop bâbord' : 'GÎTE — trop tribords',
         style: TextStyle(
-          color: babord ? Colors.white : const Color(0xFF0B0E12),
+          color: foregroundFor(alert),
           fontWeight: FontWeight.w800,
           letterSpacing: 1.4,
           fontSize: 13,

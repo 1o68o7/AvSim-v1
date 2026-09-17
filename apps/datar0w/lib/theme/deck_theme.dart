@@ -14,6 +14,8 @@ abstract final class DeckColors {
   static const Color onAlert = Color(0xFF0B0E12);
   static const Color babord = Color(0xFFE05353);
   static const Color tribord = Color(0xFF46C275);
+  /// Bandeau alerte « trop tribords » — vert foncé (libellés restent [tribord]).
+  static const Color tribordAlert = Color(0xFF0F5C32);
   static const Color muted = Color(0xFF8E939D);
 }
 

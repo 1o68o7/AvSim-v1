@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +10,7 @@ import '../../router.dart';
 import '../../session/heel.dart';
 import '../../session/live_hub.dart';
 import '../../session/model.dart';
+import '../../session/rower_orientation.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
 import '../../theme/deck_theme.dart';
@@ -27,7 +30,16 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
   @override
   void initState() {
     super.initState();
+    unawaited(lockRowerLandscape());
     WidgetsBinding.instance.addPostFrameCallback((_) => _maybeLoadFile());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    ref
+        .read(liveHubProvider.notifier)
+        .setDisplayRotation(displayRotationDegOf(context));
   }
 
   Future<void> _maybeLoadFile() async {
@@ -52,6 +64,9 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
     final giteUi = live
         ? (hub.displayGiteDeg ?? hub.giteDeg)
         : last?.giteDeg;
+    final alert = live
+        ? (hub.tareOk ? heelAlertFor(giteUi) : HeelAlert.none)
+        : heelAlertFor(giteUi);
     final sog = live ? hub.sog : last?.sog;
     final dist = live ? hub.distM : last?.distM ?? 0;
     final lat = live ? hub.lat : last?.lat;
@@ -66,7 +81,7 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            HeelBanner(alert: heelAlertFor(giteUi)),
+            HeelBanner(alert: alert),
             Expanded(
               child: Row(
           children: [

@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router.dart';
+import '../../session/rower_orientation.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 
@@ -10,6 +13,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    unawaited(unlockRowerOrientations());
     return DeckScaffold(
       title: 'DataR0w',
       subtitle: 'Sélection profil',

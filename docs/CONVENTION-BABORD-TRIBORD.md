@@ -1,6 +1,6 @@
 # Bâbord / tribord — référentiel DataR0w
 
-*Révisé le 17 septembre 2026 (inversion affichage rameur).*
+*Révisé le 17 septembre 2026 (axes écran + bandeaux vert foncé / rouge).*
 
 À l'aviron, bâbord et tribord sont **inversés** par rapport à la navigation classique.
 
@@ -14,20 +14,25 @@ le **bâbord aviron** à **droite**. Jamais le mapping marine PORT/STARBOARD dan
 
 ## Écrans rameur 2B / 3 / 4 (cale-pied)
 
-| Côté écran (yeux rameur) | Libellé | Couleur |
-|---|---|---|
-| **Gauche** | **TRIBORD** | `#46C275` vert |
-| **Droite** | **BÂBORD** | `#E05353` rouge |
+Tare + live : **paysage**, haut du téléphone à **gauche** de l'écran
+(`DeviceOrientation.landscapeLeft`, rotation UI 90°).
 
-Gîte `+` = coque basse vers la **gauche** = tribords.  
-Gîte `−` = coque basse vers la **droite** = bâbord.
+Les axes IMU sont ramenés à l'écran (`deviceToScreenVec`) :
+
+| Côté écran (yeux rameur) | Libellé | Couleur jauge | Gîte |
+|---|---|---|---|
+| **Gauche** | **TRIBORD** | `#46C275` vert | `+` (gauche écran en bas) |
+| **Droite** | **BÂBORD** | `#E05353` rouge | `−` |
 
 Chip : `réf. rameur`.
 
+Gauche écran en bas : le vecteur accéléro « ciel » penche vers la **droite** de l'UI
+(`+screenX`) → gîte positive.
+
 ## Alertes (|gîte| > 3° après tare)
 
+- Trop **tribord** (gauche écran) : bandeau 36 px fond **vert foncé** `#0F5C32`, texte blanc `GÎTE — trop tribords`
 - Trop **bâbord** (droite écran) : bandeau 36 px fond `#E05353`, texte blanc `GÎTE — trop bâbord`
-- Trop **tribord** (gauche écran) : bandeau 36 px fond `#46C275`, texte sombre `GÎTE — trop tribords`
 
 Pas d'alerte unique ambre `#E8C547` pour la gîte. L'ambre reste pour le statut non-gîte.
 

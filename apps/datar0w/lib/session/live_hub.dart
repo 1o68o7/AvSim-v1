@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -72,7 +71,7 @@ class LiveHubState {
 
   bool get tareOk => tareStatus == TareStatus.ok && tareOffset != null;
 
-  /// Gîte jsonl / physique affichée : lissé − offset, signe rameur (+ tribords).
+  /// Gîte jsonl : roll écran lissé − offset. + = tribords = gauche écran en bas.
   double? get giteDeg {
     if (rollDeg == null || tareOffset == null) return null;
     return rowerGiteFromImu(rollDeg! - tareOffset!);
@@ -150,6 +149,7 @@ class LiveHub extends Notifier<LiveHubState> {
   double _dist = 0;
   DateTime? _lastGpsAt;
   bool _imuOn = false;
+  int _displayRotationDeg = 90;
   final HeelFilter _heel = HeelFilter();
   ImuFrame? _lastImu;
   DateTime? _lastImuLogAt;
@@ -165,6 +165,11 @@ class LiveHub extends Notifier<LiveHubState> {
     return const LiveHubState();
   }
 
+  /// Rotation UI 0/90/180/270. Cale-pied : 90° (paysage, haut appareil à gauche).
+  void setDisplayRotation(int deg) {
+    _displayRotationDeg = normalizeDisplayRotationDeg(deg);
+  }
+
   Future<void> listenImu() async {
     if (_imuOn) return;
     _imuOn = true;
@@ -173,8 +178,18 @@ class LiveHub extends Notifier<LiveHubState> {
         (f) {
           _lastImu = f;
           _heel.update(
-            accelRollDeg: f.accelRollDeg,
-            gyroDegPerS: f.gx * 180 / pi,
+            accelRollDeg: screenHeelDeg(
+              f.ax,
+              f.ay,
+              f.az,
+              displayRotationDeg: _displayRotationDeg,
+            ),
+            gyroDegPerS: screenHeelGyroDegPerS(
+              f.gx,
+              f.gy,
+              f.gz,
+              displayRotationDeg: _displayRotationDeg,
+            ),
           );
           _maybeLogImu(f);
         },

@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router.dart';
 import '../../session/live_hub.dart';
+import '../../session/rower_orientation.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 import '../../widgets/heel_gauge.dart';
@@ -19,9 +22,18 @@ class _TareScreenState extends ConsumerState<TareScreen> {
   @override
   void initState() {
     super.initState();
+    unawaited(lockRowerLandscape());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(liveHubProvider.notifier).listenImu();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    ref
+        .read(liveHubProvider.notifier)
+        .setDisplayRotation(displayRotationDegOf(context));
   }
 
   @override

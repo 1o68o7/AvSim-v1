@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../router.dart';
 import '../../session/live_hub.dart';
+import '../../session/rower_orientation.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
 import '../../theme/deck_theme.dart';
@@ -26,6 +29,7 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
   @override
   void initState() {
     super.initState();
+    unawaited(unlockRowerOrientations());
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
 

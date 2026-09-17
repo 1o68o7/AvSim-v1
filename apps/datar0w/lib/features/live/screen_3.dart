@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import '../../router.dart';
 import '../../session/double_press_stop.dart';
 import '../../session/heel.dart';
 import '../../session/live_hub.dart';
+import '../../session/rower_orientation.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/heel_banner.dart';
 import '../../widgets/heel_gauge.dart';
@@ -20,6 +23,20 @@ class LiveScreen extends ConsumerStatefulWidget {
 class _LiveScreenState extends ConsumerState<LiveScreen> {
   final _stop = DoublePressStop();
   bool _stopArmed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(lockRowerLandscape());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    ref
+        .read(liveHubProvider.notifier)
+        .setDisplayRotation(displayRotationDegOf(context));
+  }
 
   Future<void> _onStop() async {
     final done = _stop.press();
@@ -39,7 +56,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   Widget build(BuildContext context) {
     final s = ref.watch(liveHubProvider);
     final gite = s.displayGiteDeg ?? s.giteDeg;
-    final alert = heelAlertFor(s.giteDeg);
+    final alert =
+        s.tareOk ? heelAlertFor(gite) : HeelAlert.none;
 
     return Scaffold(
       backgroundColor: DeckColors.bg,

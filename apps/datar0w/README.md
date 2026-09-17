@@ -20,7 +20,8 @@ Companion téléphone **1x** : GPS / IMU du cale-pied. **Pas une mesure AvSim.**
 ## BÂBORD / TRIBORD (réf. rameur)
 
 Gauche écran = **TRIBORD** vert `#46C275`. Droite = **BÂBORD** rouge `#E05353`.  
-`+` = tribords (gauche). Voir `docs/CONVENTION-BABORD-TRIBORD.md`.
+Alerte trop tribords : bandeau **vert foncé** `#0F5C32`. Trop bâbord : `#E05353`.  
+`+` = tribords (gauche écran en bas). IMU en axes écran (paysage, rotation 90°). Voir `docs/CONVENTION-BABORD-TRIBORD.md`.
 
 ## Run / APK (Android)
 
