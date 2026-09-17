@@ -11,26 +11,34 @@ class HeelLabels extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          'TRIBORD',
-          style: TextStyle(
-            color: DeckColors.tribord,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.2,
+        Flexible(
+          child: Text(
+            'TRIBORD',
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: DeckColors.tribord,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.0,
+              fontSize: 11,
+            ),
           ),
         ),
         Text(
           'réf. rameur',
-          style: TextStyle(color: DeckColors.label, fontSize: 10),
+          style: TextStyle(color: DeckColors.label, fontSize: 9),
         ),
-        Text(
-          'BÂBORD',
-          style: TextStyle(
-            color: DeckColors.babord,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.2,
+        Flexible(
+          child: Text(
+            'BÂBORD',
+            textAlign: TextAlign.right,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: DeckColors.babord,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.0,
+              fontSize: 11,
+            ),
           ),
         ),
       ],
