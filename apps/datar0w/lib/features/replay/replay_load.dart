@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../session/live_hub.dart';
@@ -12,11 +15,13 @@ class ReplayBundle {
     required this.samples,
     required this.notes,
     this.meta,
+    this.sourceLabel = 'dernière séance',
   });
 
   final List<SessionSample> samples;
   final List<SessionNote> notes;
   final SessionMeta? meta;
+  final String sourceLabel;
 }
 
 class ReplayLoadScreen extends ConsumerStatefulWidget {
@@ -24,34 +29,92 @@ class ReplayLoadScreen extends ConsumerStatefulWidget {
     super.key,
     required this.title,
     required this.onBack,
+    this.showEval = true,
+    this.allowImport = true,
   });
 
   final String title;
   final VoidCallback onBack;
+  final bool showEval;
+  final bool allowImport;
 
   @override
   ConsumerState<ReplayLoadScreen> createState() => _ReplayLoadScreenState();
 }
 
 class _ReplayLoadScreenState extends ConsumerState<ReplayLoadScreen> {
-  late final Future<ReplayBundle> _future;
+  ReplayBundle? _bundle;
+  bool _loading = true;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _future = _load();
+    _loadLast();
   }
 
-  Future<ReplayBundle> _load() async {
+  Future<void> _loadLast() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     final id =
         ref.read(liveHubProvider).sessionId ?? await SessionStore.latestId();
     if (id == null) {
-      return const ReplayBundle(samples: [], notes: []);
+      if (mounted) {
+        setState(() {
+          _bundle = const ReplayBundle(samples: [], notes: []);
+          _loading = false;
+        });
+      }
+      return;
     }
     final samples = await SessionStore.loadSamples(id);
     final notes = await SessionStore.loadNotes(id);
     final meta = await SessionStore.loadMeta(id);
-    return ReplayBundle(samples: samples, notes: notes, meta: meta);
+    if (mounted) {
+      setState(() {
+        _bundle = ReplayBundle(
+          samples: samples,
+          notes: notes,
+          meta: meta,
+        );
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _import() async {
+    final f = await FilePicker.pickFile(
+      type: FileType.custom,
+      allowedExtensions: const ['jsonl', 'json', 'txt'],
+    );
+    if (f == null) return;
+    final bytes = await f.readAsBytes();
+    final text = utf8.decode(bytes);
+    final samples = <SessionSample>[];
+    for (final line in const LineSplitter().convert(text)) {
+      final t = line.trim();
+      if (t.isEmpty) continue;
+      try {
+        final j = jsonDecode(t);
+        if (j is Map && j.containsKey('_meta')) continue;
+        if (j is Map && j.containsKey('t')) {
+          samples.add(SessionSample.fromJson(Map<String, dynamic>.from(j)));
+        }
+      } catch (_) {}
+    }
+    if (mounted) {
+      setState(() {
+        _bundle = ReplayBundle(
+          samples: samples,
+          notes: const [],
+          sourceLabel: f.name,
+        );
+        _error = samples.isEmpty ? 'Aucune ligne sample dans le fichier' : null;
+        _loading = false;
+      });
+    }
   }
 
   @override
@@ -78,23 +141,38 @@ class _ReplayLoadScreenState extends ConsumerState<ReplayLoadScreen> {
           ],
         ),
         leading: BackButton(onPressed: widget.onBack),
+        actions: [
+          if (widget.allowImport)
+            TextButton(
+              onPressed: _import,
+              child: const Text('IMPORTER'),
+            ),
+        ],
       ),
-      body: FutureBuilder<ReplayBundle>(
-        future: _future,
-        builder: (context, snap) {
-          if (snap.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final b = snap.data ??
-              const ReplayBundle(samples: [], notes: []);
-          return ReplayBody(
-            samples: b.samples,
-            notes: b.notes,
-            meta: b.meta,
-            title: widget.title,
-          );
-        },
-      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                if (_error != null)
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Text(
+                      _error!,
+                      style: const TextStyle(color: DeckColors.amber),
+                    ),
+                  ),
+                Expanded(
+                  child: ReplayBody(
+                    samples: _bundle?.samples ?? const [],
+                    notes: _bundle?.notes ?? const [],
+                    meta: _bundle?.meta,
+                    title: widget.title,
+                    showEval: widget.showEval,
+                    sourceLabel: _bundle?.sourceLabel,
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }

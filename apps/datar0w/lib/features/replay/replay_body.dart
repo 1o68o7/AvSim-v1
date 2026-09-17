@@ -18,12 +18,16 @@ class ReplayBody extends StatefulWidget {
     this.notes = const [],
     this.meta,
     this.title = 'REPLAY',
+    this.showEval = true,
+    this.sourceLabel,
   });
 
   final List<SessionSample> samples;
   final List<SessionNote> notes;
   final SessionMeta? meta;
   final String title;
+  final bool showEval;
+  final String? sourceLabel;
 
   @override
   State<ReplayBody> createState() => _ReplayBodyState();
@@ -124,11 +128,14 @@ class _ReplayBodyState extends State<ReplayBody> {
               Text(
                 widget.meta?.code == null
                     ? 'SÉANCE  1X'
-                    : 'SÉANCE  ${widget.meta!.code}  ·  1X',
+                    : 'SÉANCE  ${widget.meta!.code}  ·  ${widget.meta!.classe.toUpperCase()}',
                 style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
               ),
               const Spacer(),
-              DeckStatusChip(label: 'FICHIER CHARGÉ', ok: true),
+              DeckStatusChip(
+                label: (widget.sourceLabel ?? 'FICHIER CHARGÉ').toUpperCase(),
+                ok: true,
+              ),
             ],
           ),
         ),
@@ -234,6 +241,7 @@ class _ReplayBodyState extends State<ReplayBody> {
                 noteIdx: noteIdx,
                 onJump: _jumpToNote,
                 elapsed: elapsed,
+                showEval: widget.showEval,
               );
               if (landscape) {
                 return Row(
@@ -294,6 +302,7 @@ class _CursorPanel extends StatelessWidget {
     required this.noteIdx,
     required this.onJump,
     required this.elapsed,
+    this.showEval = true,
   });
 
   final SessionSample cur;
@@ -303,6 +312,7 @@ class _CursorPanel extends StatelessWidget {
   final int noteIdx;
   final void Function(int) onJump;
   final Duration elapsed;
+  final bool showEval;
 
   @override
   Widget build(BuildContext context) {
@@ -348,7 +358,8 @@ class _CursorPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          if (showEval)
+            Text(
             dCad == null
                 ? 'Δ CADENCE  —'
                 : 'Δ CADENCE  ${dCad! >= 0 ? '+' : ''}${dCad!.toStringAsFixed(0)}',
@@ -359,7 +370,7 @@ class _CursorPanel extends StatelessWidget {
               fontSize: 13,
             ),
           ),
-          if (notes.isNotEmpty)
+          if (showEval && notes.isNotEmpty)
             Wrap(
               spacing: 6,
               children: [

@@ -622,6 +622,17 @@ class LiveHub extends Notifier<LiveHubState> {
     return remote.id;
   }
 
+  Future<String?> joinRemoteLive(String rawCode) async {
+    final remote = await _api.lookupByCode(rawCode);
+    if (remote == null) return null;
+    state = state.copyWith(
+      coachSessionId: remote.id,
+      code: remote.code,
+      coachFromApi: true,
+    );
+    return remote.id;
+  }
+
   void startCoachPoll() {
     _coachPoll?.cancel();
     if (!state.coachFromApi || state.coachSessionId == null) return;
@@ -657,6 +668,8 @@ class LiveHub extends Notifier<LiveHubState> {
     };
     if (_store != null) {
       await _store!.appendNote(note);
+    } else if (id != null && !state.coachFromApi) {
+      await SessionStore.appendNoteToId(id, note);
     }
     if (id != null) {
       unawaited(_api.note(id: id, note: note));

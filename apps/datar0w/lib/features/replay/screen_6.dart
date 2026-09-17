@@ -12,6 +12,8 @@ class CoachReplayScreen extends StatelessWidget {
     return ReplayLoadScreen(
       title: 'COACH REPLAY',
       onBack: () => context.go(AppRoutes.profile),
+      showEval: true,
+      allowImport: true,
     );
   }
 }

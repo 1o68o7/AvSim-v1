@@ -156,6 +156,17 @@ class SessionStore {
     return out;
   }
 
+  static Future<void> appendNoteToId(
+    String sessionId,
+    Map<String, dynamic> note,
+  ) async {
+    final root = await sessionsRoot();
+    final store = SessionStore(sessionId);
+    store.directory = Directory('${root.path}/$sessionId');
+    if (!store.directory!.existsSync()) return;
+    await store.appendNote(note);
+  }
+
   static Future<List<SessionNote>> loadNotes(String sessionId) async {
     final root = await sessionsRoot();
     final file = File('${root.path}/$sessionId/notes.json');

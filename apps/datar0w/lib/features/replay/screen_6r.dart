@@ -12,6 +12,8 @@ class RowerReplayScreen extends StatelessWidget {
     return ReplayLoadScreen(
       title: 'REPLAY RAMEUR',
       onBack: () => context.go(AppRoutes.quai),
+      showEval: false,
+      allowImport: true,
     );
   }
 }
