@@ -1,20 +1,28 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:environment_sensors/environment_sensors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sensors_plus/sensors_plus.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
+import '../sensors/baro.dart';
 import '../sensors/battery.dart';
 import '../sensors/geo.dart';
 import '../sensors/gps.dart';
 import '../sensors/imu.dart';
+import '../sensors/mag_heading.dart';
 import '../sensors/net.dart';
 import '../sensors/permissions.dart';
 import 'api_client.dart';
 import 'code.dart';
 import 'heel.dart';
 import 'model.dart';
+import 'rower_orientation.dart';
+import 'session_fgs.dart';
 import 'store.dart';
 import 'tare_math.dart';
+import 'tel_cadence.dart';
 
 enum TareStatus { none, running, ok, failed }
 
@@ -49,6 +57,8 @@ class LiveHubState {
     this.ax,
     this.ay,
     this.az,
+    this.cadenceSpm,
+    this.hdgMag,
   });
 
   final bool locationOk;
@@ -80,6 +90,8 @@ class LiveHubState {
   final double? ax;
   final double? ay;
   final double? az;
+  final double? cadenceSpm;
+  final double? hdgMag;
 
   bool get tareOk => tareStatus == TareStatus.ok && tareOffset != null;
 
@@ -119,6 +131,8 @@ class LiveHubState {
     double? ax,
     double? ay,
     double? az,
+    double? cadenceSpm,
+    double? hdgMag,
   }) {
     return LiveHubState(
       locationOk: locationOk ?? this.locationOk,
@@ -150,6 +164,8 @@ class LiveHubState {
       ax: ax ?? this.ax,
       ay: ay ?? this.ay,
       az: az ?? this.az,
+      cadenceSpm: cadenceSpm ?? this.cadenceSpm,
+      hdgMag: hdgMag ?? this.hdgMag,
     );
   }
 }
@@ -181,6 +197,13 @@ class LiveHub extends Notifier<LiveHubState> {
   double? _displayGite;
   final List<double> _tareWindow = [];
   DateTime? _tareStartedAt;
+  final TelCadenceDetector _cadence = TelCadenceDetector();
+  double? _mx;
+  double? _my;
+  double? _mz;
+  double? _pHpa;
+  double? _p0Hpa;
+  bool _extraOn = false;
 
   @override
   LiveHubState build() {
@@ -230,6 +253,15 @@ class LiveHub extends Notifier<LiveHubState> {
             _tareWindow.add(filtered);
           }
           _maybeLogImu(f);
+          if (state.logging) {
+            final along = deviceToScreenVec(
+              f.ax,
+              f.ay,
+              f.az,
+              displayRotationDeg: _heelRotationDeg,
+            ).x;
+            _cadence.add(alongMps2: along, now: DateTime.now());
+          }
         },
         onError: (Object e) {
           state = state.copyWith(
@@ -239,6 +271,43 @@ class LiveHub extends Notifier<LiveHubState> {
         },
       ),
     );
+    _listenPhoneExtras();
+  }
+
+  void _listenPhoneExtras() {
+    if (_extraOn) return;
+    _extraOn = true;
+    try {
+      _imuSubs.add(
+        magnetometerEventStream(samplingPeriod: SensorInterval.uiInterval)
+            .listen(
+          (e) {
+            _mx = e.x;
+            _my = e.y;
+            _mz = e.z;
+          },
+          onError: (_) {},
+        ),
+      );
+    } catch (_) {}
+    unawaited(_listenBaro());
+  }
+
+  Future<void> _listenBaro() async {
+    try {
+      final env = EnvironmentSensors();
+      final ok = await env.getSensorAvailable(SensorType.Pressure);
+      if (!ok) return;
+      _imuSubs.add(
+        env.pressure.listen(
+          (p) {
+            _pHpa = p;
+            _p0Hpa ??= p;
+          },
+          onError: (_) {},
+        ),
+      );
+    } catch (_) {}
   }
 
   void _publishUi() {
@@ -364,6 +433,9 @@ class LiveHub extends Notifier<LiveHubState> {
   Future<bool> startSession() async {
     if (!state.tareOk || _store != null) return false;
     final perm = await AppPermissions.requestSession();
+    if (perm.locationOk) {
+      await AppPermissions.requestBackgroundAfterWhenInUse();
+    }
     state = state.copyWith(
       locationOk: perm.locationOk,
       permissionMessage: perm.message ?? '',
@@ -379,6 +451,8 @@ class LiveHub extends Notifier<LiveHubState> {
     _lastFix = null;
     _lastGoodFix = null;
     _lastGpsAt = null;
+    _cadence.reset();
+    _p0Hpa = _pHpa;
 
     state = state.copyWith(
       sessionId: id,
@@ -389,6 +463,12 @@ class LiveHub extends Notifier<LiveHubState> {
       code: code,
     );
     unawaited(_api.createSession(id: id, code: code));
+
+    try {
+      await WakelockPlus.enable();
+    } catch (_) {}
+    await startSessionForeground();
+    unawaited(lockRowerLandscape());
 
     await listenImu();
 
@@ -442,6 +522,17 @@ class LiveHub extends Notifier<LiveHubState> {
     }
     final batt = await _battery.levelPercent();
     final fix = _lastFix;
+    final imu = _lastImu;
+    final hdg = (imu != null && _mx != null && _my != null && _mz != null)
+        ? magHeadingDeg(
+            mx: _mx!,
+            my: _my!,
+            mz: _mz!,
+            ax: imu.ax,
+            ay: imu.ay,
+            az: imu.az,
+          )
+        : null;
     final sample = SessionSample(
       t: DateTime.now().millisecondsSinceEpoch,
       lat: stale ? null : fix?.lat,
@@ -453,7 +544,11 @@ class LiveHub extends Notifier<LiveHubState> {
       distM: _dist,
       giteDeg: state.giteDeg,
       pitchDeg: _lastImu?.accelPitchDeg ?? state.pitchDeg,
-      cadenceSpm: null,
+      cadenceSpm: _cadence.spm,
+      cadenceSrc: _cadence.spm == null ? null : 'tel',
+      hdgMag: hdg,
+      pHpa: _pHpa,
+      altBaro: altBaroRelM(_pHpa, _p0Hpa),
       batt: batt,
       net: state.net,
     );
@@ -463,6 +558,8 @@ class LiveHub extends Notifier<LiveHubState> {
     state = state.copyWith(
       batt: batt,
       sampleCount: state.sampleCount + 1,
+      cadenceSpm: _cadence.spm,
+      hdgMag: hdg,
     );
   }
 
@@ -478,6 +575,12 @@ class LiveHub extends Notifier<LiveHubState> {
     await _store?.markEnded();
     await _store?.close();
     _store = null;
+    try {
+      await WakelockPlus.disable();
+    } catch (_) {}
+    await stopSessionForeground();
+    unawaited(unlockRowerOrientations());
+    _cadence.reset();
     state = state.copyWith(logging: false);
   }
 

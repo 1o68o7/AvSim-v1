@@ -11,8 +11,7 @@ class PermissionOutcome {
 }
 
 class AppPermissions {
-  /// Localisation when-in-use. Background = plus tard (après grant).
-  /// IMU iOS : Info.plist seulement. Tare offset = lot C.
+  /// When-in-use d’abord (Android 10+). Background = [requestBackgroundAfterWhenInUse].
   static Future<PermissionOutcome> requestSession() async {
     try {
       await Permission.sensors.request();
@@ -39,5 +38,17 @@ class AppPermissions {
       locationOk: false,
       message: 'Localisation : ${loc.name}. GPS éteint jusqu’à acceptation.',
     );
+  }
+
+  /// Après grant when-in-use : notifs + localisation arrière-plan (FGS).
+  static Future<void> requestBackgroundAfterWhenInUse() async {
+    try {
+      await Permission.notification.request();
+    } catch (_) {}
+    final when = await Permission.locationWhenInUse.status;
+    if (!when.isGranted) return;
+    try {
+      await Permission.locationAlways.request();
+    } catch (_) {}
   }
 }

@@ -79,6 +79,7 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
     final giteLabel = giteUi == null
         ? '—'
         : '${giteUi >= 0 ? '+' : ''}${giteUi.toStringAsFixed(1)}°';
+    final cad = live ? hub.cadenceSpm : last?.cadenceSpm;
 
     return Scaffold(
       backgroundColor: DeckColors.bg,
@@ -238,8 +239,12 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                               Expanded(
                                 child: InstrumentPod(
                                   label: 'CADENCE',
-                                  value: '—',
-                                  unit: 'SPM  ·  COUP/MIN',
+                                  value: cad == null
+                                      ? '—'
+                                      : cad.toStringAsFixed(0),
+                                  unit: cad == null
+                                      ? 'SPM  ·  COUP/MIN'
+                                      : 'ESTIM. TEL  ·  SPM',
                                 ),
                               ),
                               const SizedBox(width: 8),

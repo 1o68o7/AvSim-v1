@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -22,6 +25,13 @@ class LiveScreen extends ConsumerStatefulWidget {
 class _LiveScreenState extends ConsumerState<LiveScreen> {
   final _stop = DoublePressStop();
   bool _stopArmed = false;
+  HeelAlert _lastAlert = HeelAlert.none;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(lockRowerLandscape());
+  }
 
   @override
   void didChangeDependencies() {
@@ -51,6 +61,12 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
     final gite = s.displayGiteDeg ?? s.giteDeg;
     final alert =
         s.tareOk ? heelAlertFor(gite) : HeelAlert.none;
+    if (alert != _lastAlert) {
+      if (_lastAlert == HeelAlert.none && alert != HeelAlert.none) {
+        HapticFeedback.vibrate();
+      }
+      _lastAlert = alert;
+    }
 
     return Scaffold(
       backgroundColor: DeckColors.bg,
@@ -109,8 +125,12 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
         Expanded(
           child: InstrumentPod(
             label: 'CADENCE',
-            value: '—',
-            unit: 'COUPS/MIN',
+            value: s.cadenceSpm == null
+                ? '—'
+                : s.cadenceSpm!.toStringAsFixed(0),
+            unit: s.cadenceSpm == null
+                ? 'COUPS/MIN'
+                : 'ESTIM. TEL  ·  COUPS/MIN',
           ),
         ),
         const SizedBox(height: 8),

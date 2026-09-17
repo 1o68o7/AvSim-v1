@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
 class GpsFix {
@@ -22,11 +25,7 @@ class GpsFix {
 
 class GpsService {
   Stream<GpsFix> stream() {
-    const settings = LocationSettings(
-      accuracy: LocationAccuracy.best,
-      distanceFilter: 0,
-    );
-    return Geolocator.getPositionStream(locationSettings: settings).map(
+    return Geolocator.getPositionStream(locationSettings: _settings()).map(
       (p) => GpsFix(
         lat: p.latitude,
         lon: p.longitude,
@@ -36,6 +35,20 @@ class GpsService {
         accH: p.accuracy.isFinite ? p.accuracy : null,
         accV: p.altitudeAccuracy.isFinite ? p.altitudeAccuracy : null,
       ),
+    );
+  }
+
+  static LocationSettings _settings() {
+    if (!kIsWeb && Platform.isAndroid) {
+      return AndroidSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 0,
+        intervalDuration: const Duration(seconds: 1),
+      );
+    }
+    return const LocationSettings(
+      accuracy: LocationAccuracy.best,
+      distanceFilter: 0,
     );
   }
 }

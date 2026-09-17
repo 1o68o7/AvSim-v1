@@ -14,6 +14,10 @@ class SessionSample {
     this.giteDeg,
     this.pitchDeg,
     this.cadenceSpm,
+    this.cadenceSrc,
+    this.hdgMag,
+    this.pHpa,
+    this.altBaro,
     this.batt,
     required this.net,
   });
@@ -29,6 +33,10 @@ class SessionSample {
   final double? giteDeg;
   final double? pitchDeg;
   final double? cadenceSpm;
+  final String? cadenceSrc;
+  final double? hdgMag;
+  final double? pHpa;
+  final double? altBaro;
   final int? batt;
   final String net;
 
@@ -44,6 +52,10 @@ class SessionSample {
         'gite_deg': giteDeg,
         'pitch_deg': pitchDeg,
         'cadence_spm': cadenceSpm,
+        'cadence_src': cadenceSrc,
+        'hdg_mag': hdgMag,
+        'p_hpa': pHpa,
+        'alt_baro': altBaro,
         'batt': batt,
         'net': net,
       };
@@ -63,6 +75,10 @@ class SessionSample {
       giteDeg: (j['gite_deg'] as num?)?.toDouble(),
       pitchDeg: (j['pitch_deg'] as num?)?.toDouble(),
       cadenceSpm: (j['cadence_spm'] as num?)?.toDouble(),
+      cadenceSrc: j['cadence_src'] as String?,
+      hdgMag: (j['hdg_mag'] as num?)?.toDouble(),
+      pHpa: (j['p_hpa'] as num?)?.toDouble(),
+      altBaro: (j['alt_baro'] as num?)?.toDouble(),
       batt: (j['batt'] as num?)?.toInt(),
       net: j['net'] as String? ?? 'hors ligne',
     );
