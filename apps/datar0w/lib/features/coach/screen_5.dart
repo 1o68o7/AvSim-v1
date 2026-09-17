@@ -29,7 +29,16 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeLoadFile());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(liveHubProvider.notifier).startCoachPoll();
+      _maybeLoadFile();
+    });
+  }
+
+  @override
+  void dispose() {
+    ref.read(liveHubProvider.notifier).stopCoachPoll();
+    super.dispose();
   }
 
   @override
@@ -44,6 +53,7 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
     final hub = ref.read(liveHubProvider);
     final id = hub.coachSessionId ?? hub.sessionId;
     if (id == null) return;
+    if (hub.coachFromApi) return;
     if (hub.logging && hub.sessionId == id) return;
     final samples = await SessionStore.loadSamples(id);
     if (mounted) setState(() => _fileSamples = samples);
@@ -52,13 +62,17 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
   @override
   Widget build(BuildContext context) {
     final hub = ref.watch(liveHubProvider);
-    final live = hub.logging &&
+    final apiLive = hub.coachFromApi && hub.remoteSample != null;
+    final live = !hub.coachFromApi &&
+        hub.logging &&
         hub.sessionId != null &&
         (hub.coachSessionId == null || hub.coachSessionId == hub.sessionId);
     final samples = live
         ? ref.read(liveHubProvider.notifier).recorded
         : _fileSamples;
-    final last = samples.isEmpty ? null : samples.last;
+    final last = apiLive
+        ? hub.remoteSample
+        : (samples.isEmpty ? null : samples.last);
     final giteUi = live
         ? (hub.displayGiteDeg ?? hub.giteDeg)
         : last?.giteDeg;
@@ -104,7 +118,10 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                       ),
                     ),
                     const Spacer(),
-                    DeckStatusChip(label: live ? 'LIVE' : 'FICHIER', ok: live),
+                    DeckStatusChip(
+                      label: live || apiLive ? 'LIVE' : 'FICHIER',
+                      ok: live || apiLive,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       hub.code == null ? '1X' : '1X  ${hub.code}',
@@ -279,7 +296,9 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                           ),
                           const SizedBox(height: 8),
                           FilledButton(
-                            onPressed: live
+                            onPressed: (live ||
+                                    apiLive ||
+                                    hub.coachSessionId != null)
                                 ? () =>
                                     ref.read(liveHubProvider.notifier).annotate()
                                 : null,

@@ -49,6 +49,8 @@ class LiveHubState {
     this.logging = false,
     this.code,
     this.coachSessionId,
+    this.coachFromApi = false,
+    this.remoteSample,
     this.displayGiteDeg,
     this.imuOk = false,
     this.imuHint = 'IMU : en attente du niveau du téléphone…',
@@ -82,6 +84,8 @@ class LiveHubState {
   final bool logging;
   final String? code;
   final String? coachSessionId;
+  final bool coachFromApi;
+  final SessionSample? remoteSample;
   final double? displayGiteDeg;
   final bool imuOk;
   final String imuHint;
@@ -123,6 +127,8 @@ class LiveHubState {
     bool? logging,
     String? code,
     String? coachSessionId,
+    bool? coachFromApi,
+    SessionSample? remoteSample,
     double? displayGiteDeg,
     bool? imuOk,
     String? imuHint,
@@ -156,6 +162,8 @@ class LiveHubState {
       logging: logging ?? this.logging,
       code: code ?? this.code,
       coachSessionId: coachSessionId ?? this.coachSessionId,
+      coachFromApi: coachFromApi ?? this.coachFromApi,
+      remoteSample: remoteSample ?? this.remoteSample,
       displayGiteDeg: displayGiteDeg ?? this.displayGiteDeg,
       imuOk: imuOk ?? this.imuOk,
       imuHint: imuHint ?? this.imuHint,
@@ -180,6 +188,7 @@ class LiveHub extends Notifier<LiveHubState> {
   Timer? _tick;
   Timer? _tareTicker;
   Timer? _uiTimer;
+  Timer? _coachPoll;
   SessionStore? _store;
   final SessionApi _api = SessionApi();
   final List<SessionSample> recorded = [];
@@ -455,6 +464,7 @@ class LiveHub extends Notifier<LiveHubState> {
       code: code,
     );
     unawaited(_api.createSession(id: id, code: code));
+    // Échec HTTP : le logger local continue (fichier + tick 1 Hz).
 
     try {
       await WakelockPlus.enable();
@@ -546,7 +556,10 @@ class LiveHub extends Notifier<LiveHubState> {
     );
     _store?.append(sample);
     recorded.add(sample);
-    unawaited(_api.tick(id: state.sessionId!, sample: sample));
+    final sid = state.sessionId;
+    if (sid != null) {
+      unawaited(_api.tick(id: sid, sample: sample));
+    }
     state = state.copyWith(
       batt: batt,
       sampleCount: state.sampleCount + 1,
@@ -581,36 +594,78 @@ class LiveHub extends Notifier<LiveHubState> {
     if (code.isEmpty) {
       final last = state.sessionId ?? await SessionStore.latestId();
       if (last == null) return null;
-      state = state.copyWith(coachSessionId: last);
+      state = state.copyWith(
+        coachSessionId: last,
+        coachFromApi: false,
+      );
       return last;
     }
     if (state.code?.toUpperCase() == code && state.sessionId != null) {
-      state = state.copyWith(coachSessionId: state.sessionId);
+      state = state.copyWith(
+        coachSessionId: state.sessionId,
+        coachFromApi: false,
+      );
       return state.sessionId;
     }
-    final id = await SessionStore.findIdByCode(code);
-    if (id == null) return null;
-    state = state.copyWith(coachSessionId: id);
-    return id;
+    final local = await SessionStore.findIdByCode(code);
+    if (local != null) {
+      state = state.copyWith(coachSessionId: local, coachFromApi: false);
+      return local;
+    }
+    final remote = await _api.lookupByCode(code);
+    if (remote == null) return null;
+    state = state.copyWith(
+      coachSessionId: remote.id,
+      code: remote.code,
+      coachFromApi: true,
+    );
+    return remote.id;
+  }
+
+  void startCoachPoll() {
+    _coachPoll?.cancel();
+    if (!state.coachFromApi || state.coachSessionId == null) return;
+    _coachPoll = Timer.periodic(const Duration(seconds: 1), (_) {
+      unawaited(_pollCoach());
+    });
+    unawaited(_pollCoach());
+  }
+
+  void stopCoachPoll() {
+    _coachPoll?.cancel();
+    _coachPoll = null;
+  }
+
+  Future<void> _pollCoach() async {
+    final id = state.coachSessionId;
+    if (id == null || !state.coachFromApi) return;
+    final live = await _api.fetchLive(id);
+    if (live == null) return;
+    state = state.copyWith(remoteSample: live.sample);
   }
 
   Future<void> annotate() async {
-    final id = state.sessionId;
-    if (id == null || _store == null) return;
+    final sample = state.coachFromApi ? state.remoteSample : null;
+    final id = state.coachSessionId ?? state.sessionId;
     final note = {
       't': DateTime.now().millisecondsSinceEpoch,
-      'lat': state.lat,
-      'lon': state.lon,
-      'sog': state.sog,
-      'dist_m': state.distM,
-      'gite_deg': state.giteDeg,
+      'lat': sample?.lat ?? state.lat,
+      'lon': sample?.lon ?? state.lon,
+      'sog': sample?.sog ?? state.sog,
+      'dist_m': sample?.distM ?? state.distM,
+      'gite_deg': sample?.giteDeg ?? state.giteDeg,
     };
-    await _store!.appendNote(note);
-    unawaited(_api.note(id: id, note: note));
+    if (_store != null) {
+      await _store!.appendNote(note);
+    }
+    if (id != null) {
+      unawaited(_api.note(id: id, note: note));
+    }
   }
 
   Future<void> _disposeAll() async {
     _tareTicker?.cancel();
+    stopCoachPoll();
     _uiTimer?.cancel();
     _uiTimer = null;
     await stopSession();

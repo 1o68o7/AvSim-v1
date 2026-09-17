@@ -35,6 +35,7 @@ from avsim.io.rameur import (
 )
 from avsim.io.replay import stroke_distance_m, stroke_frame
 
+from .datarow import router as datarow_router
 from .roles import Role, analyst_only, require_role
 
 app = FastAPI(
@@ -42,6 +43,8 @@ app = FastAPI(
     version="0.1.0",
     description="Deux surfaces (Analyste / Produit), un moteur. Sorties = Simulé.",
 )
+
+app.include_router(datarow_router)
 
 app.add_middleware(
     CORSMiddleware,
