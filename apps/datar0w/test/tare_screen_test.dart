@@ -15,13 +15,12 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('TARE GÎTE'), findsOneWidget);
-    await tester.tap(find.text('TARE GÎTE'));
+    expect(find.textContaining('POSITION DE SÉANCE'), findsOneWidget);
+    expect(find.text('TOURNER EN PAYSAGE POUR TARER'), findsOneWidget);
+    await tester.tap(find.text('TOURNER EN PAYSAGE POUR TARER'));
     await tester.pump();
 
-    expect(find.textContaining('EN COURS'), findsWidgets);
-    expect(find.textContaining('TARE EN COURS'), findsOneWidget);
-    expect(find.textContaining('stabilise'), findsWidgets);
+    expect(find.textContaining('EN COURS'), findsNothing);
   });
 
   testWidgets('2B paysage : TRIBORD à gauche, lacet —', (tester) async {
@@ -39,6 +38,7 @@ void main() {
     expect(find.text('BÂBORD'), findsWidgets);
     expect(find.text('LACET (YAW)'), findsOneWidget);
     expect(find.text('TARE GÎTE'), findsOneWidget);
+    expect(find.textContaining('POSITION DE SÉANCE'), findsOneWidget);
     final tri = tester.getTopLeft(find.text('TRIBORD').first).dx;
     final ba = tester.getTopLeft(find.text('BÂBORD').first).dx;
     expect(tri < ba, isTrue);

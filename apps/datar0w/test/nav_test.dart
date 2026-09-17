@@ -31,7 +31,7 @@ void main() {
   });
 
   testWidgets('2B : Retour profil absent pendant la tare', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(390, 844));
+    await tester.binding.setSurfaceSize(const Size(844, 390));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       const ProviderScope(
