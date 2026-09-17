@@ -14,6 +14,7 @@ import '../sensors/mag_heading.dart';
 import '../sensors/net.dart';
 import '../sensors/permissions.dart';
 import 'api_client.dart';
+import 'boat_config.dart';
 import 'code.dart';
 import 'heel.dart';
 import 'model.dart';
@@ -444,8 +445,18 @@ class LiveHub extends Notifier<LiveHubState> {
 
     final id = 's${DateTime.now().millisecondsSinceEpoch}';
     final code = generateSessionCode();
+    final boat = ref.read(boatConfigProvider);
     final store = SessionStore(id);
-    final dir = await store.open(tareOffset: state.tareOffset!, code: code);
+    final dir = await store.open(
+      tareOffset: state.tareOffset!,
+      code: code,
+      bassin: boat.bassin,
+      classe: boat.classe,
+      seats: boat.seats,
+      cox: boat.coxed,
+      role: boat.role.wire,
+      seatIndex: boat.clampedSeat,
+    );
     _store = store;
     recorded.clear();
     _dist = 0;
@@ -463,7 +474,17 @@ class LiveHub extends Notifier<LiveHubState> {
       distM: 0,
       code: code,
     );
-    unawaited(_api.createSession(id: id, code: code));
+    unawaited(_api.createSession(
+      id: id,
+      code: code,
+      meta: {
+        'class': boat.classe,
+        'seats': boat.seats,
+        'cox': boat.coxed,
+        'role': boat.role.wire,
+        'seatIndex': boat.clampedSeat,
+      },
+    ));
     // Échec HTTP : le logger local continue (fichier + tick 1 Hz).
 
     try {

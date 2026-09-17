@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../router.dart';
+import '../../session/boat_config.dart';
 import '../../session/heel.dart';
 import '../../session/live_hub.dart';
 import '../../session/model.dart';
@@ -124,7 +125,16 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      hub.code == null ? '1X' : '1X  ${hub.code}',
+                      () {
+                        final boat = ref.watch(boatConfigProvider);
+                        final tag = boat.info.code.toUpperCase();
+                        final seats = boat.seats > 1
+                            ? '  ·  ${boat.seats} sièges'
+                            : '';
+                        return hub.code == null
+                            ? tag
+                            : '$tag  ${hub.code}$seats';
+                      }(),
                       style: const TextStyle(
                         color: DeckColors.label,
                         fontSize: 10,

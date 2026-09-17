@@ -71,10 +71,7 @@ Sans P0 : écran noir + trous GPS dès que OxygenOS endort l’app.
 - Label : `estim. tel` pour ne pas passer pour un capteur d’aviron.  
 - Hors scope si l’algo n’est pas validé sur 2 sorties réelles.
 
-### P2 — 2e téléphone (pas bloquant bassin)
-
-API `DATAROW_API_BASE` + routes FastAPI `/datarow/*` (Lot G).  
-MVP bassin = **Partager** le jsonl (WhatsApp / Drive) + replay sur le tel coach. G vient après P0.
+### P2 — 2e téléphone : API `DATAROW_API_BASE` + `/datarow/*` (Lot G, implémenté).
 
 ---
 

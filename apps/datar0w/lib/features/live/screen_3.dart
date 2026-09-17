@@ -6,8 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router.dart';
+import '../../session/boat_config.dart';
 import '../../session/double_press_stop.dart';
 import '../../session/heel.dart';
+import '../cox/screen_cox.dart';
 import '../../session/live_hub.dart';
 import '../../session/rower_orientation.dart';
 import '../../theme/deck_theme.dart';
@@ -57,6 +59,10 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final boat = ref.watch(boatConfigProvider);
+    if (boat.role == CrewRole.cox) {
+      return const CoxLiveScreen();
+    }
     final s = ref.watch(liveHubProvider);
     final gite = s.displayGiteDeg ?? s.giteDeg;
     final alert =
@@ -146,7 +152,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
           child: InstrumentPod(
             label: 'DISTANCE',
             value: (s.distM / 1000).toStringAsFixed(2),
-            unit: 'KM  ·  SKF·1X // LIVE',
+            unit: 'KM  ·  ${ref.watch(boatConfigProvider).info.code.toUpperCase()} // LIVE',
           ),
         ),
       ],
@@ -209,7 +215,10 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
         InstrumentPod(
           label: 'SYSTÈME',
           value: s.code ?? '—',
-          unit: 'SKF·1X',
+          unit: ref.watch(boatConfigProvider).info.code.toUpperCase() +
+              (ref.watch(boatConfigProvider).seats > 1
+                  ? '  ·  SIÈGE ${ref.watch(boatConfigProvider).clampedSeat}/${ref.watch(boatConfigProvider).seats}'
+                  : ''),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -229,6 +238,13 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                 label: '${s.batt ?? '—'} %',
                 ok: (s.batt ?? 0) > 20,
               ),
+              if (ref.watch(boatConfigProvider).seats > 1) ...[
+                const SizedBox(height: 6),
+                const DeckStatusChip(
+                  label: 'autres sièges en attente',
+                  ok: false,
+                ),
+              ],
             ],
           ),
         ),

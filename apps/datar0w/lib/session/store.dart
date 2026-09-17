@@ -10,6 +10,10 @@ class SessionMeta {
   const SessionMeta({
     required this.id,
     this.classe = '1x',
+    this.seats = 1,
+    this.cox = false,
+    this.role = 'rower',
+    this.seatIndex = 1,
     this.bassin,
     this.tareOffset,
     this.code,
@@ -19,6 +23,10 @@ class SessionMeta {
 
   final String id;
   final String classe;
+  final int seats;
+  final bool cox;
+  final String role;
+  final int seatIndex;
   final String? bassin;
   final double? tareOffset;
   final String? code;
@@ -27,7 +35,12 @@ class SessionMeta {
 
   Map<String, dynamic> toJson() => {
         'id': id,
+        'class': classe,
         'classe': classe,
+        'seats': seats,
+        'cox': cox,
+        'role': role,
+        'seatIndex': seatIndex,
         'bassin': bassin,
         'tareOffsetDeg': tareOffset,
         'tare_offset': tareOffset,
@@ -38,7 +51,11 @@ class SessionMeta {
 
   static SessionMeta fromJson(Map<String, dynamic> j) => SessionMeta(
         id: j['id'] as String,
-        classe: j['classe'] as String? ?? '1x',
+        classe: (j['class'] as String?) ?? j['classe'] as String? ?? '1x',
+        seats: (j['seats'] as num?)?.toInt() ?? 1,
+        cox: j['cox'] as bool? ?? false,
+        role: j['role'] as String? ?? 'rower',
+        seatIndex: (j['seatIndex'] as num?)?.toInt() ?? 1,
         bassin: j['bassin'] as String?,
         tareOffset: (j['tareOffsetDeg'] as num?)?.toDouble() ??
             (j['tare_offset'] as num?)?.toDouble(),
@@ -68,6 +85,11 @@ class SessionStore {
     required double tareOffset,
     String? code,
     String? bassin,
+    String classe = '1x',
+    int seats = 1,
+    bool cox = false,
+    String role = 'rower',
+    int seatIndex = 1,
   }) async {
     final root = await sessionsRoot();
     final dir = Directory('${root.path}/$id');
@@ -75,6 +97,11 @@ class SessionStore {
     directory = dir;
     meta = SessionMeta(
       id: id,
+      classe: classe,
+      seats: seats,
+      cox: cox,
+      role: role,
+      seatIndex: seatIndex,
       tareOffset: tareOffset,
       code: code,
       bassin: bassin,
@@ -114,6 +141,10 @@ class SessionStore {
     meta = SessionMeta(
       id: m.id,
       classe: m.classe,
+      seats: m.seats,
+      cox: m.cox,
+      role: m.role,
+      seatIndex: m.seatIndex,
       bassin: m.bassin,
       tareOffset: m.tareOffset,
       code: m.code,

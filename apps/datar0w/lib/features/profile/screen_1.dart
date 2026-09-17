@@ -1,20 +1,23 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router.dart';
+import '../../session/boat_config.dart';
 import '../../session/rower_orientation.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     unawaited(unlockRowerOrientations());
+    final cfg = ref.watch(boatConfigProvider);
     return DeckScaffold(
       title: 'SÉLECTION PROFIL',
       body: ListView(
@@ -42,22 +45,34 @@ class ProfileScreen extends StatelessWidget {
             subtitle: 'Instrument embarqué · Vue cale-pied',
             icon: Icons.speed,
             highlighted: true,
-            onTap: () => context.go(AppRoutes.presession),
+            onTap: () {
+              ref.read(boatConfigProvider.notifier).setRole(CrewRole.rower);
+              context.go(AppRoutes.presession);
+            },
           ),
           const SizedBox(height: 12),
           _RoleCard(
             title: 'COACH',
             subtitle: 'Suivi direct bord de bassin',
             icon: Icons.sports,
-            onTap: () => context.go(AppRoutes.coachJoin),
+            onTap: () {
+              ref.read(boatConfigProvider.notifier).setRole(CrewRole.coach);
+              context.go(AppRoutes.coachJoin);
+            },
           ),
           const SizedBox(height: 12),
-          const _RoleCard(
+          _RoleCard(
             title: 'BARREUR',
-            subtitle: 'Cadence & tactique de barre',
+            subtitle: 'V sol, distance, gîte bateau (4+ / 8+)',
             icon: Icons.directions_boat,
-            locked: true,
-            footnote: "besoin d'un bateau barré",
+            footnote: 'un tél. = hub bateau, pas 8 IMU',
+            onTap: () {
+              ref.read(boatConfigProvider.notifier).setRole(CrewRole.cox);
+              if (!cfg.coxed) {
+                ref.read(boatConfigProvider.notifier).setClasse('8+');
+              }
+              context.go(AppRoutes.presession);
+            },
           ),
         ],
       ),
@@ -72,7 +87,6 @@ class _RoleCard extends StatelessWidget {
     required this.icon,
     this.onTap,
     this.highlighted = false,
-    this.locked = false,
     this.footnote,
   });
 
@@ -81,17 +95,16 @@ class _RoleCard extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
   final bool highlighted;
-  final bool locked;
   final String? footnote;
 
   @override
   Widget build(BuildContext context) {
     return Opacity(
-      opacity: locked ? 0.6 : 1,
+      opacity: 1,
       child: Material(
-        color: locked ? DeckColors.surface : DeckColors.surfaceHigh,
+        color: DeckColors.surfaceHigh,
         child: InkWell(
-          onTap: locked ? null : onTap,
+          onTap: onTap,
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(
@@ -117,7 +130,6 @@ class _RoleCard extends StatelessWidget {
                               DeckIconBox(
                                 icon: icon,
                                 accent: highlighted,
-                                muted: locked,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -127,9 +139,7 @@ class _RoleCard extends StatelessWidget {
                                     Text(
                                       title,
                                       style: TextStyle(
-                                        color: locked
-                                            ? DeckColors.label
-                                            : DeckColors.text,
+                                        color: DeckColors.text,
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: 1.4,
                                       ),
@@ -146,9 +156,7 @@ class _RoleCard extends StatelessWidget {
                                 ),
                               ),
                               Icon(
-                                locked
-                                    ? Icons.lock_outline
-                                    : Icons.arrow_forward,
+                                Icons.arrow_forward,
                                 color: highlighted
                                     ? DeckColors.amber
                                     : DeckColors.label,

@@ -1,15 +1,28 @@
 # DataR0w (`apps/datar0w`)
 
-Companion téléphone **1x** : GPS / IMU du cale-pied. **Pas une mesure AvSim.**
+Companion téléphone : GPS / IMU d’un hub (cale-pied ou bateau). **Pas une mesure AvSim.**
 
-## Lots B–E (cette branche)
+Un smartphone = **un hub / une place**. Multi-sièges = plusieurs tél. + `DATAROW_API_BASE` (plus tard). Pas de 8 IMU simulés.
+
+## Lots
 
 | Lot | Contenu |
 |---|---|
-| B | Permissions (refus = message FR). Logger 1 Hz **après Démarrer**. `samples.jsonl` + `imu.jsonl` brut. Distance haversine si `acc_h < 25 m`. Trou GPS si fix perdu. `sol — pas eau`. Cadence `—`. |
-| C | Tare 30 s : moyenne du **niveau IMU** (gravité accéléro), σ < 0,2°, `tareOffsetDeg` dans `meta.json`. Démarrer off sinon. Après tare, 0° = ce niveau. |
-| D | STOP 2× / 3 s → `LiveHub.stop()` → quai. Bandeaux gîte **deux côtés**. |
-| E | Quai 4 chiffres + Replay + Partager **jsonl+meta**. Replay carte, playhead, 2 courbes, pas d’interpolation. |
+| B–E | Logger 1 Hz après Démarrer, tare IMU, STOP, quai, replay, gîte lissée. |
+| P0/P1 | Wakelock, FGS « DataR0w — séance », mag/baro/`estim. tel`. |
+| G | FastAPI `/datarow/*` + client si `DATAROW_API_BASE` (sinon fichier local). HTTP fail ≠ stop logger. |
+| Coach | Join code / dernière séance / séance live API. Écran 5 OSM + notes. Replay import jsonl. |
+| Classes | 1x, 2x, 2-, 4x, 4-, 4+, 8+. Rôle barreur 4+/8+. |
+
+## API optionnelle
+
+```
+# dart-define ou env
+DATAROW_API_BASE=http://192.168.x.x:8000
+python -m avsim.api
+```
+
+Routes (sans OAuth) : `POST /datarow/sessions`, `.../tick`, `GET .../by-code/{code}`, `GET .../live`, `POST .../notes`, `GET .../export`.
 
 ## Gîte — lissage
 
@@ -23,6 +36,10 @@ Gauche écran = **TRIBORD** vert `#46C275`. Droite = **BÂBORD** rouge `#E05353`
 Alerte trop tribords : bandeau **vert foncé** `#0F5C32`. Trop bâbord : `#E05353`.  
 `+` = tribords (gauche écran en bas). IMU en axes écran (paysage, rotation 90°). Voir `docs/CONVENTION-BABORD-TRIBORD.md`.
 
+## Baro
+
+`sensors_plus` `barometerEventStream` seulement. **Pas** `environment_sensors` (jcenter / AGP 9). Sinon `p_hpa` / `alt_baro` = `null`.
+
 ## Run / APK (Android)
 
 Chemin projet **sans espaces** recommandé (`C:\dev\AvSim-v1`).
@@ -30,7 +47,7 @@ Chemin projet **sans espaces** recommandé (`C:\dev\AvSim-v1`).
 ```bash
 cd apps/datar0w
 flutter pub get
-flutter run
+flutter run --dart-define=DATAROW_API_BASE=http://192.168.1.10:8000
 flutter build apk --debug
 ```
 
@@ -38,10 +55,10 @@ APK : `apps/datar0w/build/app/outputs/flutter-apk/app-debug.apk`
 
 SDK : `sdk.dir` dans `android/local.properties` (machine, **non commité**).  
 `compileSdk = 37` (permission_handler_android).  
-NDK **30.0.16248370** via Android Studio → SDK Tools (GUI). **Ne pas** lancer `sdkmanager` en CLI depuis Gradle (crash Windows).
+NDK **30.0.16248370** via Android Studio → SDK Tools (GUI).
 
 Pas de cible `windows/` desktop.
 
 ## Hors contrat
 
-Watts, η, slip, RTK, 10 Hz, Analyste, micro/caméra, High-Vis cyan, moteur AvSim.
+Watts, η, slip, RTK, 10 Hz, Analyste, micro/caméra, High-Vis cyan, moteur AvSim, couloirs FISA sans GeoJSON.

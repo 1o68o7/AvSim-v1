@@ -1,20 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router.dart';
+import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
 
-class PresessionScreen extends StatefulWidget {
+class PresessionScreen extends ConsumerStatefulWidget {
   const PresessionScreen({super.key});
 
   @override
-  State<PresessionScreen> createState() => _PresessionScreenState();
+  ConsumerState<PresessionScreen> createState() => _PresessionScreenState();
 }
 
-class _PresessionScreenState extends State<PresessionScreen> {
-  final _bassin = TextEditingController(text: 'Bassin de Mantes-la-Jolie');
+class _PresessionScreenState extends ConsumerState<PresessionScreen> {
+  late final TextEditingController _bassin;
+
+  @override
+  void initState() {
+    super.initState();
+    _bassin = TextEditingController(text: ref.read(boatConfigProvider).bassin);
+  }
 
   @override
   void dispose() {
@@ -24,6 +32,9 @@ class _PresessionScreenState extends State<PresessionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cfg = ref.watch(boatConfigProvider);
+    final info = cfg.info;
+    final coxNeedsBoat = cfg.role == CrewRole.cox && !info.coxed;
     return DeckScaffold(
       title: 'DATAR0W / 2A  ·  PRÉ-SESSION',
       subtitle: 'Configuration séance',
@@ -51,9 +62,10 @@ class _PresessionScreenState extends State<PresessionScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'SÉLECTIONNÉ : 1X',
-                  style: TextStyle(
+                Text(
+                  'SÉLECTIONNÉ : ${info.code.toUpperCase()}  ·  ${info.seats} SIÈGE(S)'
+                  '${info.coxed ? '  ·  BARRÉ' : ''}',
+                  style: const TextStyle(
                     color: DeckColors.amber,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -61,17 +73,65 @@ class _PresessionScreenState extends State<PresessionScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: const [
-                    Expanded(child: _ClassChip(code: '1X', name: 'Skiff', on: true)),
-                    SizedBox(width: 8),
-                    Expanded(child: _ClassChip(code: '2X', name: 'Double')),
-                    SizedBox(width: 8),
-                    Expanded(child: _ClassChip(code: '4-', name: 'Pointe')),
-                    SizedBox(width: 8),
-                    Expanded(child: _ClassChip(code: '8+', name: 'Huit')),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final c in BoatClassInfo.all)
+                      SizedBox(
+                        width: 72,
+                        child: _ClassChip(
+                          code: c.code.toUpperCase(),
+                          name: c.label,
+                          on: cfg.classe == c.code,
+                          onTap: () => ref
+                              .read(boatConfigProvider.notifier)
+                              .setClasse(c.code),
+                        ),
+                      ),
                   ],
                 ),
+                if (info.seats > 1) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'SIÈGE  ${cfg.clampedSeat} / ${info.seats}  ·  1 = NAGE',
+                    style: const TextStyle(
+                      color: DeckColors.label,
+                      fontSize: 10,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      for (var i = 1; i <= info.seats; i++)
+                        ChoiceChip(
+                          label: Text('$i'),
+                          selected: cfg.clampedSeat == i,
+                          onSelected: (_) =>
+                              ref.read(boatConfigProvider.notifier).setSeat(i),
+                        ),
+                    ],
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Un smartphone = un hub / une place. '
+                      'Les autres sièges : en attente (API) ou ignorés (local). '
+                      'Pas de jauge par siège tant qu’il n’y a qu’un tél.',
+                      style: TextStyle(color: DeckColors.label, fontSize: 11),
+                    ),
+                  ),
+                ],
+                if (coxNeedsBoat)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 12),
+                    child: Text(
+                      'Profil BARREUR : choisir 4+ ou 8+.',
+                      style: TextStyle(color: DeckColors.amber, fontSize: 12),
+                    ),
+                  ),
                 const SizedBox(height: 20),
                 const Text(
                   'BASSIN / PLAN D’EAU',
@@ -84,6 +144,8 @@ class _PresessionScreenState extends State<PresessionScreen> {
                 const SizedBox(height: 8),
                 TextField(
                   controller: _bassin,
+                  onChanged: (v) =>
+                      ref.read(boatConfigProvider.notifier).setBassin(v),
                   style: const TextStyle(fontSize: 14),
                   decoration: const InputDecoration(
                     suffixText: '2 000 m',
@@ -114,7 +176,9 @@ class _PresessionScreenState extends State<PresessionScreen> {
             child: SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: () => context.go(AppRoutes.tare),
+                onPressed: coxNeedsBoat
+                    ? null
+                    : () => context.go(AppRoutes.tare),
                 child: const Text('CONTINUER — TARE GÎTE'),
               ),
             ),
@@ -126,38 +190,51 @@ class _PresessionScreenState extends State<PresessionScreen> {
 }
 
 class _ClassChip extends StatelessWidget {
-  const _ClassChip({required this.code, required this.name, this.on = false});
+  const _ClassChip({
+    required this.code,
+    required this.name,
+    required this.onTap,
+    this.on = false,
+  });
 
   final String code;
   final String name;
   final bool on;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: DeckColors.bg,
-        border: Border.all(color: on ? DeckColors.amber : DeckColors.hairline),
-      ),
-      child: Column(
-        children: [
-          Text(
-            code,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: on ? DeckColors.amber : DeckColors.label,
-            ),
+    return Material(
+      color: DeckColors.bg,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            border: Border.all(color: on ? DeckColors.amber : DeckColors.hairline),
           ),
-          Text(
-            name.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 9,
-              color: DeckColors.label,
-              letterSpacing: 0.8,
-            ),
+          child: Column(
+            children: [
+              Text(
+                code,
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: on ? DeckColors.amber : DeckColors.label,
+                ),
+              ),
+              Text(
+                name.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 8,
+                  color: DeckColors.label,
+                  letterSpacing: 0.6,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
