@@ -16,6 +16,8 @@ class SessionMeta {
     this.seatIndex = 1,
     this.bassin,
     this.tareOffset,
+    this.tareQuality,
+    this.tareDurationS,
     this.code,
     this.startedAt,
     this.endedAt,
@@ -29,6 +31,8 @@ class SessionMeta {
   final int seatIndex;
   final String? bassin;
   final double? tareOffset;
+  final String? tareQuality;
+  final double? tareDurationS;
   final String? code;
   final String? startedAt;
   final String? endedAt;
@@ -44,6 +48,8 @@ class SessionMeta {
         'bassin': bassin,
         'tareOffsetDeg': tareOffset,
         'tare_offset': tareOffset,
+        'tareQuality': tareQuality,
+        'tareDurationS': tareDurationS,
         'code': code,
         'started_at': startedAt,
         'ended_at': endedAt,
@@ -59,6 +65,8 @@ class SessionMeta {
         bassin: j['bassin'] as String?,
         tareOffset: (j['tareOffsetDeg'] as num?)?.toDouble() ??
             (j['tare_offset'] as num?)?.toDouble(),
+        tareQuality: j['tareQuality'] as String?,
+        tareDurationS: (j['tareDurationS'] as num?)?.toDouble(),
         code: j['code'] as String?,
         startedAt: j['started_at'] as String?,
         endedAt: j['ended_at'] as String?,
@@ -83,6 +91,8 @@ class SessionStore {
 
   Future<Directory> open({
     required double tareOffset,
+    String? tareQuality,
+    double? tareDurationS,
     String? code,
     String? bassin,
     String classe = '1x',
@@ -103,6 +113,8 @@ class SessionStore {
       role: role,
       seatIndex: seatIndex,
       tareOffset: tareOffset,
+      tareQuality: tareQuality,
+      tareDurationS: tareDurationS,
       code: code,
       bassin: bassin,
       startedAt: DateTime.now().toUtc().toIso8601String(),
@@ -147,6 +159,8 @@ class SessionStore {
       seatIndex: m.seatIndex,
       bassin: m.bassin,
       tareOffset: m.tareOffset,
+      tareQuality: m.tareQuality,
+      tareDurationS: m.tareDurationS,
       code: m.code,
       startedAt: m.startedAt,
       endedAt: DateTime.now().toUtc().toIso8601String(),

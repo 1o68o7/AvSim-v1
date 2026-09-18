@@ -12,6 +12,33 @@ class TareResult {
   final bool ok;
 }
 
+class TareSample {
+  const TareSample({required this.t, required this.rollDeg});
+
+  final DateTime t;
+  final double rollDeg;
+}
+
+class AdaptiveTareEval {
+  const AdaptiveTareEval({
+    required this.complete,
+    required this.ok,
+    required this.approx,
+    required this.offsetDeg,
+    required this.sigmaDeg,
+    required this.durationS,
+  });
+
+  final bool complete;
+  final bool ok;
+  final bool approx;
+  final double offsetDeg;
+  final double sigmaDeg;
+  final double durationS;
+
+  String get quality => ok ? 'ok' : (approx ? 'approx' : 'none');
+}
+
 /// Offset = moyenne ; OK si σ < [maxSigmaDeg] (brief 0,2°).
 TareResult computeTare(List<double> filteredRolls, {double maxSigmaDeg = 0.2}) {
   if (filteredRolls.length < 10) {
@@ -33,6 +60,64 @@ TareResult computeTare(List<double> filteredRolls, {double maxSigmaDeg = 0.2}) {
     offsetDeg: mean,
     sigmaDeg: sigma,
     ok: sigma < maxSigmaDeg,
+  );
+}
+
+/// Fenêtre glissante 3 s min / 30 s max. OK si σ(roll lissé) < 0,2° sur 3 s.
+AdaptiveTareEval evaluateAdaptiveTare({
+  required List<TareSample> samples,
+  required DateTime startedAt,
+  required DateTime now,
+  double minWindowS = 3,
+  double maxWindowS = 30,
+  double maxSigmaDeg = 0.2,
+}) {
+  final durationS = now.difference(startedAt).inMilliseconds / 1000.0;
+  final cut = now.subtract(
+    Duration(milliseconds: (minWindowS * 1000).round()),
+  );
+  final window = <double>[
+    for (final s in samples)
+      if (!s.t.isBefore(cut)) s.rollDeg,
+  ];
+  final r = computeTare(window, maxSigmaDeg: maxSigmaDeg);
+  if (durationS < minWindowS) {
+    return AdaptiveTareEval(
+      complete: false,
+      ok: false,
+      approx: false,
+      offsetDeg: r.offsetDeg,
+      sigmaDeg: r.sigmaDeg,
+      durationS: durationS,
+    );
+  }
+  if (r.ok) {
+    return AdaptiveTareEval(
+      complete: true,
+      ok: true,
+      approx: false,
+      offsetDeg: r.offsetDeg,
+      sigmaDeg: r.sigmaDeg,
+      durationS: durationS,
+    );
+  }
+  if (durationS >= maxWindowS) {
+    return AdaptiveTareEval(
+      complete: true,
+      ok: false,
+      approx: true,
+      offsetDeg: r.sigmaDeg.isFinite ? r.offsetDeg : 0,
+      sigmaDeg: r.sigmaDeg,
+      durationS: durationS,
+    );
+  }
+  return AdaptiveTareEval(
+    complete: false,
+    ok: false,
+    approx: false,
+    offsetDeg: r.offsetDeg,
+    sigmaDeg: r.sigmaDeg,
+    durationS: durationS,
   );
 }
 

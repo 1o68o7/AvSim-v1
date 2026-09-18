@@ -4,47 +4,44 @@ import 'package:flutter/material.dart';
 
 import '../theme/deck_theme.dart';
 
-/// Cercle 30 s (Stitch 2B HUD).
+/// Anneau de tare adaptative (3–30 s).
 class TareRing extends StatelessWidget {
   const TareRing({
     super.key,
-    required this.elapsedS,
+    required this.progress,
+    required this.caption,
+    this.done = false,
     this.size = 64,
   });
 
-  final int elapsedS;
+  /// 0–1, se remplit jusqu’à 30 s (ou 1.0 dès OK / approx).
+  final double progress;
+  final String caption;
+  final bool done;
   final double size;
 
   @override
   Widget build(BuildContext context) {
-    final p = (elapsedS / 30).clamp(0.0, 1.0);
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CustomPaint(
-        painter: _RingPainter(progress: p),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${elapsedS}s',
-                style: const TextStyle(
-                  color: DeckColors.amber,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                  height: 1,
-                ),
+    final p = progress.clamp(0.0, 1.0);
+    return Semantics(
+      label: 'Tare gîte $caption',
+      value: '${(p * 100).round()} pour cent',
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: CustomPaint(
+          painter: _RingPainter(progress: p),
+          child: Center(
+            child: Text(
+              caption,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: done ? DeckColors.tribord : DeckColors.amber,
+                fontWeight: FontWeight.w700,
+                fontSize: caption.length > 4 ? 8 : 11,
+                height: 1.1,
               ),
-              const Text(
-                '/ 30s',
-                style: TextStyle(
-                  color: DeckColors.label,
-                  fontSize: 8,
-                  height: 1.2,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

@@ -24,7 +24,7 @@ import 'store.dart';
 import 'tare_math.dart';
 import 'tel_cadence.dart';
 
-enum TareStatus { none, running, ok, failed }
+enum TareStatus { none, running, ok, approx, failed }
 
 class LiveHubState {
   const LiveHubState({
@@ -47,6 +47,8 @@ class LiveHubState {
     this.tareOffset,
     this.tareSigma,
     this.tareElapsedS = 0,
+    this.tareQuality,
+    this.tareDurationS,
     this.logging = false,
     this.code,
     this.coachSessionId,
@@ -82,6 +84,8 @@ class LiveHubState {
   final double? tareOffset;
   final double? tareSigma;
   final int tareElapsedS;
+  final String? tareQuality;
+  final double? tareDurationS;
   final bool logging;
   final String? code;
   final String? coachSessionId;
@@ -97,7 +101,11 @@ class LiveHubState {
   final double? cadenceSpm;
   final double? hdgMag;
 
-  bool get tareOk => tareStatus == TareStatus.ok && tareOffset != null;
+  bool get tareOk =>
+      tareOffset != null &&
+      (tareStatus == TareStatus.ok || tareStatus == TareStatus.approx);
+
+  bool get tareWeak => tareStatus == TareStatus.approx;
 
   /// Gîte jsonl : roll écran lissé − offset. + = tribords = gauche écran en bas.
   double? get giteDeg {
@@ -125,6 +133,8 @@ class LiveHubState {
     double? tareOffset,
     double? tareSigma,
     int? tareElapsedS,
+    String? tareQuality,
+    double? tareDurationS,
     bool? logging,
     String? code,
     String? coachSessionId,
@@ -160,6 +170,8 @@ class LiveHubState {
       tareOffset: tareOffset ?? this.tareOffset,
       tareSigma: tareSigma ?? this.tareSigma,
       tareElapsedS: tareElapsedS ?? this.tareElapsedS,
+      tareQuality: tareQuality ?? this.tareQuality,
+      tareDurationS: tareDurationS ?? this.tareDurationS,
       logging: logging ?? this.logging,
       code: code ?? this.code,
       coachSessionId: coachSessionId ?? this.coachSessionId,
@@ -204,7 +216,7 @@ class LiveHub extends Notifier<LiveHubState> {
   ImuFrame? _lastImu;
   DateTime? _lastImuLogAt;
   double? _displayGite;
-  final List<double> _tareWindow = [];
+  final List<TareSample> _tareWindow = [];
   DateTime? _tareStartedAt;
   final TelCadenceDetector _cadence = TelCadenceDetector();
   double? _mx;
@@ -259,7 +271,10 @@ class LiveHub extends Notifier<LiveHubState> {
           );
           final filtered = _heel.filteredDeg;
           if (state.tareStatus == TareStatus.running && filtered != null) {
-            _tareWindow.add(filtered);
+            final t = DateTime.now();
+            _tareWindow.add(TareSample(t: t, rollDeg: filtered));
+            final cut = t.subtract(const Duration(seconds: 32));
+            _tareWindow.removeWhere((s) => s.t.isBefore(cut));
           }
           _maybeLogImu(f);
           if (state.logging) {
@@ -352,6 +367,7 @@ class LiveHub extends Notifier<LiveHubState> {
       ay: imu?.ay,
       az: imu?.az,
     );
+    _maybeCompleteTare();
   }
 
   void _maybeLogImu(ImuFrame f) {
@@ -394,40 +410,48 @@ class LiveHub extends Notifier<LiveHubState> {
           : 'Tare : lecture du niveau IMU…',
     );
     _tareTicker?.cancel();
-    _tareTicker = Timer.periodic(const Duration(seconds: 1), (_) {
-      final start = _tareStartedAt;
-      if (start == null) return;
-      final s = DateTime.now().difference(start).inSeconds;
-      state = state.copyWith(
-        tareElapsedS: s.clamp(0, 30),
-        tareSampleCount: _tareWindow.length,
-      );
-      if (s >= 30) {
-        _finishTare();
-      }
+    _tareTicker = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      _maybeCompleteTare();
     });
   }
 
-  void _finishTare() {
+  void _maybeCompleteTare() {
+    if (state.tareStatus != TareStatus.running) return;
+    final start = _tareStartedAt;
+    if (start == null) return;
+    final now = DateTime.now();
+    final eval = evaluateAdaptiveTare(
+      samples: _tareWindow,
+      startedAt: start,
+      now: now,
+    );
+    final elapsed = eval.durationS.round().clamp(0, 30);
+    if (!eval.complete) {
+      state = state.copyWith(
+        tareElapsedS: elapsed,
+        tareSampleCount: _tareWindow.length,
+        tareSigma: eval.sigmaDeg.isFinite ? eval.sigmaDeg : state.tareSigma,
+      );
+      return;
+    }
+    _applyTare(eval);
+  }
+
+  void _applyTare(AdaptiveTareEval eval) {
     _tareTicker?.cancel();
     _tareTicker = null;
-    final result = computeTare(_tareWindow);
     final n = _tareWindow.length;
-    _tareWindow.clear();
-    if (!result.ok) {
-      _tareRotationDeg = null;
-    }
     state = state.copyWith(
-      tareStatus: result.ok ? TareStatus.ok : TareStatus.failed,
-      tareOffset: result.ok ? result.offsetDeg : state.tareOffset,
-      tareSigma: result.sigmaDeg.isFinite ? result.sigmaDeg : null,
-      tareElapsedS: 30,
+      tareStatus: eval.ok ? TareStatus.ok : TareStatus.approx,
+      tareOffset: eval.offsetDeg,
+      tareSigma: eval.sigmaDeg.isFinite ? eval.sigmaDeg : null,
+      tareElapsedS: eval.durationS.round().clamp(0, 30),
+      tareQuality: eval.quality,
+      tareDurationS: eval.durationS,
       tareSampleCount: n,
-      imuHint: result.ok
-          ? 'Tare OK — zéro = niveau actuel du téléphone (${result.offsetDeg.toStringAsFixed(2)}°)'
-          : (n < 10
-              ? 'Tare refusée : IMU n’a fourni que $n échantillon(s). Le niveau n’est pas enregistré.'
-              : 'Tare refusée : σ ${result.sigmaDeg.toStringAsFixed(2)}° ≥ 0,2° (bateau pas assez calé).'),
+      imuHint: eval.ok
+          ? 'Tare OK — zéro = niveau actuel du téléphone (${eval.offsetDeg.toStringAsFixed(2)}°)'
+          : 'Tare approximative : σ ${eval.sigmaDeg.isFinite ? eval.sigmaDeg.toStringAsFixed(2) : "—"}° ≥ 0,2° (Démarrer autorisé).',
     );
   }
 
@@ -449,6 +473,8 @@ class LiveHub extends Notifier<LiveHubState> {
     final store = SessionStore(id);
     final dir = await store.open(
       tareOffset: state.tareOffset!,
+      tareQuality: state.tareQuality ?? (state.tareWeak ? 'approx' : 'ok'),
+      tareDurationS: state.tareDurationS ?? state.tareElapsedS.toDouble(),
       code: code,
       bassin: boat.bassin,
       classe: boat.classe,
@@ -483,6 +509,9 @@ class LiveHub extends Notifier<LiveHubState> {
         'cox': boat.coxed,
         'role': boat.role.wire,
         'seatIndex': boat.clampedSeat,
+        'tareOffsetDeg': state.tareOffset,
+        'tareQuality': state.tareQuality ?? (state.tareWeak ? 'approx' : 'ok'),
+        'tareDurationS': state.tareDurationS ?? state.tareElapsedS.toDouble(),
       },
     ));
     // Échec HTTP : le logger local continue (fichier + tick 1 Hz).

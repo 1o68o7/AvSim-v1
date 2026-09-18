@@ -115,24 +115,29 @@ class _PortraitTare extends ConsumerWidget {
                   HeelGauge(giteDeg: shown),
                   const SizedBox(height: 8),
                   const Text(
-                    'TOLÉRANCE  σ < 0,2°  ·  30 s  ·  clamp ±15° après tare',
+                    'TOLÉRANCE  σ < 0,2°  ·  3–30 s  ·  clamp ±15° après tare',
                     style: TextStyle(color: DeckColors.label, fontSize: 11),
                   ),
                 ],
               ),
             ),
           ),
-          if (running)
-            LinearProgressIndicator(
-              value: state.tareElapsedS / 30,
-              color: DeckColors.amber,
-              backgroundColor: DeckColors.hairline,
-            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (running || state.tareOk)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Center(
+                      child: TareRing(
+                        progress: _tareProgress(state),
+                        caption: _tareRingCaption(state),
+                        done: state.tareOk,
+                      ),
+                    ),
+                  ),
                 _TareCta(state: state),
                 const SizedBox(height: 8),
                 Text(
@@ -170,6 +175,7 @@ class _LandscapeHud extends ConsumerWidget {
     final chip = switch (state.tareStatus) {
       TareStatus.running => 'ÉTALONNAGE ACTIF',
       TareStatus.ok => 'TARE OK',
+      TareStatus.approx => 'TARE FAIBLE',
       TareStatus.failed => 'RECOMMENCER',
       TareStatus.none => 'TARE NON FAITE',
     };
@@ -317,7 +323,7 @@ class _LandscapeHud extends ConsumerWidget {
                           const SizedBox(height: 8),
                           Expanded(child: HeelGauge(giteDeg: shown)),
                           const Text(
-                            'TRIBORD gauche écran  ·  σ < 0,2°  ·  clamp ±15°',
+                            'TRIBORD gauche écran  ·  σ < 0,2°  ·  3–30 s',
                             style: TextStyle(
                               color: DeckColors.label,
                               fontSize: 9,
@@ -373,7 +379,11 @@ class _LandscapeHud extends ConsumerWidget {
                             ),
                             child: Row(
                               children: [
-                                TareRing(elapsedS: state.tareElapsedS),
+                                TareRing(
+                                  progress: _tareProgress(state),
+                                  caption: _tareRingCaption(state),
+                                  done: state.tareOk,
+                                ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
@@ -382,7 +392,7 @@ class _LandscapeHud extends ConsumerWidget {
                                     children: [
                                       Text(
                                         running
-                                            ? '${((state.tareElapsedS / 30) * 100).round()}%'
+                                            ? '${(_tareProgress(state) * 100).round()}%'
                                             : state.tareOk
                                                 ? '100%'
                                                 : '0%',
@@ -394,7 +404,7 @@ class _LandscapeHud extends ConsumerWidget {
                                         ),
                                       ),
                                       LinearProgressIndicator(
-                                        value: state.tareElapsedS / 30,
+                                        value: _tareProgress(state),
                                         color: DeckColors.amber,
                                         backgroundColor: DeckColors.hairline,
                                         minHeight: 6,
@@ -436,9 +446,11 @@ class _LandscapeHud extends ConsumerWidget {
                                 Text(
                                   _statusLine(state),
                                   style: TextStyle(
-                                    color: state.tareOk
+                                    color: state.tareStatus == TareStatus.ok
                                         ? DeckColors.tribord
-                                        : DeckColors.label,
+                                        : state.tareStatus == TareStatus.approx
+                                            ? DeckColors.amber
+                                            : DeckColors.label,
                                     fontWeight: FontWeight.w800,
                                     fontSize: 16,
                                   ),
@@ -480,10 +492,10 @@ class _TareCta extends ConsumerWidget {
           : () => ref.read(liveHubProvider.notifier).beginTare(),
       child: Text(
         state.tareStatus == TareStatus.failed
-            ? 'RECOMMENCER TARE (30 S)'
+            ? 'RECOMMENCER TARE'
             : running
                 ? 'TARE EN COURS… ${state.tareElapsedS} s'
-                : 'TARE GÎTE (30 S)',
+                : 'TARE GÎTE',
       ),
     );
   }
@@ -570,13 +582,30 @@ class _MiniTelemetry extends StatelessWidget {
   }
 }
 
+double _tareProgress(LiveHubState s) {
+  if (s.tareOk) return 1;
+  if (s.tareStatus != TareStatus.running) return 0;
+  return (s.tareElapsedS / 30).clamp(0.0, 1.0);
+}
+
+String _tareRingCaption(LiveHubState s) {
+  return switch (s.tareStatus) {
+    TareStatus.running => '… stabilise',
+    TareStatus.ok || TareStatus.approx => 'OK',
+    TareStatus.failed => '—',
+    TareStatus.none => 'tare',
+  };
+}
+
 String _statusLine(LiveHubState s) {
   return switch (s.tareStatus) {
     TareStatus.none => 'NON FAITE',
     TareStatus.running =>
-      'EN COURS  ${s.tareElapsedS} s / 30  ·  ${s.tareSampleCount} éch. IMU',
+      'EN COURS  ${s.tareElapsedS} s  ·  ${s.tareSampleCount} éch. IMU  ·  σ < 0,2° sur 3 s',
     TareStatus.ok =>
-      'OK  offset ${s.tareOffset!.toStringAsFixed(2)}°  σ ${s.tareSigma?.toStringAsFixed(3)}°',
+      'OK  offset ${s.tareOffset!.toStringAsFixed(2)}°  σ ${s.tareSigma?.toStringAsFixed(3)}°  ·  ${s.tareDurationS?.toStringAsFixed(1) ?? s.tareElapsedS} s',
+    TareStatus.approx =>
+      'TARE APPROXIMATIVE  offset ${s.tareOffset?.toStringAsFixed(2)}°  σ ${s.tareSigma?.toStringAsFixed(2)}°  ·  Démarrer autorisé',
     TareStatus.failed => 'RECOMMENCER  ${s.imuHint}',
   };
 }

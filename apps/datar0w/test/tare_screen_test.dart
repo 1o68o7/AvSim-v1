@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('TARE GÎTE lance le chrono 30 s', (tester) async {
+  testWidgets('TARE GÎTE lance l’étalonnage adaptatif', (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -15,12 +15,13 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('TARE GÎTE (30 S)'), findsOneWidget);
-    await tester.tap(find.text('TARE GÎTE (30 S)'));
+    expect(find.text('TARE GÎTE'), findsOneWidget);
+    await tester.tap(find.text('TARE GÎTE'));
     await tester.pump();
 
     expect(find.textContaining('EN COURS'), findsWidgets);
     expect(find.textContaining('TARE EN COURS'), findsOneWidget);
+    expect(find.textContaining('stabilise'), findsWidgets);
   });
 
   testWidgets('2B paysage : TRIBORD à gauche, lacet —', (tester) async {
@@ -37,7 +38,7 @@ void main() {
     expect(find.text('TRIBORD'), findsWidgets);
     expect(find.text('BÂBORD'), findsWidgets);
     expect(find.text('LACET (YAW)'), findsOneWidget);
-    expect(find.text('TARE GÎTE (30 S)'), findsOneWidget);
+    expect(find.text('TARE GÎTE'), findsOneWidget);
     final tri = tester.getTopLeft(find.text('TRIBORD').first).dx;
     final ba = tester.getTopLeft(find.text('BÂBORD').first).dx;
     expect(tri < ba, isTrue);

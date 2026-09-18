@@ -231,6 +231,10 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                 label: 'IMU',
                 ok: s.rollDeg != null && s.tareOk,
               ),
+              if (s.tareWeak) ...[
+                const SizedBox(height: 6),
+                const DeckStatusChip(label: 'tare faible', ok: false),
+              ],
               const SizedBox(height: 6),
               DeckStatusChip(label: s.net, ok: s.net != 'hors ligne'),
               const SizedBox(height: 6),
