@@ -13,6 +13,7 @@ Un smartphone = **un hub / une place**. Multi-sièges = plusieurs tél. + `DATAR
 | G | FastAPI `/datarow/*` + client si `DATAROW_API_BASE` (sinon fichier local). HTTP fail ≠ stop logger. |
 | Coach | Join code / dernière séance / séance live API. Écran 5 OSM + notes. Replay import jsonl. |
 | Classes | 1x, 2x, 2-, 4x, 4-, 4+, 8+. Rôle barreur 4+/8+. |
+| I1–I5 | Identité rameur, club, parc, composition — **cadré, pas encore de code.** Voir `docs/CADRAGE-IDENTITE-CLUB-EQUIPAGE.md`. |
 
 ## Un téléphone = un hub = une place
 
@@ -49,6 +50,8 @@ Barreur : **gauche = BÂBORD**, droite = TRIBORD (`réf. barreur`). Cadence = «
 
 Navigation : BARREUR + classe 4+/8+ + tare (Démarrer) → **`/cox`** (`CoxLiveScreen`), **pas** `/live`. Rameur → `/live`. STOP 2× → `/quai`. 2A/2B : « Retour profil » (sauf tare en cours).
 
+**Pendant `/live`, `/cox`, `/coach` : pas de bouton Accueil.** Sortie = STOP 2× → quai. On ne quitte pas un enregistrement par accident.
+
 ## Baro
 
 `sensors_plus` `barometerEventStream` seulement. **Pas** `environment_sensors` (jcenter / AGP 9). Sinon `p_hpa` / `alt_baro` = `null`.
@@ -66,7 +69,7 @@ flutter build apk --debug
 
 APK : `apps/datar0w/build/app/outputs/flutter-apk/app-debug.apk`
 
-SDK : `sdk.dir` dans `android/local.properties` (machine, **non commité**).  
+SDK : `sdk.dir` dans `android/local.properties` (machine, **non committé**).  
 `compileSdk = 37` (permission_handler_android).  
 NDK **30.0.16248370** via Android Studio → SDK Tools (GUI).
 
@@ -75,3 +78,4 @@ Pas de cible `windows/` desktop.
 ## Hors contrat
 
 Watts, η, slip, RTK, 10 Hz, Analyste, micro/caméra, High-Vis cyan, moteur AvSim, couloirs FISA sans GeoJSON.
+Identité licencié / club / parc / composition = lots I1–I5 (à coder, voir cadrage).
