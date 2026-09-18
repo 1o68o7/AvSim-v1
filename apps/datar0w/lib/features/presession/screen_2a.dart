@@ -38,6 +38,7 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
     return DeckScaffold(
       title: 'DATAR0W / 2A  ·  PRÉ-SESSION',
       subtitle: 'Configuration séance',
+      leading: const DeckBackToProfile(),
       body: Column(
         children: [
           Expanded(
@@ -223,10 +224,10 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                       ref.read(boatConfigProvider.notifier).setBassin(v),
                   style: const TextStyle(fontSize: 14),
                   decoration: const InputDecoration(
-                    suffixText: '2 000 m',
-                    suffixStyle: TextStyle(
+                    hintText: 'Nom du plan d’eau',
+                    hintStyle: TextStyle(
                       color: DeckColors.label,
-                      fontSize: 11,
+                      fontSize: 13,
                     ),
                   ),
                 ),
@@ -248,14 +249,21 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: coxNeedsBoat
-                    ? null
-                    : () => context.go(AppRoutes.tare),
-                child: const Text('CONTINUER — TARE GÎTE'),
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextButton(
+                  onPressed: () => context.go(AppRoutes.profile),
+                  child: const Text('Retour profil'),
+                ),
+                const SizedBox(height: 4),
+                FilledButton(
+                  onPressed: coxNeedsBoat
+                      ? null
+                      : () => context.go(AppRoutes.tare),
+                  child: const Text('CONTINUER — TARE GÎTE'),
+                ),
+              ],
             ),
           ),
         ],

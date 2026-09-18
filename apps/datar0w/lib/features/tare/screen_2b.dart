@@ -60,7 +60,8 @@ class _TareScreenState extends ConsumerState<TareScreen> {
   Future<void> _startSession() async {
     final ok = await ref.read(liveHubProvider.notifier).startSession();
     if (!mounted || !ok) return;
-    context.go(AppRoutes.live);
+    final role = ref.read(boatConfigProvider).role;
+    context.go(AppRoutes.afterTare(role));
   }
 }
 
@@ -82,6 +83,7 @@ class _PortraitTare extends ConsumerWidget {
       subtitle: boat.isCox
           ? 'Tare gîte · ${boat.info.code.toUpperCase()} barreur ${boat.coxPosition.wire} · réf. barreur'
           : 'Tare gîte · ${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats} · réf. rameur',
+      leading: running ? null : const DeckBackToProfile(),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -199,44 +201,32 @@ class _LandscapeHud extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
+                    if (!running) ...[
+                      const DeckBackToProfile(compact: true),
+                      const SizedBox(width: 4),
+                    ],
                     Container(
                       width: 8,
                       height: 8,
                       color: DeckColors.amber,
                     ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'DATAROW / 2B · TARE GÎTE',
-                      style: TextStyle(
-                        color: DeckColors.amber,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                      Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    Expanded(
                       child: Text(
                         boat.isCox
-                            ? '${boat.info.code.toUpperCase()} · barreur ${boat.coxPosition.wire}'
-                            : '${boat.info.code.toUpperCase()} · siège ${boat.clampedSeat}/${boat.seats}',
+                            ? 'DATAROW / 2B · TARE GÎTE · ${boat.info.code.toUpperCase()} barreur ${boat.coxPosition.wire} · Bateau à quai, coque calée.'
+                            : 'DATAROW / 2B · TARE GÎTE · ${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats} · Bateau à quai, coque calée.',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: DeckColors.label,
-                          fontSize: 11,
+                          color: DeckColors.amber,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          letterSpacing: 1.2,
                         ),
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: Text('|', style: TextStyle(color: DeckColors.hairline)),
-                    ),
-                    const Expanded(
-                      child: Text(
-                        'Bateau à quai, coque calée. Ne pas bouger.',
-                        style: TextStyle(color: DeckColors.label, fontSize: 11),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
+                    const SizedBox(width: 8),
                     DeckStatusChip(
                       label: chip,
                       ok: state.tareOk,

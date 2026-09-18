@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../router.dart';
 import '../theme/deck_theme.dart';
 import 'deck_widgets.dart';
 
@@ -10,18 +12,24 @@ class DeckScaffold extends StatelessWidget {
     required this.body,
     this.subtitle,
     this.landscapeHint = false,
+    this.leading,
   });
 
   final String title;
   final String? subtitle;
   final Widget body;
   final bool landscapeHint;
+  /// Optionnel — ne pas poser sur le live paysage.
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: DeckColors.bg,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leadingWidth: leading == null ? 0 : 128,
+        leading: leading,
         toolbarHeight: subtitle != null ? 72 : 64,
         title: Column(
           children: [
@@ -61,6 +69,30 @@ class DeckScaffold extends StatelessWidget {
             ),
           Expanded(child: body),
         ],
+      ),
+    );
+  }
+}
+
+class DeckBackToProfile extends StatelessWidget {
+  const DeckBackToProfile({super.key, this.compact = false});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      style: TextButton.styleFrom(
+        visualDensity: VisualDensity.compact,
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      onPressed: () => context.go(AppRoutes.profile),
+      child: Text(
+        'Retour profil',
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: compact ? 10 : 12),
       ),
     );
   }

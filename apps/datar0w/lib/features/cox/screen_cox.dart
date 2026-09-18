@@ -29,19 +29,22 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
   final _stop = DoublePressStop();
   bool _stopArmed = false;
   HeelAlert _lastAlert = HeelAlert.none;
+  LiveHub? _hub;
 
   @override
   void initState() {
     super.initState();
     unawaited(lockRowerLandscape());
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(liveHubProvider.notifier).startCoachPoll();
+      if (!mounted) return;
+      _hub = ref.read(liveHubProvider.notifier);
+      _hub!.startCoachPoll();
     });
   }
 
   @override
   void dispose() {
-    ref.read(liveHubProvider.notifier).stopCoachPoll();
+    _hub?.stopCoachPoll();
     super.dispose();
   }
 

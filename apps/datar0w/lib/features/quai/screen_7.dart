@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../router.dart';
+import '../../session/boat_config.dart';
 import '../../session/live_hub.dart';
 import '../../session/rower_orientation.dart';
 import '../../session/store.dart';
@@ -67,6 +68,9 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
   Widget build(BuildContext context) {
     final s = _summary;
     final sessionTag = _meta?.code ?? _meta?.id ?? '—';
+    final boat = ref.watch(boatConfigProvider);
+    final isCox = _meta?.role == 'cox' || boat.role == CrewRole.cox;
+    final code = _meta?.code?.trim();
     return DeckScaffold(
       title: 'QUAI',
       subtitle: 'SESSION #$sessionTag',
@@ -122,9 +126,18 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
               ),
             ),
             Center(
-              child: DeckStatusChip(
-                label: _chip,
-                alert: _chip.contains('attente'),
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  DeckStatusChip(
+                    label: _chip,
+                    alert: _chip.contains('attente'),
+                  ),
+                  if (isCox)
+                    const DeckStatusChip(label: 'séance barreur', ok: true),
+                ],
               ),
             ),
             const SizedBox(height: 12),
@@ -132,6 +145,13 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
               onPressed: () => context.go(AppRoutes.rowerReplay),
               child: const Text('REPLAY'),
             ),
+            if (code != null && code.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => context.go(AppRoutes.coachReplay),
+                child: const Text('Replay coach'),
+              ),
+            ],
             const SizedBox(height: 8),
             OutlinedButton(
               onPressed: _share,

@@ -47,6 +47,8 @@ Alerte : overlay haut d’écran semi-transparent (bâbord `#E05353` / tribords 
 
 Barreur : **gauche = BÂBORD**, droite = TRIBORD (`réf. barreur`). Cadence = « — » ou estim. tel.
 
+Navigation : BARREUR + classe 4+/8+ + tare (Démarrer) → **`/cox`** (`CoxLiveScreen`), **pas** `/live`. Rameur → `/live`. STOP 2× → `/quai`. 2A/2B : « Retour profil » (sauf tare en cours).
+
 ## Baro
 
 `sensors_plus` `barometerEventStream` seulement. **Pas** `environment_sensors` (jcenter / AGP 9). Sinon `p_hpa` / `alt_baro` = `null`.

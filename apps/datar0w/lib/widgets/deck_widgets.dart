@@ -27,27 +27,31 @@ class DeckStatusChip extends StatelessWidget {
         color: alert ? DeckColors.amber : Colors.transparent,
         border: Border.all(color: border),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            color: alert
-                ? DeckColors.onAlert
-                : (ok ? DeckColors.tribord : DeckColors.hairline),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            label.toUpperCase(),
-            style: TextStyle(
-              fontSize: 9,
-              letterSpacing: 1.4,
-              fontWeight: FontWeight.w700,
-              color: alert ? DeckColors.onAlert : DeckColors.label,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              color: alert
+                  ? DeckColors.onAlert
+                  : (ok ? DeckColors.tribord : DeckColors.hairline),
             ),
-          ),
-        ],
+            const SizedBox(width: 6),
+            Text(
+              label.toUpperCase(),
+              style: TextStyle(
+                fontSize: 9,
+                letterSpacing: 1.4,
+                fontWeight: FontWeight.w700,
+                color: alert ? DeckColors.onAlert : DeckColors.label,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

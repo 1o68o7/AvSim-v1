@@ -9,7 +9,6 @@ import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../session/double_press_stop.dart';
 import '../../session/heel.dart';
-import '../cox/screen_cox.dart';
 import '../../session/live_hub.dart';
 import '../../session/rower_orientation.dart';
 import '../../theme/deck_theme.dart';
@@ -59,10 +58,6 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final boat = ref.watch(boatConfigProvider);
-    if (boat.role == CrewRole.cox) {
-      return const CoxLiveScreen();
-    }
     final s = ref.watch(liveHubProvider);
     final gite = s.displayGiteDeg ?? s.giteDeg;
     final alert =
