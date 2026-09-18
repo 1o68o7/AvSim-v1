@@ -504,11 +504,7 @@ class LiveHub extends Notifier<LiveHubState> {
       id: id,
       code: code,
       meta: {
-        'class': boat.classe,
-        'seats': boat.seats,
-        'cox': boat.coxed,
-        'role': boat.role.wire,
-        'seatIndex': boat.clampedSeat,
+        ...boat.toMetaFields(),
         'tareOffsetDeg': state.tareOffset,
         'tareQuality': state.tareQuality ?? (state.tareWeak ? 'approx' : 'ok'),
         'tareDurationS': state.tareDurationS ?? state.tareElapsedS.toDouble(),

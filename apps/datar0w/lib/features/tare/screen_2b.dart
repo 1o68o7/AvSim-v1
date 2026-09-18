@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router.dart';
+import '../../session/boat_config.dart';
 import '../../session/live_hub.dart';
 import '../../session/rower_orientation.dart';
 import '../../theme/deck_theme.dart';
@@ -70,11 +71,13 @@ class _PortraitTare extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final boat = ref.watch(boatConfigProvider);
     final shown = state.displayGiteDeg ?? 0;
     final running = state.tareStatus == TareStatus.running;
     return DeckScaffold(
       title: 'DATAROW / 2B',
-      subtitle: 'Tare gîte · réf. rameur',
+      subtitle:
+          'Tare gîte · ${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats} · réf. rameur',
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -170,6 +173,7 @@ class _LandscapeHud extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final boat = ref.watch(boatConfigProvider);
     final shown = state.displayGiteDeg ?? 0;
     final running = state.tareStatus == TareStatus.running;
     final chip = switch (state.tareStatus) {
@@ -203,6 +207,16 @@ class _LandscapeHud extends ConsumerWidget {
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
                         letterSpacing: 1.2,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        '${boat.info.code.toUpperCase()} · siège ${boat.clampedSeat}/${boat.seats}',
+                        style: const TextStyle(
+                          color: DeckColors.label,
+                          fontSize: 11,
+                        ),
                       ),
                     ),
                     const Padding(

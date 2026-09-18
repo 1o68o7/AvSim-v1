@@ -14,6 +14,15 @@ Un smartphone = **un hub / une place**. Multi-sièges = plusieurs tél. + `DATAR
 | Coach | Join code / dernière séance / séance live API. Écran 5 OSM + notes. Replay import jsonl. |
 | Classes | 1x, 2x, 2-, 4x, 4-, 4+, 8+. Rôle barreur 4+/8+. |
 
+## Un téléphone = un hub = une place
+
+Le siège n’existe **que** dans la classe choisie (écran 2A : classe, puis siège).
+`boatConfigProvider` porte `class` / `seats` / `cox` / `role` / `seatIndex` de 2A → 2B → live.
+Au Démarrer, les mêmes champs sont écrits dans `meta.json` (persistants pour le replay).
+
+Les autres places du bateau restent **en attente** en local. Avec `DATAROW_API_BASE`, le
+barreur / coach peut **poll** `GET /datarow/live` (Lot G). Un seul tél. ne simule pas 8 IMU.
+
 ## API optionnelle
 
 ```

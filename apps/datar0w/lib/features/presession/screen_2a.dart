@@ -54,7 +54,7 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'CLASSE D’EMBARCATION',
+                  '1 · CLASSE D’EMBARCATION',
                   style: TextStyle(
                     color: DeckColors.label,
                     fontSize: 10,
@@ -91,10 +91,9 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                       ),
                   ],
                 ),
-                if (info.seats > 1) ...[
                   const SizedBox(height: 16),
                   Text(
-                    'SIÈGE  ${cfg.clampedSeat} / ${info.seats}  ·  1 = NAGE',
+                    '2 · SIÈGE DANS ${info.code.toUpperCase()}  ·  ${cfg.clampedSeat} / ${info.seats}  ·  1 = NAGE',
                     style: const TextStyle(
                       color: DeckColors.label,
                       fontSize: 10,
@@ -104,26 +103,28 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
+                    runSpacing: 8,
                     children: [
                       for (var i = 1; i <= info.seats; i++)
                         ChoiceChip(
-                          label: Text('$i'),
+                          label: Text(i == 1 ? '$i nage' : '$i'),
                           selected: cfg.clampedSeat == i,
                           onSelected: (_) =>
                               ref.read(boatConfigProvider.notifier).setSeat(i),
                         ),
                     ],
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
                     child: Text(
-                      'Un smartphone = un hub / une place. '
-                      'Les autres sièges : en attente (API) ou ignorés (local). '
-                      'Pas de jauge par siège tant qu’il n’y a qu’un tél.',
-                      style: TextStyle(color: DeckColors.label, fontSize: 11),
+                      cfg.waitingSeats.isEmpty
+                          ? 'Un smartphone = un hub / une place (${info.code}).'
+                          : 'Ce tél. = siège ${cfg.clampedSeat}. '
+                              'Autres places (${cfg.waitingSeats.join(', ')}) : '
+                              'en attente (local) ou poll API (Lot G).',
+                      style: const TextStyle(color: DeckColors.label, fontSize: 11),
                     ),
                   ),
-                ],
                 if (coxNeedsBoat)
                   const Padding(
                     padding: EdgeInsets.only(top: 12),

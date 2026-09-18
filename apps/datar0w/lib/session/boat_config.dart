@@ -22,13 +22,29 @@ class BoatConfig {
 
   bool get coxed => info.coxed;
 
-  /// 1 = stroke / nage.
+  /// 1 = stroke / nage. Indéfini pour le barreur (siège rameur).
   int get clampedSeat {
     final n = seats;
     if (seatIndex < 1) return 1;
     if (seatIndex > n) return n;
     return seatIndex;
   }
+
+  /// Sièges du bateau non occupés par ce téléphone (local / poll API).
+  List<int> get waitingSeats {
+    if (role != CrewRole.rower) {
+      return [for (var i = 1; i <= seats; i++) i];
+    }
+    return [for (var i = 1; i <= seats; i++) if (i != clampedSeat) i];
+  }
+
+  Map<String, dynamic> toMetaFields() => {
+        'class': classe,
+        'seats': seats,
+        'cox': coxed,
+        'role': role.wire,
+        'seatIndex': clampedSeat,
+      };
 
   BoatConfig copyWith({
     String? classe,
