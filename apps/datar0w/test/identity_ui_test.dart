@@ -1,3 +1,4 @@
+import 'package:datar0w/features/identity/screen_club.dart';
 import 'package:datar0w/features/identity/screen_who.dart';
 import 'package:datar0w/identity/controller.dart';
 import 'package:datar0w/identity/models.dart';
@@ -46,5 +47,17 @@ void main() {
     );
     await tester.pump();
     expect(find.text('Camille Test'), findsOneWidget);
+  });
+
+  testWidgets('club : pas de + Ajouter hors coach', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [identityStoreOverride()],
+        child: const MaterialApp(home: ClubScreen()),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('+ Ajouter'), findsNothing);
+    expect(find.text('ENREGISTRER LE CLUB'), findsNothing);
   });
 }

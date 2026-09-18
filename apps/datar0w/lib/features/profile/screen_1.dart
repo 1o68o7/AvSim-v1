@@ -42,6 +42,11 @@ class ProfileScreen extends ConsumerWidget {
               onPressed: () => context.go(AppRoutes.identity),
               child: const Text('Choisir un rameur'),
             ),
+          if (rower == null || rower.level != RowerLevel.loisir)
+            TextButton(
+              onPressed: () => context.go(AppRoutes.club),
+              child: const Text('Mon club'),
+            ),
           const SizedBox(height: 8),
           const Text(
             'SÉLECTION PROFIL',

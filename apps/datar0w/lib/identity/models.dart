@@ -226,6 +226,15 @@ class Club {
         createdAt: DateTime.parse(j['createdAt'] as String),
       );
 
+  Club copyWith({String? name, String? shortCode, bool clearCode = false}) {
+    return Club(
+      id: id,
+      name: name ?? this.name,
+      shortCode: clearCode ? null : (shortCode ?? this.shortCode),
+      createdAt: createdAt,
+    );
+  }
+
   static Club create({required String name, String? shortCode}) {
     return Club(
       id: newIdentityId(),
@@ -258,6 +267,25 @@ class ParkBoat {
   final BoatParkStatus status;
 
   BoatClassInfo get info => BoatClassInfo.of(classe);
+
+  ParkBoat copyWith({
+    String? name,
+    String? classe,
+    List<String>? oarRack,
+    BoatParkStatus? status,
+  }) {
+    final info = BoatClassInfo.of(classe ?? this.classe);
+    return ParkBoat(
+      id: id,
+      clubId: clubId,
+      name: name ?? this.name,
+      classe: info.code,
+      seats: info.seats,
+      cox: info.coxed,
+      oarRack: oarRack ?? this.oarRack,
+      status: status ?? this.status,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
