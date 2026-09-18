@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DATAR0W — Coach Live</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            deck: {
+              bg: '#0B0E12',
+              card: '#0B0E12',
+              border: '#2A2F36',
+              borderSubtle: '#1C2026',
+              amber: '#E8C547',
+              muted: '#9AA0A6',
+              green: '#00E676',
+              red: '#FF5252',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 844px;
+      height: 390px;
+      min-width: 844px;
+      min-height: 390px;
+      max-width: 844px;
+      max-height: 390px;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #0B0E12;
+      color: #FFFFFF;
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+      -webkit-font-smoothing: antialiased;
+    }
+    .grid-tactical {
+      background-size: 26px 26px;
+      background-image: 
+        linear-gradient(to right, rgba(42, 47, 54, 0.28) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(42, 47, 54, 0.28) 1px, transparent 1px);
+    }
+  </style>
+</head>
+<body class="w-[844px] h-[390px] flex flex-col select-none overflow-hidden bg-[#0B0E12]">
+<!-- TOP BAR (32px HEIGHT STRICT) -->
+<header class="h-[32px] min-h-[32px] max-h-[32px] bg-[#0B0E12] border-b border-[#2A2F36] px-4 flex items-center justify-between shrink-0">
+<div class="flex items-center gap-2">
+<span class="text-[#E8C547] font-bold text-xs tracking-wider">DATAR0W</span>
+<span class="text-[#9AA0A6] text-xs">/</span>
+<span class="text-white text-xs font-semibold tracking-wide">COACH LIVE</span>
+<span class="ml-2 px-1.5 py-0.5 rounded border border-[#E8C547]/40 text-[#E8C547] text-[9px] font-bold tracking-widest uppercase">PROFIL COACH</span>
+</div>
+<div class="flex items-center gap-3">
+<!-- LIVE 4G Pill -->
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#111418] border border-[#2A2F36]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#00E676] animate-pulse"></span>
+<span class="text-[#00E676] text-[10px] font-bold tracking-wider">LIVE 4G</span>
+</div>
+<div class="flex items-center gap-1 px-2 py-0.5 rounded bg-[#111418] border border-[#2A2F36] text-[#9AA0A6] text-[10px]">
+<span>SKIFF 1X #04</span>
+</div>
+<span class="text-[#9AA0A6] text-[10px] font-mono">10:42:18</span>
+</div>
+</header>
+<!-- MAIN BODY (358px HEIGHT STRICT, 60% LEFT / 40% RIGHT) -->
+<main class="w-[844px] h-[358px] flex flex-row overflow-hidden">
+<!-- LEFT COLUMN (60% = 506.4px): VRAIE CARTE VECTORIELLE BORDEAUX LAC -->
+<section class="w-[506.4px] h-full relative bg-[#0B0E12] border-r border-[#2A2F36] flex flex-col justify-between overflow-hidden">
+<!-- Tactical grid overlay -->
+<div class="absolute inset-0 grid-tactical pointer-events-none opacity-60"></div>
+<!-- Top HUD indicators on map -->
+<div class="relative z-10 p-2 flex justify-between items-start pointer-events-none">
+<!-- North Up / Compass indicator -->
+<div class="flex items-center gap-1.5 px-2 py-0.5 bg-[#0B0E12]/90 border border-[#2A2F36] rounded text-[10px]">
+<span class="text-[#E8C547] font-bold">▲ N</span>
+<span class="text-[#9AA0A6] tracking-wide">NORD EN HAUT</span>
+</div>
+<!-- Bassin name & Scale indicators -->
+<div class="flex items-center gap-1.5">
+<div class="px-2 py-0.5 bg-[#0B0E12]/90 border border-[#2A2F36] rounded text-[9px] text-[#9AA0A6]">
+      BORDEAUX LAC · CENTRE RÉGIONAL D'AVIRON
+    </div>
+<div class="flex items-center gap-1 px-2 py-0.5 bg-[#0B0E12]/90 border border-[#2A2F36] rounded text-[9px] text-[#E8C547]">
+<span class="inline-block w-4 h-0.5 bg-[#E8C547] align-middle"></span>
+<span>200m</span>
+</div>
+</div>
+</div>
+<!-- Realistic Vector SVG Map of Bordeaux Lac (Lake contour, Albano regatta course & GPS) -->
+<div class="absolute inset-0 overflow-hidden pointer-events-none"><div class="absolute inset-0 bg-[#090D12]"><img alt="OSM Tile Base" class="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity filter contrast-125 brightness-75" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUSVdujvNu3sQd7CjKMz3JJbEQmgRbpYn6v-MEFabQugmh_hjOrH5zTxYTS0f-fXKjKrX2WBask76lf8bs42Wxb1Z2Ym2VdMPcIkWVrHvVCXli2z_p4n3IKWV0hgTVKm2f1U1JcTkzKNB-KCWoSfbf_BLI8RWfNm_grDNecseh9hZBJI-ifwVb4P2iUNvmINVk-cowcXotXAYlbITAVIH52Y65-vWd-6yYVgLe7a9VLZ0qm5ThEK6Z" style="display:none;"/><div class="absolute inset-0" style="background-image: radial-gradient(circle at 54% 50%, #152232 0%, #0c141c 45%, #080c10 85%);"></div><svg class="absolute inset-0 w-full h-full opacity-40" xmlns="http://www.w3.org/2000/svg"><pattern height="28" id="osm-grid" patternunits="userSpaceOnUse" width="28"><path d="M 28 0 L 0 0 0 28" fill="none" stroke="#232b35" stroke-width="0.6"></path></pattern><rect fill="url(#osm-grid)" height="100%" width="100%"></rect></svg></div><svg class="absolute inset-0 w-full h-full pointer-events-none" fill="none" viewbox="0 0 506 358" xmlns="http://www.w3.org/2000/svg"><defs><lineargradient id="waterSurface" x1="0%" x2="100%" y1="0%" y2="100%"><stop offset="0%" stop-color="#111c29" stop-opacity="0.95"></stop><stop offset="50%" stop-color="#0e1722" stop-opacity="0.98"></stop><stop offset="100%" stop-color="#091018" stop-opacity="1"></stop></lineargradient><filter height="160%" id="glowGreen" width="160%" x="-30%" y="-30%"><fedropshadow dx="0" dy="0" flood-color="#00E676" flood-opacity="0.7" stddeviation="3"></fedropshadow></filter></defs><path d="M 42 28 C 76 24, 134 26, 178 30 C 235 34, 280 32, 348 38 C 392 42, 428 58, 444 86 C 458 112, 452 144, 436 174 C 424 198, 408 226, 400 258 C 394 282, 396 308, 380 326 C 364 344, 332 348, 298 344 C 268 340, 246 324, 234 302 C 224 284, 222 262, 218 242 C 214 222, 202 210, 186 202 C 168 194, 146 198, 128 206 C 104 216, 88 234, 72 254 C 54 274, 36 276, 24 260 C 12 244, 16 218, 26 194 C 34 174, 44 156, 48 132 C 54 104, 52 78, 48 54 C 44 38, 34 30, 42 28 Z" fill="url(#waterSurface)" stroke="#263342" stroke-width="1.5"></path><path d="M 0 162 Q 18 165 42 168 Q 120 182 208 202 Q 330 234 506 244" fill="none" opacity="0.5" stroke="#1f2a36" stroke-dasharray="4 4" stroke-width="2.5"></path><text fill="#3f4b59" font-family="'JetBrains Mono', monospace" font-size="6.5" font-weight="600" letter-spacing="0.05em" x="16" y="156">BD JACQUES CHABAN-DELMAS</text><path d="M 0 32 Q 95 34 185 36 Q 320 38 506 46" fill="none" opacity="0.6" stroke="#253342" stroke-width="2"></path><text fill="#424f5e" font-family="'JetBrains Mono', monospace" font-size="6.5" font-weight="600" letter-spacing="0.05em" x="348" y="32">PONT DE CRACOVIE / ROCADE NORD (A630)</text><path d="M 48 248 C 65 240, 85 245, 96 260" fill="none" stroke="#384756" stroke-dasharray="2 2" stroke-width="2"></path><rect fill="#0d141e" fill-opacity="0.55" height="264" stroke="#222f3d" stroke-width="1" width="92" x="234" y="46"></rect><line stroke="#263442" stroke-dasharray="2 4" stroke-width="1" x1="234" x2="234" y1="46" y2="310"></line><line stroke="#1c2834" stroke-width="1" x1="249" x2="249" y1="46" y2="310"></line><line stroke="#1c2834" stroke-width="1" x1="264" x2="264" y1="46" y2="310"></line><line stroke="#3b4856" stroke-width="1.4" x1="280" x2="280" y1="46" y2="310"></line><line stroke="#1c2834" stroke-width="1" x1="296" x2="296" y1="46" y2="310"></line><line stroke="#1c2834" stroke-width="1" x1="311" x2="311" y1="46" y2="310"></line><line stroke="#263442" stroke-dasharray="2 4" stroke-width="1" x1="326" x2="326" y1="46" y2="310"></line><text fill="#4b5563" font-family="'JetBrains Mono', monospace" font-size="7.5" x="237" y="58">C1</text><text fill="#4b5563" font-family="'JetBrains Mono', monospace" font-size="7.5" x="252" y="58">C2</text><text fill="#4b5563" font-family="'JetBrains Mono', monospace" font-size="7.5" x="267" y="58">C3</text><text fill="#E8C547" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="700" x="273" y="58">C4 LIVE</text><text fill="#4b5563" font-family="'JetBrains Mono', monospace" font-size="7.5" x="300" y="58">C5</text><text fill="#4b5563" font-family="'JetBrains Mono', monospace" font-size="7.5" x="315" y="58">C6</text><line stroke="#FF5252" stroke-dasharray="3 3" stroke-opacity="0.9" stroke-width="1.2" x1="228" x2="332" y1="304" y2="304"></line><text fill="#FF5252" font-family="'JetBrains Mono', monospace" font-size="8" font-weight="600" x="336" y="307">0M (DÉPART)</text><circle cx="234" cy="304" fill="#FF5252" r="1.5"></circle><circle cx="280" cy="304" fill="#FF5252" r="1.5"></circle><circle cx="326" cy="304" fill="#FF5252" r="1.5"></circle><line stroke="#2b3542" stroke-dasharray="2 4" stroke-width="1" x1="234" x2="326" y1="242" y2="242"></line><text fill="#6b7280" font-family="'JetBrains Mono', monospace" font-size="7.5" x="336" y="245">500M</text><circle cx="249" cy="242" fill="#E8C547" opacity="0.6" r="1"></circle><circle cx="280" cy="242" fill="#E8C547" opacity="0.6" r="1"></circle><circle cx="311" cy="242" fill="#E8C547" opacity="0.6" r="1"></circle><line stroke="#2b3542" stroke-dasharray="2 4" stroke-width="1" x1="234" x2="326" y1="180" y2="180"></line><text fill="#6b7280" font-family="'JetBrains Mono', monospace" font-size="7.5" x="336" y="183">1000M</text><circle cx="249" cy="180" fill="#E8C547" opacity="0.6" r="1"></circle><circle cx="280" cy="180" fill="#E8C547" opacity="0.6" r="1"></circle><circle cx="311" cy="180" fill="#E8C547" opacity="0.6" r="1"></circle><line stroke="#2b3542" stroke-dasharray="2 4" stroke-width="1" x1="234" x2="326" y1="118" y2="118"></line><text fill="#6b7280" font-family="'JetBrains Mono', monospace" font-size="7.5" x="336" y="121">1500M</text><circle cx="249" cy="118" fill="#E8C547" opacity="0.6" r="1"></circle><circle cx="280" cy="118" fill="#E8C547" opacity="0.6" r="1"></circle><circle cx="311" cy="118" fill="#E8C547" opacity="0.6" r="1"></circle><line stroke="#00E676" stroke-dasharray="3 3" stroke-opacity="0.9" stroke-width="1.2" x1="228" x2="332" y1="56" y2="56"></line><text fill="#00E676" font-family="'JetBrains Mono', monospace" font-size="8" font-weight="600" x="336" y="59">2000M (ARRIVÉE)</text><circle cx="234" cy="56" fill="#00E676" r="1.5"></circle><circle cx="280" cy="56" fill="#00E676" r="1.5"></circle><circle cx="326" cy="56" fill="#00E676" r="1.5"></circle><path d="M 280 304 L 279 276 L 281 248 L 278 216 L 282 188 L 279 164 L 280 148" stroke="#E8C547" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path><circle cx="279" cy="276" fill="#E8C547" opacity="0.6" r="1.6"></circle><circle cx="281" cy="248" fill="#E8C547" opacity="0.7" r="1.8"></circle><circle cx="278" cy="216" fill="#E8C547" opacity="0.8" r="2"></circle><circle cx="282" cy="188" fill="#E8C547" opacity="0.85" r="2.2"></circle><circle cx="279" cy="164" fill="#E8C547" opacity="0.9" r="2.2"></circle><g transform="translate(280, 148)"><circle cx="0" cy="0" fill="#00E676" fill-opacity="0.12" r="14" stroke="#00E676" stroke-opacity="0.4" stroke-width="1"><animate attributename="r" dur="2.2s" repeatcount="indefinite" values="9;16;9"></animate><animate attributename="stroke-opacity" dur="2.2s" repeatcount="indefinite" values="0.6;0.1;0.6"></animate></circle><circle cx="0" cy="0" fill="#00E676" filter="url(#glowGreen)" r="4.5" stroke="#0B0E12" stroke-width="1.5"></circle><line stroke="#00E676" stroke-linecap="round" stroke-width="2.2" x1="0" x2="0" y1="0" y2="-22"></line><polygon fill="#00E676" points="0,-26 -4,-20 4,-20"></polygon><line opacity="0.6" stroke="#00E676" stroke-width="1" x1="-8" x2="-5" y1="0" y2="0"></line><line opacity="0.6" stroke="#00E676" stroke-width="1" x1="5" x2="8" y1="0" y2="0"></line></g><text fill="#4a5563" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="600" letter-spacing="0.08em" x="60" y="88">PLAGE DU LAC</text><text fill="#4a5563" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="600" letter-spacing="0.08em" x="300" y="330">BASE D'AVIRON / SUD</text><text fill="#4a5563" font-family="'JetBrains Mono', monospace" font-size="7.5" font-weight="600" letter-spacing="0.08em" x="345" y="86">PARC DES EXPOSITIONS</text><text fill="#424f5c" font-family="'JetBrains Mono', monospace" font-size="7" letter-spacing="0.05em" x="64" y="190">VOILE &amp; NAUTISME</text><text fill="#424d59" font-family="'JetBrains Mono', monospace" font-size="6.5" font-weight="400" letter-spacing="0.02em" x="8" y="336">© OpenStreetMap contributors · Dark Matter</text></svg></div>
+<!-- Bottom GPS and Course Coordinates Bar -->
+<div class="relative z-10 px-3 py-1.5 bg-[#0B0E12]/95 border-t border-[#2A2F36] flex items-center justify-between text-[10px] text-[#9AA0A6]">
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1.5">
+<span class="w-2.5 h-0.5 bg-[#E8C547]"></span>
+<span>TRACE GPS</span>
+</span>
+<span class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#00E676]"></span>
+<span>SKIFF LIVE (C4)</span>
+</span>
+</div>
+<div class="text-[10px]">COORD : <span class="text-white font-mono">44.8906° N, 0.5748° W</span></div>
+</div>
+</section>
+<!-- RIGHT COLUMN (40% = 337.6px): TELEMETRY SUMMARY & ACTIONS -->
+<section class="w-[337.6px] h-full bg-[#0B0E12] flex flex-col justify-between p-3 shrink-0">
+<!-- 1. Header row with chips -->
+<div class="flex items-center justify-between pb-2 border-b border-[#2A2F36]">
+<div class="flex items-center gap-2">
+<!-- Chip [● LIVE] -->
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#111418] border border-[#2A2F36] text-[10px] font-bold text-[#00E676]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#00E676]"></span>
+<span>LIVE</span>
+</div>
+<!-- Chip [RÉF. RAMEUR] -->
+<div class="px-2 py-0.5 rounded bg-[#111418] border border-[#2A2F36] text-[10px] font-medium text-[#9AA0A6]">
+            RÉF. RAMEUR
+          </div>
+</div>
+<div class="text-[10px] text-[#9AA0A6]">
+          DIST: <strong class="text-white font-mono">1.24 km</strong>
+</div>
+</div>
+<!-- 2. Telemetry Grid (Cadence + Vitesse sol) -->
+<div class="grid grid-cols-2 gap-2 my-1">
+<!-- Box 1: CADENCE -->
+<div class="p-2.5 bg-[#111418] border border-[#2A2F36] rounded">
+<div class="text-[10px] font-medium text-[#9AA0A6] tracking-wider mb-1">CADENCE</div>
+<div class="flex items-baseline gap-1.5">
+<span class="text-3xl font-bold text-white tracking-tight leading-none">28</span>
+<span class="text-[10px] font-semibold text-[#E8C547]">SPM</span>
+</div>
+<div class="text-[9px] text-[#9AA0A6] mt-1 tracking-wider">COUP/MIN</div>
+</div>
+<!-- Box 2: V. SOL (GPS) -->
+<div class="p-2.5 bg-[#111418] border border-[#2A2F36] rounded">
+<div class="text-[10px] font-medium text-[#9AA0A6] tracking-wider mb-1">V. SOL (GPS)</div>
+<div class="flex items-baseline gap-1.5">
+<span class="text-3xl font-bold text-white tracking-tight leading-none">4.2</span>
+<span class="text-[10px] font-semibold text-[#9AA0A6]">m/s</span>
+</div>
+<div class="text-[9px] text-[#9AA0A6] mt-1 tracking-wider">SOL — PAS EAU</div>
+</div>
+</div>
+<!-- 3. Inclinometer / Heel section -->
+<div class="p-2.5 bg-[#111418] border border-[#2A2F36] rounded flex flex-col gap-1.5 my-1">
+<div class="flex items-center justify-between text-[10px]">
+<span class="text-[#9AA0A6] font-medium tracking-wider">GÎTE INSTANTANÉE</span>
+<span class="px-1.5 py-0.5 rounded bg-[#00E676]/15 text-[#00E676] text-[9px] font-bold border border-[#00E676]/30">
+            TRIBORD
+          </span>
+</div>
+<div class="flex items-baseline justify-between">
+<div class="flex items-baseline gap-1.5">
+<span class="text-2xl font-bold text-[#00E676] leading-none">+1.4°</span>
+<span class="text-[10px] font-semibold text-[#00E676]">TRIBORD</span>
+</div>
+<span class="text-[9px] text-[#9AA0A6] font-mono">TOLÉRANCE ±0.5°</span>
+</div>
+<!-- Micro bar indicator -->
+<div class="mt-0.5">
+<div class="flex justify-between text-[8px] text-[#9AA0A6] mb-1">
+<span class="text-[#FF5252]">BÂBORD (-10°)</span>
+<span>0.0°</span>
+<span class="text-[#00E676]">TRIBORD (+10°)</span>
+</div>
+<div class="w-full h-1.5 bg-[#1C2026] rounded-full relative flex items-center">
+<!-- Zero marker -->
+<div class="absolute left-1/2 w-0.5 h-2.5 bg-[#9AA0A6] -translate-x-1/2"></div>
+<!-- Indicator pip (slightly to the right for +1.4° tribord) -->
+<div class="absolute left-[57%] w-2 h-2 rounded-full bg-[#00E676] shadow-[0_0_6px_#00E676] -translate-x-1/2"></div>
+</div>
+</div>
+</div>
+<!-- 4. Action button at bottom: ANNOTER -->
+<div class="pt-1">
+<button class="w-full py-2 flex items-center justify-center gap-2 rounded border-[1.5px] border-[#E8C547] bg-transparent text-[#E8C547] hover:bg-[#E8C547]/10 active:bg-[#E8C547]/20 transition-colors font-mono font-bold text-xs tracking-wider uppercase cursor-pointer" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>ANNOTER</span>
+</button>
+</div>
+</section>
+</main>
+</body></html>

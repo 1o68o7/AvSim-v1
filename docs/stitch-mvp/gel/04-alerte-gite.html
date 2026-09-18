@@ -1,0 +1,181 @@
+<!DOCTYPE html><html class="dark" lang="fr"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>DataR0w — Écran 3 : Rameur Live (Paysage)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet">
+<style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0B0E12;
+      color: #FFFFFF;
+      font-family: 'JetBrains Mono', monospace;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    .tabular {
+      font-feature-settings: "tnum" 1, "zero" 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .border-cockpit {
+      border-color: #2A2F36;
+    }
+    .text-dim {
+      color: #9AA0A6;
+    }
+  </style>
+</head>
+<body class="bg-[#0B0E12] text-white flex items-center justify-center p-0 m-0 w-full h-full">
+<!-- Container fixe strict 844x390 Paysage (1x Skiff Cale-pied) -->
+<main class="w-[844px] h-[390px] max-w-[844px] max-h-[390px] bg-[#0B0E12] flex flex-col relative overflow-hidden border border-[#1A1F26]">
+<!-- Bandeau Alerte Gîte Haut 36px -->
+<div class="w-full h-[36px] bg-[#00E676] text-black font-bold text-[13px] tracking-[0.15em] uppercase flex items-center justify-center px-4 shrink-0">
+<span class="">GÎTE — TROP TRIBORD</span>
+</div>
+<!-- Conteneur 3 colonnes instruments (hauteur restante: 354px) -->
+<div class="w-full h-[354px] flex flex-row flex-1">
+<!-- COLONNE GAUCHE (~42% -> 355px) : VITESSE / CADENCE / DISTANCE -->
+<section class="w-[355px] h-full flex flex-col justify-between p-4 border-r border-[#2A2F36]">
+<!-- Cadence (28 coups/min) -->
+<div class="flex flex-col">
+<div class="flex items-baseline gap-2">
+<span class="text-[76px] leading-[0.85] font-extrabold tracking-tight tabular text-white">27</span>
+<span class="text-[14px] font-bold text-white tracking-wider uppercase">coups/min</span>
+</div>
+</div>
+<!-- Séparateur hairline cockpit -->
+<div class="w-full h-px bg-[#2A2F36] my-1"></div>
+<!-- Vitesse sol (4.2 m/s sol — pas eau) -->
+<div class="flex flex-col">
+<div class="flex items-baseline gap-3">
+<span class="text-[64px] leading-[0.88] font-extrabold tracking-tight tabular text-white">3.9</span>
+<div class="flex flex-col justify-center">
+<span class="text-[15px] font-bold text-white leading-tight">m/s</span>
+<span class="text-[11px] font-medium text-dim tracking-wide whitespace-nowrap mt-0.5">sol — pas eau</span>
+</div>
+</div>
+</div>
+<!-- Séparateur hairline cockpit -->
+<div class="w-full h-px bg-[#2A2F36] my-1"></div>
+<!-- Distance (1.24 km) -->
+<div class="flex items-baseline justify-between pb-1">
+<div class="flex items-baseline gap-2">
+<span class="text-[44px] leading-none font-bold tracking-tight tabular text-white">1.38</span>
+<span class="text-[14px] font-bold text-dim tracking-wider uppercase">km</span>
+</div>
+<div class="text-[11px] text-dim tracking-wider uppercase">
+            SKF·1X // LIVE
+          </div>
+</div>
+</section>
+<!-- COLONNE CENTRE (~38% -> 320px) : HORIZON ARTIFICIEL GÎTE -->
+<section class="w-[320px] h-full flex flex-col justify-between p-4 border-r border-[#2A2F36]">
+<!-- Titre obligatoire strict: GÎTE -->
+<div class="flex items-center justify-between">
+<h2 class="text-[13px] font-bold tracking-[0.2em] text-dim uppercase">GÎTE</h2>
+<span class="text-[11px] font-mono text-dim tracking-widest">TOLÉRANCE ±3.0°</span>
+</div>
+<!-- Horizon artificiel / Aircraft-style heel gauge (flat line art) -->
+<div class="flex-1 flex items-center justify-center relative my-1">
+<svg class="w-full h-full max-h-[170px]" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg">
+<!-- Fond repère de visée -->
+<rect fill="#0B0E12" height="180" width="280" x="0" y="0"></rect>
+<!-- Ligne d'eau référence zéro fixe (pointillée discrète) -->
+<line stroke="#1F252E" stroke-dasharray="3,3" stroke-width="1" x1="20" x2="260" y1="90" y2="90"></line>
+<!-- Graduations de l'arc de gîte (Rayon 105, Centre 140, 120) -->
+<path d="M 118 36 A 105 105 0 0 1 162 36" fill="none" stroke="#2A2F36" stroke-linecap="round" stroke-width="6"></path>
+<path d="M 129 32 A 105 105 0 0 1 151 32" fill="none" stroke="#38404A" stroke-width="3"></path>
+<!-- Ticks angulaires -->
+<line stroke="#FFFFFF" stroke-width="2" x1="140" x2="140" y1="20" y2="35"></line>
+<text fill="#9AA0A6" font-family="'JetBrains Mono'" font-size="9" font-weight="600" text-anchor="middle" x="140" y="15">0°</text>
+<line stroke="#9AA0A6" stroke-width="1.5" x1="129" x2="132" y1="27" y2="38"></line>
+<line stroke="#9AA0A6" stroke-width="1.5" x1="151" x2="148" y1="27" y2="38"></line>
+<line stroke="#4B535E" stroke-width="1.5" x1="104" x2="110" y1="36" y2="46"></line>
+<text fill="#4B535E" font-family="'JetBrains Mono'" font-size="8" text-anchor="middle" x="96" y="38">10</text>
+<line stroke="#4B535E" stroke-width="1.5" x1="176" x2="170" y1="36" y2="46"></line>
+<text fill="#4B535E" font-family="'JetBrains Mono'" font-size="8" text-anchor="middle" x="184" y="38">10</text>
+<!-- Repère Bâbord / Tribord -->
+<text fill="#4B535E" font-family="'JetBrains Mono'" font-size="10" font-weight="700" letter-spacing="1" x="35" y="148">BÂBORD</text>
+<text fill="#4B535E" font-family="'JetBrains Mono'" font-size="10" font-weight="700" letter-spacing="1" text-anchor="end" x="245" y="148">TRIBORD</text>
+<!-- Aiguille & Horizon mobile incliné à +1.4° -->
+<g transform="rotate(4.8, 140, 95)">
+<line stroke="#FFFFFF" stroke-linecap="square" stroke-width="2.5" x1="40" x2="105" y1="95" y2="95"></line>
+<line stroke="#FFFFFF" stroke-linecap="square" stroke-width="2.5" x1="175" x2="240" y1="95" y2="95"></line>
+<polygon fill="#FFFFFF" points="140,32 135,60 145,60"></polygon>
+<line stroke="#FFFFFF" stroke-width="2" x1="140" x2="140" y1="55" y2="95"></line>
+<circle cx="140" cy="95" fill="#0B0E12" r="4.5" stroke="#FFFFFF" stroke-width="2"></circle>
+</g>
+<!-- Réticule central fixe du bateau -->
+<circle cx="140" cy="95" fill="none" r="8" stroke="#2A2F36" stroke-width="1.5"></circle>
+<line stroke="#9AA0A6" stroke-width="2" x1="120" x2="128" y1="95" y2="95"></line>
+<line stroke="#9AA0A6" stroke-width="2" x1="152" x2="160" y1="95" y2="95"></line>
+<circle cx="140" cy="95" fill="#FFFFFF" r="2"></circle>
+</svg>
+</div>
+<!-- Readout géant +1.4° tribords -->
+<div class="flex items-baseline justify-between pt-1 border-t border-[#2A2F36]">
+<div class="flex items-baseline gap-1">
+<span class="text-[44px] leading-none font-bold tracking-tight tabular text-[#00E676]">+4.8°</span>
+</div>
+<span class="text-[14px] font-bold text-white tracking-widest uppercase">TRIBORD</span>
+</div>
+</section>
+<!-- COLONNE DROITE (~20% -> 169px) : STATUTS MINIMAUX & STOP -->
+<section class="w-[169px] h-full flex flex-col justify-between p-4 bg-[#0B0E12]">
+<!-- Pastilles capteurs minimales -->
+<div class="flex flex-col gap-3.5">
+<!-- GPS / IMU statut -->
+<div class="flex items-center justify-between pr-1">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-[#00E676] inline-block"></span>
+<span class="text-[13px] font-bold tracking-wider text-white">GPS</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-[#00E676] inline-block"></span>
+<span class="text-[13px] font-bold tracking-wider text-white">IMU</span>
+</div>
+</div>
+<div class="w-full h-px bg-[#2A2F36]"></div>
+<!-- Réseau 4G + signal bars SVG -->
+<div class="flex items-center justify-between">
+<span class="text-[14px] font-bold tracking-wider text-white">4G</span>
+<div class="flex items-end gap-1 h-3.5">
+<span class="w-1 h-1.5 bg-white"></span>
+<span class="w-1 h-2 bg-white"></span>
+<span class="w-1 h-2.5 bg-white"></span>
+<span class="w-1 h-3.5 bg-white"></span>
+</div>
+</div>
+<div class="w-full h-px bg-[#2A2F36]"></div>
+<!-- Batterie 62% + outline icon -->
+<div class="flex items-center justify-between">
+<span class="text-[14px] font-bold tabular tracking-wider text-white">60%</span>
+<div class="flex items-center">
+<div class="w-6 h-3 border border-white p-[1px] flex items-center">
+<div class="h-full w-[62%] bg-white" style="width: 60%;"></div>
+</div>
+<div class="w-[2px] h-1.5 bg-white"></div>
+</div>
+</div>
+</div>
+<!-- Bouton STOP cockpit rectangulaire -->
+<button class="w-full h-[54px] border-2 border-[#2A2F36] active:border-white active:bg-white active:text-black bg-transparent text-white font-bold text-[14px] tracking-[0.2em] uppercase flex items-center justify-center transition-colors" type="button">
+          STOP
+        </button>
+</section>
+</div>
+</main>
+
+
+
+</body></html>

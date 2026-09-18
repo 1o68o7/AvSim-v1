@@ -2,6 +2,9 @@
 
 *16 septembre 2026. Coller tel quel dans le projet existant.*
 
+**Gel HTML reçu** : `docs/stitch-mvp/GEL.md` + fichiers `docs/stitch-mvp/gel/*.html`.
+C’est la référence Flutter. Ce patch reste le cahier des manques / DA.
+
 ## État
 
 Garder :
