@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:datar0w/sensors/geo.dart';
 import 'package:datar0w/session/model.dart';
+import 'package:datar0w/session/store.dart';
 import 'package:datar0w/session/summary.dart';
 import 'package:datar0w/theme/deck_theme.dart';
 
@@ -30,6 +31,22 @@ void main() {
       contains(' — '),
     );
     expect(formatClockRange(null, null), '—');
+  });
+
+  test('SessionMeta identité optionnelle, rétro-compat', () {
+    const m = SessionMeta(id: 's1');
+    final j = m.toJson();
+    expect(j.containsKey('rowerId'), isFalse);
+    final m2 = SessionMeta.fromJson({
+      'id': 's2',
+      'class': '8+',
+      'rowerId': 'r1',
+      'side': 'babord',
+      'seatIndex': 3,
+    });
+    expect(m2.rowerId, 'r1');
+    expect(m2.side, 'babord');
+    expect(m2.seatIndex, 3);
   });
 
   test('note coach JSON', () {

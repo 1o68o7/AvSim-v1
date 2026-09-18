@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../identity/controller.dart';
+import '../../identity/format.dart';
+import '../../identity/models.dart';
 import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../session/live_hub.dart';
@@ -69,6 +72,14 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
     final s = _summary;
     final sessionTag = _meta?.code ?? _meta?.id ?? '—';
     final boat = ref.watch(boatConfigProvider);
+    final ident = ref.watch(identityProvider);
+    Assignment? asg;
+    final aid = _meta?.assignmentId;
+    if (aid != null) {
+      for (final a in ident.assignments) {
+        if (a.id == aid) asg = a;
+      }
+    }
     final isCox = _meta?.role == 'cox' || boat.role == CrewRole.cox;
     final code = _meta?.code?.trim();
     return DeckScaffold(
@@ -137,6 +148,13 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
                   ),
                   if (isCox)
                     const DeckStatusChip(label: 'séance barreur', ok: true),
+                  if (asg != null)
+                    DeckStatusChip(label: assignmentChip(asg), ok: true)
+                  else if (_meta?.seatIndex != null && _meta?.side != null)
+                    DeckStatusChip(
+                      label: 'siège ${_meta!.seatIndex} / ${_meta!.side}',
+                      ok: true,
+                    ),
                 ],
               ),
             ),

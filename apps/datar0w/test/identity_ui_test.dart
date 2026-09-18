@@ -1,5 +1,6 @@
 import 'package:datar0w/features/identity/screen_club.dart';
 import 'package:datar0w/features/identity/screen_crew.dart';
+import 'package:datar0w/features/identity/screen_home_roles.dart';
 import 'package:datar0w/features/identity/screen_who.dart';
 import 'package:datar0w/identity/controller.dart';
 import 'package:datar0w/identity/models.dart';
@@ -72,5 +73,17 @@ void main() {
     await tester.pump();
     expect(find.text('Réservé au coach.'), findsOneWidget);
     expect(find.text('ENREGISTRER L’ÉQUIPAGE'), findsNothing);
+  });
+
+  testWidgets('accueil coach : Composer Rejoindre Parc', (tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(home: HomeCoachScreen()),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('COMPOSER'), findsOneWidget);
+    expect(find.text('REJOINDRE'), findsOneWidget);
+    expect(find.text('PARC'), findsOneWidget);
   });
 }

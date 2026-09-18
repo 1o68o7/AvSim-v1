@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import '../identity/controller.dart';
+import '../identity/models.dart';
 import '../sensors/baro.dart';
 import '../sensors/battery.dart';
 import '../sensors/geo.dart';
@@ -470,6 +472,13 @@ class LiveHub extends Notifier<LiveHubState> {
     final id = 's${DateTime.now().millisecondsSinceEpoch}';
     final code = generateSessionCode();
     final boat = ref.read(boatConfigProvider);
+    final ident = ref.read(identityProvider);
+    final rower = ident.activeRower;
+    final asg = rower == null
+        ? null
+        : (boat.role == CrewRole.cox
+            ? ident.coxAssignmentFor(rower.id)
+            : ident.assignmentForRower(rower.id));
     final store = SessionStore(id);
     final dir = await store.open(
       tareOffset: state.tareOffset!,
@@ -481,8 +490,15 @@ class LiveHub extends Notifier<LiveHubState> {
       seats: boat.seats,
       cox: boat.coxed,
       role: boat.role.wire,
-      seatIndex: boat.metaSeatIndex,
-      coxPosition: boat.isCox ? boat.coxPosition.wire : null,
+      seatIndex: asg?.seatIndex ?? boat.metaSeatIndex,
+      coxPosition: boat.isCox
+          ? (asg?.coxPosition ?? boat.coxPosition.wire)
+          : null,
+      rowerId: rower?.id,
+      clubId: ident.activeClub?.id ?? rower?.clubId,
+      boatId: asg?.boatId,
+      assignmentId: asg?.id,
+      side: asg == null || asg.side == SidePref.none ? null : asg.side.wire,
     );
     _store = store;
     recorded.clear();
@@ -509,6 +525,11 @@ class LiveHub extends Notifier<LiveHubState> {
         'tareOffsetDeg': state.tareOffset,
         'tareQuality': state.tareQuality ?? (state.tareWeak ? 'approx' : 'ok'),
         'tareDurationS': state.tareDurationS ?? state.tareElapsedS.toDouble(),
+        if (rower?.id != null) 'rowerId': rower!.id,
+        if (ident.activeClub?.id != null) 'clubId': ident.activeClub!.id,
+        if (asg?.boatId != null) 'boatId': asg!.boatId,
+        if (asg?.id != null) 'assignmentId': asg!.id,
+        if (asg != null && asg.side != SidePref.none) 'side': asg.side.wire,
       },
     ));
     // Échec HTTP : le logger local continue (fichier + tick 1 Hz).

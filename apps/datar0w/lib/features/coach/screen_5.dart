@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../identity/controller.dart';
+import '../../identity/format.dart';
+import '../../identity/models.dart';
 import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../session/heel.dart';
@@ -145,6 +148,36 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
               ),
             ),
             const Divider(height: 1, color: DeckColors.hairline),
+            Builder(
+              builder: (context) {
+                final ident = ref.watch(identityProvider);
+                final boatId = ident.assignments.isEmpty
+                    ? null
+                    : ident.assignments.last.boatId;
+                final crew = boatId == null
+                    ? <Assignment>[]
+                    : ident.assignmentsForBoat(boatId);
+                if (crew.isEmpty) return const SizedBox.shrink();
+                final bits = [
+                  for (final a in crew)
+                    '${a.role == 'cox' ? 'barreur' : 's${a.seatIndex}'} '
+                    '${ident.rowerById(a.rowerId)?.displayName ?? ''}'
+                    '${a.role == 'cox' ? '' : ' ${assignmentChip(a)}'}',
+                ];
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+                  child: Text(
+                    bits.join('  ·  '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: DeckColors.label,
+                      fontSize: 10,
+                    ),
+                  ),
+                );
+              },
+            ),
             Expanded(
               child: Row(
                 children: [

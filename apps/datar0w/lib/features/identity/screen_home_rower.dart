@@ -7,6 +7,7 @@ import '../../identity/format.dart';
 import '../../identity/models.dart';
 import '../../router.dart';
 import '../../session/boat_config.dart';
+import '../identity/screen_home_roles.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 
@@ -15,7 +16,15 @@ class HomeRowerScreen extends ConsumerWidget {
   const HomeRowerScreen({super.key});
 
   void _continue(BuildContext context, WidgetRef ref) {
-    ref.read(boatConfigProvider.notifier).setRole(CrewRole.rower);
+    final snap = ref.read(identityProvider);
+    final rower = snap.activeRower;
+    final asg = rower == null ? null : snap.assignmentForRower(rower.id);
+    continueFromAssignment(
+      ref,
+      role: CrewRole.rower,
+      assignment: asg,
+      boat: snap.boatById(asg?.boatId),
+    );
     context.go(AppRoutes.presession);
   }
 

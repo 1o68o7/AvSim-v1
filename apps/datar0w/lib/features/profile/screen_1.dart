@@ -82,7 +82,7 @@ class ProfileScreen extends ConsumerWidget {
             icon: Icons.sports,
             onTap: () {
               ref.read(boatConfigProvider.notifier).setRole(CrewRole.coach);
-              context.go(AppRoutes.coachJoin);
+              context.go(AppRoutes.homeCoach);
             },
           ),
           const SizedBox(height: 12),
@@ -96,7 +96,7 @@ class ProfileScreen extends ConsumerWidget {
               if (!cfg.coxed) {
                 ref.read(boatConfigProvider.notifier).setClasse('8+');
               }
-              context.go(AppRoutes.presession);
+              context.go(AppRoutes.homeCox);
             },
           ),
         ],

@@ -6,6 +6,7 @@ import 'features/cox/screen_cox.dart';
 import 'features/identity/screen_boat_edit.dart';
 import 'features/identity/screen_club.dart';
 import 'features/identity/screen_crew.dart';
+import 'features/identity/screen_home_roles.dart';
 import 'features/identity/screen_home_rower.dart';
 import 'features/identity/screen_rower_edit.dart';
 import 'features/identity/screen_who.dart';
@@ -22,6 +23,8 @@ abstract final class AppRoutes {
   static const identity = '/identity';
   static const identityEdit = '/identity/edit';
   static const homeRower = '/home/rower';
+  static const homeCox = '/home/cox';
+  static const homeCoach = '/home/coach';
   static const club = '/club';
   static const clubBoat = '/club/boat';
   static const crew = '/crew';
@@ -60,6 +63,16 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.homeRower,
       name: 'home-rower',
       builder: (context, state) => const HomeRowerScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.homeCox,
+      name: 'home-cox',
+      builder: (context, state) => const HomeCoxScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.homeCoach,
+      name: 'home-coach',
+      builder: (context, state) => const HomeCoachScreen(),
     ),
     GoRoute(
       path: AppRoutes.club,

@@ -22,6 +22,11 @@ class SessionMeta {
     this.code,
     this.startedAt,
     this.endedAt,
+    this.rowerId,
+    this.clubId,
+    this.boatId,
+    this.assignmentId,
+    this.side,
   });
 
   final String id;
@@ -38,6 +43,11 @@ class SessionMeta {
   final String? code;
   final String? startedAt;
   final String? endedAt;
+  final String? rowerId;
+  final String? clubId;
+  final String? boatId;
+  final String? assignmentId;
+  final String? side;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -56,6 +66,11 @@ class SessionMeta {
         'code': code,
         'started_at': startedAt,
         'ended_at': endedAt,
+        if (rowerId != null) 'rowerId': rowerId,
+        if (clubId != null) 'clubId': clubId,
+        if (boatId != null) 'boatId': boatId,
+        if (assignmentId != null) 'assignmentId': assignmentId,
+        if (side != null) 'side': side,
       };
 
   static SessionMeta fromJson(Map<String, dynamic> j) => SessionMeta(
@@ -75,7 +90,36 @@ class SessionMeta {
         code: j['code'] as String?,
         startedAt: j['started_at'] as String?,
         endedAt: j['ended_at'] as String?,
+        rowerId: j['rowerId'] as String?,
+        clubId: j['clubId'] as String?,
+        boatId: j['boatId'] as String?,
+        assignmentId: j['assignmentId'] as String?,
+        side: j['side'] as String?,
       );
+
+  SessionMeta copyWith({String? endedAt}) {
+    return SessionMeta(
+      id: id,
+      classe: classe,
+      seats: seats,
+      cox: cox,
+      role: role,
+      seatIndex: seatIndex,
+      coxPosition: coxPosition,
+      bassin: bassin,
+      tareOffset: tareOffset,
+      tareQuality: tareQuality,
+      tareDurationS: tareDurationS,
+      code: code,
+      startedAt: startedAt,
+      endedAt: endedAt ?? this.endedAt,
+      rowerId: rowerId,
+      clubId: clubId,
+      boatId: boatId,
+      assignmentId: assignmentId,
+      side: side,
+    );
+  }
 }
 
 class SessionStore {
@@ -106,6 +150,11 @@ class SessionStore {
     String role = 'rower',
     int? seatIndex = 1,
     String? coxPosition,
+    String? rowerId,
+    String? clubId,
+    String? boatId,
+    String? assignmentId,
+    String? side,
   }) async {
     final root = await sessionsRoot();
     final dir = Directory('${root.path}/$id');
@@ -119,6 +168,11 @@ class SessionStore {
       role: role,
       seatIndex: seatIndex,
       coxPosition: coxPosition,
+      rowerId: rowerId,
+      clubId: clubId,
+      boatId: boatId,
+      assignmentId: assignmentId,
+      side: side,
       tareOffset: tareOffset,
       tareQuality: tareQuality,
       tareDurationS: tareDurationS,
@@ -157,22 +211,7 @@ class SessionStore {
   Future<void> markEnded() async {
     final m = meta;
     if (m == null) return;
-    meta = SessionMeta(
-      id: m.id,
-      classe: m.classe,
-      seats: m.seats,
-      cox: m.cox,
-      role: m.role,
-      seatIndex: m.seatIndex,
-      coxPosition: m.coxPosition,
-      bassin: m.bassin,
-      tareOffset: m.tareOffset,
-      tareQuality: m.tareQuality,
-      tareDurationS: m.tareDurationS,
-      code: m.code,
-      startedAt: m.startedAt,
-      endedAt: DateTime.now().toUtc().toIso8601String(),
-    );
+    meta = m.copyWith(endedAt: DateTime.now().toUtc().toIso8601String());
     await _writeMeta();
   }
 

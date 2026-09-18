@@ -139,7 +139,7 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
       );
     }
     await ref.read(identityProvider.notifier).saveCrew(boat.id, crew);
-    if (mounted) context.go(AppRoutes.profile);
+    if (mounted) context.go(AppRoutes.homeCoach);
   }
 
   @override
@@ -175,7 +175,7 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
       subtitle: 'Coques prêtes · 1 tél. = 1 place',
       landscapeHint: true,
       leading: TextButton(
-        onPressed: () => context.go(AppRoutes.profile),
+        onPressed: () => context.go(AppRoutes.homeCoach),
         child: const Text('Retour'),
       ),
       body: ready.isEmpty
