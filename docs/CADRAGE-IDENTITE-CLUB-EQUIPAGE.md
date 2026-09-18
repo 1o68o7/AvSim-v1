@@ -3,6 +3,8 @@
 > Statut : **exploratoire, en cours de construction**. Pas de mockups : chaque lot doit livrer du code réel (modèles, persistance, UI, tests) qui compile et s'installe sur le OnePlus.
 > App : `apps/datar0w`. Ne pas toucher le solver AvSim. Ne pas revert `compileSdk = 37` / `ndkVersion = "30.0.16248370"`. Pas de `sdkmanager`. Pas de `windows/`.
 > Ce document est **vivant** : on l'augmente au fur et à mesure des décisions. Chaque lot ci-dessous devient un commit distinct.
+>
+> **I1–I5 : pas encore de code.** Ce fichier est le cahier. Le prochain commit de développement = Lot I1 (modèle + FFA + tests, sans écran).
 
 ---
 
@@ -18,6 +20,22 @@ Or en pratique :
 - Un **coach** compose des équipages : il choisit deux profils compatibles (ex. compétiteur bâbord + compétiteur tribord) et leur attribue un bateau + des pelles (P4, P1/P2/P4…).
 
 Donc l'identité n'est pas une ligne : c'est un **graphe** Rower ↔ Club ↔ Boat ↔ Assignment. Ce document le modélise et découpe l'implémentation.
+
+---
+
+## 0.1 Navigation séance (déjà sur `main`, ne pas casser)
+
+```
+/ profil (rôles de séance, pas encore profils licenciés)
+ ├ rameur  → 2A → tare → /live → quai → replay 6r
+ ├ barreur → 2A → tare → /cox  → quai → replay 6r (+ replay coach si code)
+ └ coach   → join → /coach → replay-coach
+```
+
+- 2A / 2B : « Retour profil » (sauf tare en cours).
+- **Pendant `/live`, `/cox`, `/coach` : pas de bouton Accueil / leading profil.**
+  Sortie de séance = **STOP 2× → `/quai`** uniquement. On ne quitte pas un enregistrement par accident.
+- I2 s'insère **avant** cet écran profil-rôles : « Qui rame ? » → puis les 3 cartes actuelles.
 
 ---
 
@@ -153,7 +171,9 @@ Rien de cassé si absent : la séance anonyme reste possible (mode loisir, pas d
 
 Chaque lot = 1 commit, `flutter analyze` clean, tests unitaires sur la logique pure, APK qui s'installe.
 
-### Lot I1 — Modèle + persistance (fondations)
+**État au 18 sept. 2026 : I1–I6 = à coder. Aucun fichier `lib/identity/` sur `main`.**
+
+### Lot I1 — Modèle + persistance (fondations) — PROCHAIN
 - `lib/identity/models.dart` : `Rower`, `Club`, `Boat`, `Assignment` (+ sérialisation JSON).
 - `lib/identity/ffa_categories.dart` : fonction pure `ageCategory(birthDate)` + tests sur la grille.
 - `lib/identity/store.dart` : CRUD local (réutilise le pattern `session/store.dart`).
@@ -165,7 +185,7 @@ Chaque lot = 1 commit, `flutter analyze` clean, tests unitaires sur la logique p
 - Nouveau flow au premier lancement : "Qui rame ?" → créer / choisir.
 - Formulaire : nom, date de naissance (date picker), sexe, poids, taille, côté préféré, pelles, niveau. Catégorie affichée en live (lecture seule).
 - Persistance immédiate. Liste des profils locaux + suppression.
-- Bouton "Passer (sans profil)" → flux actuel inchangé.
+- Bouton "Passer (sans profil)" → flux actuel inchangé (3 cartes rôle).
 - Commit : `feat(datar0w): rower profile screen + local store`.
 
 ### Lot I3 — Club + parc à bateaux
@@ -187,7 +207,7 @@ Chaque lot = 1 commit, `flutter analyze` clean, tests unitaires sur la logique p
 - Écran quai 7 : chip "siège n / côté / pelles" si affectation présente.
 - Commit : `feat(datar0w): session meta + crew display`.
 
-### Lot I6 — (plus tard) Sync API
+### Lot I6 — (plus tard) Sync API / hôte (Supabase envisagé)
 - Endpoints `/datarow/club/*`, `/datarow/rowers/*`, `/datarow/assignments/*` — **après** stabilisation locale. Hors de ce cadrage pour l'instant.
 
 ---
@@ -200,6 +220,7 @@ Chaque lot = 1 commit, `flutter analyze` clean, tests unitaires sur la logique p
 - Algorithme automatique d'appariement "meilleur pair" — produit, pas fondation.
 - IMC stocké / courbes de forme — calculé à la volée plus tard, jamais persisté comme métrique médicale.
 - Modification du solver AvSim, watts, RTK, 10 Hz, micro, caméra, podomètre.
+- Ajouter un bouton Accueil sur `/live`, `/cox` ou `/coach` (sortie = STOP 2× seulement).
 
 ---
 
@@ -211,6 +232,7 @@ Chaque lot = 1 commit, `flutter analyze` clean, tests unitaires sur la logique p
 4. **Séance sans profil possible** (rétro-compat, mode loisir).
 5. **Un téléphone = un club actif** au MVP.
 6. **Pas de mockups** : chaque lot livre du Dart qui compile et s'installe.
+7. **Pas d'Accueil pendant l'enregistrement** (`/live`, `/cox`, `/coach`). Sortie = STOP 2× → quai.
 
 ---
 
