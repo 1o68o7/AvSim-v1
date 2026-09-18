@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'features/coach/screen_5.dart';
 import 'features/coach/screen_join.dart';
 import 'features/cox/screen_cox.dart';
+import 'features/identity/screen_home_rower.dart';
+import 'features/identity/screen_rower_edit.dart';
+import 'features/identity/screen_who.dart';
 import 'features/live/screen_3.dart';
 import 'features/presession/screen_2a.dart';
 import 'features/profile/screen_1.dart';
@@ -13,6 +16,9 @@ import 'features/tare/screen_2b.dart';
 import 'session/boat_class.dart';
 
 abstract final class AppRoutes {
+  static const identity = '/identity';
+  static const identityEdit = '/identity/edit';
+  static const homeRower = '/home/rower';
   static const profile = '/';
   static const presession = '/presession';
   static const tare = '/tare';
@@ -23,14 +29,32 @@ abstract final class AppRoutes {
   static const coachReplay = '/replay-coach';
   static const rowerReplay = '/replay';
   static const quai = '/quai';
+
   /// Après tare : barreur → `/cox`, rameur → `/live`. Écrans distincts.
   static String afterTare(CrewRole role) =>
       role == CrewRole.cox ? cox : live;
 }
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: AppRoutes.profile,
+  initialLocation: AppRoutes.identity,
   routes: [
+    GoRoute(
+      path: AppRoutes.identity,
+      name: '0-identity',
+      builder: (context, state) => const IdentityListScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.identityEdit,
+      name: '0-identity-edit',
+      builder: (context, state) => RowerEditScreen(
+        rowerId: state.uri.queryParameters['id'],
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.homeRower,
+      name: 'home-rower',
+      builder: (context, state) => const HomeRowerScreen(),
+    ),
     GoRoute(
       path: AppRoutes.profile,
       name: '1-profils',

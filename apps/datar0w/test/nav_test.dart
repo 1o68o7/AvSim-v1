@@ -1,4 +1,4 @@
-import 'package:datar0w/app.dart';
+import 'package:datar0w/features/cox/screen_cox.dart';
 import 'package:datar0w/features/presession/screen_2a.dart';
 import 'package:datar0w/features/tare/screen_2b.dart';
 import 'package:datar0w/router.dart';
@@ -6,6 +6,8 @@ import 'package:datar0w/session/boat_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'identity_test_helpers.dart';
 
 void main() {
   test('BARREUR après tare → /cox, rameur → /live', () {
@@ -47,7 +49,8 @@ void main() {
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(844, 390));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    final container = ProviderContainer();
+    final ov = identityStoreOverride();
+    final container = ProviderContainer(overrides: [ov]);
     addTearDown(container.dispose);
     container.read(boatConfigProvider.notifier).setRole(CrewRole.cox);
     container.read(boatConfigProvider.notifier).setClasse('8+');
@@ -55,13 +58,10 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const DataR0wApp(),
+        child: const MaterialApp(home: CoxLiveScreen()),
       ),
     );
     await tester.pump();
-    appRouter.go(AppRoutes.cox);
-    await tester.pumpAndSettle();
-    addTearDown(() => appRouter.go(AppRoutes.profile));
     expect(find.textContaining('BARREUR'), findsWidgets);
     expect(find.text('réf. barreur'), findsOneWidget);
     expect(find.text('réf. rameur'), findsNothing);

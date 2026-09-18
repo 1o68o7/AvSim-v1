@@ -1,0 +1,182 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../session/boat_class.dart';
+import 'models.dart';
+import 'store.dart';
+
+final identityStoreProvider = Provider<IdentityStore>((ref) => IdentityStore());
+
+class IdentitySnapshot {
+  const IdentitySnapshot({
+    this.rowers = const [],
+    this.clubs = const [],
+    this.boats = const [],
+    this.assignments = const [],
+    this.prefs = const IdentityPrefs(),
+  });
+
+  final List<Rower> rowers;
+  final List<Club> clubs;
+  final List<ParkBoat> boats;
+  final List<Assignment> assignments;
+  final IdentityPrefs prefs;
+
+  Rower? get activeRower {
+    final id = prefs.activeRowerId;
+    if (id == null) return null;
+    for (final r in rowers) {
+      if (r.id == id) return r;
+    }
+    return null;
+  }
+
+  Club? get activeClub {
+    final id = prefs.activeClubId;
+    if (id == null) {
+      return clubs.isEmpty ? null : clubs.first;
+    }
+    for (final c in clubs) {
+      if (c.id == id) return c;
+    }
+    return clubs.isEmpty ? null : clubs.first;
+  }
+
+  List<ParkBoat> boatsForClub(String? clubId) {
+    if (clubId == null) return boats;
+    return boats.where((b) => b.clubId == clubId).toList();
+  }
+
+  List<ParkBoat> get readyBoats => boats
+      .where((b) => b.status == BoatParkStatus.ready)
+      .toList();
+
+  List<Assignment> assignmentsForBoat(String boatId) =>
+      assignments.where((a) => a.boatId == boatId).toList();
+
+  Assignment? assignmentForRower(String rowerId) {
+    for (final a in assignments.reversed) {
+      if (a.rowerId == rowerId && a.role != 'cox') return a;
+    }
+    return null;
+  }
+
+  Assignment? coxAssignmentFor(String rowerId) {
+    for (final a in assignments.reversed) {
+      if (a.rowerId == rowerId && a.role == 'cox') return a;
+    }
+    return null;
+  }
+
+  ParkBoat? boatById(String? id) {
+    if (id == null) return null;
+    for (final b in boats) {
+      if (b.id == id) return b;
+    }
+    return null;
+  }
+
+  Rower? rowerById(String? id) {
+    if (id == null) return null;
+    for (final r in rowers) {
+      if (r.id == id) return r;
+    }
+    return null;
+  }
+}
+
+/// Notifier : racine test = lecture sync ; sinon premier frame vide + reload.
+class IdentityController extends Notifier<IdentitySnapshot> {
+  IdentityStore get _store => ref.read(identityStoreProvider);
+
+  @override
+  IdentitySnapshot build() {
+    final seeded = _trySyncSnapshot();
+    if (seeded != null) return seeded;
+    Future<void>.microtask(_refresh);
+    return const IdentitySnapshot();
+  }
+
+  IdentitySnapshot? _trySyncSnapshot() {
+    final store = _store;
+    final rowers = store.tryListRowersSync();
+    if (rowers == null) return null;
+    return IdentitySnapshot(
+      rowers: rowers,
+      clubs: store.tryListClubsSync() ?? const [],
+      boats: store.tryListBoatsSync() ?? const [],
+      assignments: store.tryListAssignmentsSync() ?? const [],
+      prefs: store.tryLoadPrefsSync() ?? const IdentityPrefs(),
+    );
+  }
+
+  Future<IdentitySnapshot> _reload() async {
+    return IdentitySnapshot(
+      rowers: await _store.listRowers(),
+      clubs: await _store.listClubs(),
+      boats: await _store.listBoats(),
+      assignments: await _store.listAssignments(),
+      prefs: await _store.loadState(),
+    );
+  }
+
+  Future<void> _refresh() async {
+    state = await _reload();
+  }
+
+  Future<void> saveRower(Rower rower) async {
+    await _store.upsertRower(rower);
+    final prefs = await _store.loadState();
+    await _store.saveState(prefs.copyWith(activeRowerId: rower.id));
+    await _refresh();
+  }
+
+  Future<void> selectRower(String? id) async {
+    final prefs = await _store.loadState();
+    await _store.saveState(
+      id == null
+          ? prefs.copyWith(clearRower: true)
+          : prefs.copyWith(activeRowerId: id),
+    );
+    await _refresh();
+  }
+
+  Future<void> deleteRower(String id) async {
+    await _store.deleteRower(id);
+    await _refresh();
+  }
+
+  Future<void> saveClub(Club club) async {
+    await _store.upsertClub(club);
+    final prefs = await _store.loadState();
+    await _store.saveState(prefs.copyWith(activeClubId: club.id));
+    await _refresh();
+  }
+
+  Future<void> selectClub(String id) async {
+    final prefs = await _store.loadState();
+    await _store.saveState(prefs.copyWith(activeClubId: id));
+    await _refresh();
+  }
+
+  Future<void> saveBoat(ParkBoat boat) async {
+    await _store.upsertBoat(boat);
+    await _refresh();
+  }
+
+  Future<void> deleteBoat(String id) async {
+    await _store.deleteBoat(id);
+    await _refresh();
+  }
+
+  Future<void> saveCrew(String boatId, List<Assignment> crew) async {
+    await _store.replaceAssignmentsForBoat(boatId, crew);
+    await _refresh();
+  }
+}
+
+final identityProvider =
+    NotifierProvider<IdentityController, IdentitySnapshot>(
+  IdentityController.new,
+);
+
+bool canEditPark(CrewRole role) => role == CrewRole.coach;

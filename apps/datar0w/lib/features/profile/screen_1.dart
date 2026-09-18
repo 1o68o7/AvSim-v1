@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../identity/controller.dart';
+import '../../identity/models.dart';
 import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../session/rower_orientation.dart';
@@ -18,11 +20,29 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     unawaited(unlockRowerOrientations());
     final cfg = ref.watch(boatConfigProvider);
+    final ident = ref.watch(identityProvider);
+    final rower = ident.activeRower;
     return DeckScaffold(
       title: 'SÉLECTION PROFIL',
+      subtitle: rower == null ? 'sans profil (loisir)' : rower.displayName,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
         children: [
+          if (rower != null)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(rower.displayName),
+              subtitle: Text('${rower.category()} · ${rower.sex.wire}'),
+              trailing: const Icon(Icons.edit),
+              onTap: () =>
+                  context.go('${AppRoutes.identityEdit}?id=${rower.id}'),
+            )
+          else
+            TextButton(
+              onPressed: () => context.go(AppRoutes.identity),
+              child: const Text('Choisir un rameur'),
+            ),
+          const SizedBox(height: 8),
           const Text(
             'SÉLECTION PROFIL',
             style: TextStyle(
@@ -47,7 +67,7 @@ class ProfileScreen extends ConsumerWidget {
             highlighted: true,
             onTap: () {
               ref.read(boatConfigProvider.notifier).setRole(CrewRole.rower);
-              context.go(AppRoutes.presession);
+              context.go(AppRoutes.homeRower);
             },
           ),
           const SizedBox(height: 12),

@@ -168,6 +168,51 @@ class IdentityStore {
       const JsonEncoder.withIndent('  ').convert(rows),
     );
   }
+
+  /// Lecture synchrone si le store a un répertoire imposé (tests).
+  IdentityPrefs? tryLoadPrefsSync() {
+    final dir = _rootOverride;
+    if (dir == null) return null;
+    dir.createSync(recursive: true);
+    final f = File(p.join(dir.path, 'state.json'));
+    if (!f.existsSync()) return const IdentityPrefs();
+    final j = jsonDecode(f.readAsStringSync()) as Map<String, dynamic>;
+    return IdentityPrefs.fromJson(j);
+  }
+
+  List<Rower>? tryListRowersSync() {
+    final raw = _tryReadListSync('rowers.json');
+    return raw?.map(Rower.fromJson).toList();
+  }
+
+  List<Club>? tryListClubsSync() {
+    final raw = _tryReadListSync('clubs.json');
+    return raw?.map(Club.fromJson).toList();
+  }
+
+  List<ParkBoat>? tryListBoatsSync() {
+    final raw = _tryReadListSync('boats.json');
+    return raw?.map(ParkBoat.fromJson).toList();
+  }
+
+  List<Assignment>? tryListAssignmentsSync() {
+    final raw = _tryReadListSync('assignments.json');
+    return raw?.map(Assignment.fromJson).toList();
+  }
+
+  List<Map<String, dynamic>>? _tryReadListSync(String name) {
+    final dir = _rootOverride;
+    if (dir == null) return null;
+    dir.createSync(recursive: true);
+    final f = File(p.join(dir.path, name));
+    if (!f.existsSync()) return [];
+    final raw = jsonDecode(f.readAsStringSync());
+    if (raw is! List) return [];
+    return raw
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+  }
 }
 
 class IdentityPrefs {

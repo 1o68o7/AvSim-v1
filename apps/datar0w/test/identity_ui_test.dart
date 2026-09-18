@@ -1,0 +1,50 @@
+import 'package:datar0w/features/identity/screen_who.dart';
+import 'package:datar0w/identity/controller.dart';
+import 'package:datar0w/identity/models.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'identity_test_helpers.dart';
+
+class _SeededIdentity extends IdentityController {
+  @override
+  IdentitySnapshot build() {
+    return IdentitySnapshot(
+      rowers: [
+        Rower.create(
+          displayName: 'Camille Test',
+          birthDate: DateTime(1998, 5, 10),
+        ),
+      ],
+    );
+  }
+}
+
+void main() {
+  testWidgets('Qui rame : passer sans profil visible', (tester) async {
+    final ov = identityStoreOverride();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [ov],
+        child: const MaterialApp(home: IdentityListScreen()),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('Passer (sans profil)'), findsOneWidget);
+  });
+
+  testWidgets('profil local listé sur Qui rame', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          identityStoreOverride(),
+          identityProvider.overrideWith(_SeededIdentity.new),
+        ],
+        child: const MaterialApp(home: IdentityListScreen()),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('Camille Test'), findsOneWidget);
+  });
+}
