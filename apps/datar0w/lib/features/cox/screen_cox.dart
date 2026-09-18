@@ -88,11 +88,12 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
 
     return Scaffold(
       backgroundColor: DeckColors.bg,
-      body: SafeArea(
-        child: Column(
-          children: [
-            HeelBanner(alert: alert),
-            Padding(
+      body: HeelAlertOverlay(
+        alert: alert,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               child: Row(
                 children: [
@@ -196,6 +197,7 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

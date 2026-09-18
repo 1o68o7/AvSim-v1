@@ -44,13 +44,19 @@ void main() {
     );
   });
 
-  test('couleurs bâbord rouge / tribord vert, alerte tribords vert foncé', () {
+  test('couleurs bâbord rouge / tribord vert, alerte semi-transparente', () {
     expect(DeckColors.babord, const Color(0xFFE05353));
     expect(DeckColors.tribord, const Color(0xFF46C275));
     expect(DeckColors.tribordAlert, const Color(0xFF0F5C32));
     expect(DeckColors.tribord.toARGB32(), isNot(0xFF00E676));
-    expect(HeelBanner.backgroundFor(HeelAlert.tribord), DeckColors.tribordAlert);
-    expect(HeelBanner.backgroundFor(HeelAlert.babord), DeckColors.babord);
+    expect(
+      HeelBanner.backgroundFor(HeelAlert.tribord).a,
+      closeTo(0.80, 0.02),
+    );
+    expect(
+      HeelBanner.backgroundFor(HeelAlert.babord).a,
+      closeTo(0.80, 0.02),
+    );
   });
 
   test('filtre suit une marche sans rester collé au brut', () {
@@ -67,20 +73,52 @@ void main() {
     expect(f.filteredDeg, isNull);
   });
 
-  testWidgets('bandeau trop tribords vert foncé, trop bâbord rouge', (tester) async {
+  testWidgets('bandeau trop tribords et trop bâbord, overlay', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: HeelBanner(alert: HeelAlert.tribord)),
     );
+    await tester.pump();
     expect(find.text('GÎTE — trop tribords'), findsOneWidget);
-    final trib = tester.widget<Container>(find.byType(Container).first);
-    expect(trib.color, DeckColors.tribordAlert);
 
     await tester.pumpWidget(
       const MaterialApp(home: HeelBanner(alert: HeelAlert.babord)),
     );
+    await tester.pump();
     expect(find.text('GÎTE — trop bâbord'), findsOneWidget);
-    final bab = tester.widget<Container>(find.byType(Container).first);
-    expect(bab.color, DeckColors.babord);
+  });
+
+  testWidgets('bandeau overlay ne pousse pas le layout', (tester) async {
+    const bodyKey = Key('live-body');
+    Future<void> pumpAlert(HeelAlert a) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: HeelAlertOverlay(
+              alert: a,
+              child: const Column(
+                children: [
+                  SizedBox(key: bodyKey, height: 80, width: double.infinity),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await pumpAlert(HeelAlert.none);
+    await tester.pump();
+    final y0 = tester.getTopLeft(find.byKey(bodyKey)).dy;
+    await pumpAlert(HeelAlert.babord);
+    await tester.pumpAndSettle();
+    final y1 = tester.getTopLeft(find.byKey(bodyKey)).dy;
+    expect(y1, y0);
+    expect(find.text('GÎTE — trop bâbord'), findsOneWidget);
+
+    await pumpAlert(HeelAlert.tribord);
+    await tester.pumpAndSettle();
+    expect(find.text('GÎTE — trop tribords'), findsOneWidget);
+    expect(tester.getTopLeft(find.byKey(bodyKey)).dy, y0);
   });
 
   testWidgets('barreur : BÂBORD à gauche, TRIBORD à droite, réf. barreur', (tester) async {

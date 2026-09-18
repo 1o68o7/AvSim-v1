@@ -42,7 +42,7 @@ Routes (sans OAuth) : `POST /datarow/sessions`, `.../tick`, `GET .../by-code/{co
 ## BÂBORD / TRIBORD (réf. rameur)
 
 Gauche écran = **TRIBORD** vert `#46C275`. Droite = **BÂBORD** rouge `#E05353`.  
-Alerte trop tribords : bandeau **vert foncé** `#0F5C32`. Trop bâbord : `#E05353`.  
+Alerte : overlay haut d’écran semi-transparent (bâbord `#E05353` / tribords `#46C275`).  
 `+` = tribords (gauche écran en bas). IMU en axes écran (paysage, rotation 90°). Voir `docs/CONVENTION-BABORD-TRIBORD.md`.
 
 Barreur : **gauche = BÂBORD**, droite = TRIBORD (`réf. barreur`). Cadence = « — » ou estim. tel.

@@ -76,13 +76,14 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
 
     return Scaffold(
       backgroundColor: DeckColors.bg,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            HeelBanner(alert: alert),
-            Expanded(
-              child: LayoutBuilder(
+      body: HeelAlertOverlay(
+        alert: alert,
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: LayoutBuilder(
                 builder: (context, constraints) {
                   final landscape = constraints.maxWidth > 640;
                   if (landscape) {
@@ -120,6 +121,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

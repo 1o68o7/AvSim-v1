@@ -1,6 +1,6 @@
 # Bâbord / tribord — référentiel DataR0w
 
-*Révisé le 17 septembre 2026 (axes écran + bandeaux vert foncé / rouge).*
+*Révisé le 18 septembre 2026 (barreur + overlay gîte).*
 
 À l'aviron, bâbord et tribord sont **inversés** par rapport à la navigation classique.
 
@@ -41,8 +41,10 @@ Position : `coxPosition` `rear` (défaut) ou `front`. `seatIndex` = `null`.
 
 ## Alertes (|gîte| > 3° après tare)
 
-- Trop **tribord** (gauche écran) : bandeau 36 px fond **vert foncé** `#0F5C32`, texte blanc `GÎTE — trop tribords`
-- Trop **bâbord** (droite écran) : bandeau 36 px fond `#E05353`, texte blanc `GÎTE — trop bâbord`
+Overlay haut d’écran (SafeArea), **sans décaler** le layout. Dégradé
+semi-transparent (~80 % α) ~56 px : `#E05353` bâbord / `#46C275` tribords
+→ transparent. Fade-in 150 ms, fade-out 300 ms. Vibration courte à l’apparition
+seulement. Les deux côtés restent alertables.
 
 Pas d'alerte unique ambre `#E8C547` pour la gîte. L'ambre reste pour le statut non-gîte.
 
