@@ -1,6 +1,7 @@
 import 'package:datar0w/session/heel.dart';
 import 'package:datar0w/theme/deck_theme.dart';
 import 'package:datar0w/widgets/heel_banner.dart';
+import 'package:datar0w/widgets/heel_gauge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,6 +20,7 @@ void main() {
   test('+gîte = tribords = gauche écran', () {
     expect(rowerGiteFromImu(2), 2);
     expect(heelAlignmentX(5), lessThan(0));
+    expect(heelAlignmentX(5, perspective: HeelPerspective.cox), greaterThan(0));
     expect(heelAlertFor(4.0), HeelAlert.tribord);
     expect(heelAlertFor(-4.0), HeelAlert.babord);
     expect(heelAlertFor(1.0), HeelAlert.none);
@@ -79,5 +81,20 @@ void main() {
     expect(find.text('GÎTE — trop bâbord'), findsOneWidget);
     final bab = tester.widget<Container>(find.byType(Container).first);
     expect(bab.color, DeckColors.babord);
+  });
+
+  testWidgets('barreur : BÂBORD à gauche, TRIBORD à droite, réf. barreur', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: HeelLabels(perspective: HeelPerspective.cox),
+        ),
+      ),
+    );
+    expect(find.text('réf. barreur'), findsOneWidget);
+    expect(find.text('réf. rameur'), findsNothing);
+    final ba = tester.getTopLeft(find.text('BÂBORD')).dx;
+    final tri = tester.getTopLeft(find.text('TRIBORD')).dx;
+    expect(ba < tri, isTrue);
   });
 }

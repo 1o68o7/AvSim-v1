@@ -108,6 +108,13 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
                   ),
                   const Spacer(),
                   DeckStatusChip(label: 'GÎTE BATEAU', ok: gite != null),
+                  const SizedBox(width: 8),
+                  DeckStatusChip(
+                    label: boat.coxPosition == CoxPosition.front
+                        ? 'pos. avant'
+                        : 'pos. arrière',
+                    ok: true,
+                  ),
                 ],
               ),
             ),
@@ -142,11 +149,16 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
                             : '${gite.toStringAsFixed(1)}°',
                         child: Column(
                           children: [
-                            const HeelLabels(),
-                            HeelGauge(giteDeg: gite ?? 0),
-                            const Text(
-                              'RÉF. RAMEUR  ·  PAS DE SPM INVENTÉ',
-                              style: TextStyle(
+                            const HeelLabels(perspective: HeelPerspective.cox),
+                            HeelGauge(
+                              giteDeg: gite ?? 0,
+                              perspective: HeelPerspective.cox,
+                            ),
+                            Text(
+                              s.cadenceSpm == null
+                                  ? 'CADENCE  —  ·  pas de SPM inventé'
+                                  : 'CADENCE  ${s.cadenceSpm!.toStringAsFixed(0)}  ·  estim. tel',
+                              style: const TextStyle(
                                 color: DeckColors.label,
                                 fontSize: 9,
                               ),

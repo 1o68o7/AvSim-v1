@@ -69,8 +69,54 @@ void main() {
 
     await tester.tap(find.text('8+'));
     await tester.pump();
-    expect(find.textContaining('2 · SIÈGE DANS 8+'), findsOneWidget);
+    expect(find.textContaining('3 · SIÈGE DANS 8+'), findsOneWidget);
+    expect(find.text('Barreur'), findsOneWidget);
     expect(find.text('8'), findsOneWidget);
     expect(find.textContaining('en attente'), findsOneWidget);
+  });
+
+  test('barreur : seatIndex null + coxPosition rear|front', () {
+    const m = SessionMeta(
+      id: 's-cox',
+      classe: '8+',
+      seats: 8,
+      cox: true,
+      role: 'cox',
+      seatIndex: null,
+      coxPosition: 'rear',
+    );
+    final j = m.toJson();
+    expect(j['seatIndex'], isNull);
+    expect(j['coxPosition'], 'rear');
+    final back = SessionMeta.fromJson(j);
+    expect(back.seatIndex, isNull);
+    expect(back.role, 'cox');
+    expect(back.coxPosition, 'rear');
+
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    container.read(boatConfigProvider.notifier).setClasse('4+');
+    container.read(boatConfigProvider.notifier).setRole(CrewRole.cox);
+    container.read(boatConfigProvider.notifier).setCoxPosition(CoxPosition.front);
+    expect(container.read(boatConfigProvider).metaSeatIndex, isNull);
+    expect(container.read(boatConfigProvider).toMetaFields()['seatIndex'], isNull);
+    expect(container.read(boatConfigProvider).toMetaFields()['coxPosition'], 'front');
+  });
+
+  testWidgets('2A 8+ : rôle barreur puis position, pas de siège rameur', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(home: PresessionScreen()),
+      ),
+    );
+    await tester.tap(find.text('8+'));
+    await tester.pump();
+    await tester.tap(find.text('Barreur'));
+    await tester.pump();
+    expect(find.text('Arrière'), findsOneWidget);
+    expect(find.text('Avant'), findsOneWidget);
+    expect(find.text('1 nage'), findsNothing);
   });
 }

@@ -14,6 +14,7 @@ class SessionMeta {
     this.cox = false,
     this.role = 'rower',
     this.seatIndex = 1,
+    this.coxPosition,
     this.bassin,
     this.tareOffset,
     this.tareQuality,
@@ -28,7 +29,8 @@ class SessionMeta {
   final int seats;
   final bool cox;
   final String role;
-  final int seatIndex;
+  final int? seatIndex;
+  final String? coxPosition;
   final String? bassin;
   final double? tareOffset;
   final String? tareQuality;
@@ -45,6 +47,7 @@ class SessionMeta {
         'cox': cox,
         'role': role,
         'seatIndex': seatIndex,
+        'coxPosition': coxPosition,
         'bassin': bassin,
         'tareOffsetDeg': tareOffset,
         'tare_offset': tareOffset,
@@ -61,7 +64,9 @@ class SessionMeta {
         seats: (j['seats'] as num?)?.toInt() ?? 1,
         cox: j['cox'] as bool? ?? false,
         role: j['role'] as String? ?? 'rower',
-        seatIndex: (j['seatIndex'] as num?)?.toInt() ?? 1,
+        seatIndex: (j['seatIndex'] as num?)?.toInt() ??
+            ((j['role'] as String?) == 'cox' ? null : 1),
+        coxPosition: j['coxPosition'] as String?,
         bassin: j['bassin'] as String?,
         tareOffset: (j['tareOffsetDeg'] as num?)?.toDouble() ??
             (j['tare_offset'] as num?)?.toDouble(),
@@ -99,7 +104,8 @@ class SessionStore {
     int seats = 1,
     bool cox = false,
     String role = 'rower',
-    int seatIndex = 1,
+    int? seatIndex = 1,
+    String? coxPosition,
   }) async {
     final root = await sessionsRoot();
     final dir = Directory('${root.path}/$id');
@@ -112,6 +118,7 @@ class SessionStore {
       cox: cox,
       role: role,
       seatIndex: seatIndex,
+      coxPosition: coxPosition,
       tareOffset: tareOffset,
       tareQuality: tareQuality,
       tareDurationS: tareDurationS,
@@ -157,6 +164,7 @@ class SessionStore {
       cox: m.cox,
       role: m.role,
       seatIndex: m.seatIndex,
+      coxPosition: m.coxPosition,
       bassin: m.bassin,
       tareOffset: m.tareOffset,
       tareQuality: m.tareQuality,

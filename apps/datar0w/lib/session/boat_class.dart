@@ -36,6 +36,15 @@ class BoatClassInfo {
 
 enum CrewRole { rower, cox, coach }
 
+enum CoxPosition { rear, front }
+
+extension CoxPositionX on CoxPosition {
+  String get wire => this == CoxPosition.front ? 'front' : 'rear';
+
+  static CoxPosition parse(String? raw) =>
+      raw == 'front' ? CoxPosition.front : CoxPosition.rear;
+}
+
 extension CrewRoleX on CrewRole {
   String get wire {
     switch (this) {

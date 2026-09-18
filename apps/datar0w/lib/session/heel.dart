@@ -113,9 +113,17 @@ HeelAlert heelAlertFor(double? giteDeg, {double limitDeg = 3}) {
   return HeelAlert.none;
 }
 
-/// +gîte (tribord) → gauche écran (−1) ; −gîte (bâbord) → droite (+1).
-double heelAlignmentX(double giteDeg) =>
-    (-giteDeg / 15.0).clamp(-1.0, 1.0);
+/// +gîte (tribord) → gauche écran rameur (−1) ; −gîte (bâbord) → droite (+1).
+/// Barreur : côtés inversés (bâbord à gauche).
+double heelAlignmentX(
+  double giteDeg, {
+  HeelPerspective perspective = HeelPerspective.rower,
+}) {
+  final x = (-giteDeg / 15.0).clamp(-1.0, 1.0);
+  return perspective == HeelPerspective.cox ? -x : x;
+}
+
+enum HeelPerspective { rower, cox }
 
 double emaAlphaForTau({required double dtS, required double tauS}) {
   return dtS / (tauS + dtS);

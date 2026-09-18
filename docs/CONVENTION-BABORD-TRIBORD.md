@@ -29,6 +29,16 @@ Chip : `réf. rameur`.
 Gauche écran en bas : le vecteur accéléro « ciel » penche vers la **droite** de l'UI
 (`+screenX`) → gîte positive.
 
+## Écran barreur (4+ / 8+)
+
+Le barreur regarde vers la proue : **gauche écran = BÂBORD** rouge `#E05353`,
+**droite = TRIBORD** vert `#46C275`. Chip `réf. barreur`.
+
+Les rameurs du même bateau gardent la convention cale-pied (gauche = TRIBORD).
+Deux profils, deux orientations d’écran, **un seul** signe stocké (réf. rameur).
+
+Position : `coxPosition` `rear` (défaut) ou `front`. `seatIndex` = `null`.
+
 ## Alertes (|gîte| > 3° après tare)
 
 - Trop **tribord** (gauche écran) : bandeau 36 px fond **vert foncé** `#0F5C32`, texte blanc `GÎTE — trop tribords`

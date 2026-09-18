@@ -91,9 +91,79 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                       ),
                   ],
                 ),
+                if (info.coxed) ...[
+                  const SizedBox(height: 16),
+                  const Text(
+                    '2 · RÔLE DANS CE BATEAU',
+                    style: TextStyle(
+                      color: DeckColors.label,
+                      fontSize: 10,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      ChoiceChip(
+                        label: const Text('Rameur'),
+                        selected: cfg.role == CrewRole.rower,
+                        onSelected: (_) => ref
+                            .read(boatConfigProvider.notifier)
+                            .setRole(CrewRole.rower),
+                      ),
+                      ChoiceChip(
+                        label: const Text('Barreur'),
+                        selected: cfg.role == CrewRole.cox,
+                        onSelected: (_) => ref
+                            .read(boatConfigProvider.notifier)
+                            .setRole(CrewRole.cox),
+                      ),
+                    ],
+                  ),
+                ],
+                if (cfg.isCox && info.coxed) ...[
+                  const SizedBox(height: 16),
+                  const Text(
+                    '3 · POSITION BARREUR',
+                    style: TextStyle(
+                      color: DeckColors.label,
+                      fontSize: 10,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      ChoiceChip(
+                        label: const Text('Arrière'),
+                        selected: cfg.coxPosition == CoxPosition.rear,
+                        onSelected: (_) => ref
+                            .read(boatConfigProvider.notifier)
+                            .setCoxPosition(CoxPosition.rear),
+                      ),
+                      ChoiceChip(
+                        label: const Text('Avant'),
+                        selected: cfg.coxPosition == CoxPosition.front,
+                        onSelected: (_) => ref
+                            .read(boatConfigProvider.notifier)
+                            .setCoxPosition(CoxPosition.front),
+                      ),
+                    ],
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Défaut : arrière (le plus courant). Pas de siège rameur. '
+                      'Les rameurs restent en attente (local / poll API).',
+                      style: TextStyle(color: DeckColors.label, fontSize: 11),
+                    ),
+                  ),
+                ] else ...[
                   const SizedBox(height: 16),
                   Text(
-                    '2 · SIÈGE DANS ${info.code.toUpperCase()}  ·  ${cfg.clampedSeat} / ${info.seats}  ·  1 = NAGE',
+                    '${info.coxed ? '3' : '2'} · SIÈGE DANS ${info.code.toUpperCase()}  ·  ${cfg.clampedSeat} / ${info.seats}  ·  1 = NAGE',
                     style: const TextStyle(
                       color: DeckColors.label,
                       fontSize: 10,
@@ -122,9 +192,13 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                           : 'Ce tél. = siège ${cfg.clampedSeat}. '
                               'Autres places (${cfg.waitingSeats.join(', ')}) : '
                               'en attente (local) ou poll API (Lot G).',
-                      style: const TextStyle(color: DeckColors.label, fontSize: 11),
+                      style: const TextStyle(
+                        color: DeckColors.label,
+                        fontSize: 11,
+                      ),
                     ),
                   ),
+                ],
                 if (coxNeedsBoat)
                   const Padding(
                     padding: EdgeInsets.only(top: 12),

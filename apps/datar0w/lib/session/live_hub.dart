@@ -481,7 +481,8 @@ class LiveHub extends Notifier<LiveHubState> {
       seats: boat.seats,
       cox: boat.coxed,
       role: boat.role.wire,
-      seatIndex: boat.clampedSeat,
+      seatIndex: boat.metaSeatIndex,
+      coxPosition: boat.isCox ? boat.coxPosition.wire : null,
     );
     _store = store;
     recorded.clear();

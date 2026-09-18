@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../router.dart';
 import '../../session/boat_config.dart';
+import '../../session/heel.dart';
 import '../../session/live_hub.dart';
 import '../../session/rower_orientation.dart';
 import '../../theme/deck_theme.dart';
@@ -74,10 +75,13 @@ class _PortraitTare extends ConsumerWidget {
     final boat = ref.watch(boatConfigProvider);
     final shown = state.displayGiteDeg ?? 0;
     final running = state.tareStatus == TareStatus.running;
+    final persp =
+        boat.isCox ? HeelPerspective.cox : HeelPerspective.rower;
     return DeckScaffold(
       title: 'DATAROW / 2B',
-      subtitle:
-          'Tare gîte · ${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats} · réf. rameur',
+      subtitle: boat.isCox
+          ? 'Tare gîte · ${boat.info.code.toUpperCase()} barreur ${boat.coxPosition.wire} · réf. barreur'
+          : 'Tare gîte · ${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats} · réf. rameur',
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -101,7 +105,7 @@ class _PortraitTare extends ConsumerWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-                  const HeelLabels(),
+                  HeelLabels(perspective: persp),
                   const SizedBox(height: 8),
                   Text(
                     '${shown.toStringAsFixed(1)}°',
@@ -115,7 +119,7 @@ class _PortraitTare extends ConsumerWidget {
                     style: TextStyle(color: DeckColors.label, fontSize: 11),
                   ),
                   const SizedBox(height: 12),
-                  HeelGauge(giteDeg: shown),
+                  HeelGauge(giteDeg: shown, perspective: persp),
                   const SizedBox(height: 8),
                   const Text(
                     'TOLÉRANCE  σ < 0,2°  ·  3–30 s  ·  clamp ±15° après tare',
@@ -174,6 +178,7 @@ class _LandscapeHud extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final boat = ref.watch(boatConfigProvider);
+    final cox = boat.isCox;
     final shown = state.displayGiteDeg ?? 0;
     final running = state.tareStatus == TareStatus.running;
     final chip = switch (state.tareStatus) {
@@ -209,10 +214,12 @@ class _LandscapeHud extends ConsumerWidget {
                         letterSpacing: 1.2,
                       ),
                     ),
-                    Padding(
+                      Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Text(
-                        '${boat.info.code.toUpperCase()} · siège ${boat.clampedSeat}/${boat.seats}',
+                        boat.isCox
+                            ? '${boat.info.code.toUpperCase()} · barreur ${boat.coxPosition.wire}'
+                            : '${boat.info.code.toUpperCase()} · siège ${boat.clampedSeat}/${boat.seats}',
                         style: const TextStyle(
                           color: DeckColors.label,
                           fontSize: 11,
@@ -273,9 +280,9 @@ class _LandscapeHud extends ConsumerWidget {
                           Row(
                             children: [
                               _SideBadge(
-                                label: 'TRIBORD',
-                                sub: '+15.0°',
-                                color: DeckColors.tribord,
+                                label: cox ? 'BÂBORD' : 'TRIBORD',
+                                sub: cox ? '-15.0°' : '+15.0°',
+                                color: cox ? DeckColors.babord : DeckColors.tribord,
                                 left: true,
                               ),
                               Expanded(
@@ -327,18 +334,27 @@ class _LandscapeHud extends ConsumerWidget {
                                 ),
                               ),
                               _SideBadge(
-                                label: 'BÂBORD',
-                                sub: '-15.0°',
-                                color: DeckColors.babord,
+                                label: cox ? 'TRIBORD' : 'BÂBORD',
+                                sub: cox ? '+15.0°' : '-15.0°',
+                                color: cox ? DeckColors.tribord : DeckColors.babord,
                                 left: false,
                               ),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Expanded(child: HeelGauge(giteDeg: shown)),
-                          const Text(
-                            'TRIBORD gauche écran  ·  σ < 0,2°  ·  3–30 s',
-                            style: TextStyle(
+                          Expanded(
+                            child: HeelGauge(
+                              giteDeg: shown,
+                              perspective: cox
+                                  ? HeelPerspective.cox
+                                  : HeelPerspective.rower,
+                            ),
+                          ),
+                          Text(
+                            cox
+                                ? 'BÂBORD gauche écran  ·  σ < 0,2°  ·  3–30 s'
+                                : 'TRIBORD gauche écran  ·  σ < 0,2°  ·  3–30 s',
+                            style: const TextStyle(
                               color: DeckColors.label,
                               fontSize: 9,
                             ),

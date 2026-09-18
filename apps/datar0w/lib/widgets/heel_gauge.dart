@@ -6,18 +6,28 @@ import '../session/heel.dart';
 import '../theme/deck_theme.dart';
 
 class HeelLabels extends StatelessWidget {
-  const HeelLabels({super.key});
+  const HeelLabels({
+    super.key,
+    this.perspective = HeelPerspective.rower,
+  });
+
+  final HeelPerspective perspective;
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    final cox = perspective == HeelPerspective.cox;
+    final leftLabel = cox ? 'BÂBORD' : 'TRIBORD';
+    final rightLabel = cox ? 'TRIBORD' : 'BÂBORD';
+    final leftColor = cox ? DeckColors.babord : DeckColors.tribord;
+    final rightColor = cox ? DeckColors.tribord : DeckColors.babord;
+    return Row(
       children: [
         Flexible(
           child: Text(
-            'TRIBORD',
+            leftLabel,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: DeckColors.tribord,
+              color: leftColor,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.0,
               fontSize: 11,
@@ -25,16 +35,16 @@ class HeelLabels extends StatelessWidget {
           ),
         ),
         Text(
-          'réf. rameur',
-          style: TextStyle(color: DeckColors.label, fontSize: 9),
+          cox ? 'réf. barreur' : 'réf. rameur',
+          style: const TextStyle(color: DeckColors.label, fontSize: 9),
         ),
         Flexible(
           child: Text(
-            'BÂBORD',
+            rightLabel,
             textAlign: TextAlign.right,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: DeckColors.babord,
+              color: rightColor,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.0,
               fontSize: 11,
@@ -46,22 +56,30 @@ class HeelLabels extends StatelessWidget {
   }
 }
 
-/// Jauge + horizon : + à gauche (tribord / vert).
+/// Jauge + horizon. Rameur : + à gauche (tribord / vert).
+/// Barreur : + (tribord / vert) à droite.
 class HeelGauge extends StatelessWidget {
-  const HeelGauge({super.key, required this.giteDeg});
+  const HeelGauge({
+    super.key,
+    required this.giteDeg,
+    this.perspective = HeelPerspective.rower,
+  });
 
   final double giteDeg;
+  final HeelPerspective perspective;
 
   @override
   Widget build(BuildContext context) {
     final v = clampHeel(giteDeg);
-    final x = heelAlignmentX(v);
+    final x = heelAlignmentX(v, perspective: perspective);
     return Column(
       children: [
         SizedBox(
           height: 56,
           child: CustomPaint(
-            painter: _HorizonPainter(giteDeg: v),
+            painter: _HorizonPainter(
+              giteDeg: perspective == HeelPerspective.cox ? -v : v,
+            ),
             child: const SizedBox.expand(),
           ),
         ),

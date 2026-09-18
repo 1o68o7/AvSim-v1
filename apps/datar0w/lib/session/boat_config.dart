@@ -8,12 +8,14 @@ class BoatConfig {
     this.classe = '1x',
     this.seatIndex = 1,
     this.role = CrewRole.rower,
+    this.coxPosition = CoxPosition.rear,
     this.bassin = 'Bassin de Mantes-la-Jolie',
   });
 
   final String classe;
   final int seatIndex;
   final CrewRole role;
+  final CoxPosition coxPosition;
   final String bassin;
 
   BoatClassInfo get info => BoatClassInfo.of(classe);
@@ -22,13 +24,18 @@ class BoatConfig {
 
   bool get coxed => info.coxed;
 
-  /// 1 = stroke / nage. Indéfini pour le barreur (siège rameur).
+  bool get isCox => role == CrewRole.cox;
+
+  /// 1 = stroke / nage. Inutilisé si barreur.
   int get clampedSeat {
     final n = seats;
     if (seatIndex < 1) return 1;
     if (seatIndex > n) return n;
     return seatIndex;
   }
+
+  /// `null` pour le barreur (pas de siège rameur).
+  int? get metaSeatIndex => isCox ? null : clampedSeat;
 
   /// Sièges du bateau non occupés par ce téléphone (local / poll API).
   List<int> get waitingSeats {
@@ -43,25 +50,29 @@ class BoatConfig {
         'seats': seats,
         'cox': coxed,
         'role': role.wire,
-        'seatIndex': clampedSeat,
+        'seatIndex': metaSeatIndex,
+        if (isCox) 'coxPosition': coxPosition.wire,
       };
 
   BoatConfig copyWith({
     String? classe,
     int? seatIndex,
     CrewRole? role,
+    CoxPosition? coxPosition,
     String? bassin,
   }) {
     final next = BoatConfig(
       classe: classe ?? this.classe,
       seatIndex: seatIndex ?? this.seatIndex,
       role: role ?? this.role,
+      coxPosition: coxPosition ?? this.coxPosition,
       bassin: bassin ?? this.bassin,
     );
     return BoatConfig(
       classe: next.classe,
       seatIndex: next.clampedSeat,
       role: next.role,
+      coxPosition: next.coxPosition,
       bassin: next.bassin,
     );
   }
@@ -72,12 +83,23 @@ class BoatConfigNotifier extends Notifier<BoatConfig> {
   BoatConfig build() => const BoatConfig();
 
   void setClasse(String code) {
-    state = state.copyWith(classe: BoatClassInfo.of(code).code, seatIndex: 1);
+    final info = BoatClassInfo.of(code);
+    var role = state.role;
+    if (!info.coxed && role == CrewRole.cox) {
+      role = CrewRole.rower;
+    }
+    state = state.copyWith(
+      classe: info.code,
+      seatIndex: 1,
+      role: role,
+    );
   }
 
   void setSeat(int i) => state = state.copyWith(seatIndex: i);
 
   void setRole(CrewRole role) => state = state.copyWith(role: role);
+
+  void setCoxPosition(CoxPosition p) => state = state.copyWith(coxPosition: p);
 
   void setBassin(String v) => state = state.copyWith(bassin: v);
 }

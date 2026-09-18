@@ -45,6 +45,8 @@ Gauche écran = **TRIBORD** vert `#46C275`. Droite = **BÂBORD** rouge `#E05353`
 Alerte trop tribords : bandeau **vert foncé** `#0F5C32`. Trop bâbord : `#E05353`.  
 `+` = tribords (gauche écran en bas). IMU en axes écran (paysage, rotation 90°). Voir `docs/CONVENTION-BABORD-TRIBORD.md`.
 
+Barreur : **gauche = BÂBORD**, droite = TRIBORD (`réf. barreur`). Cadence = « — » ou estim. tel.
+
 ## Baro
 
 `sensors_plus` `barometerEventStream` seulement. **Pas** `environment_sensors` (jcenter / AGP 9). Sinon `p_hpa` / `alt_baro` = `null`.
