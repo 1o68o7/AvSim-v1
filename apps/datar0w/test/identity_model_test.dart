@@ -78,6 +78,7 @@ void main() {
     final a2 = (await store.listAssignments()).single;
     expect(a2.seatIndex, 3);
     expect(a2.side, SidePref.babord);
+    expect(a2.createdAt, isNotNull);
     expect(Assignment.fromJson(a2.toJson()).id, a2.id);
 
     await store.deleteRower(rower.id);

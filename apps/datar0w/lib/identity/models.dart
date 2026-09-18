@@ -345,6 +345,7 @@ class Assignment {
     this.oars = const [],
     this.role = 'rower',
     this.coxPosition,
+    required this.createdAt,
   });
 
   final String id;
@@ -355,6 +356,7 @@ class Assignment {
   final List<String> oars;
   final String role;
   final String? coxPosition;
+  final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -365,6 +367,7 @@ class Assignment {
         'oars': oars,
         'role': role,
         'coxPosition': coxPosition,
+        'createdAt': createdAt.toUtc().toIso8601String(),
       };
 
   static Assignment fromJson(Map<String, dynamic> j) => Assignment(
@@ -376,6 +379,9 @@ class Assignment {
         oars: (j['oars'] as List?)?.map((e) => '$e').toList() ?? const [],
         role: j['role'] as String? ?? 'rower',
         coxPosition: j['coxPosition'] as String?,
+        createdAt: j['createdAt'] is String
+            ? DateTime.parse(j['createdAt'] as String)
+            : DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
       );
 
   static Assignment create({
@@ -386,6 +392,7 @@ class Assignment {
     List<String> oars = const [],
     String role = 'rower',
     String? coxPosition,
+    DateTime? createdAt,
   }) {
     return Assignment(
       id: newIdentityId(),
@@ -396,6 +403,13 @@ class Assignment {
       oars: oars,
       role: role,
       coxPosition: coxPosition,
+      createdAt: createdAt ?? DateTime.now().toUtc(),
     );
   }
+}
+
+bool sameLocalDay(DateTime a, DateTime b) {
+  final la = a.toLocal();
+  final lb = b.toLocal();
+  return la.year == lb.year && la.month == lb.month && la.day == lb.day;
 }

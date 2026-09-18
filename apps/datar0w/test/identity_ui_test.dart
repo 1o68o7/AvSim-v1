@@ -1,4 +1,5 @@
 import 'package:datar0w/features/identity/screen_club.dart';
+import 'package:datar0w/features/identity/screen_crew.dart';
 import 'package:datar0w/features/identity/screen_who.dart';
 import 'package:datar0w/identity/controller.dart';
 import 'package:datar0w/identity/models.dart';
@@ -59,5 +60,17 @@ void main() {
     await tester.pump();
     expect(find.text('+ Ajouter'), findsNothing);
     expect(find.text('ENREGISTRER LE CLUB'), findsNothing);
+  });
+
+  testWidgets('composition : hors coach → réservé', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [identityStoreOverride()],
+        child: const MaterialApp(home: CrewScreen()),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('Réservé au coach.'), findsOneWidget);
+    expect(find.text('ENREGISTRER L’ÉQUIPAGE'), findsNothing);
   });
 }

@@ -82,6 +82,26 @@ class IdentitySnapshot {
     }
     return null;
   }
+
+  List<ParkBoat> readyBoatsForClub(String? clubId) => boats
+      .where((b) =>
+          b.status == BoatParkStatus.ready &&
+          (clubId == null || b.clubId == clubId))
+      .toList();
+
+  bool rowerAssignedTodayElsewhere(
+    String rowerId, {
+    String? exceptBoatId,
+    DateTime? now,
+  }) {
+    final n = now ?? DateTime.now();
+    for (final a in assignments) {
+      if (a.rowerId != rowerId) continue;
+      if (exceptBoatId != null && a.boatId == exceptBoatId) continue;
+      if (sameLocalDay(a.createdAt, n)) return true;
+    }
+    return false;
+  }
 }
 
 /// Notifier : racine test = lecture sync ; sinon premier frame vide + reload.
