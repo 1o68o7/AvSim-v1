@@ -193,6 +193,12 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     await _refresh();
   }
 
+  Future<void> setClubRole(ClubMemberRole role) async {
+    final prefs = await _store.loadState();
+    await _store.saveState(prefs.copyWith(clubRole: role));
+    await _refresh();
+  }
+
   Future<void> reloadFromStore() async {
     await _refresh();
   }
@@ -203,4 +209,15 @@ final identityProvider =
   IdentityController.new,
 );
 
-bool canEditPark(CrewRole role) => role == CrewRole.coach;
+bool canEditPark(IdentitySnapshot snap, CrewRole session) =>
+    session == CrewRole.coach && snap.prefs.clubRole == ClubMemberRole.admin;
+
+bool canCheckoutOps(IdentitySnapshot snap, CrewRole session) =>
+    session == CrewRole.coach &&
+    (snap.prefs.clubRole == ClubMemberRole.coach ||
+        snap.prefs.clubRole == ClubMemberRole.admin);
+
+bool boatAllowsRower(ParkBoat boat, Rower rower) {
+  if (rower.level == RowerLevel.loisir) return boat.loisirOk;
+  return true;
+}

@@ -24,6 +24,7 @@ class _BoatEditScreenState extends ConsumerState<BoatEditScreen> {
   final _oars = TextEditingController();
   String _classe = '1x';
   BoatParkStatus _status = BoatParkStatus.ready;
+  bool _loisirOk = true;
   bool _ready = false;
   String? _id;
 
@@ -47,12 +48,13 @@ class _BoatEditScreenState extends ConsumerState<BoatEditScreen> {
       _classe = existing.classe;
       _status = existing.status;
       _oars.text = existing.oarRack.join('/');
+      _loisirOk = existing.loisirOk;
     }
     _ready = true;
   }
 
   Future<void> _save() async {
-    if (!canEditPark(ref.read(boatConfigProvider).role)) return;
+    if (!canEditPark(ref.read(identityProvider), ref.read(boatConfigProvider).role)) return;
     final name = _name.text.trim();
     final club = ref.read(identityProvider).activeClub;
     if (name.isEmpty || club == null) return;
@@ -68,6 +70,7 @@ class _BoatEditScreenState extends ConsumerState<BoatEditScreen> {
             classe: _classe,
             oarRack: rack,
             status: _status,
+            loisirOk: _loisirOk,
           )
         : ParkBoat(
             id: _id!,
@@ -78,6 +81,7 @@ class _BoatEditScreenState extends ConsumerState<BoatEditScreen> {
             cox: BoatClassInfo.of(_classe).coxed,
             oarRack: rack,
             status: _status,
+            loisirOk: _loisirOk,
           );
     await ref.read(identityProvider.notifier).saveBoat(boat);
     if (mounted) context.go(AppRoutes.club);
@@ -86,7 +90,10 @@ class _BoatEditScreenState extends ConsumerState<BoatEditScreen> {
   @override
   Widget build(BuildContext context) {
     final snap = ref.watch(identityProvider);
-    final edit = canEditPark(ref.watch(boatConfigProvider).role);
+    final edit = canEditPark(
+      snap,
+      ref.watch(boatConfigProvider).role,
+    );
     _hydrate(snap);
     final info = BoatClassInfo.of(_classe);
     if (!edit) {
@@ -141,6 +148,13 @@ class _BoatEditScreenState extends ConsumerState<BoatEditScreen> {
             decoration: const InputDecoration(
               labelText: 'Pelles (ex. P1/P2/P4)',
             ),
+          ),
+          const SizedBox(height: 8),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Ouvert loisir'),
+            value: _loisirOk,
+            onChanged: (v) => setState(() => _loisirOk = v),
           ),
           const SizedBox(height: 8),
           const Text('Statut'),

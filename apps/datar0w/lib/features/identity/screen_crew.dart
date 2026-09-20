@@ -102,6 +102,11 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
         .contains(rowerId)) {
       return true;
     }
+    final boat = snap.boatById(_boatId);
+    final rower = snap.rowerById(rowerId);
+    if (boat != null && rower != null && !boatAllowsRower(boat, rower)) {
+      return true;
+    }
     return snap.rowerAssignedTodayElsewhere(
       rowerId,
       exceptBoatId: _boatId,
@@ -117,6 +122,8 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
     for (var i = 1; i <= boat.seats; i++) {
       final d = _seats[i];
       if (d == null || d.rowerId == null) continue;
+      final rower = snap.rowerById(d.rowerId);
+      if (rower != null && !boatAllowsRower(boat, rower)) continue;
       crew.add(
         Assignment.create(
           boatId: boat.id,

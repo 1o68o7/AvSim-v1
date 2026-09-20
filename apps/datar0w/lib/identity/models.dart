@@ -66,6 +66,23 @@ extension RowerLevelX on RowerLevel {
   }
 }
 
+enum ClubMemberRole { rower, coach, admin }
+
+extension ClubMemberRoleX on ClubMemberRole {
+  String get wire => name;
+
+  static ClubMemberRole parse(String? raw) {
+    switch (raw) {
+      case 'coach':
+        return ClubMemberRole.coach;
+      case 'rower':
+        return ClubMemberRole.rower;
+      default:
+        return ClubMemberRole.admin;
+    }
+  }
+}
+
 enum BoatParkStatus { ready, reserved, out, maintenance }
 
 extension BoatParkStatusX on BoatParkStatus {
@@ -257,6 +274,7 @@ class ParkBoat {
     required this.cox,
     this.oarRack = const [],
     this.status = BoatParkStatus.ready,
+    this.loisirOk = true,
   });
 
   final String id;
@@ -267,6 +285,7 @@ class ParkBoat {
   final bool cox;
   final List<String> oarRack;
   final BoatParkStatus status;
+  final bool loisirOk;
 
   BoatClassInfo get info => BoatClassInfo.of(classe);
 
@@ -275,6 +294,7 @@ class ParkBoat {
     String? classe,
     List<String>? oarRack,
     BoatParkStatus? status,
+    bool? loisirOk,
   }) {
     final info = BoatClassInfo.of(classe ?? this.classe);
     return ParkBoat(
@@ -286,6 +306,7 @@ class ParkBoat {
       cox: info.coxed,
       oarRack: oarRack ?? this.oarRack,
       status: status ?? this.status,
+      loisirOk: loisirOk ?? this.loisirOk,
     );
   }
 
@@ -298,6 +319,7 @@ class ParkBoat {
         'cox': cox,
         'oarRack': oarRack,
         'status': status.wire,
+        'loisirOk': loisirOk,
       };
 
   static ParkBoat fromJson(Map<String, dynamic> j) {
@@ -313,6 +335,7 @@ class ParkBoat {
       cox: j['cox'] as bool? ?? info.coxed,
       oarRack: (j['oarRack'] as List?)?.map((e) => '$e').toList() ?? const [],
       status: BoatParkStatusX.parse(j['status'] as String?),
+      loisirOk: j['loisirOk'] as bool? ?? true,
     );
   }
 
@@ -322,6 +345,7 @@ class ParkBoat {
     required String classe,
     List<String> oarRack = const [],
     BoatParkStatus status = BoatParkStatus.ready,
+    bool loisirOk = true,
   }) {
     final info = BoatClassInfo.of(classe);
     return ParkBoat(
@@ -333,6 +357,7 @@ class ParkBoat {
       cox: info.coxed,
       oarRack: oarRack,
       status: status,
+      loisirOk: loisirOk,
     );
   }
 }

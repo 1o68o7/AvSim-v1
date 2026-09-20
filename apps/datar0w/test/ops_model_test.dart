@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:datar0w/identity/controller.dart';
 import 'package:datar0w/identity/models.dart';
 import 'package:datar0w/identity/store.dart';
 import 'package:datar0w/ops/alignment.dart';
 import 'package:datar0w/ops/oar_set.dart';
 import 'package:datar0w/ops/service.dart';
 import 'package:datar0w/ops/store.dart';
+import 'package:datar0w/session/boat_class.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -174,5 +176,31 @@ void main() {
   test('alignement : 8+ avant 1x', () {
     expect(boardingRank('8+') < boardingRank('1x'), isTrue);
     expect(boardingRank('4x') < boardingRank('2x'), isTrue);
+  });
+
+  test('loisir seulement sur coque loisir_ok', () {
+    final loisir = Rower.create(
+      displayName: 'Loisir',
+      birthDate: DateTime(1990, 1, 1),
+    ).copyWith(level: RowerLevel.loisir);
+    final comp = loisir.copyWith(level: RowerLevel.competiteur);
+    final closed = boat.copyWith(loisirOk: false);
+    expect(boatAllowsRower(closed, loisir), isFalse);
+    expect(boatAllowsRower(closed, comp), isTrue);
+    expect(boatAllowsRower(boat, loisir), isTrue);
+  });
+
+  test('admin édite le parc, coach sort', () {
+    const snapAdmin = IdentitySnapshot(
+      prefs: IdentityPrefs(clubRole: ClubMemberRole.admin),
+    );
+    const snapCoach = IdentitySnapshot(
+      prefs: IdentityPrefs(clubRole: ClubMemberRole.coach),
+    );
+    expect(canEditPark(snapAdmin, CrewRole.coach), isTrue);
+    expect(canEditPark(snapCoach, CrewRole.coach), isFalse);
+    expect(canCheckoutOps(snapCoach, CrewRole.coach), isTrue);
+    expect(canCheckoutOps(snapAdmin, CrewRole.coach), isTrue);
+    expect(canCheckoutOps(snapAdmin, CrewRole.rower), isFalse);
   });
 }

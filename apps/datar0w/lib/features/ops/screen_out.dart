@@ -86,7 +86,7 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
   Widget build(BuildContext context) {
     final role = ref.watch(boatConfigProvider).role;
     final snap = ref.watch(identityProvider);
-    if (role != CrewRole.coach) {
+    if (role != CrewRole.coach || !canCheckoutOps(snap, role)) {
       return const DeckScaffold(
         title: 'SORTIE',
         body: Center(

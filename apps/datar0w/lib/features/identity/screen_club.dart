@@ -63,7 +63,7 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
   Widget build(BuildContext context) {
     final snap = ref.watch(identityProvider);
     final role = ref.watch(boatConfigProvider).role;
-    final edit = canEditPark(role);
+    final edit = canEditPark(snap, role);
     _hydrate(snap);
     final boats = snap.boatsForClub(snap.activeClub?.id);
 
@@ -88,6 +88,29 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
             enabled: edit,
             decoration: const InputDecoration(labelText: 'Code court (3–4 car.)'),
           ),
+          if (role == CrewRole.coach) ...[
+            const SizedBox(height: 12),
+            const Text(
+              'RÔLE CLUB',
+              style: TextStyle(
+                color: DeckColors.label,
+                fontSize: 11,
+                letterSpacing: 1.1,
+              ),
+            ),
+            Wrap(
+              spacing: 8,
+              children: [
+                for (final r in [ClubMemberRole.coach, ClubMemberRole.admin])
+                  ChoiceChip(
+                    label: Text(r.wire),
+                    selected: snap.prefs.clubRole == r,
+                    onSelected: (_) =>
+                        ref.read(identityProvider.notifier).setClubRole(r),
+                  ),
+              ],
+            ),
+          ],
           if (edit) ...[
             const SizedBox(height: 12),
             FilledButton(

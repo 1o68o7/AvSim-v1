@@ -216,30 +216,40 @@ class IdentityStore {
 }
 
 class IdentityPrefs {
-  const IdentityPrefs({this.activeRowerId, this.activeClubId});
+  const IdentityPrefs({
+    this.activeRowerId,
+    this.activeClubId,
+    this.clubRole = ClubMemberRole.admin,
+  });
 
   final String? activeRowerId;
   final String? activeClubId;
+  /// Rôle club (Point B `club_members.role`). Défaut admin = téléphone qui tient le parc.
+  final ClubMemberRole clubRole;
 
   IdentityPrefs copyWith({
     String? activeRowerId,
     String? activeClubId,
+    ClubMemberRole? clubRole,
     bool clearRower = false,
     bool clearClub = false,
   }) {
     return IdentityPrefs(
       activeRowerId: clearRower ? null : (activeRowerId ?? this.activeRowerId),
       activeClubId: clearClub ? null : (activeClubId ?? this.activeClubId),
+      clubRole: clubRole ?? this.clubRole,
     );
   }
 
   Map<String, dynamic> toJson() => {
         'activeRowerId': activeRowerId,
         'activeClubId': activeClubId,
+        'clubRole': clubRole.wire,
       };
 
   static IdentityPrefs fromJson(Map<String, dynamic> j) => IdentityPrefs(
         activeRowerId: j['activeRowerId'] as String?,
         activeClubId: j['activeClubId'] as String?,
+        clubRole: ClubMemberRoleX.parse(j['clubRole'] as String?),
       );
 }
