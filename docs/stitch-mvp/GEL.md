@@ -41,25 +41,25 @@ HTML utile (extraits, pas labo) : `docs/stitch-mvp/gel/`.
 | C3 Départ / alignement | `/ops/departure` | **codé** (C3) — enrichir, pas de 2ᵉ route |
 | C4 Impact | `/ops/maintenance` (+ fiche impact) | **codé** (C4) |
 | C5 Fiche coque | `/club/boat` | **codé** |
-| E1 Calendrier FFA | `/calendar` | **à coder** |
-| E2 Fiche événement | `/calendar/:id` | **à coder** |
-| E3 Plans d’eau | `/waters` | **à coder** |
-| E4 Localisation club | `/club` (pin carte) | **à coder** (enrichir I3) |
-| I live — presets + mini-carte | `/live` | **à coder** (layout, pas nouvelle route) |
-| R1 Pairing BLE | `/devices` | **à coder** |
-| R2 Chip FC/SpO2 | overlay `/live` | **à extraire seulement** |
-| R3 Courbe FC replay | `/replay` | **à coder** |
-| R4 Visibilité coach | chip `/coach` si `hrBpm` | **à coder** |
-| R5 + J4 Consentement santé | `/consent` | **un seul écran** |
-| J1 Mes objets | `/devices` | **à coder** |
-| J2 Readiness | `/physio` | **à coder** |
-| J3 Mes constantes | `/physio` | **à coder** |
-| L1 Calendrier loisirs | `/calendar` (filtres) | **à coder** (après E) |
-| L2 Fiche événement loisir | `/calendar/:id` | **à coder** |
-| L3 Signalement | `/calendar/:id` | **à coder** |
-| L4 Historique rameur | `/physio` + profil | **à coder** |
-| L5 Spinoscope loisir | `/spinoscope` | **étendre D4** |
-| Auth club (Point B) | `/auth` | **à coder** (local si pas de clés) |
+| E1 Calendrier FFA | `/calendar` | **codé** |
+| E2 Fiche événement | `/calendar/:id` | **codé** |
+| E3 Plans d’eau | `/waters` | **codé** |
+| E4 Localisation club | `/club` (pin carte) | **codé** |
+| I live — presets + mini-carte | `/live` | **codé** |
+| R1 Pairing BLE | `/devices` | **codé** (saisie locale ; scan GATT parser) |
+| R2 Chip FC/SpO2 | overlay `/live` | **codé** (extrait, live Deck conservé) |
+| R3 Courbe FC replay | `/replay` | **codé** |
+| R4 Visibilité coach | chip `/coach` si `hrBpm` | **codé** |
+| R5 + J4 Consentement santé | `/consent` | **codé** (un seul écran) |
+| J1 Mes objets | `/devices` | **codé** |
+| J2 Readiness | `/physio` | **codé** |
+| J3 Mes constantes | `/physio` | **codé** |
+| L1 Calendrier loisirs | `/calendar` (filtres) | **codé** |
+| L2 Fiche événement loisir | `/calendar/:id` | **codé** |
+| L3 Signalement | `/calendar/:id` | **codé** |
+| L4 Historique rameur | `/physio` + profil | **codé** |
+| L5 Spinoscope loisir | `/spinoscope` | **codé** (étend D4) |
+| Auth club (Point B) | `/auth` | **codé** (local si pas de clés) |
 
 ## Ignorés (labo / doublons)
 

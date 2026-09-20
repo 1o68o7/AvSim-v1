@@ -29,7 +29,7 @@ class HealthConsent {
 }
 
 class ConsentStore {
-  ConsentStore({Directory? root}) : _root = root;
+  ConsentStore({this._root});
   final Directory? _root;
 
   Future<File> _file() async {

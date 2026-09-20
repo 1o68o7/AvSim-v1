@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'layout_model.dart';
 
 class LayoutStore {
-  LayoutStore({Directory? root}) : _root = root;
+  LayoutStore({this._root});
 
   final Directory? _root;
 

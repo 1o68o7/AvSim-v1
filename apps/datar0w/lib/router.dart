@@ -10,6 +10,8 @@ import 'features/cox/screen_cox.dart';
 import 'features/identity/screen_boat_edit.dart';
 import 'features/identity/screen_club.dart';
 import 'features/identity/screen_crew.dart';
+import 'features/identity/screen_devices.dart';
+import 'features/identity/screen_physio.dart';
 import 'features/identity/screen_home_roles.dart';
 import 'features/identity/screen_home_rower.dart';
 import 'features/identity/screen_import.dart';
@@ -220,6 +222,16 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.consent,
       name: 'consent',
       builder: (context, state) => const ConsentScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.devices,
+      name: 'devices',
+      builder: (context, state) => const DevicesScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.physio,
+      name: 'physio',
+      builder: (context, state) => const PhysioScreen(),
     ),
   ],
 );
