@@ -38,6 +38,7 @@ C'est le chantier **parc opérationnel**, pas juste « parc inventaire ». Sans 
 | **Verrou multi-coach** | ❌ |
 | **Écran départ / alignement** | ❌ |
 | **Filtre loisir/compétiteur sur coques** | ❌ (décision à figer) |
+| **Photo d'impact → maintenance** | ❌ |
 
 ---
 
@@ -55,7 +56,7 @@ Liste exhaustive de ce que je vois. À trancher : **garder / repousser / jeter**
 
 ### 2.2 Pelles (le vrai métier aviron)
 
-6. **Jeu de pelles de sortie** — à la sortie, on choisit *quelles* pelles sortent avec la coque (sous-ensemble du rack). Pas juste « le rack a P1/P2/P4 », mais « on emmène P1×2, P2×2, P4×1 ».
+6. **Jeu de pelles de sortie** — à la sortie, on choisit *quelles* pelles sortent avec la coque (sous-ensemble du rack). Pas juste « le rack a P1/P2/P4 », mais « on emmène P1×2, P2×2, P4×1 ». **Critique en compétition** : le jeu de pelles est figé pour la course, pas improvisé au quai.
 7. **Attribution poste → pelle** — déjà dans `Assignment.oars`, mais à **figer à la sortie** (pas modifiable après embarquement sans trace).
 8. **Retour des pelles** — check-in vérifie que les pelles sont revenues (ou signale manquant). Simple booléen « pelles OK » au MVP.
 9. **Usure / maintenance pelles** — plus tard. Hors MVP.
@@ -81,14 +82,24 @@ Liste exhaustive de ce que je vois. À trancher : **garder / repousser / jeter**
 20. **Règle d'attribution** — loisir ne peut recevoir qu'une coque `loisir_ok`. Compétiteur : toutes (sauf maintenance).
 21. **Quota loisir** — plus tard. Hors MVP.
 
-### 2.6 Hors scope assumé (pour l'instant)
+### 2.6 Signalement d'impact → maintenance (nouveau)
+
+22. **Photo d'impact** — à la sortie ou au retour, le coach (ou le barreur) peut attacher **une photo** d'un choc / rayure / fissure sur la coque. La coque bascule automatiquement en `maintenance` (ou file d'attente maintenance) jusqu'à validation.
+23. **Signalement texte** — champ libre court « ce qui s'est passé » lié à la photo.
+24. **File maintenance** — liste des coques signalées, avec photo + note, statut `maintenance` jusqu'à réparation. Le coach ne peut pas re-sortir une coque en maintenance sans lever le flag.
+25. **Visibilité rameur** — le rameur voit « ta coque est en maintenance » s'il était affecté, sans détail photo si sensible.
+
+> Note : pas de caméra live ni flux continu. **Une photo à la demande**, prise au moment du signalement. Hors scope : inspection IA, géoloc du hangar.
+
+### 2.7 Hors scope assumé (pour l'instant)
 
 - Planification multi-jours / calendrier de séances.
 - Réservation à l'avance (J-1) — on reste « sortie du moment ».
-- Suivi d'usure pelles / coques (compteurs de sorties).
+- Suivi d'usure pelles / coques (compteurs de sorties) — la photo d'impact couvre le cas ponctuel.
 - GPS de localisation du hangar.
 - Facturation / abonnements loisir.
 - Télémétrie par siège (Lot G).
+- Inspection IA des dommages.
 
 ---
 
@@ -101,10 +112,12 @@ Avant de coder, on fixe :
 | D1 | Sortie = action explicite ou implicite (composition = sortie) ? | Explicite / implicite | **Explicite** — composition ≠ sortie. On compose d'abord, on sort ensuite. |
 | D2 | Verrou multi-coach : refus sec ou file d'attente ? | Refus / file | **File** — plus réaliste club. |
 | D3 | Check-in auto à la fin de séance ? | Auto / manuel / proposer | **Proposer** (opt-in). |
-| D4 | Pelles : jeu de sortie dédié ou juste rack ? | Rack seul / jeu sortie | **Jeu de sortie** — c'est le vrai usage. |
+| D4 | Pelles : jeu de sortie dédié ou juste rack ? | Rack seul / jeu sortie | **Jeu de sortie** — c'est le vrai usage, surtout en compétition. |
 | D5 | Filtre loisir/compétiteur sur coques ? | Oui / non | **Oui**, tag `loisir_ok`. |
 | D6 | Rôles : `coach` peut-il sortir sans être `admin` ? | Coach sort / admin seulement | **Coach sort**, admin gère le parc. |
-| D7 | Scope MVP : tout 2.1–2.5 ou sous-ensemble ? | Complet / minimal | **Minimal** : 1–5, 6–8, 11, 15–16, 19–20. Le reste en lots suivants. |
+| D7 | Scope MVP : tout 2.1–2.6 ou sous-ensemble ? | Complet / minimal | **Minimal** : 1–8, 11–12, 15–16, 19–20, **22–24**. Le reste en lots suivants. |
+| D8 | Photo d'impact : obligatoire ou optionnelle à la sortie ? | Obligatoire / opt-in | **Opt-in** — ne pas bloquer la sortie si pas de dommage. |
+| D9 | Stockage photos : local d'abord ou direct cloud ? | Local / cloud | **Local d'abord**, sync cloud au Point B (évite upload si hors-ligne). |
 
 ---
 
@@ -112,15 +125,16 @@ Avant de coder, on fixe :
 
 Chaque lot = 1 commit, `flutter analyze` clean, tests, APK qui s'installe.
 
-**C1 — Modèle sortie + verrou** (fondations, pas d'écran)
-- `lib/ops/boat_out.dart` : `BoatOut` (boatId, coachId, startedAt, plannedEnd, status, oarSet).
-- `lib/ops/oar_set.dart` : jeu de pelles de sortie (sous-ensemble du rack).
-- Store local + tests : sortie/retour, verrou, file d'attente.
-- Commit : `feat(datar0w): boat checkout model + oar sets`
+**C1 — Modèle sortie + verrou + jeu de pelles** (fondations, pas d'écran)
+- `lib/ops/boat_out.dart` : `BoatOut` (boatId, coachId, startedAt, plannedEnd, status, oarSetId).
+- `lib/ops/oar_set.dart` : `OarSet` (boatId, items[{spec, qty}], checkedOutAt) — sous-ensemble du rack.
+- `lib/ops/impact_report.dart` : `ImpactReport` (boatId, photoPath, note, reportedBy, reportedAt, status).
+- Store local + tests : sortie/retour, verrou, file d'attente, pelles manquantes, report impact → maintenance.
+- Commit : `feat(datar0w): boat checkout model + oar sets + impact reports`
 
 **C2 — Écran sortie / retour (coach)**
-- `/ops/out` : liste coques `ready` → CTA « Sortir » (choisit jeu de pelles, heure prévue).
-- `/ops/in` : coques `out` → CTA « Rentrer » (vérifie pelles).
+- `/ops/out` : liste coques `ready` → CTA « Sortir » (choisit jeu de pelles, heure prévue, option photo impact).
+- `/ops/in` : coques `out` → CTA « Rentrer » (vérifie pelles, signale manquant).
 - Verrou : coque `out` grisée à la composition.
 - Commit : `feat(datar0w): boat checkout/in screens`
 
@@ -134,20 +148,27 @@ Chaque lot = 1 commit, `flutter analyze` clean, tests, APK qui s'installe.
 - Rôles `coach` vs `admin` (réutilise Point B `club_members.role`).
 - Commit : `feat(datar0w): boat access rules loisir/competiteur`
 
-**C5 — Sync Supabase (branche Point B)**
-- Tables `boat_outs`, `oar_sets`. RLS par club. Realtime sur `boat_outs`.
+**C5 — Signalement d'impact (photo + maintenance)**
+- Depuis `/ops/out` ou `/ops/in` : CTA « Signaler un impact » → photo (caméra) + note courte.
+- Coque → `maintenance`, file visible coach/admin.
+- Rameur affecté : notification « coque en maintenance ».
+- Commit : `feat(datar0w): impact photo + maintenance queue`
+
+**C6 — Sync Supabase (branche Point B)**
+- Tables `boat_outs`, `oar_sets`, `impact_reports`. RLS par club. Realtime sur `boat_outs`.
+- Photos : upload Storage au sync (local d'abord).
 - Commit : `feat(datar0w): boat ops sync`
 
-Hors scope C1–C5 : usure pelles, calendrier multi-jours, réservation J-1, GPS hangar.
+Hors scope C1–C6 : usure pelles (compteurs), calendrier multi-jours, réservation J-1, GPS hangar, inspection IA.
 
 ---
 
-## 5. Prompt Cursor — Lots C1 → C4 (à coller après validation)
+## 5. Prompt Cursor — Lots C1 → C5 (à coller après validation)
 
-> Ce bloc est le prompt exact. À ajuster selon les décisions D1–D7 ci-dessus.
+> Ce bloc est le prompt exact. À ajuster selon les décisions D1–D9 ci-dessus.
 
 ```
-DataR0w — Point C : parc opérationnel (sortie, alignement, pelles, multi-coach).
+DataR0w — Point C : parc opérationnel (sortie, alignement, pelles, multi-coach, impact).
 Lis d'abord docs/CADRAGE-PARC-OPERATIONNEL.md et docs/CADRAGE-IDENTITE-CLUB-EQUIPAGE.md.
 
 Ne pas toucher AvSim. Ne pas revert compileSdk 37 / ndkVersion "30.0.16248370".
@@ -163,18 +184,22 @@ DA : #0B0E12 / blanc / #9AA0A6 / #2A2F36 / CTA #E8C547 / TRIBORD #46C275 / BÂBO
 - Pelles : JEU DE SORTIE dédié (sous-ensemble du rack), figé à la sortie. D4 = jeu sortie.
 - Filtre loisir/compétiteur : tag loisir_ok sur Boat. D5 = oui.
 - Coach peut sortir ; admin gère le parc (CRUD). D6 = coach sort.
-- Scope MVP = C1–C4 (minimal). D7 = minimal.
+- Photo d'impact : OPT-IN à la sortie/retour, pas bloquante. D8 = opt-in.
+- Photos : LOCAL d'abord, sync cloud au Point B. D9 = local.
+- Scope MVP = C1–C5 (minimal + impact). D7 = minimal.
 
-## C1 — modèle sortie + verrou, AUCUN écran
+## C1 — modèle sortie + verrou + jeu de pelles + impact, AUCUN écran
 lib/ops/boat_out.dart : BoatOut (boatId, coachId, startedAt, plannedEnd, status, oarSetId)
-lib/ops/oar_set.dart : OarSet (boatId, items[{spec, qty}], checkedOutAt)
+lib/ops/oar_set.dart : OarSet (boatId, items[{spec, qty}], checkedOutAt) — sous-ensemble du rack
+lib/ops/impact_report.dart : ImpactReport (boatId, photoPath, note, reportedBy, reportedAt, status)
 lib/ops/store.dart : CRUD local (JSON Documents/datar0w/ops/)
-Règles : coque out → non ré-assignable ; file d'attente si 2 coachs veulent la même.
-Tests : sortie/retour, verrou, file, pelles manquantes au retour.
-Commit : feat(datar0w): boat checkout model + oar sets
+Règles : coque out → non ré-assignable ; file d'attente si 2 coachs veulent la même ;
+         report impact → coque maintenance, non re-sortable sans lever le flag.
+Tests : sortie/retour, verrou, file, pelles manquantes, report impact → maintenance.
+Commit : feat(datar0w): boat checkout model + oar sets + impact reports
 
 ## C2 — écran sortie / retour (coach)
-/ops/out  : liste coques ready → CTA « Sortir » (jeu de pelles, heure prévue).
+/ops/out  : liste coques ready → CTA « Sortir » (jeu de pelles, heure prévue, option photo impact).
 /ops/in   : coques out → CTA « Rentrer » (vérifie pelles, signale manquant).
 Verrou : coque out grisée à /crew.
 Commit : feat(datar0w): boat checkout/in screens
@@ -189,19 +214,26 @@ Tag loisir_ok sur Boat. Règle d'attribution à la composition.
 Rôles coach vs admin (réutilise Point B club_members.role).
 Commit : feat(datar0w): boat access rules loisir/competiteur
 
+## C5 — signalement d'impact (photo + maintenance)
+Depuis /ops/out ou /ops/in : CTA « Signaler un impact » → photo (caméra) + note courte.
+Coque → maintenance, file visible coach/admin.
+Rameur affecté : notification « coque en maintenance ».
+Commit : feat(datar0w): impact photo + maintenance queue
+
 ## Hors scope
-Usure pelles, calendrier multi-jours, réservation J-1, GPS hangar, télémétrie par siège.
+Usure pelles (compteurs), calendrier multi-jours, réservation J-1, GPS hangar,
+inspection IA, télémétrie par siège.
 Ne pas redessiner /live /cox /tare /coach carte /replay /crew /club.
 
 flutter analyze clean. Tests ops verts.
-Un commit par lot C1…C4, dans cet ordre.
+Un commit par lot C1…C5, dans cet ordre.
 ```
 
 ---
 
 ## 6. Prochaine action
 
-1. **Débattre** la liste §2 et les décisions D1–D7 ci-dessus.
+1. **Débattre** la liste §2 et les décisions D1–D9 ci-dessus.
 2. Trancher → figer dans §3.
 3. Pousser le prompt §5 dans Cursor.
 4. C1 d'abord (modèle, pas d'écran), comme I1.
