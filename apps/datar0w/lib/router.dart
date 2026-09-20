@@ -10,6 +10,8 @@ import 'features/identity/screen_home_roles.dart';
 import 'features/identity/screen_home_rower.dart';
 import 'features/identity/screen_rower_edit.dart';
 import 'features/identity/screen_who.dart';
+import 'features/ops/screen_in.dart';
+import 'features/ops/screen_out.dart';
 import 'features/live/screen_3.dart';
 import 'features/presession/screen_2a.dart';
 import 'features/profile/screen_1.dart';
@@ -28,6 +30,8 @@ abstract final class AppRoutes {
   static const club = '/club';
   static const clubBoat = '/club/boat';
   static const crew = '/crew';
+  static const opsOut = '/ops/out';
+  static const opsIn = '/ops/in';
   static const profile = '/';
   static const presession = '/presession';
   static const tare = '/tare';
@@ -90,6 +94,16 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.crew,
       name: 'crew',
       builder: (context, state) => const CrewScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.opsOut,
+      name: 'ops-out',
+      builder: (context, state) => const OpsOutScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.opsIn,
+      name: 'ops-in',
+      builder: (context, state) => const OpsInScreen(),
     ),
     GoRoute(
       path: AppRoutes.profile,

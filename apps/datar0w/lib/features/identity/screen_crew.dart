@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../identity/controller.dart';
 import '../../identity/models.dart';
+import '../../ops/controller.dart';
 import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
@@ -110,6 +111,7 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
   Future<void> _save(IdentitySnapshot snap) async {
     final boat = snap.boatById(_boatId);
     if (boat == null) return;
+    if (ref.read(opsProvider).activeForBoat(boat.id) != null) return;
     final now = DateTime.now().toUtc();
     final crew = <Assignment>[];
     for (var i = 1; i <= boat.seats; i++) {
@@ -169,6 +171,13 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
     _ensureBoat(snap);
     final ready = snap.readyBoatsForClub(snap.activeClub?.id);
     final boat = snap.boatById(_boatId);
+    final ops = ref.watch(opsProvider);
+    final locked = snap
+        .boatsForClub(snap.activeClub?.id)
+        .where((b) => ops.activeForBoat(b.id) != null ||
+            b.status == BoatParkStatus.out ||
+            b.status == BoatParkStatus.reserved)
+        .toList();
 
     return DeckScaffold(
       title: 'COMPOSITION',
@@ -178,7 +187,7 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
         onPressed: () => context.go(AppRoutes.homeCoach),
         child: const Text('Retour'),
       ),
-      body: ready.isEmpty
+      body: ready.isEmpty && locked.isEmpty
           ? const Center(
               child: Text(
                 'Aucune coque prête. Statut hors d’eau / maintenance : non assignable.',
@@ -189,6 +198,22 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               children: [
+                if (locked.isNotEmpty) ...[
+                  for (final b in locked)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        '${b.name} — sortie, composition verrouillée',
+                        style: const TextStyle(color: DeckColors.muted),
+                      ),
+                    ),
+                ],
+                if (ready.isEmpty)
+                  const Text(
+                    'Aucune coque prête à composer.',
+                    style: TextStyle(color: DeckColors.muted),
+                  )
+                else
                 InputDecorator(
                   decoration: const InputDecoration(labelText: 'Coque'),
                   child: DropdownButtonHideUnderline(
@@ -212,7 +237,7 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
                     ),
                   ),
                 ),
-                if (boat != null) ...[
+                if (boat != null && ready.any((b) => b.id == boat.id)) ...[
                   const SizedBox(height: 12),
                   for (var i = 1; i <= boat.seats; i++)
                     _seatRow(snap, boat, i),
