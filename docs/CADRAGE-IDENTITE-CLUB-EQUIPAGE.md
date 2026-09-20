@@ -314,3 +314,276 @@ Ne pas redessiner /live /cox /tare /coach carte /replay.
 flutter analyze clean. Tests identité verts.
 Un commit par lot I1…I5, dans cet ordre.
 ```
+
+---
+
+## 9. Point B — Sync Supabase (cadrage + prompt Cursor)
+
+> **Prérequis** : I1–I5 mergés sur `main` (identité locale stable). Ce point B ne remplace pas le local : il **ajoute** une couche cloud. Le téléphone reste utilisable hors-ligne.
+>
+> **Hôte** : Supabase (Postgres + Auth + Realtime). Pas de serveur maison. Le projet Supabase est créé **par toi** dans le dashboard ; Cursor ne crée pas le projet cloud, il écrit le SQL + le client Dart.
+>
+> **Secrets** : `SUPABASE_URL` + `SUPABASE_ANON_KEY` dans `--dart-define` / CI secrets. **Jamais** dans le repo. Pas de `service_role` côté client.
+
+### 9.1 Décisions figées (point B)
+
+1. **Offline-first** : le local (JSON `Documents/datar0w/`) reste la source de vérité UI. Supabase = miroir + sync. Écriture locale **immédiate**, push en file d'attente, pull au reconnect.
+2. **Auth** : Supabase Auth, **email + magic link** (passwordless). Un user = un `auth.users.id`. Le `Rower` local gagne un `userId` nullable (rattachement au login). Pas de Google/OAuth au MVP B.
+3. **Multi-tenant = club** : `clubs.id` = tenant. RLS : un membre ne voit/écrit **que** les lignes de ses clubs. Rôles club : `coach` | `rower` | `cox` | `admin` (admin = coach + gestion membres).
+4. **RLS strict** : activé sur **toutes** les tables. Politiques `USING` + `WITH CHECK`. Fonctions `security definer` pour `is_club_member(club_id)` / `club_role(club_id)` avec `search_path = ''`.
+5. **Realtime** : Postgres Changes sur `assignments`, `boats`, `rowers` (filtrés par `club_id`) pour que 2 coachs / 2 tél voient la même composition. Pas de polling.
+6. **Conflits** : last-write-wins sur `updated_at`. Pas de merge manuel au MVP.
+7. **Pas de télémétrie live dans Supabase** : les samples `samples.jsonl` restent **locaux** (1 Hz, fichiers lourds). Seuls les **métadonnées de séance** (début/fin, rowerId, boatId, assignmentId, distance, gîte max) montent au cloud. La télémétrie par siège (Lot G) viendra plus tard.
+8. **Deep links** : scheme `datarow://auth/callback` (AndroidManifest + iOS Info.plist). Magic link → retour app.
+9. **Ne pas casser** I1–I5 : le store local reste ; on ajoute `lib/sync/` par-dessus. Mode « sans compte » (Passer) continue de marcher.
+10. **Pas de PowerSync / Brick** au MVP B : sync maison légère (outbox + delta `updated_at`). On pourra migrer si ça coince.
+
+### 9.2 Schéma Postgres (à pousser via `supabase/migrations/`)
+
+```sql
+-- 0001_identity_core.sql
+create extension if not exists pgcrypto;
+
+create table public.clubs (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  short_code text unique,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.club_members (
+  club_id uuid not null references public.clubs(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  role text not null check (role in ('admin','coach','rower','cox')),
+  rower_id uuid, -- lien optionnel vers public.rowers
+  joined_at timestamptz not null default now(),
+  primary key (club_id, user_id)
+);
+create index club_members_user_id_idx on public.club_members(user_id);
+
+create table public.rowers (
+  id uuid primary key default gen_random_uuid(),
+  club_id uuid not null references public.clubs(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete set null,
+  display_name text not null,
+  birth_date date not null,
+  sex text not null check (sex in ('M','F','X')),
+  weight_kg float,
+  height_cm float,
+  side_pref text not null default 'none' check (side_pref in ('babord','tribord','none')),
+  oar_spec text,
+  level text not null default 'inconnu' check (level in ('loisir','competiteur','inconnu')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index rowers_club_id_idx on public.rowers(club_id);
+
+create table public.boats (
+  id uuid primary key default gen_random_uuid(),
+  club_id uuid not null references public.clubs(id) on delete cascade,
+  name text not null,
+  class text not null,          -- 1x..8+
+  seats int not null,
+  cox boolean not null default false,
+  oar_rack text[] not null default '{}',
+  status text not null default 'ready' check (status in ('ready','maintenance','out')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index boats_club_id_idx on public.boats(club_id);
+
+create table public.assignments (
+  id uuid primary key default gen_random_uuid(),
+  club_id uuid not null references public.clubs(id) on delete cascade,
+  boat_id uuid not null references public.boats(id) on delete cascade,
+  rower_id uuid not null references public.rowers(id) on delete cascade,
+  seat_index int,              -- null si barreur
+  side text check (side in ('babord','tribord')),
+  oars text[] not null default '{}',
+  role text not null default 'rower' check (role in ('rower','cox')),
+  cox_position text check (cox_position in ('rear','front')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index assignments_club_id_idx on public.assignments(club_id);
+
+-- helpers RLS
+create or replace function public.is_club_member(p_club_id uuid)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (
+    select 1 from public.club_members cm
+    where cm.club_id = p_club_id and cm.user_id = auth.uid()
+  );
+$$;
+revoke all on function public.is_club_member(uuid) from public;
+grant execute on function public.is_club_member(uuid) to authenticated;
+
+create or replace function public.club_role(p_club_id uuid)
+returns text language sql stable security definer set search_path = '' as $$
+  select role from public.club_members
+  where club_id = p_club_id and user_id = auth.uid() limit 1;
+$$;
+revoke all on function public.club_role(uuid) from public;
+grant execute on function public.club_role(uuid) to authenticated;
+
+-- RLS
+alter table public.clubs enable row level security;
+alter table public.club_members enable row level security;
+alter table public.rowers enable row level security;
+alter table public.boats enable row level security;
+alter table public.assignments enable row level security;
+
+-- clubs : membre lit ; admin crée/modifie
+create policy clubs_select on public.clubs for select to authenticated
+  using (public.is_club_member(id));
+create policy clubs_write on public.clubs for all to authenticated
+  using (public.club_role(id) = 'admin')
+  with check (public.club_role(id) = 'admin');
+
+-- club_members : voit ses lignes ; admin gère
+create policy cm_select on public.club_members for select to authenticated
+  using (public.is_club_member(club_id));
+create policy cm_write on public.club_members for all to authenticated
+  using (public.club_role(club_id) = 'admin')
+  with check (public.club_role(club_id) = 'admin');
+
+-- rowers / boats / assignments : membre lit ; coach+ admin écrivent
+create policy rowers_select on public.rowers for select to authenticated
+  using (public.is_club_member(club_id));
+create policy rowers_write on public.rowers for all to authenticated
+  using (public.club_role(club_id) in ('admin','coach'))
+  with check (public.club_role(club_id) in ('admin','coach'));
+
+create policy boats_select on public.boats for select to authenticated
+  using (public.is_club_member(club_id));
+create policy boats_write on public.boats for all to authenticated
+  using (public.club_role(club_id) in ('admin','coach'))
+  with check (public.club_role(club_id) in ('admin','coach'));
+
+create policy assignments_select on public.assignments for select to authenticated
+  using (public.is_club_member(club_id));
+create policy assignments_write on public.assignments for all to authenticated
+  using (public.club_role(club_id) in ('admin','coach'))
+  with check (public.club_role(club_id) in ('admin','coach'));
+```
+
+### 9.3 Client Dart (offline-first)
+
+- `pubspec.yaml` : `supabase_flutter: ^2.17.2` (stable). Pas de `service_role`.
+- `lib/sync/supabase_client.dart` : init depuis `--dart-define`.
+- `lib/sync/outbox.dart` : file locale (SQLite ou JSON) des mutations en attente.
+- `lib/sync/sync_engine.dart` : `push()` (outbox → Supabase), `pull()` (delta `updated_at > last_sync`), `onConnectivityChanged`.
+- `lib/identity/store.dart` : **inchangé** pour l'UI ; on ajoute `store.syncToCloud()` qui pousse le diff.
+- Realtime : `supabase.from('assignments').stream(primaryKey: ['id']).eq('club_id', clubId)` → provider Riverpod.
+- Auth UI : écran « Se connecter » (email + magic link) **optionnel** — accessible depuis « Qui rame ? » / profil. Sans login, le mode local continue.
+- Deep link `datarow://auth/callback` dans `AndroidManifest.xml` + `Info.plist`.
+
+### 9.4 Lots B (code réel, pas de mockup)
+
+Chaque lot = 1 commit, `flutter analyze` clean, tests sur la logique pure (RLS testable via SQL, sync via mock).
+
+**B1 — Schéma + RLS (SQL only, pas d'UI)**
+- Dossier `supabase/migrations/0001_identity_core.sql` (ci-dessus).
+- README : comment créer le projet Supabase, coller la migration, activer Realtime sur `assignments/boats/rowers`.
+- Test SQL (optionnel) : 2 clubs, 2 users → isolation prouvée.
+- Commit : `feat(datar0w): supabase schema + RLS identity core`.
+
+**B2 — Auth magic link + rattachement Rower**
+- `lib/sync/auth_screen.dart` : email → magic link → deep link → session.
+- `Rower.userId` nullable ; au login, proposer « rattacher ce profil local à mon compte ».
+- `club_members` : à la création de club, le créateur devient `admin`.
+- Commit : `feat(datar0w): supabase auth magic link + rower link`.
+
+**B3 — Sync offline-first (outbox + delta)**
+- `lib/sync/outbox.dart` + `sync_engine.dart`.
+- `store.dart` : après chaque CRUD local → enqueue outbox.
+- `pull()` : `updated_at > last_sync_at` par table, merge LWW.
+- Connectivity : `connectivity_plus` (déjà dispo via FGS) déclenche sync.
+- Commit : `feat(datar0w): offline-first sync outbox + delta pull`.
+
+**B4 — Realtime composition + écran coach**
+- Provider `assignmentsStream(clubId)` → écran 5 coach se met à jour tout seul.
+- Chip « sync » sur écran 8 (accueil coach) : dernière sync / hors-ligne.
+- Commit : `feat(datar0w): realtime assignments + coach sync chip`.
+
+### 9.5 Hors scope (point B)
+
+- Télémétrie `samples.jsonl` dans le cloud (trop lourd, 1 Hz).
+- PowerSync / Brick / ElectricSQL (trop tôt).
+- OAuth Google / Apple.
+- Multi-club par user (un user = un club au MVP B ; multi plus tard).
+- Résolution de conflits manuelle (UI diff).
+- Edge Functions métier (on reste sur RLS + client).
+- Migration du store local existant vers SQLite (on garde JSON + outbox JSON).
+
+### 9.6 Recette test (2 téléphones, 1 club)
+
+1. Projet Supabase créé, migration B1 appliquée, Realtime ON.
+2. Tél A : créer club « CNB », devenir admin, ajouter 2 rameurs, 1 bateau 2x READY.
+3. Tél B : se connecter (magic link) → rejoindre le club (code ou invitation) en `rower`.
+4. Tél A : composer équipage 2x → Tél B voit l'affectation **en temps réel** (Realtime).
+5. Couper le réseau sur Tél A : composer un 2ᵉ équipage → remettre le réseau → Tél B le reçoit (outbox + pull).
+6. Tél B (loisir) : ouvrir « Qui rame ? » → voit **uniquement** son affectation, pas le catalogue parc.
+7. `flutter analyze` clean, APK debug sur les 2 tél.
+
+---
+
+## 10. Prompt Cursor — Point B (Lots B1 → B4)
+
+> À coller **après** I1–I5 mergés. Ne pas rouvrir les décisions §9.1 sans en discuter.
+
+```
+DataR0w — point B : sync Supabase offline-first (lots B1→B4).
+Lis d'abord docs/CADRAGE-IDENTITE-CLUB-EQUIPAGE.md §9 et apps/datar0w/README.md.
+
+Ne pas toucher AvSim. Ne pas revert compileSdk 37 / ndkVersion "30.0.16248370".
+Pas de sdkmanager. Pas de windows/. Pas d'Accueil sur /live /cox /coach.
+Secrets : SUPABASE_URL + SUPABASE_ANON_KEY via --dart-define / CI. JAMAIS service_role côté client.
+Ne pas porter le jargon Stitch. Ne pas casser I1–I5 (store local reste, on ajoute lib/sync/).
+
+## Règles (figées §9.1)
+- Offline-first : local = vérité UI, Supabase = miroir + sync.
+- Auth = email + magic link. Rower.userId nullable.
+- Tenant = club. RLS sur toutes les tables. Helpers is_club_member / club_role (security definer, search_path '').
+- Realtime Postgres Changes sur assignments/boats/rowers (filtrés club_id).
+- Pas de samples.jsonl dans le cloud (métadonnées séance seulement).
+- Conflits = LWW updated_at. Pas de merge manuel.
+- Mode « Passer » (sans compte) continue de marcher.
+
+## B1 — Schéma + RLS (SQL only)
+Créer supabase/migrations/0001_identity_core.sql (voir §9.2).
+README : créer projet Supabase, coller migration, activer Realtime.
+Test SQL isolation 2 clubs / 2 users (optionnel).
+Commit : feat(datar0w): supabase schema + RLS identity core
+
+## B2 — Auth magic link + rattachement Rower
+lib/sync/auth_screen.dart : email → magic link → deep link datarow://auth/callback.
+Rower.userId nullable ; proposer rattachement au login.
+Création club → créateur = admin (club_members).
+Deep links AndroidManifest + Info.plist.
+Commit : feat(datar0w): supabase auth magic link + rower link
+
+## B3 — Sync offline-first (outbox + delta)
+lib/sync/outbox.dart + sync_engine.dart.
+store.dart : après CRUD local → enqueue outbox.
+pull() : updated_at > last_sync_at, merge LWW.
+connectivity_plus déclenche sync.
+Commit : feat(datar0w): offline-first sync outbox + delta pull
+
+## B4 — Realtime composition + chip coach
+Provider assignmentsStream(clubId) → écran 5 se met à jour.
+Chip « sync » sur /home/coach (dernière sync / hors-ligne).
+Commit : feat(datar0w): realtime assignments + coach sync chip
+
+## Hors scope
+Télémétrie samples dans le cloud, PowerSync/Brick, OAuth Google/Apple,
+multi-club, conflits manuels, Edge Functions métier.
+Ne pas redessiner /live /cox /tare /coach carte /replay /identity.
+
+flutter analyze clean.
+Un commit par lot B1…B4, dans cet ordre.
+Recette §9.6 sur 2 tél.
+```
+
+*Document vivant — point B ajouté pour cadrer la sync Supabase. À enrichir au fil des retours.*
