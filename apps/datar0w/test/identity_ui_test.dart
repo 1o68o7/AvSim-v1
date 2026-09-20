@@ -6,6 +6,7 @@ import 'package:datar0w/features/identity/screen_spinoscope.dart';
 import 'package:datar0w/features/identity/screen_who.dart';
 import 'package:datar0w/identity/controller.dart';
 import 'package:datar0w/identity/models.dart';
+import 'package:datar0w/widgets/club_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -100,6 +101,16 @@ void main() {
     await tester.pump();
     expect(find.text('EFFECTIF'), findsOneWidget);
     expect(find.text('COUPETTES'), findsOneWidget);
+  });
+
+  testWidgets('chip ~N licenciés (estimation club)', (tester) async {
+    final club = Club.create(name: 'CN Test').copyWith(licenceCountApprox: 140);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: ClubBanner(club: club)),
+      ),
+    );
+    expect(find.text('~140 licenciés'), findsOneWidget);
   });
 
   testWidgets('accueil coach : Composer Rejoindre Parc', (tester) async {

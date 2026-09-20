@@ -81,6 +81,13 @@ void main() {
     expect(a2.createdAt, isNotNull);
     expect(Assignment.fromJson(a2.toJson()).id, a2.id);
 
+    final club2 = club.copyWith(licenceCountApprox: 87);
+    await store.upsertClub(club2);
+    final loaded = (await store.listClubs()).single;
+    expect(loaded.licenceCountApprox, 87);
+    expect(Club.fromJson(loaded.toJson()).licenceCountApprox, 87);
+    expect(loaded.copyWith(clearLicenceCount: true).licenceCountApprox, isNull);
+
     await store.deleteRower(rower.id);
     expect(await store.listRowers(), isEmpty);
   });

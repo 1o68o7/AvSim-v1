@@ -42,6 +42,7 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
   final _city = TextEditingController();
   final _lat = TextEditingController();
   final _lon = TextEditingController();
+  final _licences = TextEditingController();
   bool _hydrated = false;
 
   @override
@@ -56,6 +57,7 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
     _city.dispose();
     _lat.dispose();
     _lon.dispose();
+    _licences.dispose();
     super.dispose();
   }
 
@@ -73,6 +75,7 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
       _city.text = c.city ?? '';
       _lat.text = c.lat?.toString() ?? '';
       _lon.text = c.lon?.toString() ?? '';
+      _licences.text = c.licenceCountApprox?.toString() ?? '';
     }
     _hydrated = true;
   }
@@ -103,6 +106,8 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
       city: _city.text.trim().isEmpty ? null : _city.text.trim(),
       lat: double.tryParse(_lat.text.trim().replaceAll(',', '.')),
       lon: double.tryParse(_lon.text.trim().replaceAll(',', '.')),
+      licenceCountApprox: int.tryParse(_licences.text.trim()),
+      clearLicenceCount: _licences.text.trim().isEmpty,
     );
     await ref.read(identityProvider.notifier).saveClub(club);
   }
@@ -197,6 +202,15 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
               controller: _lon,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(labelText: 'Longitude'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _licences,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Licenciés (approx.)',
+                helperText: 'Estimation club, pas FFA. Pas de PII rameurs.',
+              ),
             ),
             const SizedBox(height: 8),
             OutlinedButton(
