@@ -8,12 +8,15 @@ Un smartphone = **un hub / une place**. Multi-sièges = plusieurs tél. + `DATAR
 
 | Lot | Contenu |
 |---|---|
-| B–E | Logger 1 Hz après Démarrer, tare IMU, STOP, quai, replay, gîte lissée. |
+| B–E (télémétrie) | Logger 1 Hz après Démarrer, tare IMU, STOP, quai, replay, gîte lissée. |
 | P0/P1 | Wakelock, FGS « DataR0w — séance », mag/baro/`estim. tel`. |
-| G | FastAPI `/datarow/*` + client si `DATAROW_API_BASE` (sinon fichier local). HTTP fail ≠ stop logger. |
+| G (API hub) | FastAPI `/datarow/*` + client si `DATAROW_API_BASE` (sinon fichier local). HTTP fail ≠ stop logger. |
 | Coach | Join code / dernière séance / séance live API. Écran 5 OSM + notes. Replay import jsonl. |
 | Classes | 1x, 2x, 2-, 4x, 4-, 4+, 8+. Rôle barreur 4+/8+. |
-| I1–I5 | Identité rameur, club, parc, composition — **cadré, pas encore de code.** Voir `docs/CADRAGE-IDENTITE-CLUB-EQUIPAGE.md`. |
+| I1–I8 / C1–C6 / D1–D5 | **Codés** : identité, parc ops, import cabane, spinoscope. Mapping Stitch : `docs/stitch-mvp/GEL.md`. |
+| B (auth) | Magic link Supabase si `SUPABASE_URL` + `SUPABASE_ANON_KEY`. Sinon mode local, pas de crash. |
+| E / L | Calendrier + plans d’eau (JSON curaté, pas de scrape FFA). Filtres loisir / rando / master. |
+| I live / R / J | Presets live + mini-carte ; chip FC BLE ; `/devices` `/physio` `/consent`. |
 
 ## Un téléphone = un hub = une place
 
@@ -31,6 +34,9 @@ barreur / coach peut **poll** `GET /datarow/live` (Lot G). Un seul tél. ne simu
 DATAROW_API_BASE=http://192.168.x.x:8000
 python -m avsim.api
 ```
+
+Auth club (optionnelle) : `--dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...`.
+Sans ces clés, `/auth` affiche le mode local — **pas de crash**.
 
 Routes (sans OAuth) : `POST /datarow/sessions`, `.../tick`, `GET .../by-code/{code}`, `GET .../live`, `POST .../notes`, `GET .../export`.
 
@@ -78,4 +84,4 @@ Pas de cible `windows/` desktop.
 ## Hors contrat
 
 Watts, η, slip, RTK, 10 Hz, Analyste, micro/caméra, High-Vis cyan, moteur AvSim, couloirs FISA sans GeoJSON.
-Identité licencié / club / parc / composition = lots I1–I5 (à coder, voir cadrage).
+Identité / parc / import : I1–I8, C, D **codés**. Hors contrat : Watts, η, scrape FFA, paiement.

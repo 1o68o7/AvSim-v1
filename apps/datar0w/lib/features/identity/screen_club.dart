@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../identity/controller.dart';
@@ -11,6 +13,7 @@ import '../../identity/models.dart';
 import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
+import '../../maps/deck_tiles.dart';
 import '../../widgets/club_banner.dart';
 import '../../widgets/deck_scaffold.dart';
 
@@ -36,6 +39,9 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
   final _year = TextEditingController();
   final _primary = TextEditingController();
   final _secondary = TextEditingController();
+  final _city = TextEditingController();
+  final _lat = TextEditingController();
+  final _lon = TextEditingController();
   bool _hydrated = false;
 
   @override
@@ -47,6 +53,9 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
     _year.dispose();
     _primary.dispose();
     _secondary.dispose();
+    _city.dispose();
+    _lat.dispose();
+    _lon.dispose();
     super.dispose();
   }
 
@@ -61,6 +70,9 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
       _year.text = c.foundedYear?.toString() ?? '';
       _primary.text = hexColor(c.primaryColor);
       _secondary.text = hexColor(c.secondaryColor);
+      _city.text = c.city ?? '';
+      _lat.text = c.lat?.toString() ?? '';
+      _lon.text = c.lon?.toString() ?? '';
     }
     _hydrated = true;
   }
@@ -88,6 +100,9 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
       clearFounded: _year.text.trim().isEmpty,
       primaryColor: parseHexColor(_primary.text),
       secondaryColor: parseHexColor(_secondary.text),
+      city: _city.text.trim().isEmpty ? null : _city.text.trim(),
+      lat: double.tryParse(_lat.text.trim().replaceAll(',', '.')),
+      lon: double.tryParse(_lon.text.trim().replaceAll(',', '.')),
     );
     await ref.read(identityProvider.notifier).saveClub(club);
   }
@@ -167,6 +182,23 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
               decoration: const InputDecoration(labelText: 'Couleur 2 (#RRGGBB)'),
             ),
             const SizedBox(height: 8),
+            TextField(
+              controller: _city,
+              decoration: const InputDecoration(labelText: 'Ville'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _lat,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Latitude'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _lon,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Longitude'),
+            ),
+            const SizedBox(height: 8),
             OutlinedButton(
               onPressed: _pickCrest,
               child: const Text('BLASON (PHOTO)'),
@@ -202,6 +234,51 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
               child: const Text('ENREGISTRER LE CLUB'),
             ),
           ],
+          if (snap.activeClub?.lat != null && snap.activeClub?.lon != null) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 140,
+              child: FlutterMap(
+                options: MapOptions(
+                  initialCenter: LatLng(
+                    snap.activeClub!.lat!,
+                    snap.activeClub!.lon!,
+                  ),
+                  initialZoom: 12,
+                ),
+                children: [
+                  DeckMapTiles.layer(),
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: LatLng(
+                          snap.activeClub!.lat!,
+                          snap.activeClub!.lon!,
+                        ),
+                        width: 28,
+                        height: 28,
+                        child: const Icon(Icons.place, color: DeckColors.amber),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const Text(
+              DeckMapTiles.attribution,
+              style: TextStyle(color: DeckColors.muted, fontSize: 10),
+            ),
+          ],
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: () => context.go(AppRoutes.calendar),
+            child: const Text('CALENDRIER'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: () => context.go(AppRoutes.waters),
+            child: const Text('PLANS D’EAU'),
+          ),
           const SizedBox(height: 24),
           Text(
             'PARC À BATEAUX',

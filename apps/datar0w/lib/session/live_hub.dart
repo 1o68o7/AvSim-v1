@@ -9,6 +9,7 @@ import '../identity/controller.dart';
 import '../identity/models.dart';
 import '../sensors/baro.dart';
 import '../sensors/battery.dart';
+import '../sensors/ble/cardio_hub.dart';
 import '../sensors/geo.dart';
 import '../sensors/gps.dart';
 import '../sensors/imu.dart';
@@ -65,6 +66,9 @@ class LiveHubState {
     this.az,
     this.cadenceSpm,
     this.hdgMag,
+    this.hrBpm,
+    this.spo2Pct,
+    this.hrSource,
   });
 
   final bool locationOk;
@@ -102,6 +106,9 @@ class LiveHubState {
   final double? az;
   final double? cadenceSpm;
   final double? hdgMag;
+  final int? hrBpm;
+  final int? spo2Pct;
+  final String? hrSource;
 
   bool get tareOk =>
       tareOffset != null &&
@@ -151,6 +158,9 @@ class LiveHubState {
     double? az,
     double? cadenceSpm,
     double? hdgMag,
+    int? hrBpm,
+    int? spo2Pct,
+    String? hrSource,
   }) {
     return LiveHubState(
       locationOk: locationOk ?? this.locationOk,
@@ -188,6 +198,9 @@ class LiveHubState {
       az: az ?? this.az,
       cadenceSpm: cadenceSpm ?? this.cadenceSpm,
       hdgMag: hdgMag ?? this.hdgMag,
+      hrBpm: hrBpm ?? this.hrBpm,
+      spo2Pct: spo2Pct ?? this.spo2Pct,
+      hrSource: hrSource ?? this.hrSource,
     );
   }
 }
@@ -603,6 +616,7 @@ class LiveHub extends Notifier<LiveHubState> {
             az: imu.az,
           )
         : null;
+    final hr = ref.read(cardioHubProvider);
     final sample = SessionSample(
       t: DateTime.now().millisecondsSinceEpoch,
       lat: stale ? null : fix?.lat,
@@ -621,6 +635,8 @@ class LiveHub extends Notifier<LiveHubState> {
       altBaro: altBaroRelM(_pHpa, _p0Hpa),
       batt: batt,
       net: state.net,
+      hrBpm: hr?.bpm,
+      hrSource: hr == null ? null : 'ble',
     );
     _store?.append(sample);
     recorded.add(sample);
@@ -633,6 +649,7 @@ class LiveHub extends Notifier<LiveHubState> {
       sampleCount: state.sampleCount + 1,
       cadenceSpm: _cadence.spm,
       hdgMag: hdg,
+      hrBpm: hr?.bpm,
     );
   }
 

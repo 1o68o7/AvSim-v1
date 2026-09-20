@@ -144,6 +144,7 @@ class Rower {
     this.oarSpec,
     this.level = RowerLevel.inconnu,
     this.clubId,
+    this.userId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -158,6 +159,7 @@ class Rower {
   final String? oarSpec;
   final RowerLevel level;
   final String? clubId;
+  final String? userId;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -181,6 +183,8 @@ class Rower {
     RowerLevel? level,
     String? clubId,
     bool clearClub = false,
+    String? userId,
+    bool clearUser = false,
     DateTime? updatedAt,
   }) {
     return Rower(
@@ -194,6 +198,7 @@ class Rower {
       oarSpec: clearOar ? null : (oarSpec ?? this.oarSpec),
       level: level ?? this.level,
       clubId: clearClub ? null : (clubId ?? this.clubId),
+      userId: clearUser ? null : (userId ?? this.userId),
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -210,6 +215,7 @@ class Rower {
         'oarSpec': oarSpec,
         'level': level.wire,
         'clubId': clubId,
+        if (userId != null) 'userId': userId,
         'createdAt': createdAt.toUtc().toIso8601String(),
         'updatedAt': updatedAt.toUtc().toIso8601String(),
       };
@@ -226,6 +232,7 @@ class Rower {
       oarSpec: j['oarSpec'] as String?,
       level: RowerLevelX.parse(j['level'] as String?),
       clubId: j['clubId'] as String?,
+      userId: j['userId'] as String?,
       createdAt: DateTime.parse(j['createdAt'] as String),
       updatedAt: DateTime.parse(j['updatedAt'] as String),
     );
@@ -259,6 +266,11 @@ class Club {
     this.primaryColor,
     this.secondaryColor,
     this.crestPath,
+    this.address,
+    this.postcode,
+    this.city,
+    this.lat,
+    this.lon,
     required this.createdAt,
   });
 
@@ -271,6 +283,11 @@ class Club {
   final int? primaryColor;
   final int? secondaryColor;
   final String? crestPath;
+  final String? address;
+  final String? postcode;
+  final String? city;
+  final double? lat;
+  final double? lon;
   final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
@@ -283,6 +300,11 @@ class Club {
         'primaryColor': primaryColor,
         'secondaryColor': secondaryColor,
         'crestPath': crestPath,
+        'address': address,
+        'postcode': postcode,
+        'city': city,
+        'lat': lat,
+        'lon': lon,
         'createdAt': createdAt.toUtc().toIso8601String(),
       };
 
@@ -296,6 +318,11 @@ class Club {
         primaryColor: (j['primaryColor'] as num?)?.toInt(),
         secondaryColor: (j['secondaryColor'] as num?)?.toInt(),
         crestPath: j['crestPath'] as String?,
+        address: j['address'] as String?,
+        postcode: j['postcode'] as String?,
+        city: j['city'] as String?,
+        lat: (j['lat'] as num?)?.toDouble(),
+        lon: (j['lon'] as num?)?.toDouble(),
         createdAt: DateTime.parse(j['createdAt'] as String),
       );
 
@@ -313,6 +340,11 @@ class Club {
     int? secondaryColor,
     String? crestPath,
     bool clearCrest = false,
+    String? address,
+    String? postcode,
+    String? city,
+    double? lat,
+    double? lon,
   }) {
     return Club(
       id: id,
@@ -324,6 +356,11 @@ class Club {
       primaryColor: primaryColor ?? this.primaryColor,
       secondaryColor: secondaryColor ?? this.secondaryColor,
       crestPath: clearCrest ? null : (crestPath ?? this.crestPath),
+      address: address ?? this.address,
+      postcode: postcode ?? this.postcode,
+      city: city ?? this.city,
+      lat: lat ?? this.lat,
+      lon: lon ?? this.lon,
       createdAt: createdAt,
     );
   }

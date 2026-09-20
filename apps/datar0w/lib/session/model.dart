@@ -20,6 +20,9 @@ class SessionSample {
     this.altBaro,
     this.batt,
     required this.net,
+    this.hrBpm,
+    this.spo2Pct,
+    this.hrSource,
   });
 
   final int t;
@@ -39,6 +42,9 @@ class SessionSample {
   final double? altBaro;
   final int? batt;
   final String net;
+  final int? hrBpm;
+  final int? spo2Pct;
+  final String? hrSource;
 
   Map<String, dynamic> toJson() => {
         't': t,
@@ -58,6 +64,9 @@ class SessionSample {
         'alt_baro': altBaro,
         'batt': batt,
         'net': net,
+        'hr_bpm': hrBpm,
+        'spo2_pct': spo2Pct,
+        'hr_source': hrSource,
       };
 
   String toJsonLine() => jsonEncode(toJson());
@@ -81,6 +90,9 @@ class SessionSample {
       altBaro: (j['alt_baro'] as num?)?.toDouble(),
       batt: (j['batt'] as num?)?.toInt(),
       net: j['net'] as String? ?? 'hors ligne',
+      hrBpm: (j['hr_bpm'] as num?)?.toInt(),
+      spo2Pct: (j['spo2_pct'] as num?)?.toInt(),
+      hrSource: j['hr_source'] as String?,
     );
   }
 }

@@ -83,6 +83,18 @@ class HomeRowerScreen extends ConsumerWidget {
               onPressed: () => context.go(AppRoutes.spinoscope),
               child: const Text('SPINOSCOPE'),
             ),
+            TextButton(
+              onPressed: () => context.go(AppRoutes.consent),
+              child: const Text('DONNÉES SANTÉ'),
+            ),
+            TextButton(
+              onPressed: () => context.go(AppRoutes.devices),
+              child: const Text('MES OBJETS'),
+            ),
+            TextButton(
+              onPressed: () => context.go(AppRoutes.physio),
+              child: const Text('MES CONSTANTES'),
+            ),
           ],
         ),
       ),

@@ -1,0 +1,47 @@
+{
+  "waters": [
+    {
+      "id": "garonne-bordeaux",
+      "name": "Lac de Bordeaux",
+      "type": "bassin",
+      "city": "Bordeaux",
+      "lat": 44.879,
+      "lon": -0.571,
+      "length_m": 2000
+    },
+    {
+      "id": "saone-macon",
+      "name": "Saône — Mâcon",
+      "type": "competition",
+      "city": "Mâcon",
+      "lat": 46.3069,
+      "lon": 4.8289,
+      "length_m": 2000
+    },
+    {
+      "id": "seine-paris",
+      "name": "Seine — Paris",
+      "type": "riviere",
+      "city": "Paris",
+      "lat": 48.8566,
+      "lon": 2.3522
+    },
+    {
+      "id": "seine-fontainebleau",
+      "name": "Seine — Fontainebleau",
+      "type": "riviere",
+      "city": "Fontainebleau",
+      "lat": 48.4047,
+      "lon": 2.7016
+    },
+    {
+      "id": "correze-brive",
+      "name": "Plan d'eau de Brive",
+      "type": "competition",
+      "city": "Brive",
+      "lat": 45.1596,
+      "lon": 1.5335,
+      "length_m": 2000
+    }
+  ]
+}

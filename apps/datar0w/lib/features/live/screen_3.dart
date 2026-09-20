@@ -2,11 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 
+import '../../live/layout_controller.dart';
+import '../../live/layout_model.dart';
+import '../../maps/deck_tiles.dart';
 import '../../router.dart';
-import '../../session/boat_config.dart';
 import '../../session/double_press_stop.dart';
 import '../../session/heel.dart';
 import '../../session/live_hub.dart';
@@ -27,6 +31,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   final _stop = DoublePressStop();
   bool _stopArmed = false;
   HeelAlert _lastAlert = HeelAlert.none;
+  bool _panel = false;
 
   @override
   void initState() {
@@ -59,100 +64,214 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(liveHubProvider);
+    final layout = ref.watch(liveLayoutProvider);
     final gite = s.displayGiteDeg ?? s.giteDeg;
-    final alert =
-        s.tareOk ? heelAlertFor(gite) : HeelAlert.none;
+    final alert = s.tareOk ? heelAlertFor(gite) : HeelAlert.none;
     if (alert != _lastAlert) {
       if (_lastAlert == HeelAlert.none && alert != HeelAlert.none) {
         HapticFeedback.vibrate();
       }
       _lastAlert = alert;
     }
+    final mapOk = layout.mapEnabled &&
+        s.net != 'hors ligne' &&
+        s.lat != null &&
+        s.lon != null &&
+        !s.gpsLost;
+    final effective = layout.preset == LivePreset.navigation && !mapOk
+        ? [LiveBlock.gite, LiveBlock.vsol]
+        : layout.visible;
 
     return Scaffold(
       backgroundColor: DeckColors.bg,
       body: HeelAlertOverlay(
         alert: alert,
         child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: Stack(
             children: [
-              Expanded(
-                child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final landscape = constraints.maxWidth > 640;
-                  if (landscape) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(flex: 5, child: _metricsColumn(s, expand: true)),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            flex: 5,
-                            child: _giteColumn(gite),
-                          ),
-                          const SizedBox(width: 8),
-                          SizedBox(
-                            width: 128,
-                            child: _systemColumn(s, expand: true),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  return ListView(
-                    padding: const EdgeInsets.all(12),
-                    children: [
-                      SizedBox(height: 280, child: _metricsColumn(s, expand: true)),
-                      const SizedBox(height: 8),
-                      _giteColumn(gite),
-                      const SizedBox(height: 8),
-                      SizedBox(height: 220, child: _systemColumn(s, expand: true)),
-                    ],
-                  );
-                },
+              Column(
+                children: [
+                  _topBar(layout, s),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _blocksColumn(s, gite, effective, mapOk),
+                        ),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: 128,
+                          child: _systemColumn(s),
+                        ),
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onVerticalDragEnd: (_) async {
+                            HapticFeedback.lightImpact();
+                            await ref.read(liveLayoutProvider.notifier).cycle();
+                          },
+                          child: const SizedBox(width: 60),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
+              if (_panel) _customize(layout),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _metricsColumn(LiveHubState s, {required bool expand}) {
-    return Column(
-      children: [
-        Expanded(
-          child: InstrumentPod(
-            label: 'CADENCE',
-            value: s.cadenceSpm == null
-                ? '—'
-                : s.cadenceSpm!.toStringAsFixed(0),
-            unit: s.cadenceSpm == null
-                ? 'COUPS/MIN'
-                : 'ESTIM. TEL  ·  COUPS/MIN',
+  Widget _topBar(RowerLayout layout, LiveHubState s) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+      child: Row(
+        children: [
+          if (s.hrBpm != null)
+            Text(
+              '♥ ${s.hrBpm}',
+              style: TextStyle(
+                color: (s.hrBpm ?? 0) > 180
+                    ? DeckColors.babord
+                    : DeckColors.tribord,
+                fontWeight: FontWeight.w700,
+              ),
+            )
+          else
+            const Text(
+              '♥ —',
+              style: TextStyle(color: DeckColors.muted, fontSize: 12),
+            ),
+          if (s.spo2Pct != null) ...[
+            const SizedBox(width: 8),
+            Text(
+              'SpO2 ${s.spo2Pct}%',
+              style: const TextStyle(color: DeckColors.label, fontSize: 12),
+            ),
+          ],
+          const Spacer(),
+          Semantics(
+            button: true,
+            label: 'Preset ${layout.preset.label}',
+            child: GestureDetector(
+              onTap: () => setState(() => _panel = !_panel),
+              child: Container(
+                width: 48,
+                height: 48,
+                alignment: Alignment.center,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: const BoxDecoration(
+                    color: DeckColors.amber,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _blocksColumn(
+    LiveHubState s,
+    double? gite,
+    List<LiveBlock> blocks,
+    bool mapOk,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        children: [
+          for (var i = 0; i < blocks.length; i++) ...[
+            if (i > 0) const SizedBox(height: 8),
+            Expanded(child: _block(s, gite, blocks[i], mapOk)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _block(LiveHubState s, double? gite, LiveBlock b, bool mapOk) {
+    switch (b) {
+      case LiveBlock.gite:
+        return _giteColumn(gite);
+      case LiveBlock.vsol:
+        return InstrumentPod(
+          label: 'VITESSE SOL',
+          value: s.sog == null ? '—' : s.sog!.toStringAsFixed(1),
+          unit: 'M/S  ·  SOL — PAS EAU',
+        );
+      case LiveBlock.distance:
+        return InstrumentPod(
+          label: 'DISTANCE',
+          value: (s.distM / 1000).toStringAsFixed(2),
+          unit: 'KM',
+        );
+      case LiveBlock.spm:
+        return InstrumentPod(
+          label: 'CADENCE',
+          value: s.cadenceSpm == null ? '—' : s.cadenceSpm!.toStringAsFixed(0),
+          unit: 'COUPS/MIN',
+        );
+      case LiveBlock.hr:
+        return InstrumentPod(
+          label: 'FC',
+          value: s.hrBpm?.toString() ?? '—',
+          unit: 'BPM  ·  INFORMATIF',
+        );
+      case LiveBlock.spo2:
+        return InstrumentPod(
+          label: 'SPO2',
+          value: s.spo2Pct?.toString() ?? '—',
+          unit: '%  ·  APPROX.',
+        );
+      case LiveBlock.map:
+        return mapOk ? _miniMap(s) : _giteColumn(gite);
+    }
+  }
+
+  Widget _miniMap(LiveHubState s) {
+    final pts = ref
+        .read(liveHubProvider.notifier)
+        .recorded
+        .where((e) => e.lat != null && e.lon != null)
+        .map((e) => LatLng(e.lat!, e.lon!))
+        .toList();
+    final center = LatLng(s.lat!, s.lon!);
+    return InstrumentPod(
+      label: 'CARTE',
+      value: 'N',
+      unit: DeckMapTiles.attribution,
+      child: FlutterMap(
+        options: MapOptions(
+          initialCenter: center,
+          initialZoom: 14,
         ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: InstrumentPod(
-            label: 'VITESSE SOL',
-            value: s.sog == null ? '—' : s.sog!.toStringAsFixed(1),
-            unit: 'M/S  ·  SOL — PAS EAU',
+        children: [
+          DeckMapTiles.layer(),
+          if (pts.length >= 2)
+            PolylineLayer(
+              polylines: [
+                Polyline(points: pts, color: DeckColors.amber, strokeWidth: 2),
+              ],
+            ),
+          MarkerLayer(
+            markers: [
+              Marker(
+                point: center,
+                width: 16,
+                height: 16,
+                child: const Icon(Icons.circle, size: 10, color: DeckColors.amber),
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: InstrumentPod(
-            label: 'DISTANCE',
-            value: (s.distM / 1000).toStringAsFixed(2),
-            unit: 'KM  ·  ${ref.watch(boatConfigProvider).info.code.toUpperCase()} // LIVE',
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -162,35 +281,14 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
       value: gite == null ? 'tare' : '${gite.toStringAsFixed(1)}°',
       child: Column(
         children: [
-          const Text(
-            'TOLÉRANCE ±3.0°  ·  RÉF. RAMEUR',
-            style: TextStyle(color: DeckColors.label, fontSize: 9),
-          ),
-          const SizedBox(height: 4),
           const HeelLabels(),
           HeelGauge(giteDeg: gite ?? 0),
-          const SizedBox(height: 4),
-          Text(
-            gite == null
-                ? 'TARE REQUISE'
-                : (gite >= 0
-                    ? 'TRIBORD  +${gite.toStringAsFixed(1)}°'
-                    : 'BÂBORD  ${gite.toStringAsFixed(1)}°'),
-            style: TextStyle(
-              color: gite == null
-                  ? DeckColors.label
-                  : (gite >= 0 ? DeckColors.tribord : DeckColors.babord),
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
-              fontSize: 12,
-            ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _systemColumn(LiveHubState s, {required bool expand}) {
+  Widget _systemColumn(LiveHubState s) {
     final stop = OutlinedButton(
       style: OutlinedButton.styleFrom(
         foregroundColor: _stopArmed ? DeckColors.alert : DeckColors.label,
@@ -212,10 +310,6 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
         InstrumentPod(
           label: 'SYSTÈME',
           value: s.code ?? '—',
-          unit: ref.watch(boatConfigProvider).info.code.toUpperCase() +
-              (ref.watch(boatConfigProvider).seats > 1
-                  ? '  ·  SIÈGE ${ref.watch(boatConfigProvider).clampedSeat}/${ref.watch(boatConfigProvider).seats}'
-                  : ''),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -224,34 +318,65 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                 ok: !s.gpsLost && s.locationOk,
               ),
               const SizedBox(height: 6),
-              DeckStatusChip(
-                label: 'IMU',
-                ok: s.rollDeg != null && s.tareOk,
-              ),
-              if (s.tareWeak) ...[
-                const SizedBox(height: 6),
-                const DeckStatusChip(label: 'tare faible', ok: false),
-              ],
+              DeckStatusChip(label: 'IMU', ok: s.rollDeg != null && s.tareOk),
               const SizedBox(height: 6),
               DeckStatusChip(label: s.net, ok: s.net != 'hors ligne'),
-              const SizedBox(height: 6),
-              DeckStatusChip(
-                label: '${s.batt ?? '—'} %',
-                ok: (s.batt ?? 0) > 20,
-              ),
-              if (ref.watch(boatConfigProvider).seats > 1) ...[
-                const SizedBox(height: 6),
-                const DeckStatusChip(
-                  label: 'autres sièges en attente',
-                  ok: false,
-                ),
-              ],
             ],
           ),
         ),
         const Spacer(),
         stop,
       ],
+    );
+  }
+
+  Widget _customize(RowerLayout layout) {
+    return Positioned.fill(
+      child: Material(
+        color: Colors.black54,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Container(
+              color: DeckColors.surface,
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('PERSONNALISER'),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      for (final p in [
+                        LivePreset.securite,
+                        LivePreset.performance,
+                        LivePreset.cardio,
+                        LivePreset.navigation,
+                        LivePreset.complet,
+                      ])
+                        ChoiceChip(
+                          label: Text(p.label),
+                          selected: layout.preset == p,
+                          onSelected: (_) async {
+                            await ref
+                                .read(liveLayoutProvider.notifier)
+                                .setPreset(p);
+                            setState(() => _panel = false);
+                          },
+                        ),
+                    ],
+                  ),
+                  TextButton(
+                    onPressed: () => setState(() => _panel = false),
+                    child: const Text('Fermer'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

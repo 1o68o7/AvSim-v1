@@ -1,11 +1,17 @@
 import 'package:go_router/go_router.dart';
 
+import 'features/calendar/screen_calendar.dart';
+import 'features/calendar/screen_event.dart';
+import 'features/calendar/screen_waters.dart';
+import 'features/health/screen_consent.dart';
 import 'features/coach/screen_5.dart';
 import 'features/coach/screen_join.dart';
 import 'features/cox/screen_cox.dart';
 import 'features/identity/screen_boat_edit.dart';
 import 'features/identity/screen_club.dart';
 import 'features/identity/screen_crew.dart';
+import 'features/identity/screen_devices.dart';
+import 'features/identity/screen_physio.dart';
 import 'features/identity/screen_home_roles.dart';
 import 'features/identity/screen_home_rower.dart';
 import 'features/identity/screen_import.dart';
@@ -24,6 +30,7 @@ import 'features/replay/screen_6.dart';
 import 'features/replay/screen_6r.dart';
 import 'features/tare/screen_2b.dart';
 import 'session/boat_class.dart';
+import 'sync/auth_screen.dart';
 
 abstract final class AppRoutes {
   static const identity = '/identity';
@@ -50,6 +57,12 @@ abstract final class AppRoutes {
   static const coachReplay = '/replay-coach';
   static const rowerReplay = '/replay';
   static const quai = '/quai';
+  static const auth = '/auth';
+  static const calendar = '/calendar';
+  static const waters = '/waters';
+  static const consent = '/consent';
+  static const devices = '/devices';
+  static const physio = '/physio';
 
   /// Après tare : barreur → `/cox`, rameur → `/live`. Écrans distincts.
   static String afterTare(CrewRole role) =>
@@ -182,6 +195,43 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.quai,
       name: '7-quai',
       builder: (context, state) => const QuaiScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.auth,
+      name: 'auth',
+      builder: (context, state) => const AuthScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.calendar,
+      name: 'calendar',
+      builder: (context, state) => const CalendarScreen(),
+    ),
+    GoRoute(
+      path: '/calendar/:id',
+      name: 'calendar-event',
+      builder: (context, state) => EventSheetScreen(
+        eventId: state.pathParameters['id']!,
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.waters,
+      name: 'waters',
+      builder: (context, state) => const WatersScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.consent,
+      name: 'consent',
+      builder: (context, state) => const ConsentScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.devices,
+      name: 'devices',
+      builder: (context, state) => const DevicesScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.physio,
+      name: 'physio',
+      builder: (context, state) => const PhysioScreen(),
     ),
   ],
 );

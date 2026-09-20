@@ -9,6 +9,7 @@ import '../../session/model.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
 import '../../theme/deck_theme.dart';
+import '../../maps/deck_tiles.dart';
 import '../../widgets/deck_widgets.dart';
 
 class ReplayBody extends StatefulWidget {
@@ -152,10 +153,8 @@ class _ReplayBodyState extends State<ReplayBody> {
                 ),
                 children: [
                   TileLayer(
-                    urlTemplate:
-                        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                    subdomains: const ['a', 'b', 'c'],
-                    userAgentPackageName: 'io.datar0w.datar0w',
+                    urlTemplate: DeckMapTiles.urlTemplate,
+                    userAgentPackageName: DeckMapTiles.userAgentPackageName,
                   ),
                   PolylineLayer(
                     polylines: [
@@ -445,6 +444,14 @@ class _CurvesPainter extends CustomPainter {
       samples.map((s) => s.sog).toList(),
       Colors.white70,
     );
+    if (samples.any((s) => s.hrBpm != null)) {
+      _line(
+        canvas,
+        size,
+        samples.map((s) => s.hrBpm?.toDouble()).toList(),
+        DeckColors.babord,
+      );
+    }
     final t0 = samples.first.t;
     final spanT = (samples.last.t - t0).clamp(1, 1 << 30);
     for (var n = 0; n < notes.length; n++) {
