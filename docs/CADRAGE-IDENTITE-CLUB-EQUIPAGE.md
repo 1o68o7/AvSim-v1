@@ -4,7 +4,7 @@
 > App : `apps/datar0w`. Ne pas toucher le solver AvSim. Ne pas revert `compileSdk = 37` / `ndkVersion = "30.0.16248370"`. Pas de `sdkmanager`. Pas de `windows/`.
 > Ce document est **vivant** : on l'augmente au fur et à mesure des décisions. Chaque lot ci-dessous devient un commit distinct.
 >
-> **I1–I5 : pas encore de code.** Ce fichier est le cahier. Le prochain commit de développement = Lot I1 (modèle + FFA + tests, sans écran).
+> **I1–I5 : mergés sur `main`.** Point B (Supabase) : lots B1–B4. Local JSON reste la vérité UI.
 
 ---
 

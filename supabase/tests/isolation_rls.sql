@@ -1,0 +1,20 @@
+-- Isolation RLS (optionnel). Prérequis : deux users Auth (uid_a, uid_b)
+-- et migration 0001 appliquée.
+--
+-- 1. En session A (auth.uid() = uid_a) : insert club A.
+--    → handle_new_club pose A admin. A SELECT clubs → 1 ligne.
+-- 2. En session B : insert club B. B SELECT clubs → 1 ligne (la sienne).
+-- 3. B SELECT clubs WHERE id = club_a → 0 lignes (is_club_member faux).
+-- 4. B insert boat sur club_a → rejeté (boats_write / club_role).
+-- 5. A insert rower sur club_a OK. B SELECT rowers → 0 (pas membre).
+--
+-- Ne pas exécuter tel quel : remplacer les UUID. Document de recette.
+
+-- Exemple (à adapter) :
+-- set request.jwt.claim.sub = '11111111-1111-1111-1111-111111111111';
+-- insert into public.clubs (name, short_code) values ('Club A', 'CNA');
+-- select count(*) from public.clubs; -- 1
+--
+-- set request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
+-- insert into public.clubs (name, short_code) values ('Club B', 'CNB');
+-- select count(*) from public.clubs; -- 1 (pas 2)

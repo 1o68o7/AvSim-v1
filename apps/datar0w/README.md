@@ -13,7 +13,8 @@ Un smartphone = **un hub / une place**. Multi-sièges = plusieurs tél. + `DATAR
 | G | FastAPI `/datarow/*` + client si `DATAROW_API_BASE` (sinon fichier local). HTTP fail ≠ stop logger. |
 | Coach | Join code / dernière séance / séance live API. Écran 5 OSM + notes. Replay import jsonl. |
 | Classes | 1x, 2x, 2-, 4x, 4-, 4+, 8+. Rôle barreur 4+/8+. |
-| I1–I5 | Identité rameur, club, parc, composition — **cadré, pas encore de code.** Voir `docs/CADRAGE-IDENTITE-CLUB-EQUIPAGE.md`. |
+| I1–I5 | Identité locale (profils, club, parc coach, composition). |
+| B (Supabase) | Sync optionnelle, offline-first — `supabase/README.md`. |
 
 ## Un téléphone = un hub = une place
 
