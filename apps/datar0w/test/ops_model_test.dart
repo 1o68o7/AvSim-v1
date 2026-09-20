@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:datar0w/identity/models.dart';
 import 'package:datar0w/identity/store.dart';
+import 'package:datar0w/ops/alignment.dart';
 import 'package:datar0w/ops/oar_set.dart';
 import 'package:datar0w/ops/service.dart';
 import 'package:datar0w/ops/store.dart';
@@ -168,5 +169,10 @@ void main() {
     expect(t!.coachId, 'coach-b');
     expect(t.transferredFromCoachId, 'coach-a');
     expect(t.transferredAt, isNotNull);
+  });
+
+  test('alignement : 8+ avant 1x', () {
+    expect(boardingRank('8+') < boardingRank('1x'), isTrue);
+    expect(boardingRank('4x') < boardingRank('2x'), isTrue);
   });
 }

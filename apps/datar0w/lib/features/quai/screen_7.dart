@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../identity/controller.dart';
 import '../../identity/format.dart';
 import '../../identity/models.dart';
+import '../../ops/controller.dart';
 import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../session/live_hub.dart';
@@ -82,6 +83,10 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
     }
     final isCox = _meta?.role == 'cox' || boat.role == CrewRole.cox;
     final code = _meta?.code?.trim();
+    final ops = ref.watch(opsProvider);
+    final hullId = _meta?.boatId ?? asg?.boatId;
+    final activeOut = hullId == null ? null : ops.activeForBoat(hullId);
+    final showCheckIn = boat.role == CrewRole.coach && activeOut != null;
     return DeckScaffold(
       title: 'QUAI',
       subtitle: 'SESSION #$sessionTag',
@@ -175,6 +180,18 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
               onPressed: _share,
               child: const Text('PARTAGER AU COACH'),
             ),
+            if (showCheckIn) ...[
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: () async {
+                  await ref.read(opsProvider.notifier).checkIn(
+                        outId: activeOut.id,
+                        oarsOk: true,
+                      );
+                },
+                child: const Text('RENTRER LA COQUE ?'),
+              ),
+            ],
             const SizedBox(height: 8),
             TextButton(
               onPressed: () => context.go(AppRoutes.profile),

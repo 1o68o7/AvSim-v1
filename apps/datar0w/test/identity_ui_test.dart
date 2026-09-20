@@ -87,5 +87,6 @@ void main() {
     expect(find.text('PARC'), findsOneWidget);
     expect(find.text('SORTIR'), findsOneWidget);
     expect(find.text('RENTRER'), findsOneWidget);
+    expect(find.text('DÉPART'), findsOneWidget);
   });
 }

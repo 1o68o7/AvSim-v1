@@ -155,6 +155,11 @@ class HomeCoachScreen extends ConsumerWidget {
               onPressed: () => context.go(AppRoutes.opsIn),
               child: const Text('RENTRER'),
             ),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: () => context.go(AppRoutes.opsDeparture),
+              child: const Text('DÉPART'),
+            ),
           ],
         ),
       ),

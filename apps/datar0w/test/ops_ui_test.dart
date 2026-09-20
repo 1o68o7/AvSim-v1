@@ -1,5 +1,6 @@
 import 'package:datar0w/features/identity/screen_crew.dart';
 import 'package:datar0w/features/identity/screen_home_roles.dart';
+import 'package:datar0w/features/ops/screen_departure.dart';
 import 'package:datar0w/features/ops/screen_in.dart';
 import 'package:datar0w/features/ops/screen_out.dart';
 import 'package:datar0w/identity/controller.dart';
@@ -45,6 +46,7 @@ void main() {
     await tester.pump();
     expect(find.text('SORTIR'), findsOneWidget);
     expect(find.text('RENTRER'), findsOneWidget);
+    expect(find.text('DÉPART'), findsOneWidget);
   });
 
   testWidgets('sortie : hors coach → réservé', (tester) async {
@@ -90,5 +92,16 @@ void main() {
     await tester.pump();
     expect(find.textContaining('Empacher — sortie'), findsOneWidget);
     expect(find.textContaining('Hudson'), findsOneWidget);
+  });
+
+  testWidgets('départ : hors coach → réservé', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [identityStoreOverride(), opsStoreOverride()],
+        child: const MaterialApp(home: OpsDepartureScreen()),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('Réservé au coach.'), findsOneWidget);
   });
 }
