@@ -4,6 +4,7 @@ import 'boat_out.dart';
 import 'impact_report.dart';
 import 'oar_set.dart';
 import 'store.dart';
+import 'cloud_sync.dart';
 
 enum CheckoutKind { checkedOut, queued, blocked }
 
@@ -39,6 +40,17 @@ class OpsService {
 
   final IdentityStore identity;
   final OpsStore ops;
+
+  OpsCloudSync get _sync => OpsCloudSync(ops: ops, identity: identity);
+
+  Future<void> _afterMutate() async {
+    await _sync.snapshotOutbox();
+    if (OpsSyncConfig.enabled) {
+      try {
+        await _sync.flush();
+      } catch (_) {}
+    }
+  }
 
   Future<BoatOut?> activeOutForBoat(String boatId) async {
     final list = await ops.listOuts();
@@ -105,6 +117,7 @@ class OpsService {
         message: msg,
       );
       await ops.upsertQueue(q);
+      await _afterMutate();
       return CheckoutResult(
         kind: CheckoutKind.queued,
         message: msg,
@@ -136,6 +149,7 @@ class OpsService {
       boatId,
       'Ta coque ${boat.name} est sortie.',
     );
+    await _afterMutate();
     return CheckoutResult(
       kind: CheckoutKind.checkedOut,
       message: 'Sortie enregistrée.',
@@ -153,6 +167,7 @@ class OpsService {
     if (boat != null) {
       await identity.upsertBoat(boat.copyWith(status: BoatParkStatus.out));
     }
+    await _afterMutate();
     return next;
   }
 
@@ -180,6 +195,7 @@ class OpsService {
         ),
       );
     }
+    await _afterMutate();
     return next;
   }
 
@@ -195,6 +211,7 @@ class OpsService {
       coachId: toCoachId,
     );
     await ops.upsertOut(next);
+    await _afterMutate();
     return next;
   }
 
@@ -218,6 +235,7 @@ class OpsService {
       );
     }
     await _notifyCrew(boatId, 'Ta coque est en maintenance.');
+    await _afterMutate();
     return report;
   }
 
@@ -239,6 +257,7 @@ class OpsService {
         );
       }
     }
+    await _afterMutate();
   }
 
   Future<ParkBoat?> _boat(String id) async {
