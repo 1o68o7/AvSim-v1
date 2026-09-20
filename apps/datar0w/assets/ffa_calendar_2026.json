@@ -1,6 +1,8 @@
 {
   "season": "2025-2026",
   "source": "curated",
+  "updated": "2026-09-20",
+  "notice": "Catalogue local. Aucun HTTP vers ffaviron.fr. MAJ humaine : docs/CALENDRIER-MAJ.md",
   "events": [
     {
       "id": "ffa-macon-2026",
@@ -16,6 +18,21 @@
       "licence_requise": "AC",
       "url": "https://www.ffaviron.fr/",
       "water_id": "saone-macon"
+    },
+    {
+      "id": "ffa-vichy-courts-2026",
+      "name": "Championnats de France bateaux courts",
+      "start": "2026-07-16",
+      "end": "2026-07-19",
+      "city": "Vichy",
+      "lat": 46.1318,
+      "lon": 3.4252,
+      "type": "championnat",
+      "discipline": "bassin",
+      "open_to_loisir": false,
+      "licence_requise": "AC",
+      "url": "https://www.ffaviron.fr/",
+      "water_id": "allier-vichy"
     },
     {
       "id": "ffa-fontainebleau-2026",
@@ -36,6 +53,36 @@
       "limite_bateaux": 30
     },
     {
+      "id": "ffa-cazaubon-2026",
+      "name": "Régate de Cazaubon",
+      "start": "2026-04-25",
+      "end": "2026-04-26",
+      "city": "Cazaubon",
+      "lat": 43.934,
+      "lon": -0.038,
+      "type": "regate_ouverte",
+      "discipline": "bassin",
+      "open_to_loisir": true,
+      "licence_requise": "AL",
+      "url": "https://www.ffaviron.fr/",
+      "water_id": "ubarritz-cazaubon"
+    },
+    {
+      "id": "ffa-aiguebelette-2026",
+      "name": "Régate d’Aiguebelette",
+      "start": "2026-05-30",
+      "end": "2026-05-31",
+      "city": "Aiguebelette",
+      "lat": 45.535,
+      "lon": 5.813,
+      "type": "regate_ouverte",
+      "discipline": "lac",
+      "open_to_loisir": true,
+      "licence_requise": "AL",
+      "url": "https://www.ffaviron.fr/",
+      "water_id": "lac-aiguebelette"
+    },
+    {
       "id": "ffa-tdp-2026",
       "name": "Traversée de Paris",
       "start": "2026-03-21",
@@ -51,6 +98,23 @@
       "distance_km": 27,
       "url": "https://www.ffaviron.fr/",
       "water_id": "seine-paris"
+    },
+    {
+      "id": "ffa-loire-rando-2026",
+      "name": "Randon’Aviron Loire",
+      "start": "2026-09-05",
+      "end": "2026-09-06",
+      "city": "Orléans",
+      "lat": 47.9029,
+      "lon": 1.9093,
+      "type": "randonnee",
+      "discipline": "riviere",
+      "open_to_loisir": true,
+      "licence_requise": "aucune",
+      "labellise": "RandonAviron",
+      "distance_km": 42,
+      "url": "https://www.ffaviron.fr/",
+      "water_id": "loire-orleans"
     },
     {
       "id": "ffa-brive-master-2026",
