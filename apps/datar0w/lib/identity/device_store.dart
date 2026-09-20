@@ -1,17 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import 'devices.dart';
 
 class DeviceStore {
-  DeviceStore({this._root});
-  final Directory? _root;
+  DeviceStore({this.root});
+  final Directory? root;
 
   Future<File> _file() async {
-    final dir = _root ??
+    final dir = root ??
         Directory(
           p.join(
             (await getApplicationDocumentsDirectory()).path,
@@ -59,3 +60,5 @@ class DeviceStore {
     );
   }
 }
+
+final deviceStoreProvider = Provider<DeviceStore>((_) => DeviceStore());
