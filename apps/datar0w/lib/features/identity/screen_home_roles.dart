@@ -8,6 +8,7 @@ import '../../identity/models.dart';
 import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
+import '../../widgets/club_banner.dart';
 import '../../widgets/deck_scaffold.dart';
 
 void continueFromAssignment(
@@ -119,6 +120,7 @@ class HomeCoachScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final club = ref.watch(identityProvider).activeClub;
     return DeckScaffold(
       title: 'ACCUEIL COACH',
       subtitle: 'Composition · parc · live',
@@ -126,15 +128,17 @@ class HomeCoachScreen extends ConsumerWidget {
         onPressed: () => context.go(AppRoutes.profile),
         child: const Text('Retour'),
       ),
-      body: Padding(
+      body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            FilledButton(
-              onPressed: () => context.go(AppRoutes.crew),
-              child: const Text('COMPOSER'),
-            ),
+        children: [
+          if (club != null) ...[
+            ClubBanner(club: club),
+            const SizedBox(height: 16),
+          ],
+          FilledButton(
+            onPressed: () => context.go(AppRoutes.crew),
+            child: const Text('COMPOSER'),
+          ),
             const SizedBox(height: 12),
             OutlinedButton(
               onPressed: () => context.go(AppRoutes.coachJoin),
@@ -165,8 +169,7 @@ class HomeCoachScreen extends ConsumerWidget {
               onPressed: () => context.go(AppRoutes.opsMaintenance),
               child: const Text('MAINTENANCE'),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

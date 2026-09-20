@@ -11,6 +11,7 @@ import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../identity/screen_home_roles.dart';
 import '../../theme/deck_theme.dart';
+import '../../widgets/club_banner.dart';
 import '../../widgets/deck_scaffold.dart';
 
 /// Accueil rameur : affectation coach (écrans 6/7) ou vide (écran 9). Pas de parc.
@@ -37,9 +38,7 @@ class HomeRowerScreen extends ConsumerWidget {
     final asg = rower == null ? null : ident.assignmentForRower(rower.id);
     final boat = ident.boatById(asg?.boatId);
     final club = ident.activeClub;
-    final showClub = rower != null &&
-        rower.level != RowerLevel.loisir &&
-        club != null;
+    final showClub = club != null;
     final notices = rower == null
         ? const <OpsNotice>[]
         : ref.watch(opsProvider).noticesFor(rower.id);
@@ -73,11 +72,7 @@ class HomeRowerScreen extends ConsumerWidget {
             if (showClub)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: Text(
-                  'Club : ${club.name}'
-                  '${club.shortCode == null ? '' : ' · ${club.shortCode}'}',
-                  style: const TextStyle(color: DeckColors.label, fontSize: 12),
-                ),
+                child: ClubBanner(club: club, compact: true),
               ),
             FilledButton(
               onPressed: () => _continue(context, ref),
