@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../import/apply.dart';
+import '../import/cloud_sync.dart';
 import '../import/mapping.dart';
 import '../session/boat_class.dart';
 import 'models.dart';
@@ -175,6 +176,7 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     await _store.upsertClub(club);
     final prefs = await _store.loadState();
     await _store.saveState(prefs.copyWith(activeClubId: club.id));
+    await ClubImportSync(identity: _store).snapshotOutbox();
     await _refresh();
   }
 
@@ -216,6 +218,7 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     await _store.replaceAllBoats(r.boats);
     final prefs = await _store.loadState();
     await _store.saveState(prefs.copyWith(lastImportId: r.importId));
+    await ClubImportSync(identity: _store).snapshotOutbox();
     await _refresh();
     return r;
   }
