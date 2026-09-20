@@ -160,6 +160,13 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
               child: const Text('+ Ajouter'),
             ),
           ],
+          if (canCheckoutOps(snap, role) && snap.activeClub != null) ...[
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: () => context.go(AppRoutes.clubImport),
+              child: const Text('IMPORTER UN FICHIER'),
+            ),
+          ],
         ],
       ),
     );

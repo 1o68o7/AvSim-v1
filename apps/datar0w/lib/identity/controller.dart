@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../import/apply.dart';
+import '../import/mapping.dart';
 import '../session/boat_class.dart';
 import 'models.dart';
 import 'store.dart';
@@ -196,6 +198,30 @@ class IdentityController extends Notifier<IdentitySnapshot> {
   Future<void> setClubRole(ClubMemberRole role) async {
     final prefs = await _store.loadState();
     await _store.saveState(prefs.copyWith(clubRole: role));
+    await _refresh();
+  }
+
+  Future<ImportApplyResult?> confirmImport(List<ParsedBoatRow> rows) async {
+    final club = state.activeClub;
+    if (club == null) return null;
+    final r = applyParkImport(
+      clubId: club.id,
+      existing: state.boats,
+      rows: rows,
+    );
+    await _store.replaceAllBoats(r.boats);
+    final prefs = await _store.loadState();
+    await _store.saveState(prefs.copyWith(lastImportId: r.importId));
+    await _refresh();
+    return r;
+  }
+
+  Future<void> undoLastImport() async {
+    final id = state.prefs.lastImportId;
+    if (id == null) return;
+    await _store.deleteBoatsByImportId(id);
+    final prefs = await _store.loadState();
+    await _store.saveState(prefs.copyWith(clearImport: true));
     await _refresh();
   }
 

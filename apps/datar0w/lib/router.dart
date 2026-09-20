@@ -8,6 +8,7 @@ import 'features/identity/screen_club.dart';
 import 'features/identity/screen_crew.dart';
 import 'features/identity/screen_home_roles.dart';
 import 'features/identity/screen_home_rower.dart';
+import 'features/identity/screen_import.dart';
 import 'features/identity/screen_rower_edit.dart';
 import 'features/identity/screen_who.dart';
 import 'features/ops/screen_departure.dart';
@@ -31,6 +32,7 @@ abstract final class AppRoutes {
   static const homeCoach = '/home/coach';
   static const club = '/club';
   static const clubBoat = '/club/boat';
+  static const clubImport = '/club/import';
   static const crew = '/crew';
   static const opsOut = '/ops/out';
   static const opsIn = '/ops/in';
@@ -93,6 +95,11 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => BoatEditScreen(
         boatId: state.uri.queryParameters['id'],
       ),
+    ),
+    GoRoute(
+      path: AppRoutes.clubImport,
+      name: 'club-import',
+      builder: (context, state) => const ClubImportScreen(),
     ),
     GoRoute(
       path: AppRoutes.crew,

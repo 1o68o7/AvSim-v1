@@ -230,24 +230,29 @@ class IdentityPrefs {
     this.activeRowerId,
     this.activeClubId,
     this.clubRole = ClubMemberRole.admin,
+    this.lastImportId,
   });
 
   final String? activeRowerId;
   final String? activeClubId;
   /// Rôle club (Point B `club_members.role`). Défaut admin = téléphone qui tient le parc.
   final ClubMemberRole clubRole;
+  final String? lastImportId;
 
   IdentityPrefs copyWith({
     String? activeRowerId,
     String? activeClubId,
     ClubMemberRole? clubRole,
+    String? lastImportId,
     bool clearRower = false,
     bool clearClub = false,
+    bool clearImport = false,
   }) {
     return IdentityPrefs(
       activeRowerId: clearRower ? null : (activeRowerId ?? this.activeRowerId),
       activeClubId: clearClub ? null : (activeClubId ?? this.activeClubId),
       clubRole: clubRole ?? this.clubRole,
+      lastImportId: clearImport ? null : (lastImportId ?? this.lastImportId),
     );
   }
 
@@ -255,11 +260,13 @@ class IdentityPrefs {
         'activeRowerId': activeRowerId,
         'activeClubId': activeClubId,
         'clubRole': clubRole.wire,
+        'lastImportId': lastImportId,
       };
 
   static IdentityPrefs fromJson(Map<String, dynamic> j) => IdentityPrefs(
         activeRowerId: j['activeRowerId'] as String?,
         activeClubId: j['activeClubId'] as String?,
         clubRole: ClubMemberRoleX.parse(j['clubRole'] as String?),
+        lastImportId: j['lastImportId'] as String?,
       );
 }
