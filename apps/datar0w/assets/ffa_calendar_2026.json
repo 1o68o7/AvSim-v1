@@ -1,0 +1,71 @@
+{
+  "season": "2025-2026",
+  "source": "curated",
+  "events": [
+    {
+      "id": "ffa-macon-2026",
+      "name": "Championnats de France bateaux longs",
+      "start": "2026-06-04",
+      "end": "2026-06-07",
+      "city": "Mâcon",
+      "lat": 46.3069,
+      "lon": 4.8289,
+      "type": "championnat",
+      "discipline": "riviere",
+      "open_to_loisir": false,
+      "licence_requise": "AC",
+      "url": "https://www.ffaviron.fr/",
+      "water_id": "saone-macon"
+    },
+    {
+      "id": "ffa-fontainebleau-2026",
+      "name": "Régate du Pays de Fontainebleau",
+      "start": "2026-05-10",
+      "end": "2026-05-10",
+      "city": "Fontainebleau",
+      "lat": 48.4047,
+      "lon": 2.7016,
+      "type": "regate_ouverte",
+      "discipline": "riviere",
+      "open_to_loisir": true,
+      "definition_loisir": "J14+ non inscrit aux championnats de France / critérium national FFA lors des 2 dernières saisons.",
+      "licence_requise": "AL",
+      "url": "https://www.ffaviron.fr/",
+      "water_id": "seine-fontainebleau",
+      "inscription_tarif_eur": 15,
+      "limite_bateaux": 30
+    },
+    {
+      "id": "ffa-tdp-2026",
+      "name": "Traversée de Paris",
+      "start": "2026-03-21",
+      "end": "2026-03-22",
+      "city": "Paris",
+      "lat": 48.8566,
+      "lon": 2.3522,
+      "type": "randonnee",
+      "discipline": "riviere",
+      "open_to_loisir": true,
+      "licence_requise": "aucune",
+      "labellise": "RandonAviron",
+      "distance_km": 27,
+      "url": "https://www.ffaviron.fr/",
+      "water_id": "seine-paris"
+    },
+    {
+      "id": "ffa-brive-master-2026",
+      "name": "Championnats de France master",
+      "start": "2026-09-12",
+      "end": "2026-09-13",
+      "city": "Brive",
+      "lat": 45.1596,
+      "lon": 1.5335,
+      "type": "master",
+      "discipline": "riviere",
+      "open_to_loisir": true,
+      "licence_requise": "AC",
+      "url": "https://www.ffaviron.fr/",
+      "water_id": "correze-brive"
+    }
+  ]
+}

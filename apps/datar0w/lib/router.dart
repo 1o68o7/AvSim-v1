@@ -1,5 +1,8 @@
 import 'package:go_router/go_router.dart';
 
+import 'features/calendar/screen_calendar.dart';
+import 'features/calendar/screen_event.dart';
+import 'features/calendar/screen_waters.dart';
 import 'features/coach/screen_5.dart';
 import 'features/coach/screen_join.dart';
 import 'features/cox/screen_cox.dart';
@@ -52,6 +55,8 @@ abstract final class AppRoutes {
   static const rowerReplay = '/replay';
   static const quai = '/quai';
   static const auth = '/auth';
+  static const calendar = '/calendar';
+  static const waters = '/waters';
 
   /// Après tare : barreur → `/cox`, rameur → `/live`. Écrans distincts.
   static String afterTare(CrewRole role) =>
@@ -189,6 +194,23 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.auth,
       name: 'auth',
       builder: (context, state) => const AuthScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.calendar,
+      name: 'calendar',
+      builder: (context, state) => const CalendarScreen(),
+    ),
+    GoRoute(
+      path: '/calendar/:id',
+      name: 'calendar-event',
+      builder: (context, state) => EventSheetScreen(
+        eventId: state.pathParameters['id']!,
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.waters,
+      name: 'waters',
+      builder: (context, state) => const WatersScreen(),
     ),
   ],
 );

@@ -15,6 +15,7 @@ import '../../session/model.dart';
 import '../../session/rower_orientation.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
+import '../../maps/deck_tiles.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_widgets.dart';
 import '../../widgets/heel_banner.dart';
@@ -193,10 +194,9 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                           ),
                           children: [
                             TileLayer(
-                              urlTemplate:
-                                  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                              subdomains: const ['a', 'b', 'c'],
-                              userAgentPackageName: 'io.datar0w.datar0w',
+                              urlTemplate: DeckMapTiles.urlTemplate,
+                              userAgentPackageName:
+                                  DeckMapTiles.userAgentPackageName,
                             ),
                             PolylineLayer(
                               polylines: [

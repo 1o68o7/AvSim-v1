@@ -9,6 +9,7 @@ import '../../session/model.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
 import '../../theme/deck_theme.dart';
+import '../../maps/deck_tiles.dart';
 import '../../widgets/deck_widgets.dart';
 
 class ReplayBody extends StatefulWidget {
@@ -152,10 +153,8 @@ class _ReplayBodyState extends State<ReplayBody> {
                 ),
                 children: [
                   TileLayer(
-                    urlTemplate:
-                        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-                    subdomains: const ['a', 'b', 'c'],
-                    userAgentPackageName: 'io.datar0w.datar0w',
+                    urlTemplate: DeckMapTiles.urlTemplate,
+                    userAgentPackageName: DeckMapTiles.userAgentPackageName,
                   ),
                   PolylineLayer(
                     polylines: [

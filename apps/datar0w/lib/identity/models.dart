@@ -266,6 +266,11 @@ class Club {
     this.primaryColor,
     this.secondaryColor,
     this.crestPath,
+    this.address,
+    this.postcode,
+    this.city,
+    this.lat,
+    this.lon,
     required this.createdAt,
   });
 
@@ -278,6 +283,11 @@ class Club {
   final int? primaryColor;
   final int? secondaryColor;
   final String? crestPath;
+  final String? address;
+  final String? postcode;
+  final String? city;
+  final double? lat;
+  final double? lon;
   final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
@@ -290,6 +300,11 @@ class Club {
         'primaryColor': primaryColor,
         'secondaryColor': secondaryColor,
         'crestPath': crestPath,
+        'address': address,
+        'postcode': postcode,
+        'city': city,
+        'lat': lat,
+        'lon': lon,
         'createdAt': createdAt.toUtc().toIso8601String(),
       };
 
@@ -303,6 +318,11 @@ class Club {
         primaryColor: (j['primaryColor'] as num?)?.toInt(),
         secondaryColor: (j['secondaryColor'] as num?)?.toInt(),
         crestPath: j['crestPath'] as String?,
+        address: j['address'] as String?,
+        postcode: j['postcode'] as String?,
+        city: j['city'] as String?,
+        lat: (j['lat'] as num?)?.toDouble(),
+        lon: (j['lon'] as num?)?.toDouble(),
         createdAt: DateTime.parse(j['createdAt'] as String),
       );
 
@@ -320,6 +340,11 @@ class Club {
     int? secondaryColor,
     String? crestPath,
     bool clearCrest = false,
+    String? address,
+    String? postcode,
+    String? city,
+    double? lat,
+    double? lon,
   }) {
     return Club(
       id: id,
@@ -331,6 +356,11 @@ class Club {
       primaryColor: primaryColor ?? this.primaryColor,
       secondaryColor: secondaryColor ?? this.secondaryColor,
       crestPath: clearCrest ? null : (crestPath ?? this.crestPath),
+      address: address ?? this.address,
+      postcode: postcode ?? this.postcode,
+      city: city ?? this.city,
+      lat: lat ?? this.lat,
+      lon: lon ?? this.lon,
       createdAt: createdAt,
     );
   }
