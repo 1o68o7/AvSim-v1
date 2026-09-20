@@ -1,0 +1,228 @@
+<!DOCTYPE html><html lang="fr" class="h-full" style=""><svg class="inline-defs-container" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></svg><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Écran 6 — Coach Replay</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            deck: {
+              bg: '#0B0E12',
+              card: '#12161D',
+              border: '#2A2F36',
+              borderLight: '#3D4450',
+              amber: '#E8C547',
+              muted: '#9AA0A6',
+              green: '#00E676',
+              red: '#FF5252',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+    body {
+      background-color: #0B0E12;
+      color: #FFFFFF;
+      font-family: 'JetBrains Mono', monospace;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      overflow: hidden;
+    }
+    .hairline-border {
+      border: 1px solid #2A2F36;
+    }
+  </style>
+</head>
+<body class="w-[844px] h-[390px] max-w-[844px] max-h-[390px] bg-deck-bg text-white overflow-hidden flex flex-col justify-between p-3 select-none">
+
+  <!-- TOP BAR / HEADER -->
+  <header class="w-full h-8 flex items-center justify-between border-b border-deck-border pb-2 px-1 text-[11px] tracking-wider">
+    <div class="flex items-center space-x-3">
+      <span class="text-deck-amber font-bold text-xs tracking-widest uppercase">DATAR0W</span>
+      <span class="text-deck-border">/</span>
+      <span class="text-white font-semibold">COACH REPLAY</span>
+      <span class="px-2 py-0.5 rounded text-[10px] bg-deck-card border border-deck-border text-deck-amber uppercase font-medium">PROFIL COACH</span>
+    </div>
+    
+    <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2 text-[11px]">
+        <span class="text-deck-muted">SÉANCE:</span>
+        <span class="text-white font-medium">BASSIN 2000M · SKIFF 1X #04</span>
+      </div>
+      <div class="h-3 w-[1px] bg-deck-border"></div>
+      <div class="flex items-center space-x-1.5 text-deck-muted">
+        <span class="inline-block w-1.5 h-1.5 rounded-full bg-deck-muted"></span>
+        <span class="text-[10px] uppercase tracking-wider">FICHIER CHARGÉ</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN VIEWPORT: 2 CURVES TIMELINE + RIGHT TELEMETRY / DELTA -->
+  <main class="w-full flex-1 flex gap-3 pt-2.5 min-h-0">
+
+    <!-- GRAPH & SCRUBBER AREA (LEFT 72%) -->
+    <div class="flex-1 flex flex-col justify-between bg-deck-card border border-deck-border rounded-sm p-2.5 relative">
+      
+      <!-- Graph Legend & Current Time Marker -->
+      <div class="flex items-center justify-between text-[10px] mb-1">
+        <div class="flex items-center space-x-4">
+          <!-- Curve 1: Cadence -->
+          <div class="flex items-center space-x-1.5">
+            <span class="inline-block w-3 h-[2px] bg-deck-amber"></span>
+            <span class="text-deck-amber font-medium">CADENCE (SPM)</span>
+          </div>
+          <!-- Curve 2: V Sol -->
+          <div class="flex items-center space-x-1.5">
+            <span class="inline-block w-3 h-[2px] bg-white"></span>
+            <span class="text-white font-medium">V. SOL (m/s)</span>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3 text-[10px]">
+          <span class="text-deck-muted">TÉMOIN ACTIF:</span>
+          <span class="text-white font-semibold bg-[#1C212B] px-1.5 py-0.5 rounded border border-deck-border text-deck-amber">04:32 / 07:18</span>
+        </div>
+      </div>
+
+      <!-- DUAL CURVE GRAPH SVG -->
+      <div class="w-full flex-1 relative bg-[#0B0E12] border border-deck-border rounded-sm overflow-hidden flex items-center">
+        <!-- SVG Dual Curve Display -->
+        <svg viewBox="0 0 540 180" class="w-full h-full" preserveAspectRatio="none">
+          <defs>
+            <!-- Vertical grid pattern -->
+            <pattern id="grid" width="60" height="36" patternUnits="userSpaceOnUse">
+              <path d="M 60 0 L 0 0 0 36" fill="none" stroke="#1A2029" stroke-width="0.75" stroke-dasharray="2 2"></path>
+            </pattern>
+          </defs>
+          <rect width="540" height="180" fill="#090C10"></rect>
+          <rect width="540" height="180" fill="url(#grid)"></rect>
+
+          <!-- Axis markings -->
+          <text x="6" y="18" fill="#4E5562" font-size="8" font-family="JetBrains Mono">34 SPM / 5.5 m/s</text>
+          <text x="6" y="94" fill="#4E5562" font-size="8" font-family="JetBrains Mono">28 SPM / 4.2 m/s</text>
+          <text x="6" y="172" fill="#4E5562" font-size="8" font-family="JetBrains Mono">20 SPM / 3.0 m/s</text>
+
+          <!-- Distance markers at bottom -->
+          <text x="75" y="174" fill="#3D4450" font-size="7" font-family="JetBrains Mono">250m</text>
+          <text x="175" y="174" fill="#3D4450" font-size="7" font-family="JetBrains Mono">500m</text>
+          <text x="275" y="174" fill="#3D4450" font-size="7" font-family="JetBrains Mono">750m</text>
+          <text x="375" y="174" fill="#3D4450" font-size="7" font-family="JetBrains Mono">1000m</text>
+          <text x="475" y="174" fill="#3D4450" font-size="7" font-family="JetBrains Mono">1250m</text>
+
+          <!-- Annotation Flag 1 at x=140 (02:10) -->
+          <line x1="140" y1="10" x2="140" y2="165" stroke="#E8C547" stroke-width="1" stroke-dasharray="3 2" opacity="0.6"></line>
+          <rect x="126" y="10" width="28" height="12" rx="1" fill="#1C212B" stroke="#E8C547" stroke-width="0.8"></rect>
+          <text x="140" y="19" fill="#E8C547" font-size="7" font-weight="bold" font-family="JetBrains Mono" text-anchor="middle">NOTE 1</text>
+
+          <!-- Annotation Flag 2 at cursor x=320 (04:32) -->
+          <line x1="320" y1="10" x2="320" y2="165" stroke="#FFFFFF" stroke-width="1.2" opacity="0.9"></line>
+          <rect x="306" y="10" width="28" height="12" rx="1" fill="#E8C547"></rect>
+          <text x="320" y="19" fill="#000000" font-size="7" font-weight="bold" font-family="JetBrains Mono" text-anchor="middle">NOTE 2</text>
+
+          <!-- CURVE 1: CADENCE (Yellow Amber #E8C547) -->
+          <path d="M 0 130 
+                   C 30 135, 50 110, 80 102 
+                   C 110 95, 130 90, 150 94 
+                   C 180 98, 200 90, 230 84 
+                   C 260 78, 280 88, 300 86 
+                   C 310 85, 320 80, 330 76 
+                   C 350 72, 380 75, 410 70 
+                   C 440 65, 470 78, 500 74 
+                   L 540 76" fill="none" stroke="#E8C547" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+
+          <!-- CURVE 2: VITESSE SOL (Pure White #FFFFFF) -->
+          <path d="M 0 145 
+                   C 30 148, 50 126, 80 118 
+                   C 110 110, 130 106, 150 109 
+                   C 180 112, 200 104, 230 98 
+                   C 260 92, 280 100, 300 98 
+                   C 310 97, 320 92, 330 89 
+                   C 350 85, 380 87, 410 83 
+                   C 440 78, 470 90, 500 86 
+                   L 540 88" fill="none" stroke="#FFFFFF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></path>
+
+          <!-- Cursor Point at x=320 (Cadence = y=80 -> 28 SPM; V sol = y=92 -> 4.2 m/s) -->
+          <circle cx="320" cy="80" r="3.5" fill="#E8C547" stroke="#0B0E12" stroke-width="1"></circle>
+          <circle cx="320" cy="92" r="3" fill="#FFFFFF" stroke="#0B0E12" stroke-width="1"></circle>
+        </svg>
+
+        <!-- Current Cursor Scrubber Tooltip Overlay -->
+        <div class="absolute left-[310px] top-6 pointer-events-none bg-[#0B0E12]/90 border border-deck-border px-1.5 py-0.5 rounded text-[9px] shadow-sm">
+          <span class="text-deck-amber font-semibold">28 SPM</span> · <span class="text-white font-medium">4.2 m/s</span>
+        </div>
+      </div>
+
+      <!-- PLAYBACK & TIMELINE CONTROLS -->
+      <div class="flex items-center space-x-2.5 mt-2 text-[11px]">
+        <!-- Play / Pause Button -->
+        <button class="w-7 h-7 flex items-center justify-center rounded bg-deck-amber text-black font-bold text-xs hover:bg-[#d8b53d] transition-colors">
+          ▶
+        </button>
+
+        <!-- Timeline Scrubber Bar -->
+        <div class="flex-1 flex flex-col justify-center">
+          <div class="relative w-full h-2 bg-[#181D24] border border-deck-border rounded-full overflow-hidden flex items-center">
+            <!-- Progress Fill -->
+            <div class="h-full bg-deck-amber/40" style="width: 59%;"></div>
+            <!-- Scrubber Playhead -->
+            <div class="absolute top-0 bottom-0 w-2 bg-deck-amber rounded-full shadow" style="left: 58%;"></div>
+          </div>
+          <div class="flex justify-between text-[9px] text-deck-muted mt-1 px-0.5">
+            <span class="">00:00</span>
+            <span class="">01:45</span>
+            <span class="text-deck-amber font-semibold">04:32 (CURSEUR)</span>
+            <span class="">06:00</span>
+            <span class="">07:18</span>
+          </div>
+        </div>
+
+        <!-- Annotation Jump Buttons -->
+        <div class="flex items-center space-x-1 pl-1">
+          <button class="px-2 py-1 bg-[#181D24] border border-deck-border text-deck-amber text-[10px] font-medium rounded hover:border-deck-amber">
+            ⯇ NOTE 1
+          </button>
+          <button class="px-2 py-1 bg-[#181D24] border border-deck-amber text-deck-amber text-[10px] font-semibold rounded">
+            NOTE 2 ⯈
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL: RAW DELTA & TELEMETRY AT CURSOR (28%) -->
+    <div class="w-[236px] flex flex-col justify-between space-y-1.5 min-h-0"><div class="bg-deck-card border border-deck-border rounded-sm p-2 flex flex-col justify-between"><div class="text-[10px] text-deck-muted font-medium uppercase tracking-wider">ÉVALUATION SÉQUENCE</div><div class="my-1.5 text-center py-1 bg-[#0B0E12] border border-deck-border rounded"><div class="text-[9px] text-deck-muted">VARIATION CADENCE</div><div class="text-xl font-bold text-deck-amber tracking-tight font-mono">Δ CADENCE = +2</div><div class="text-[8px] text-deck-muted">RÉF. BASE: 26 SPM → 28 SPM</div></div><div class="text-[9px] text-deck-muted border-t border-deck-border/60 pt-1 space-y-0.5"><div class="flex justify-between"><span class="">REPÈRE NOTE 2:</span><span class="text-white font-medium">04:32 · 1120m</span></div><div class="text-[#C5CAD1] leading-tight italic">« Relance sortie de virage, maintien vitesse sol 4.2 m/s »</div></div></div><div class="bg-deck-card border border-deck-border rounded-sm p-2 flex flex-col justify-start space-y-1.5"><div class="text-[10px] text-deck-muted font-medium uppercase tracking-wider">VALEURS AU CURSEUR (04:32)</div><div class="space-y-1 text-[10px]"><div class="flex items-center justify-between py-0.5 px-1.5 bg-[#0B0E12] border border-deck-border rounded"><span class="text-deck-muted">CADENCE :</span><span class="text-deck-amber font-bold text-xs">28 <span class="text-[9px] font-normal text-deck-muted">SPM</span></span></div><div class="flex items-center justify-between py-0.5 px-1.5 bg-[#0B0E12] border border-deck-border rounded"><span class="text-deck-muted">V. SOL (GPS) :</span><span class="text-white font-bold text-xs">4.2 <span class="text-[9px] font-normal text-deck-muted">m/s</span></span></div><div class="flex items-center justify-between py-0.5 px-1.5 bg-[#0B0E12] border border-deck-border rounded"><span class="text-deck-muted">GÎTE INSTANTANÉE :</span><span class="text-deck-green font-bold text-xs">+1.4° <span class="text-[8px] font-normal uppercase">TRIBORDS</span></span></div></div></div></div>
+
+  </main>
+
+  <!-- FOOTER STATUS STRIP -->
+  <footer class="w-full h-5 flex items-center justify-between border-t border-deck-border text-[9px] text-deck-muted px-1 pt-1 mt-1">
+    <div class="flex items-center space-x-3">
+      <span class="">MODE: REPLAY ANALYTIQUE</span>
+      <span class="">·</span>
+      <span class="">SYNCHRO GPS + IMU OK</span>
+    </div>
+    <div class="flex items-center space-x-2"><span class="">DISTANCE SÉANCE : <strong class="text-white font-semibold">1.24 km</strong></span><span class="">·</span><span class="">ÉCRAN 6 / 7</span></div>
+  </footer>
+
+
+
+
+
+
+
+</body></html>

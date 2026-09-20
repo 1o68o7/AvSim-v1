@@ -1,0 +1,198 @@
+<!DOCTYPE html><html lang="fr" class="dark"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Écran 2A — Pré-session</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            deck: {
+              base: '#0B0E12',
+              surface: '#111418',
+              surfaceLow: '#161A20',
+              border: '#2A2F36',
+              amber: '#E8C547',
+              amberDim: '#B89B2E',
+              green: '#00E676',
+              red: '#FF3B30',
+              muted: '#7A828E',
+              subtle: '#4A515C',
+              text: '#E6E9EE'
+            }
+          },
+          fontFamily: {
+            mono: ['"JetBrains Mono"', 'monospace'],
+            sans: ['"Inter"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #050709;
+      color: #E6E9EE;
+      font-family: 'JetBrains Mono', monospace;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    .device-viewport {
+      width: 390px;
+      height: 844px;
+      max-height: 844px;
+      background-color: #0B0E12;
+      border: 1px solid #2A2F36;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.85);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen 2A: Pré-session (390x844) -->
+  <main class="device-viewport" role="region" aria-label="Écran 2A — Pré-session">
+
+    <!-- Top Minimal Avionics Header (No REC, No avatar, No MODE PAYSAGE) -->
+    <header class="h-14 px-5 border-b border-deck-border flex items-center justify-between bg-deck-surface/70 shrink-0">
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-deck-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+        <span class="text-xs font-bold tracking-widest text-deck-text uppercase">DATAR0W</span>
+        <span class="text-[10px] text-deck-subtle font-mono">/ 2A</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="w-1.5 h-1.5 rounded-full bg-deck-amber animate-pulse"></span>
+        <span class="text-[10px] font-mono tracking-wider text-deck-amber uppercase">PRÉ-SESSION</span>
+      </div>
+    </header>
+
+    <!-- Main Content Area: Fields Only -->
+    <div class="flex-1 px-5 py-6 flex flex-col gap-6 overflow-hidden">
+      
+      <!-- Section Title -->
+      <div>
+        <h1 class="text-lg font-bold text-white tracking-tight uppercase">Configuration séance</h1>
+        <p class="text-[11px] text-deck-muted mt-1 leading-normal font-sans">Paramétrage matériel et télémétrie avant mise à l'eau</p>
+      </div>
+
+      <!-- Field 1: Boat Class Chips (1x selected) -->
+      <section class="flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <label class="text-[11px] font-semibold tracking-wider text-deck-muted uppercase">Classe d'embarcation</label>
+          <span class="text-[10px] text-deck-amber font-mono font-medium">SÉLECTIONNÉ : 1X</span>
+        </div>
+        <div class="grid grid-cols-4 gap-2">
+          <!-- 1x (Selected) -->
+          <div class="h-13 py-2 px-1 flex flex-col items-center justify-center rounded-none bg-deck-surface border-2 border-deck-amber text-white shadow-sm" aria-current="true">
+            <span class="text-sm font-bold tracking-tight text-deck-amber">1X</span>
+            <span class="text-[9px] text-deck-text/90 uppercase font-mono tracking-tighter">Skiff</span>
+          </div>
+          <!-- 2x -->
+          <div class="h-13 py-2 px-1 flex flex-col items-center justify-center rounded-none bg-deck-surface/40 border border-deck-border text-deck-muted hover:border-deck-subtle transition-colors opacity-70">
+            <span class="text-sm font-semibold tracking-tight">2X</span>
+            <span class="text-[9px] uppercase font-mono tracking-tighter text-deck-subtle">Double</span>
+          </div>
+          <!-- 4- -->
+          <div class="h-13 py-2 px-1 flex flex-col items-center justify-center rounded-none bg-deck-surface/40 border border-deck-border text-deck-muted hover:border-deck-subtle transition-colors opacity-70">
+            <span class="text-sm font-semibold tracking-tight">4-</span>
+            <span class="text-[9px] uppercase font-mono tracking-tighter text-deck-subtle">Pointe</span>
+          </div>
+          <!-- 8+ -->
+          <div class="h-13 py-2 px-1 flex flex-col items-center justify-center rounded-none bg-deck-surface/40 border border-deck-border text-deck-muted hover:border-deck-subtle transition-colors opacity-70">
+            <span class="text-sm font-semibold tracking-tight">8+</span>
+            <span class="text-[9px] uppercase font-mono tracking-tighter text-deck-subtle">Huit</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Field 2: Bassin text -->
+      <section class="flex flex-col gap-2">
+        <label class="text-[11px] font-semibold tracking-wider text-deck-muted uppercase">Bassin / Plan d'eau</label>
+        <div class="h-12 px-3.5 bg-deck-surface border border-deck-border flex items-center justify-between">
+          <div class="flex items-center gap-2.5 overflow-hidden">
+            <svg class="w-4 h-4 text-deck-amber shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span class="text-xs font-mono font-medium text-deck-text truncate">Bassin de Mantes-la-Jolie</span>
+          </div>
+          <span class="text-[10px] font-mono text-deck-muted uppercase shrink-0 tracking-wider">2 000 m</span>
+        </div>
+      </section>
+
+      <!-- Field 3: Sensors GPS / IMU / BLE «— aucun» -->
+      <section class="flex flex-col gap-2.5">
+        <div class="flex items-center justify-between">
+          <label class="text-[11px] font-semibold tracking-wider text-deck-muted uppercase">Capteurs télémétriques</label>
+          
+        </div>
+
+        <div class="flex flex-col gap-2 border border-deck-border bg-deck-surface p-3"><!-- GPS -->
+          <div class="flex items-center justify-between py-1.5 border-b border-deck-border/60">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2 h-2 rounded-full bg-deck-green"></span>
+              <span class="text-xs font-bold text-white tracking-wide">GPS</span>
+            </div>
+            <span class="text-[10px] font-mono text-deck-green uppercase font-semibold">ACTIF</span>
+          </div>
+
+          <!-- IMU -->
+          <div class="flex items-center justify-between py-1.5 border-b border-deck-border/60">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2 h-2 rounded-full bg-deck-green"></span>
+              <span class="text-xs font-bold text-white tracking-wide">IMU</span>
+            </div>
+            <span class="text-[10px] font-mono text-deck-green uppercase font-semibold">ACTIF</span>
+          </div>
+
+          <!-- BLE: aucun -->
+          <div class="flex items-center justify-between py-1.5">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2 h-2 rounded-full bg-deck-subtle"></span>
+              <span class="text-xs font-bold text-deck-muted tracking-wide">BLE</span>
+            </div>
+            <span class="text-[11px] font-mono text-deck-muted font-semibold tracking-wider">— aucun</span>
+          </div></div>
+      </section>
+
+      <!-- Note / Info -->
+      <div class="mt-auto p-3 bg-deck-surfaceLow border-l-2 border-deck-amber/80 text-[11px] text-deck-muted font-sans leading-relaxed">
+        L'assiette et le centrage gyroscopique seront étalonnés à l'étape suivante sur le ponton.
+      </div>
+
+    </div>
+
+    <!-- Bottom Sticky Action (One button: Continuer — tare gîte) -->
+    <footer class="p-5 border-t border-deck-border bg-deck-surface/90 shrink-0">
+      <button type="button" class="w-full h-13 py-3.5 px-4 bg-deck-amber hover:bg-deck-amberDim active:scale-[0.99] transition-all flex items-center justify-center gap-2 text-deck-base font-mono font-bold text-xs tracking-wider uppercase shadow-md cursor-pointer">
+        <span class="">Continuer — tare gîte</span>
+        <svg class="w-4 h-4 text-deck-base" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </footer>
+
+  </main>
+
+
+
+
+
+</body></html>
