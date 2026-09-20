@@ -9,6 +9,7 @@ import '../identity/controller.dart';
 import '../identity/models.dart';
 import '../sensors/baro.dart';
 import '../sensors/battery.dart';
+import '../sensors/ble/cardio_hub.dart';
 import '../sensors/geo.dart';
 import '../sensors/gps.dart';
 import '../sensors/imu.dart';
@@ -615,6 +616,7 @@ class LiveHub extends Notifier<LiveHubState> {
             az: imu.az,
           )
         : null;
+    final hr = ref.read(cardioHubProvider);
     final sample = SessionSample(
       t: DateTime.now().millisecondsSinceEpoch,
       lat: stale ? null : fix?.lat,
@@ -633,6 +635,8 @@ class LiveHub extends Notifier<LiveHubState> {
       altBaro: altBaroRelM(_pHpa, _p0Hpa),
       batt: batt,
       net: state.net,
+      hrBpm: hr?.bpm,
+      hrSource: hr == null ? null : 'ble',
     );
     _store?.append(sample);
     recorded.add(sample);
@@ -645,6 +649,7 @@ class LiveHub extends Notifier<LiveHubState> {
       sampleCount: state.sampleCount + 1,
       cadenceSpm: _cadence.spm,
       hdgMag: hdg,
+      hrBpm: hr?.bpm,
     );
   }
 

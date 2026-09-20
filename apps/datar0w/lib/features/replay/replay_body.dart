@@ -444,6 +444,14 @@ class _CurvesPainter extends CustomPainter {
       samples.map((s) => s.sog).toList(),
       Colors.white70,
     );
+    if (samples.any((s) => s.hrBpm != null)) {
+      _line(
+        canvas,
+        size,
+        samples.map((s) => s.hrBpm?.toDouble()).toList(),
+        DeckColors.babord,
+      );
+    }
     final t0 = samples.first.t;
     final spanT = (samples.last.t - t0).clamp(1, 1 << 30);
     for (var n = 0; n < notes.length; n++) {

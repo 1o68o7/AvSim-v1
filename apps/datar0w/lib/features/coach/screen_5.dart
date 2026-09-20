@@ -127,6 +127,13 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                       label: live || apiLive ? 'LIVE' : 'FICHIER',
                       ok: live || apiLive,
                     ),
+                    if (last?.hrBpm != null) ...[
+                      const SizedBox(width: 8),
+                      DeckStatusChip(
+                        label: '♥ ${last!.hrBpm}',
+                        ok: true,
+                      ),
+                    ],
                     const SizedBox(width: 8),
                     Text(
                       () {
