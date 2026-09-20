@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../calendar/loisir_store.dart';
 import '../../identity/controller.dart';
 import '../../identity/models.dart';
 import '../../ops/controller.dart';
@@ -91,6 +92,40 @@ class _SpinoscopeScreenState extends ConsumerState<SpinoscopeScreen> {
           Text(
             'Sorties en cours : $outsToday',
             style: const TextStyle(color: DeckColors.amber),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'LOISIR / RANDO / MASTER',
+            style: TextStyle(
+              color: DeckColors.label,
+              fontSize: 11,
+              letterSpacing: 1.1,
+            ),
+          ),
+          FutureBuilder(
+            future: LoisirStore().list(),
+            builder: (context, snap) {
+              final list = snap.data ?? const [];
+              if (list.isEmpty) {
+                return const Text(
+                  'Aucune participation signalée.',
+                  style: TextStyle(color: DeckColors.muted),
+                );
+              }
+              return Column(
+                children: [
+                  for (final p in list.take(8))
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      title: Text(p.eventId),
+                      subtitle: Text(
+                        '${p.type} · ${p.tempsCourse ?? p.classementLoisir ?? 'ok'}',
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
           const SizedBox(height: 16),
           const Text(

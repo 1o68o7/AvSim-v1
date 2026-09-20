@@ -6,6 +6,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../calendar/catalog.dart';
+import '../../calendar/loisir_store.dart';
+import '../../calendar/models.dart';
 import '../../identity/controller.dart';
 import '../../identity/models.dart';
 import '../../maps/deck_tiles.dart';
@@ -13,18 +15,33 @@ import '../../router.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 
-class EventSheetScreen extends ConsumerWidget {
+class EventSheetScreen extends ConsumerStatefulWidget {
   const EventSheetScreen({super.key, required this.eventId});
 
   final String eventId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<EventSheetScreen> createState() => _EventSheetScreenState();
+}
+
+class _EventSheetScreenState extends ConsumerState<EventSheetScreen> {
+  final _temps = TextEditingController();
+  final _place = TextEditingController();
+
+  @override
+  void dispose() {
+    _temps.dispose();
+    _place.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final rower = ref.watch(identityProvider).activeRower;
     return FutureBuilder<CalendarCatalog>(
       future: CalendarCatalog.load(),
       builder: (context, snap) {
-        final e = snap.data?.eventById(eventId);
+        final e = snap.data?.eventById(widget.eventId);
         if (e == null) {
           return DeckScaffold(
             title: 'ÉVÉNEMENT',
@@ -48,10 +65,6 @@ class EventSheetScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             children: [
               Text(e.name, style: const TextStyle(fontWeight: FontWeight.w700)),
-              Text(
-                e.start.toIso8601String().split('T').first,
-                style: const TextStyle(color: DeckColors.muted),
-              ),
               if (blocked)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),
@@ -59,22 +72,12 @@ class EventSheetScreen extends ConsumerWidget {
                     'Licence loisir — compétition réservée à une licence compétition.',
                     style: TextStyle(color: DeckColors.amber),
                   ),
-                )
-              else if (al)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Text(
-                    'Ta licence loisir t’autorise cet événement.',
-                    style: TextStyle(color: DeckColors.tribord),
-                  ),
                 ),
-              if (e.definitionLoisir != null) ...[
-                const SizedBox(height: 8),
+              if (e.definitionLoisir != null)
                 Text(
                   e.definitionLoisir!,
                   style: const TextStyle(color: DeckColors.label, height: 1.3),
                 ),
-              ],
               if (e.lat != null && e.lon != null) ...[
                 const SizedBox(height: 12),
                 SizedBox(
@@ -102,10 +105,6 @@ class EventSheetScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const Text(
-                  DeckMapTiles.attribution,
-                  style: TextStyle(color: DeckColors.muted, fontSize: 10),
-                ),
               ],
               if (e.url != null) ...[
                 const SizedBox(height: 12),
@@ -114,6 +113,54 @@ class EventSheetScreen extends ConsumerWidget {
                   child: const Text('INSCRIPTION (LIEN)'),
                 ),
               ],
+              const SizedBox(height: 16),
+              const Text(
+                'SIGNALER MA PARTICIPATION',
+                style: TextStyle(
+                  color: DeckColors.label,
+                  fontSize: 11,
+                  letterSpacing: 1.1,
+                ),
+              ),
+              TextField(
+                controller: _temps,
+                decoration:
+                    const InputDecoration(labelText: 'Temps (si course)'),
+              ),
+              TextField(
+                controller: _place,
+                decoration:
+                    const InputDecoration(labelText: 'Classement loisir'),
+              ),
+              const SizedBox(height: 8),
+              FilledButton(
+                onPressed: rower == null
+                    ? null
+                    : () async {
+                        await LoisirStore().add(
+                          ParticipationLoisir(
+                            id: 'p-${DateTime.now().millisecondsSinceEpoch}',
+                            eventId: e.id,
+                            rowerId: rower.id,
+                            type: e.type,
+                            date: e.start,
+                            tempsCourse: _temps.text.trim().isEmpty
+                                ? null
+                                : _temps.text.trim(),
+                            classementLoisir: _place.text.trim().isEmpty
+                                ? null
+                                : _place.text.trim(),
+                            distanceKm: e.distanceKm,
+                          ),
+                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Participation notée')),
+                          );
+                        }
+                      },
+                child: const Text('J’AI PARTICIPÉ'),
+              ),
             ],
           ),
         );
