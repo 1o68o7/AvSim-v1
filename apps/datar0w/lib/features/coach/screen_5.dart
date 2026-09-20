@@ -15,6 +15,7 @@ import '../../session/model.dart';
 import '../../session/rower_orientation.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
+import '../../sync/providers.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_widgets.dart';
 import '../../widgets/heel_banner.dart';
@@ -66,6 +67,10 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
   @override
   Widget build(BuildContext context) {
     final hub = ref.watch(liveHubProvider);
+    final clubId = ref.watch(identityProvider).activeClub?.id;
+    ref.listen(assignmentsStreamProvider(clubId), (prev, next) {
+      next.whenData((rows) => applyAssignmentRows(ref, rows));
+    });
     final apiLive = hub.coachFromApi && hub.remoteSample != null;
     final live = !hub.coachFromApi &&
         hub.logging &&

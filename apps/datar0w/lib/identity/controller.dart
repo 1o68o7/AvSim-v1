@@ -143,6 +143,8 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     state = await _reload();
   }
 
+  Future<void> reload() => _refresh();
+
   Future<void> saveRower(Rower rower) async {
     await _store.upsertRower(rower);
     final prefs = await _store.loadState();

@@ -86,5 +86,6 @@ void main() {
     expect(find.text('COMPOSER'), findsOneWidget);
     expect(find.text('REJOINDRE'), findsOneWidget);
     expect(find.text('PARC'), findsOneWidget);
+    expect(find.text('HORS-LIGNE'), findsOneWidget);
   });
 }

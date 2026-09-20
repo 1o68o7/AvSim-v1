@@ -7,8 +7,10 @@ import '../../identity/format.dart';
 import '../../identity/models.dart';
 import '../../router.dart';
 import '../../session/boat_config.dart';
+import '../../sync/providers.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import '../../widgets/deck_widgets.dart';
 
 void continueFromAssignment(
   WidgetRef ref, {
@@ -119,6 +121,11 @@ class HomeCoachScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final hud = ref.watch(syncHudProvider);
+    final clubId = ref.watch(identityProvider).activeClub?.id;
+    ref.listen(assignmentsStreamProvider(clubId), (prev, next) {
+      next.whenData((rows) => applyAssignmentRows(ref, rows));
+    });
     return DeckScaffold(
       title: 'ACCUEIL COACH',
       subtitle: 'Composition · parc · live',
@@ -131,6 +138,15 @@ class HomeCoachScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: DeckStatusChip(
+                label: hud.chip,
+                ok: hud.online && hud.error == null,
+                alert: !hud.online,
+              ),
+            ),
+            const SizedBox(height: 12),
             FilledButton(
               onPressed: () => context.go(AppRoutes.crew),
               child: const Text('COMPOSER'),
