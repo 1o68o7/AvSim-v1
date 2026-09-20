@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../sync/cloud_map.dart';
+import '../sync/outbox.dart';
 import 'models.dart';
 
 /// CRUD JSON sous `Documents/datar0w/`.
@@ -11,6 +13,30 @@ class IdentityStore {
   IdentityStore({Directory? root}) : _rootOverride = root;
 
   final Directory? _rootOverride;
+  SyncOutbox? _outbox;
+
+  Future<SyncOutbox> outbox() async {
+    _outbox ??= SyncOutbox(root: await root());
+    return _outbox!;
+  }
+
+  Future<void> _enqueue({
+    required String table,
+    required String op,
+    required String id,
+    Map<String, dynamic> payload = const {},
+  }) async {
+    final box = await outbox();
+    await box.enqueue(
+      OutboxOp(
+        table: table,
+        op: op,
+        id: id,
+        payload: payload,
+        queuedAt: DateTime.now().toUtc(),
+      ),
+    );
+  }
 
   Future<Directory> root() async {
     if (_rootOverride != null) {
@@ -28,15 +54,26 @@ class IdentityStore {
     return raw.map(Rower.fromJson).toList();
   }
 
-  Future<void> upsertRower(Rower rower) async {
+  Future<void> upsertRower(Rower rower, {bool enqueue = true}) async {
+    final row = enqueue
+        ? rower.copyWith(updatedAt: DateTime.now().toUtc())
+        : rower;
     final list = await listRowers();
-    final i = list.indexWhere((e) => e.id == rower.id);
+    final i = list.indexWhere((e) => e.id == row.id);
     if (i >= 0) {
-      list[i] = rower;
+      list[i] = row;
     } else {
-      list.add(rower);
+      list.add(row);
     }
     await _writeList('rowers.json', list.map((e) => e.toJson()).toList());
+    if (enqueue && row.clubId != null) {
+      await _enqueue(
+        table: 'rowers',
+        op: 'upsert',
+        id: row.id,
+        payload: rowerToCloud(row),
+      );
+    }
   }
 
   Future<void> deleteRower(String id) async {
@@ -47,6 +84,7 @@ class IdentityStore {
     if (st.activeRowerId == id) {
       await saveState(st.copyWith(clearRower: true));
     }
+    await _enqueue(table: 'rowers', op: 'delete', id: id);
   }
 
   Future<List<Club>> listClubs() async {
@@ -54,15 +92,26 @@ class IdentityStore {
     return raw.map(Club.fromJson).toList();
   }
 
-  Future<void> upsertClub(Club club) async {
+  Future<void> upsertClub(Club club, {bool enqueue = true}) async {
+    final row = enqueue
+        ? club.copyWith(updatedAt: DateTime.now().toUtc())
+        : club;
     final list = await listClubs();
-    final i = list.indexWhere((e) => e.id == club.id);
+    final i = list.indexWhere((e) => e.id == row.id);
     if (i >= 0) {
-      list[i] = club;
+      list[i] = row;
     } else {
-      list.add(club);
+      list.add(row);
     }
     await _writeList('clubs.json', list.map((e) => e.toJson()).toList());
+    if (enqueue) {
+      await _enqueue(
+        table: 'clubs',
+        op: 'upsert',
+        id: row.id,
+        payload: clubToCloud(row),
+      );
+    }
   }
 
   Future<void> deleteClub(String id) async {
@@ -76,6 +125,7 @@ class IdentityStore {
     if (st.activeClubId == id) {
       await saveState(st.copyWith(clearClub: true));
     }
+    await _enqueue(table: 'clubs', op: 'delete', id: id);
   }
 
   Future<List<ParkBoat>> listBoats() async {
@@ -83,15 +133,26 @@ class IdentityStore {
     return raw.map(ParkBoat.fromJson).toList();
   }
 
-  Future<void> upsertBoat(ParkBoat boat) async {
+  Future<void> upsertBoat(ParkBoat boat, {bool enqueue = true}) async {
+    final row = enqueue
+        ? boat.copyWith(updatedAt: DateTime.now().toUtc())
+        : boat;
     final list = await listBoats();
-    final i = list.indexWhere((e) => e.id == boat.id);
+    final i = list.indexWhere((e) => e.id == row.id);
     if (i >= 0) {
-      list[i] = boat;
+      list[i] = row;
     } else {
-      list.add(boat);
+      list.add(row);
     }
     await _writeList('boats.json', list.map((e) => e.toJson()).toList());
+    if (enqueue) {
+      await _enqueue(
+        table: 'boats',
+        op: 'upsert',
+        id: row.id,
+        payload: boatToCloud(row),
+      );
+    }
   }
 
   Future<void> deleteBoat(String id) async {
@@ -101,6 +162,7 @@ class IdentityStore {
     final asg = await listAssignments();
     asg.removeWhere((a) => a.boatId == id);
     await _writeList('assignments.json', asg.map((e) => e.toJson()).toList());
+    await _enqueue(table: 'boats', op: 'delete', id: id);
   }
 
   Future<List<Assignment>> listAssignments() async {
@@ -108,15 +170,44 @@ class IdentityStore {
     return raw.map(Assignment.fromJson).toList();
   }
 
-  Future<void> upsertAssignment(Assignment a) async {
+  Future<void> upsertAssignment(Assignment a, {bool enqueue = true}) async {
+    final row = enqueue
+        ? Assignment(
+            id: a.id,
+            boatId: a.boatId,
+            seatIndex: a.seatIndex,
+            rowerId: a.rowerId,
+            side: a.side,
+            oars: a.oars,
+            role: a.role,
+            coxPosition: a.coxPosition,
+            createdAt: a.createdAt,
+            updatedAt: DateTime.now().toUtc(),
+          )
+        : a;
     final list = await listAssignments();
-    final i = list.indexWhere((e) => e.id == a.id);
+    final i = list.indexWhere((e) => e.id == row.id);
     if (i >= 0) {
-      list[i] = a;
+      list[i] = row;
     } else {
-      list.add(a);
+      list.add(row);
     }
     await _writeList('assignments.json', list.map((e) => e.toJson()).toList());
+    if (enqueue) {
+      final boats = await listBoats();
+      String? clubId;
+      for (final b in boats) {
+        if (b.id == row.boatId) clubId = b.clubId;
+      }
+      if (clubId != null) {
+        await _enqueue(
+          table: 'assignments',
+          op: 'upsert',
+          id: row.id,
+          payload: assignmentToCloud(row, clubId: clubId),
+        );
+      }
+    }
   }
 
   Future<void> replaceAssignmentsForBoat(
@@ -124,15 +215,22 @@ class IdentityStore {
     List<Assignment> next,
   ) async {
     final list = await listAssignments();
+    final removed = list.where((a) => a.boatId == boatId).toList();
     list.removeWhere((a) => a.boatId == boatId);
-    list.addAll(next);
     await _writeList('assignments.json', list.map((e) => e.toJson()).toList());
+    for (final a in removed) {
+      await _enqueue(table: 'assignments', op: 'delete', id: a.id);
+    }
+    for (final a in next) {
+      await upsertAssignment(a);
+    }
   }
 
   Future<void> deleteAssignment(String id) async {
     final list = await listAssignments();
     list.removeWhere((e) => e.id == id);
     await _writeList('assignments.json', list.map((e) => e.toJson()).toList());
+    await _enqueue(table: 'assignments', op: 'delete', id: id);
   }
 
   Future<IdentityPrefs> loadState() async {

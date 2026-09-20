@@ -212,48 +212,65 @@ class Club {
     required this.name,
     this.shortCode,
     required this.createdAt,
-  });
+    DateTime? updatedAt,
+  }) : updatedAt = updatedAt ?? createdAt;
 
   final String id;
   final String name;
   final String? shortCode;
   final DateTime createdAt;
+  final DateTime updatedAt;
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
         'shortCode': shortCode,
         'createdAt': createdAt.toUtc().toIso8601String(),
+        'updatedAt': updatedAt.toUtc().toIso8601String(),
       };
 
-  static Club fromJson(Map<String, dynamic> j) => Club(
+  static Club fromJson(Map<String, dynamic> j) {
+    final created = DateTime.parse(j['createdAt'] as String);
+    return Club(
         id: j['id'] as String,
         name: j['name'] as String? ?? '',
         shortCode: j['shortCode'] as String?,
-        createdAt: DateTime.parse(j['createdAt'] as String),
+        createdAt: created,
+        updatedAt: j['updatedAt'] is String
+            ? DateTime.parse(j['updatedAt'] as String)
+            : created,
       );
+  }
 
-  Club copyWith({String? name, String? shortCode, bool clearCode = false}) {
+  Club copyWith({
+    String? name,
+    String? shortCode,
+    bool clearCode = false,
+    DateTime? updatedAt,
+  }) {
     return Club(
       id: id,
       name: name ?? this.name,
       shortCode: clearCode ? null : (shortCode ?? this.shortCode),
       createdAt: createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
   static Club create({required String name, String? shortCode}) {
+    final now = DateTime.now().toUtc();
     return Club(
       id: newIdentityId(),
       name: name,
       shortCode: shortCode,
-      createdAt: DateTime.now().toUtc(),
+      createdAt: now,
+      updatedAt: now,
     );
   }
 }
 
 class ParkBoat {
-  const ParkBoat({
+  ParkBoat({
     required this.id,
     required this.clubId,
     required this.name,
@@ -262,7 +279,8 @@ class ParkBoat {
     required this.cox,
     this.oarRack = const [],
     this.status = BoatParkStatus.ready,
-  });
+    DateTime? updatedAt,
+  }) : updatedAt = updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
 
   final String id;
   final String clubId;
@@ -272,6 +290,7 @@ class ParkBoat {
   final bool cox;
   final List<String> oarRack;
   final BoatParkStatus status;
+  final DateTime updatedAt;
 
   BoatClassInfo get info => BoatClassInfo.of(classe);
 
@@ -280,6 +299,7 @@ class ParkBoat {
     String? classe,
     List<String>? oarRack,
     BoatParkStatus? status,
+    DateTime? updatedAt,
   }) {
     final info = BoatClassInfo.of(classe ?? this.classe);
     return ParkBoat(
@@ -291,6 +311,7 @@ class ParkBoat {
       cox: info.coxed,
       oarRack: oarRack ?? this.oarRack,
       status: status ?? this.status,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
@@ -303,6 +324,7 @@ class ParkBoat {
         'cox': cox,
         'oarRack': oarRack,
         'status': status.wire,
+        'updatedAt': updatedAt.toUtc().toIso8601String(),
       };
 
   static ParkBoat fromJson(Map<String, dynamic> j) {
@@ -318,6 +340,9 @@ class ParkBoat {
       cox: j['cox'] as bool? ?? info.coxed,
       oarRack: (j['oarRack'] as List?)?.map((e) => '$e').toList() ?? const [],
       status: BoatParkStatusX.parse(j['status'] as String?),
+      updatedAt: j['updatedAt'] is String
+          ? DateTime.parse(j['updatedAt'] as String)
+          : DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
     );
   }
 
@@ -338,6 +363,7 @@ class ParkBoat {
       cox: info.coxed,
       oarRack: oarRack,
       status: status,
+      updatedAt: DateTime.now().toUtc(),
     );
   }
 }
@@ -353,7 +379,8 @@ class Assignment {
     this.role = 'rower',
     this.coxPosition,
     required this.createdAt,
-  });
+    DateTime? updatedAt,
+  }) : updatedAt = updatedAt ?? createdAt;
 
   final String id;
   final String boatId;
@@ -364,6 +391,7 @@ class Assignment {
   final String role;
   final String? coxPosition;
   final DateTime createdAt;
+  final DateTime updatedAt;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -375,6 +403,7 @@ class Assignment {
         'role': role,
         'coxPosition': coxPosition,
         'createdAt': createdAt.toUtc().toIso8601String(),
+        'updatedAt': updatedAt.toUtc().toIso8601String(),
       };
 
   static Assignment fromJson(Map<String, dynamic> j) => Assignment(
@@ -389,6 +418,11 @@ class Assignment {
         createdAt: j['createdAt'] is String
             ? DateTime.parse(j['createdAt'] as String)
             : DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
+        updatedAt: j['updatedAt'] is String
+            ? DateTime.parse(j['updatedAt'] as String)
+            : (j['createdAt'] is String
+                ? DateTime.parse(j['createdAt'] as String)
+                : DateTime.fromMillisecondsSinceEpoch(0, isUtc: true)),
       );
 
   static Assignment create({
@@ -400,7 +434,9 @@ class Assignment {
     String role = 'rower',
     String? coxPosition,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
+    final now = DateTime.now().toUtc();
     return Assignment(
       id: newIdentityId(),
       boatId: boatId,
@@ -410,7 +446,8 @@ class Assignment {
       oars: oars,
       role: role,
       coxPosition: coxPosition,
-      createdAt: createdAt ?? DateTime.now().toUtc(),
+      createdAt: createdAt ?? now,
+      updatedAt: updatedAt ?? createdAt ?? now,
     );
   }
 }

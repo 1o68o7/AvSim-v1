@@ -171,7 +171,7 @@ Rien de cassé si absent : la séance anonyme reste possible (mode loisir, pas d
 
 Chaque lot = 1 commit, `flutter analyze` clean, tests unitaires sur la logique pure, APK qui s'installe.
 
-**État au 18 sept. 2026 : I1–I6 = à coder. Aucun fichier `lib/identity/` sur `main`.**
+**État : I1–I5 sur `main`. Point B = sync Supabase (`supabase/`).**
 
 ### Lot I1 — Modèle + persistance (fondations) — PROCHAIN
 - `lib/identity/models.dart` : `Rower`, `Club`, `Boat`, `Assignment` (+ sérialisation JSON).
@@ -238,7 +238,7 @@ Chaque lot = 1 commit, `flutter analyze` clean, tests unitaires sur la logique p
 
 ## 7. Prochaine action
 
-Exécuter **Lot I1** (modèle + FFA + tests, sans écran). Ensuite I2. On augmente ce document au fur et à mesure : toute décision nouvelle s'ajoute en §6 ou modifie un lot.
+Lots **B1–B4** (schéma RLS, magic link, outbox, realtime). I1–I5 ne se rouvrent pas.
 
 *Document vivant — créé pour cadrer l'identité DataR0w. À enrichir, pas à figer.*
 
