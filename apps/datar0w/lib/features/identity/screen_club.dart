@@ -11,6 +11,7 @@ import '../../widgets/deck_scaffold.dart';
 
 String boatStatusLabel(BoatParkStatus s) => switch (s) {
       BoatParkStatus.ready => 'prêt',
+      BoatParkStatus.reserved => 'réservée',
       BoatParkStatus.maintenance => 'maintenance',
       BoatParkStatus.out => 'hors d’eau',
     };

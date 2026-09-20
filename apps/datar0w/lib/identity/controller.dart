@@ -192,6 +192,10 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     await _store.replaceAssignmentsForBoat(boatId, crew);
     await _refresh();
   }
+
+  Future<void> reloadFromStore() async {
+    await _refresh();
+  }
 }
 
 final identityProvider =

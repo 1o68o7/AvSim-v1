@@ -66,7 +66,7 @@ extension RowerLevelX on RowerLevel {
   }
 }
 
-enum BoatParkStatus { ready, maintenance, out }
+enum BoatParkStatus { ready, reserved, out, maintenance }
 
 extension BoatParkStatusX on BoatParkStatus {
   String get wire => name;
@@ -77,6 +77,8 @@ extension BoatParkStatusX on BoatParkStatus {
         return BoatParkStatus.maintenance;
       case 'out':
         return BoatParkStatus.out;
+      case 'reserved':
+        return BoatParkStatus.reserved;
       default:
         return BoatParkStatus.ready;
     }
