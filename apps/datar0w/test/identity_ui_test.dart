@@ -35,6 +35,7 @@ void main() {
     );
     await tester.pump();
     expect(find.text('Passer (sans profil)'), findsOneWidget);
+    expect(find.text('Se connecter (club)'), findsOneWidget);
   });
 
   testWidgets('profil local listé sur Qui rame', (tester) async {

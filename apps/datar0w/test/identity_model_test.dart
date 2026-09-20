@@ -4,6 +4,7 @@ import 'package:datar0w/identity/ffa_categories.dart';
 import 'package:datar0w/identity/is_lightweight.dart';
 import 'package:datar0w/identity/models.dart';
 import 'package:datar0w/identity/store.dart';
+import 'package:datar0w/sync/config.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -73,6 +74,9 @@ void main() {
     expect(r2.sex, RowerSex.f);
     expect(r2.lightweight, isTrue);
     expect(r2.category(seasonYear: 2025).code, 'SE');
+    expect(r2.userId, isNull);
+    final linked = rower.copyWith(userId: 'user-uuid');
+    expect(Rower.fromJson(linked.toJson()).userId, 'user-uuid');
     expect((await store.listClubs()).single.shortCode, 'CNT');
     expect((await store.listBoats()).single.classe, '8+');
     final a2 = (await store.listAssignments()).single;
@@ -83,5 +87,10 @@ void main() {
 
     await store.deleteRower(rower.id);
     expect(await store.listRowers(), isEmpty);
+  });
+
+  test('sync cloud désactivé sans dart-define', () {
+    expect(SyncConfig.enabled, isFalse);
+    expect(SyncConfig.url, isEmpty);
   });
 }

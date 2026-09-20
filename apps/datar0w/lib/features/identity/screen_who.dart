@@ -76,6 +76,10 @@ class IdentityListScreen extends ConsumerWidget {
                   },
                   child: const Text('Passer (sans profil)'),
                 ),
+                TextButton(
+                  onPressed: () => context.go(AppRoutes.auth),
+                  child: const Text('Se connecter (club)'),
+                ),
               ],
             ),
           ),
