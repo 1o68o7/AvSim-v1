@@ -13,10 +13,14 @@ Un smartphone = **un hub / une place**. Multi-sièges = plusieurs tél. + `DATAR
 | G (API hub) | FastAPI `/datarow/*` + client si `DATAROW_API_BASE` (sinon fichier local). HTTP fail ≠ stop logger. |
 | Coach | Join code / dernière séance / séance live API. Écran 5 OSM + notes. Replay import jsonl. |
 | Classes | 1x, 2x, 2-, 4x, 4-, 4+, 8+. Rôle barreur 4+/8+. |
-| I1–I8 / C1–C6 / D1–D5 | **Codés** : identité, parc ops, import cabane, spinoscope. Mapping Stitch : `docs/stitch-mvp/GEL.md`. |
-| B (auth) | Magic link Supabase si `SUPABASE_URL` + `SUPABASE_ANON_KEY`. Sinon mode local, pas de crash. |
-| E / L | Calendrier + plans d’eau (JSON curaté, pas de scrape FFA). Filtres loisir / rando / master. |
-| I live / R / J | Presets live + mini-carte ; chip FC BLE ; `/devices` `/physio` `/consent`. |
+| I1–I8 / C1–C6 / D1–D5 | **Codés** : identité, parc ops, import cabane, spinoscope. Mapping : `docs/stitch-mvp/GEL.md`. |
+| B (auth) | `/auth` magic link si `SUPABASE_URL` + `SUPABASE_ANON_KEY`. Sinon mode local, pas de crash. |
+| E / L | `/calendar` `/calendar/:id` `/waters` — JSON curaté, **pas** de scrape FFA. Filtres loisir / rando / master. |
+| I live | Presets blocs + mini-carte sur `/live` (Deck conservé). Swipe bord droit. |
+| R / J | Chip FC, `/devices` `/physio` `/consent`. Scan GATT Heart Rate (lot C). |
+| G mock | `club.licenceCountApprox` — chip « ~N licenciés », estimation club (pas FFA). |
+
+Routes nouvelles : `/auth` `/calendar` `/calendar/:id` `/waters` `/consent` `/devices` `/physio`.
 
 ## Un téléphone = un hub = une place
 
@@ -84,4 +88,4 @@ Pas de cible `windows/` desktop.
 ## Hors contrat
 
 Watts, η, slip, RTK, 10 Hz, Analyste, micro/caméra, High-Vis cyan, moteur AvSim, couloirs FISA sans GeoJSON.
-Identité / parc / import : I1–I8, C, D **codés**. Hors contrat : Watts, η, scrape FFA, paiement.
+Identité / parc / import / calendrier / auth : **codés**. Hors contrat : Watts, η, scrape FFA live, paiement.

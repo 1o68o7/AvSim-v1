@@ -78,12 +78,14 @@ Stop si analyze casse. Pas de PR fourre-tout avec AvSim.
 
 ## PR GitHub à traiter **côté humain** (pas l’agent)
 
+Ne pas closer depuis l’agent.
+
 | PR | Sujet | Action toi |
 |---|---|---|
-| #50 | B Supabase older | Close : B plus récent est sur main (`19f9980`) |
-| #52 | Point D | Close : déjà sur main |
-| #38 | Gel HTML Deck | Close ou laisser doc ; HTML déjà dans `docs/stitch-mvp/gel/` |
-| #46 | Tare orientation | Close après merge du lot B agent |
+| #50 | B Supabase older | **Stale** vs main (auth plus récente `19f9980`). Close côté humain. |
+| #52 | Point D | **Déjà sur main**. Close côté humain. |
+| #38 | Gel HTML Deck | **Stale** ; HTML dans `docs/stitch-mvp/gel/`. Close ou laisser doc. |
+| #46 | Tare orientation | **À cherry-pick** (lot B agent). Close après merge. Ne pas closer avant. |
 
 ## Toi après le merge agent
 

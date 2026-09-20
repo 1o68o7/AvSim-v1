@@ -46,7 +46,7 @@ HTML utile (extraits, pas labo) : `docs/stitch-mvp/gel/`.
 | E3 Plans d’eau | `/waters` | **codé** |
 | E4 Localisation club | `/club` (pin carte) | **codé** |
 | I live — presets + mini-carte | `/live` | **codé** |
-| R1 Pairing BLE | `/devices` | **codé** (saisie locale ; scan GATT parser) |
+| R1 Pairing BLE | `/devices` | **codé** — scan GATT 0x180D à brancher (lot C) ; parser 0x2A37 déjà là |
 | R2 Chip FC/SpO2 | overlay `/live` | **codé** (extrait, live Deck conservé) |
 | R3 Courbe FC replay | `/replay` | **codé** |
 | R4 Visibilité coach | chip `/coach` si `hrBpm` | **codé** |
