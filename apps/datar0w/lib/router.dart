@@ -10,6 +10,7 @@ import 'features/identity/screen_home_roles.dart';
 import 'features/identity/screen_home_rower.dart';
 import 'features/identity/screen_import.dart';
 import 'features/identity/screen_rower_edit.dart';
+import 'features/identity/screen_spinoscope.dart';
 import 'features/identity/screen_who.dart';
 import 'features/ops/screen_departure.dart';
 import 'features/ops/screen_impact.dart';
@@ -33,6 +34,7 @@ abstract final class AppRoutes {
   static const club = '/club';
   static const clubBoat = '/club/boat';
   static const clubImport = '/club/import';
+  static const spinoscope = '/spinoscope';
   static const crew = '/crew';
   static const opsOut = '/ops/out';
   static const opsIn = '/ops/in';
@@ -100,6 +102,11 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.clubImport,
       name: 'club-import',
       builder: (context, state) => const ClubImportScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.spinoscope,
+      name: 'spinoscope',
+      builder: (context, state) => const SpinoscopeScreen(),
     ),
     GoRoute(
       path: AppRoutes.crew,

@@ -14,6 +14,7 @@ class IdentitySnapshot {
     this.clubs = const [],
     this.boats = const [],
     this.assignments = const [],
+    this.trophies = const [],
     this.prefs = const IdentityPrefs(),
   });
 
@@ -21,6 +22,7 @@ class IdentitySnapshot {
   final List<Club> clubs;
   final List<ParkBoat> boats;
   final List<Assignment> assignments;
+  final List<Trophy> trophies;
   final IdentityPrefs prefs;
 
   Rower? get activeRower {
@@ -127,6 +129,7 @@ class IdentityController extends Notifier<IdentitySnapshot> {
       clubs: store.tryListClubsSync() ?? const [],
       boats: store.tryListBoatsSync() ?? const [],
       assignments: store.tryListAssignmentsSync() ?? const [],
+      trophies: store.tryListTrophiesSync() ?? const [],
       prefs: store.tryLoadPrefsSync() ?? const IdentityPrefs(),
     );
   }
@@ -137,6 +140,7 @@ class IdentityController extends Notifier<IdentitySnapshot> {
       clubs: await _store.listClubs(),
       boats: await _store.listBoats(),
       assignments: await _store.listAssignments(),
+      trophies: await _store.listTrophies(),
       prefs: await _store.loadState(),
     );
   }
@@ -222,6 +226,16 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     await _store.deleteBoatsByImportId(id);
     final prefs = await _store.loadState();
     await _store.saveState(prefs.copyWith(clearImport: true));
+    await _refresh();
+  }
+
+  Future<void> saveTrophy(Trophy t) async {
+    await _store.upsertTrophy(t);
+    await _refresh();
+  }
+
+  Future<void> deleteTrophy(String id) async {
+    await _store.deleteTrophy(id);
     await _refresh();
   }
 

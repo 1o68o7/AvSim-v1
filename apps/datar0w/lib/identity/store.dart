@@ -113,6 +113,28 @@ class IdentityStore {
     await _writeList('assignments.json', asg.map((e) => e.toJson()).toList());
   }
 
+  Future<List<Trophy>> listTrophies() async {
+    final raw = await _readList('trophies.json');
+    return raw.map(Trophy.fromJson).toList();
+  }
+
+  Future<void> upsertTrophy(Trophy t) async {
+    final list = await listTrophies();
+    final i = list.indexWhere((e) => e.id == t.id);
+    if (i >= 0) {
+      list[i] = t;
+    } else {
+      list.add(t);
+    }
+    await _writeList('trophies.json', list.map((e) => e.toJson()).toList());
+  }
+
+  Future<void> deleteTrophy(String id) async {
+    final list = await listTrophies();
+    list.removeWhere((e) => e.id == id);
+    await _writeList('trophies.json', list.map((e) => e.toJson()).toList());
+  }
+
   Future<List<Assignment>> listAssignments() async {
     final raw = await _readList('assignments.json');
     return raw.map(Assignment.fromJson).toList();
@@ -208,6 +230,11 @@ class IdentityStore {
   List<Assignment>? tryListAssignmentsSync() {
     final raw = _tryReadListSync('assignments.json');
     return raw?.map(Assignment.fromJson).toList();
+  }
+
+  List<Trophy>? tryListTrophiesSync() {
+    final raw = _tryReadListSync('trophies.json');
+    return raw?.map(Trophy.fromJson).toList();
   }
 
   List<Map<String, dynamic>>? _tryReadListSync(String name) {

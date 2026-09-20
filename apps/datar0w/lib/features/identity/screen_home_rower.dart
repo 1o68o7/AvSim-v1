@@ -78,6 +78,11 @@ class HomeRowerScreen extends ConsumerWidget {
               onPressed: () => _continue(context, ref),
               child: const Text('CONTINUER'),
             ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () => context.go(AppRoutes.spinoscope),
+              child: const Text('SPINOSCOPE'),
+            ),
           ],
         ),
       ),

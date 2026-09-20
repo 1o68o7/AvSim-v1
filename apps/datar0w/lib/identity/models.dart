@@ -579,3 +579,50 @@ bool sameLocalDay(DateTime a, DateTime b) {
   final lb = b.toLocal();
   return la.year == lb.year && la.month == lb.month && la.day == lb.day;
 }
+
+class Trophy {
+  const Trophy({
+    required this.id,
+    required this.clubId,
+    required this.name,
+    required this.date,
+    this.result,
+  });
+
+  final String id;
+  final String clubId;
+  final String name;
+  final DateTime date;
+  final String? result;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'clubId': clubId,
+        'name': name,
+        'date': date.toUtc().toIso8601String().split('T').first,
+        'result': result,
+      };
+
+  static Trophy fromJson(Map<String, dynamic> j) => Trophy(
+        id: j['id'] as String,
+        clubId: j['clubId'] as String,
+        name: j['name'] as String? ?? '',
+        date: DateTime.parse(j['date'] as String),
+        result: j['result'] as String?,
+      );
+
+  static Trophy create({
+    required String clubId,
+    required String name,
+    required DateTime date,
+    String? result,
+  }) {
+    return Trophy(
+      id: newIdentityId(),
+      clubId: clubId,
+      name: name,
+      date: date,
+      result: result,
+    );
+  }
+}

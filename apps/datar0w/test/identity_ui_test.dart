@@ -2,6 +2,7 @@ import 'package:datar0w/features/identity/screen_club.dart';
 import 'package:datar0w/features/identity/screen_crew.dart';
 import 'package:datar0w/features/identity/screen_home_roles.dart';
 import 'package:datar0w/features/identity/screen_import.dart';
+import 'package:datar0w/features/identity/screen_spinoscope.dart';
 import 'package:datar0w/features/identity/screen_who.dart';
 import 'package:datar0w/identity/controller.dart';
 import 'package:datar0w/identity/models.dart';
@@ -89,6 +90,18 @@ void main() {
     expect(find.text('ENREGISTRER L’ÉQUIPAGE'), findsNothing);
   });
 
+  testWidgets('spinoscope : vitrine effectif', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [identityStoreOverride(), opsStoreOverride()],
+        child: const MaterialApp(home: SpinoscopeScreen()),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('EFFECTIF'), findsOneWidget);
+    expect(find.text('COUPETTES'), findsOneWidget);
+  });
+
   testWidgets('accueil coach : Composer Rejoindre Parc', (tester) async {
     await tester.pumpWidget(
       const ProviderScope(
@@ -103,5 +116,6 @@ void main() {
     expect(find.text('RENTRER'), findsOneWidget);
     expect(find.text('DÉPART'), findsOneWidget);
     expect(find.text('MAINTENANCE'), findsOneWidget);
+    expect(find.text('SPINOSCOPE'), findsOneWidget);
   });
 }
