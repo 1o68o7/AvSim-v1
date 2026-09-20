@@ -241,3 +241,76 @@ Chaque lot = 1 commit, `flutter analyze` clean, tests unitaires sur la logique p
 Exécuter **Lot I1** (modèle + FFA + tests, sans écran). Ensuite I2. On augmente ce document au fur et à mesure : toute décision nouvelle s'ajoute en §6 ou modifie un lot.
 
 *Document vivant — créé pour cadrer l'identité DataR0w. À enrichir, pas à figer.*
+
+---
+
+## 8. Prompt Cursor — Lots I1 → I5 (à coller tel quel)
+
+> Ce bloc est le prompt exact à passer à Cursor. Il fige les règles métier (parc éditable = coach seulement, loisir sans accès catalogue) et l'ordre des commits. Ne pas rouvrir sans en discuter.
+
+```
+DataR0w — lots I1 → I5 identité + restriction parc.
+Lis d'abord docs/CADRAGE-IDENTITE-CLUB-EQUIPAGE.md et apps/datar0w/README.md.
+
+Ne pas toucher AvSim. Ne pas revert compileSdk 37 / ndkVersion "30.0.16248370".
+Pas de sdkmanager. Pas de windows/. Pas d'Accueil sur /live /cox /coach (sortie = STOP 2×).
+Ne pas porter le jargon Stitch (SYS_ID, STAGE PROTOCOL, SENSOR SYNC, entraxe, calage, calibration factory).
+
+DA : #0B0E12 / blanc / #9AA0A6 / #2A2F36 / CTA #E8C547 / TRIBORD #46C275 / BÂBORD #E05353.
+
+## Règles métier (figées)
+- Côté et pelles = Assignment, pas Rower.sidePref.
+- Catégorie FFA = ageCategory(birthDate), jamais saisie.
+- Séance sans profil possible (« Passer »).
+- Un tél. = un club actif.
+- PARC ÉDITABLE = COACH SEULEMENT. Loisir / rameur / barreur : voient UNIQUEMENT
+  l'affectation coach (écrans 6/7) ou l'état vide (écran 9). Pas de picker catalogue.
+- Continuer sans Assignment → flux actuel 2A (classe + siège hub), PAS choix d'une coque du parc.
+- Coque OUT / MAINTENANCE : non assignable à I4.
+- Rameur déjà affecté « aujourd'hui » : grisé à la composition.
+
+## I1 — modèle + tests, AUCUN écran
+lib/identity/models.dart : Rower, Club, Boat, Assignment
+lib/identity/ffa_categories.dart + is_lightweight.dart + store.dart (JSON Documents/datar0w/)
+Tests : 6 dates → codes FFA, léger H/F, JSON round-trip.
+Commit : feat(datar0w): identity model + FFA categories
+
+## I2 — Qui rame + fiche + accueil rameur (écrans 1, 2, 6, 9)
+Routes avant le / profil-rôles actuel :
+  /identity          liste profils + CTA créer + « Passer (sans profil) » → /
+  /identity/edit     fiche (nom, naissance, sexe, poids, taille, sidePref, oars, level)
+                     cat. FFA lecture seule
+  /home/rower        si Assignment → coque/siège/côté/pelles + CONTINUER → /presession
+                     sinon état vide écran 9 + CONTINUER → /presession
+                     PAS de liste parc. Lien club = lecture seule ou absent si loisir.
+Le / actuel (3 cartes Rameur/Coach/Barreur) RESTE après Passer ou après choix profil.
+Commit : feat(datar0w): rower profile screen + local store
+
+## I3 — club + parc
+  /club              coach : CRUD + Ajouter. Autre rôle : lecture, pas de + Ajouter.
+  /club/boat         coach : nom, classe (boat_class.dart), cox, pelles, statut.
+                     PAS entraxe / calage / notes usine.
+Commit : feat(datar0w): club + boat park CRUD
+
+## I4 — composition (écran 5 paysage, COACH ONLY)
+  /crew              si rôle ≠ coach → redirect /home/rower ou /
+  Coques READY only. Sièges + rameur + side + oars. 4+/8+ barreur avant/arrière.
+  1 tél. = 1 place. Sauvegarde Assignment.
+Commit : feat(datar0w): crew composition screen
+
+## I5 — branchement séance
+meta.json optionnel : rowerId clubId boatId assignmentId seatIndex side (rétro-compat si absent).
+Quai : chip « siège n / côté / pelles » si Assignment.
+Écran 5 coach live existant : ligne équipage si Assignment, sans casser la carte OSM.
+Accueil barreur /home/cox : bateau + position + liste sièges LECTURE + CONTINUER → /presession
+  (2A forcera 4+/8+ + rôle cox comme aujourd'hui).
+Accueil coach /home/coach : Composer → /crew ; Rejoindre → /coach-join ; parc → /club.
+Commit : feat(datar0w): session meta + crew display
+
+## Hors scope
+Login FFA, multi-club, télémétrie par siège, IMC stocké, micro/caméra, watts, RTK.
+Ne pas redessiner /live /cox /tare /coach carte /replay.
+
+flutter analyze clean. Tests identité verts.
+Un commit par lot I1…I5, dans cet ordre.
+```
