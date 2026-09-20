@@ -11,6 +11,7 @@ import 'features/identity/screen_home_rower.dart';
 import 'features/identity/screen_rower_edit.dart';
 import 'features/identity/screen_who.dart';
 import 'features/ops/screen_departure.dart';
+import 'features/ops/screen_impact.dart';
 import 'features/ops/screen_in.dart';
 import 'features/ops/screen_out.dart';
 import 'features/live/screen_3.dart';
@@ -34,6 +35,7 @@ abstract final class AppRoutes {
   static const opsOut = '/ops/out';
   static const opsIn = '/ops/in';
   static const opsDeparture = '/ops/departure';
+  static const opsMaintenance = '/ops/maintenance';
   static const profile = '/';
   static const presession = '/presession';
   static const tare = '/tare';
@@ -111,6 +113,11 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.opsDeparture,
       name: 'ops-departure',
       builder: (context, state) => const OpsDepartureScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.opsMaintenance,
+      name: 'ops-maintenance',
+      builder: (context, state) => const MaintenanceQueueScreen(),
     ),
     GoRoute(
       path: AppRoutes.profile,

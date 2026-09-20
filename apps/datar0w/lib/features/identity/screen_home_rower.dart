@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../identity/controller.dart';
 import '../../identity/format.dart';
 import '../../identity/models.dart';
+import '../../ops/controller.dart';
+import '../../ops/impact_report.dart';
 import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../identity/screen_home_roles.dart';
@@ -30,14 +32,18 @@ class HomeRowerScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final snap = ref.watch(identityProvider);
-    final rower = snap.activeRower;
-    final asg = rower == null ? null : snap.assignmentForRower(rower.id);
-    final boat = snap.boatById(asg?.boatId);
-    final club = snap.activeClub;
+    final ident = ref.watch(identityProvider);
+    final rower = ident.activeRower;
+    final asg = rower == null ? null : ident.assignmentForRower(rower.id);
+    final boat = ident.boatById(asg?.boatId);
+    final club = ident.activeClub;
     final showClub = rower != null &&
         rower.level != RowerLevel.loisir &&
         club != null;
+    final notices = rower == null
+        ? const <OpsNotice>[]
+        : ref.watch(opsProvider).noticesFor(rower.id);
+    final maint = notices.where((n) => n.message.contains('maintenance'));
 
     return DeckScaffold(
       title: 'ACCUEIL RAMEUR',
@@ -56,6 +62,14 @@ class HomeRowerScreen extends ConsumerWidget {
                   ? const _EmptyAssignment()
                   : _AssignedCard(boat: boat, assignment: asg),
             ),
+            if (maint.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  'Ta coque est en maintenance.',
+                  style: const TextStyle(color: DeckColors.amber),
+                ),
+              ),
             if (showClub)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),

@@ -88,5 +88,6 @@ void main() {
     expect(find.text('SORTIR'), findsOneWidget);
     expect(find.text('RENTRER'), findsOneWidget);
     expect(find.text('DÉPART'), findsOneWidget);
+    expect(find.text('MAINTENANCE'), findsOneWidget);
   });
 }

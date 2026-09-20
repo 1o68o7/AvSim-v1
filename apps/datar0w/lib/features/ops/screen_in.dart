@@ -9,6 +9,7 @@ import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import 'screen_impact.dart';
 
 class OpsInScreen extends ConsumerStatefulWidget {
   const OpsInScreen({super.key});
@@ -83,6 +84,7 @@ class _OpsInScreenState extends ConsumerState<OpsInScreen> {
                   _OutTile(
                     name: ident.boatById(o.boatId)?.name ?? o.boatId,
                     classe: ident.boatById(o.boatId)?.classe ?? '',
+                    boatId: o.boatId,
                     oars: ops.oarSetById(o.oarSetId)?.label ?? '—',
                     until: formatPlannedEnd(o.plannedEnd),
                     onIn: () async {
@@ -106,6 +108,7 @@ class _OutTile extends StatelessWidget {
   const _OutTile({
     required this.name,
     required this.classe,
+    required this.boatId,
     required this.oars,
     required this.until,
     required this.onIn,
@@ -113,6 +116,7 @@ class _OutTile extends StatelessWidget {
 
   final String name;
   final String classe;
+  final String boatId;
   final String oars;
   final String until;
   final VoidCallback onIn;
@@ -143,6 +147,8 @@ class _OutTile extends StatelessWidget {
               onPressed: onIn,
               child: const Text('RENTRER'),
             ),
+            const SizedBox(height: 8),
+            SignalImpactButton(boatId: boatId),
           ],
         ),
       ),

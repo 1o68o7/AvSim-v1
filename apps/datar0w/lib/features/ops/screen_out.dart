@@ -10,6 +10,7 @@ import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import 'screen_impact.dart';
 
 class OpsOutScreen extends ConsumerStatefulWidget {
   const OpsOutScreen({super.key});
@@ -25,13 +26,11 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
   final Map<String, bool> _pick = {};
   bool _personal = false;
   final _personalSpec = TextEditingController();
-  final _impact = TextEditingController();
   String? _flash;
 
   @override
   void dispose() {
     _personalSpec.dispose();
-    _impact.dispose();
     super.dispose();
   }
 
@@ -72,13 +71,6 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
           plannedEnd: planned,
         );
     if (!mounted) return;
-    if (r.ok && _impact.text.trim().isNotEmpty) {
-      await ref.read(opsProvider.notifier).reportImpact(
-            boatId: boat.id,
-            reportedBy: _coachId,
-            note: _impact.text.trim(),
-          );
-    }
     setState(() => _flash = r.message);
   }
 
@@ -209,12 +201,8 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
                       if (t != null) setState(() => _end = t);
                     },
                   ),
-                  TextField(
-                    controller: _impact,
-                    decoration: const InputDecoration(
-                      labelText: 'Impact (opt-in, photo au lot C5)',
-                    ),
-                  ),
+                  const SizedBox(height: 12),
+                  SignalImpactButton(boatId: boat.id),
                   const SizedBox(height: 20),
                   FilledButton(
                     onPressed: () => _sortir(boat),

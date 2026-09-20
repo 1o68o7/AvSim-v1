@@ -1,6 +1,7 @@
 import 'package:datar0w/features/identity/screen_crew.dart';
 import 'package:datar0w/features/identity/screen_home_roles.dart';
 import 'package:datar0w/features/ops/screen_departure.dart';
+import 'package:datar0w/features/ops/screen_impact.dart';
 import 'package:datar0w/features/ops/screen_in.dart';
 import 'package:datar0w/features/ops/screen_out.dart';
 import 'package:datar0w/identity/controller.dart';
@@ -47,6 +48,7 @@ void main() {
     expect(find.text('SORTIR'), findsOneWidget);
     expect(find.text('RENTRER'), findsOneWidget);
     expect(find.text('DÉPART'), findsOneWidget);
+    expect(find.text('MAINTENANCE'), findsOneWidget);
   });
 
   testWidgets('sortie : hors coach → réservé', (tester) async {
@@ -103,5 +105,16 @@ void main() {
     );
     await tester.pump();
     expect(find.text('Réservé au coach.'), findsOneWidget);
+  });
+
+  testWidgets('maintenance : file vide', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [identityStoreOverride(), opsStoreOverride()],
+        child: const MaterialApp(home: MaintenanceQueueScreen()),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('Aucun signalement ouvert.'), findsOneWidget);
   });
 }

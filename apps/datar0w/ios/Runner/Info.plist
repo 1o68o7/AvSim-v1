@@ -26,6 +26,8 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Photo d’un choc ou d’une rayure sur la coque (signalement maintenance).</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Suivi GPS de la séance d'aviron (vitesse sol et trace).</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
