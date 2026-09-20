@@ -83,6 +83,36 @@ extension ClubMemberRoleX on ClubMemberRole {
   }
 }
 
+enum BoatType { pointe, coupleuse, skiff, inconnu }
+
+extension BoatTypeX on BoatType {
+  String get wire => name;
+
+  static BoatType parse(String? raw) {
+    final s = (raw ?? '').toLowerCase().trim();
+    if (s.contains('skiff') || s == '1x') return BoatType.skiff;
+    if (s.contains('pointe') || s.contains('sweep')) return BoatType.pointe;
+    if (s.contains('couple') || s.contains('scull')) return BoatType.coupleuse;
+    return BoatType.inconnu;
+  }
+}
+
+enum BoatMaterial { carbone, composite, bois, inconnu }
+
+extension BoatMaterialX on BoatMaterial {
+  String get wire => name;
+
+  static BoatMaterial parse(String? raw) {
+    final s = (raw ?? '').toLowerCase().trim();
+    if (s.startsWith('carb')) return BoatMaterial.carbone;
+    if (s.startsWith('comp') || s.contains('fibre')) {
+      return BoatMaterial.composite;
+    }
+    if (s.startsWith('bois') || s.contains('wood')) return BoatMaterial.bois;
+    return BoatMaterial.inconnu;
+  }
+}
+
 enum BoatParkStatus { ready, reserved, out, maintenance }
 
 extension BoatParkStatusX on BoatParkStatus {
@@ -223,18 +253,36 @@ class Club {
     required this.id,
     required this.name,
     this.shortCode,
+    this.fullName,
+    this.slogan,
+    this.foundedYear,
+    this.primaryColor,
+    this.secondaryColor,
+    this.crestPath,
     required this.createdAt,
   });
 
   final String id;
   final String name;
   final String? shortCode;
+  final String? fullName;
+  final String? slogan;
+  final int? foundedYear;
+  final int? primaryColor;
+  final int? secondaryColor;
+  final String? crestPath;
   final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
         'shortCode': shortCode,
+        'fullName': fullName,
+        'slogan': slogan,
+        'foundedYear': foundedYear,
+        'primaryColor': primaryColor,
+        'secondaryColor': secondaryColor,
+        'crestPath': crestPath,
         'createdAt': createdAt.toUtc().toIso8601String(),
       };
 
@@ -242,14 +290,40 @@ class Club {
         id: j['id'] as String,
         name: j['name'] as String? ?? '',
         shortCode: j['shortCode'] as String?,
+        fullName: j['fullName'] as String?,
+        slogan: j['slogan'] as String?,
+        foundedYear: (j['foundedYear'] as num?)?.toInt(),
+        primaryColor: (j['primaryColor'] as num?)?.toInt(),
+        secondaryColor: (j['secondaryColor'] as num?)?.toInt(),
+        crestPath: j['crestPath'] as String?,
         createdAt: DateTime.parse(j['createdAt'] as String),
       );
 
-  Club copyWith({String? name, String? shortCode, bool clearCode = false}) {
+  Club copyWith({
+    String? name,
+    String? shortCode,
+    bool clearCode = false,
+    String? fullName,
+    bool clearFullName = false,
+    String? slogan,
+    bool clearSlogan = false,
+    int? foundedYear,
+    bool clearFounded = false,
+    int? primaryColor,
+    int? secondaryColor,
+    String? crestPath,
+    bool clearCrest = false,
+  }) {
     return Club(
       id: id,
       name: name ?? this.name,
       shortCode: clearCode ? null : (shortCode ?? this.shortCode),
+      fullName: clearFullName ? null : (fullName ?? this.fullName),
+      slogan: clearSlogan ? null : (slogan ?? this.slogan),
+      foundedYear: clearFounded ? null : (foundedYear ?? this.foundedYear),
+      primaryColor: primaryColor ?? this.primaryColor,
+      secondaryColor: secondaryColor ?? this.secondaryColor,
+      crestPath: clearCrest ? null : (crestPath ?? this.crestPath),
       createdAt: createdAt,
     );
   }
@@ -275,6 +349,14 @@ class ParkBoat {
     this.oarRack = const [],
     this.status = BoatParkStatus.ready,
     this.loisirOk = true,
+    this.boatType = BoatType.inconnu,
+    this.brand,
+    this.model,
+    this.year,
+    this.material = BoatMaterial.inconnu,
+    this.serial,
+    this.notes,
+    this.importId,
   });
 
   final String id;
@@ -286,6 +368,14 @@ class ParkBoat {
   final List<String> oarRack;
   final BoatParkStatus status;
   final bool loisirOk;
+  final BoatType boatType;
+  final String? brand;
+  final String? model;
+  final int? year;
+  final BoatMaterial material;
+  final String? serial;
+  final String? notes;
+  final String? importId;
 
   BoatClassInfo get info => BoatClassInfo.of(classe);
 
@@ -295,6 +385,15 @@ class ParkBoat {
     List<String>? oarRack,
     BoatParkStatus? status,
     bool? loisirOk,
+    BoatType? boatType,
+    String? brand,
+    String? model,
+    int? year,
+    BoatMaterial? material,
+    String? serial,
+    String? notes,
+    String? importId,
+    bool clearImport = false,
   }) {
     final info = BoatClassInfo.of(classe ?? this.classe);
     return ParkBoat(
@@ -307,6 +406,14 @@ class ParkBoat {
       oarRack: oarRack ?? this.oarRack,
       status: status ?? this.status,
       loisirOk: loisirOk ?? this.loisirOk,
+      boatType: boatType ?? this.boatType,
+      brand: brand ?? this.brand,
+      model: model ?? this.model,
+      year: year ?? this.year,
+      material: material ?? this.material,
+      serial: serial ?? this.serial,
+      notes: notes ?? this.notes,
+      importId: clearImport ? null : (importId ?? this.importId),
     );
   }
 
@@ -320,6 +427,14 @@ class ParkBoat {
         'oarRack': oarRack,
         'status': status.wire,
         'loisirOk': loisirOk,
+        'boatType': boatType.wire,
+        'brand': brand,
+        'model': model,
+        'year': year,
+        'material': material.wire,
+        'serial': serial,
+        'notes': notes,
+        'importId': importId,
       };
 
   static ParkBoat fromJson(Map<String, dynamic> j) {
@@ -336,6 +451,14 @@ class ParkBoat {
       oarRack: (j['oarRack'] as List?)?.map((e) => '$e').toList() ?? const [],
       status: BoatParkStatusX.parse(j['status'] as String?),
       loisirOk: j['loisirOk'] as bool? ?? true,
+      boatType: BoatTypeX.parse(j['boatType'] as String?),
+      brand: j['brand'] as String?,
+      model: j['model'] as String?,
+      year: (j['year'] as num?)?.toInt(),
+      material: BoatMaterialX.parse(j['material'] as String?),
+      serial: j['serial'] as String?,
+      notes: j['notes'] as String?,
+      importId: j['importId'] as String?,
     );
   }
 
@@ -346,6 +469,14 @@ class ParkBoat {
     List<String> oarRack = const [],
     BoatParkStatus status = BoatParkStatus.ready,
     bool loisirOk = true,
+    BoatType boatType = BoatType.inconnu,
+    String? brand,
+    String? model,
+    int? year,
+    BoatMaterial material = BoatMaterial.inconnu,
+    String? serial,
+    String? notes,
+    String? importId,
   }) {
     final info = BoatClassInfo.of(classe);
     return ParkBoat(
@@ -358,6 +489,14 @@ class ParkBoat {
       oarRack: oarRack,
       status: status,
       loisirOk: loisirOk,
+      boatType: boatType,
+      brand: brand,
+      model: model,
+      year: year,
+      material: material,
+      serial: serial,
+      notes: notes,
+      importId: importId,
     );
   }
 }

@@ -94,6 +94,16 @@ class IdentityStore {
     await _writeList('boats.json', list.map((e) => e.toJson()).toList());
   }
 
+  Future<void> replaceAllBoats(List<ParkBoat> boats) async {
+    await _writeList('boats.json', boats.map((e) => e.toJson()).toList());
+  }
+
+  Future<void> deleteBoatsByImportId(String importId) async {
+    final list = await listBoats();
+    list.removeWhere((e) => e.importId == importId);
+    await _writeList('boats.json', list.map((e) => e.toJson()).toList());
+  }
+
   Future<void> deleteBoat(String id) async {
     final list = await listBoats();
     list.removeWhere((e) => e.id == id);
