@@ -1,9 +1,9 @@
-# Cadrage exploratoire — Point C : parc opérationnel (sortie, alignement, pelles, multi-coach)
+# Cadrage — Point C : parc opérationnel (sortie, alignement, pelles, multi-coach)
 
-> Statut : **exploratoire, à débattre**. Pas de code tant que la liste ci-dessous n'est pas validée.
+> Statut : **à construire**. Pas de débat — on code dans l'ordre ci-dessous.
 > App : `apps/datar0w`. Ne pas toucher AvSim. Ne pas revert `compileSdk = 37` / `ndkVersion "30.0.16248370"`. Pas de `sdkmanager`. Pas de `windows/`.
-> Prérequis : I1–I5 mergés (identité locale), Point B (Supabase) en cours ou prévu.
-> Ce document est **vivant** : on l'augmente au fur et à mesure des décisions. Chaque lot devient un commit distinct.
+> Prérequis : I1–I5 mergés (identité locale), Point B (Supabase) prévu en C6.
+> Chaque lot = 1 commit, `flutter analyze` clean, tests, APK qui s'installe.
 
 ---
 
@@ -17,8 +17,9 @@ Le trou réel :
 - Pas de **check-out / check-in** : bateau « sorti » vs « au hangar ».
 - Pas de **jeu de pelles dédié** : attribution fine P1/P2/P4 par poste, pas juste une liste rack.
 - Pas de **verrou multi-coach** : deux coachs peuvent composer le même bateau en même temps.
-- Pas de **filtre loisir / compétiteur** sur l'accès aux coques (décidé au cadrage identité, à figer ici).
+- Pas de **filtre loisir / compétiteur** sur l'accès aux coques.
 - Pas d'écran **« départ »** : embarquement, alignement, qui part avec quoi.
+- Pas de **signalement d'impact** : photo + note → maintenance.
 
 C'est le chantier **parc opérationnel**, pas juste « parc inventaire ». Sans lui, dès qu'il y a 2 coachs sur un même parc, ça se casse.
 
@@ -37,26 +38,24 @@ C'est le chantier **parc opérationnel**, pas juste « parc inventaire ». Sans 
 | **Jeu de pelles dédié (sortie)** | ❌ |
 | **Verrou multi-coach** | ❌ |
 | **Écran départ / alignement** | ❌ |
-| **Filtre loisir/compétiteur sur coques** | ❌ (décision à figer) |
+| **Filtre loisir/compétiteur sur coques** | ❌ |
 | **Photo d'impact → maintenance** | ❌ |
 
 ---
 
-## 2. Fonctionnalités candidates (à débattre)
+## 2. Fonctionnalités (ordre de build)
 
-Liste exhaustive de ce que je vois. À trancher : **garder / repousser / jeter**.
-
-### 2.1 Cycle de vie d'une coque (le cœur)
+### 2.1 Cycle de vie d'une coque
 
 1. **Sortie de parc (check-out)** — le coach déclare « on sort l'Empacher pour la séance 14h ». La coque passe `ready → out`. Horodaté, par qui.
 2. **Retour de parc (check-in)** — fin de séance ou manuellement. `out → ready` (ou `maintenance` si signalé). Horodaté.
-3. **Statut enrichi** — `ready | out | maintenance | reserved` (reserved = sorti mais pas encore parti). Aujourd'hui 3 statuts, on en ajoute 1–2.
-4. **Verrou d'édition** — une coque `out` ne peut pas être ré-composée par un autre coach tant qu'elle n'est pas revenue. Empêche le double-booking.
+3. **Statut enrichi** — `ready | out | maintenance | reserved` (reserved = sorti mais pas encore parti).
+4. **Verrou d'édition** — une coque `out` ne peut pas être ré-composée par un autre coach tant qu'elle n'est pas revenue.
 5. **File d'attente** — si 2 coachs veulent la même coque, le 2ᵉ voit « réservée par Coach X jusqu'à 15h30 ». Pas de refus sec.
 
-### 2.2 Pelles (le vrai métier aviron)
+### 2.2 Pelles
 
-6. **Jeu de pelles de sortie** — à la sortie, on choisit *quelles* pelles sortent avec la coque (sous-ensemble du rack). Pas juste « le rack a P1/P2/P4 », mais « on emmène P1×2, P2×2, P4×1 ». **Critique en compétition** : le jeu de pelles est figé pour la course, pas improvisé au quai.
+6. **Jeu de pelles de sortie** — à la sortie, on choisit *quelles* pelles sortent avec la coque (sous-ensemble du rack). Pas juste « le rack a P1/P2/P4 », mais « on emmène P1×2, P2×2, P4×1 ». **Critique en compétition** : le jeu est figé pour la course.
 7. **Attribution poste → pelle** — déjà dans `Assignment.oars`, mais à **figer à la sortie** (pas modifiable après embarquement sans trace).
 8. **Retour des pelles** — check-in vérifie que les pelles sont revenues (ou signale manquant). Simple booléen « pelles OK » au MVP.
 9. **Usure / maintenance pelles** — plus tard. Hors MVP.
@@ -82,20 +81,20 @@ Liste exhaustive de ce que je vois. À trancher : **garder / repousser / jeter**
 20. **Règle d'attribution** — loisir ne peut recevoir qu'une coque `loisir_ok`. Compétiteur : toutes (sauf maintenance).
 21. **Quota loisir** — plus tard. Hors MVP.
 
-### 2.6 Signalement d'impact → maintenance (nouveau)
+### 2.6 Signalement d'impact → maintenance
 
-22. **Photo d'impact** — à la sortie ou au retour, le coach (ou le barreur) peut attacher **une photo** d'un choc / rayure / fissure sur la coque. La coque bascule automatiquement en `maintenance` (ou file d'attente maintenance) jusqu'à validation.
+22. **Photo d'impact** — à la sortie ou au retour, le coach (ou le barreur) peut attacher **une photo** d'un choc / rayure / fissure sur la coque. La coque bascule automatiquement en `maintenance` jusqu'à validation.
 23. **Signalement texte** — champ libre court « ce qui s'est passé » lié à la photo.
 24. **File maintenance** — liste des coques signalées, avec photo + note, statut `maintenance` jusqu'à réparation. Le coach ne peut pas re-sortir une coque en maintenance sans lever le flag.
 25. **Visibilité rameur** — le rameur voit « ta coque est en maintenance » s'il était affecté, sans détail photo si sensible.
 
 > Note : pas de caméra live ni flux continu. **Une photo à la demande**, prise au moment du signalement. Hors scope : inspection IA, géoloc du hangar.
 
-### 2.7 Hors scope assumé (pour l'instant)
+### 2.7 Hors scope assumé
 
 - Planification multi-jours / calendrier de séances.
 - Réservation à l'avance (J-1) — on reste « sortie du moment ».
-- Suivi d'usure pelles / coques (compteurs de sorties) — la photo d'impact couvre le cas ponctuel.
+- Suivi d'usure pelles / coques (compteurs de sorties).
 - GPS de localisation du hangar.
 - Facturation / abonnements loisir.
 - Télémétrie par siège (Lot G).
@@ -103,29 +102,25 @@ Liste exhaustive de ce que je vois. À trancher : **garder / repousser / jeter**
 
 ---
 
-## 3. Décisions à trancher (débat)
+## 3. Règles figées (pas de débat)
 
-Avant de coder, on fixe :
-
-| # | Question | Options | Ma reco |
-|---|---|---|---|
-| D1 | Sortie = action explicite ou implicite (composition = sortie) ? | Explicite / implicite | **Explicite** — composition ≠ sortie. On compose d'abord, on sort ensuite. |
-| D2 | Verrou multi-coach : refus sec ou file d'attente ? | Refus / file | **File** — plus réaliste club. |
-| D3 | Check-in auto à la fin de séance ? | Auto / manuel / proposer | **Proposer** (opt-in). |
-| D4 | Pelles : jeu de sortie dédié ou juste rack ? | Rack seul / jeu sortie | **Jeu de sortie** — c'est le vrai usage, surtout en compétition. |
-| D5 | Filtre loisir/compétiteur sur coques ? | Oui / non | **Oui**, tag `loisir_ok`. |
-| D6 | Rôles : `coach` peut-il sortir sans être `admin` ? | Coach sort / admin seulement | **Coach sort**, admin gère le parc. |
-| D7 | Scope MVP : tout 2.1–2.6 ou sous-ensemble ? | Complet / minimal | **Minimal** : 1–8, 11–12, 15–16, 19–20, **22–24**. Le reste en lots suivants. |
-| D8 | Photo d'impact : obligatoire ou optionnelle à la sortie ? | Obligatoire / opt-in | **Opt-in** — ne pas bloquer la sortie si pas de dommage. |
-| D9 | Stockage photos : local d'abord ou direct cloud ? | Local / cloud | **Local d'abord**, sync cloud au Point B (évite upload si hors-ligne). |
+| # | Règle |
+|---|---|
+| D1 | Sortie = action **explicite**. Composition ≠ sortie. On compose d'abord, on sort ensuite. |
+| D2 | Verrou multi-coach = **file d'attente**, pas refus sec. |
+| D3 | Check-in : **proposer** à la fin de séance (opt-in). |
+| D4 | Pelles : **jeu de sortie** dédié (sous-ensemble du rack), figé à la sortie. |
+| D5 | Filtre loisir/compétiteur : tag `loisir_ok` sur `Boat`. |
+| D6 | Coach peut sortir ; admin gère le parc (CRUD). |
+| D7 | Photo d'impact : **opt-in**, pas bloquante. |
+| D8 | Photos : **local d'abord**, sync cloud au Point B. |
+| D9 | Scope MVP = C1–C6. |
 
 ---
 
-## 4. Lots proposés (après validation du débat)
+## 4. Lots (ordre de build)
 
-Chaque lot = 1 commit, `flutter analyze` clean, tests, APK qui s'installe.
-
-**C1 — Modèle sortie + verrou + jeu de pelles** (fondations, pas d'écran)
+**C1 — Modèle sortie + verrou + jeu de pelles + impact, AUCUN écran**
 - `lib/ops/boat_out.dart` : `BoatOut` (boatId, coachId, startedAt, plannedEnd, status, oarSetId).
 - `lib/ops/oar_set.dart` : `OarSet` (boatId, items[{spec, qty}], checkedOutAt) — sous-ensemble du rack.
 - `lib/ops/impact_report.dart` : `ImpactReport` (boatId, photoPath, note, reportedBy, reportedAt, status).
@@ -163,9 +158,7 @@ Hors scope C1–C6 : usure pelles (compteurs), calendrier multi-jours, réservat
 
 ---
 
-## 5. Prompt Cursor — Lots C1 → C5 (à coller après validation)
-
-> Ce bloc est le prompt exact. À ajuster selon les décisions D1–D9 ci-dessus.
+## 5. Prompt Cursor — Lots C1 → C6 (à coller tel quel)
 
 ```
 DataR0w — Point C : parc opérationnel (sortie, alignement, pelles, multi-coach, impact).
@@ -177,16 +170,16 @@ Ne pas porter le jargon Stitch (SYS_ID, STAGE PROTOCOL, SENSOR SYNC, entraxe, ca
 
 DA : #0B0E12 / blanc / #9AA0A6 / #2A2F36 / CTA #E8C547 / TRIBORD #46C275 / BÂBORD #E05353.
 
-## Règles métier (figées après débat — à confirmer)
-- Sortie = action EXPLICITE (composition ≠ sortie). D1 = explicite.
-- Verrou multi-coach = FILE D'ATTENTE, pas refus sec. D2 = file.
-- Check-in : PROPOSER à la fin de séance (opt-in). D3 = proposer.
-- Pelles : JEU DE SORTIE dédié (sous-ensemble du rack), figé à la sortie. D4 = jeu sortie.
-- Filtre loisir/compétiteur : tag loisir_ok sur Boat. D5 = oui.
-- Coach peut sortir ; admin gère le parc (CRUD). D6 = coach sort.
-- Photo d'impact : OPT-IN à la sortie/retour, pas bloquante. D8 = opt-in.
-- Photos : LOCAL d'abord, sync cloud au Point B. D9 = local.
-- Scope MVP = C1–C5 (minimal + impact). D7 = minimal.
+## Règles métier (figées)
+- Sortie = action EXPLICITE (composition ≠ sortie).
+- Verrou multi-coach = FILE D'ATTENTE, pas refus sec.
+- Check-in : PROPOSER à la fin de séance (opt-in).
+- Pelles : JEU DE SORTIE dédié (sous-ensemble du rack), figé à la sortie.
+- Filtre loisir/compétiteur : tag loisir_ok sur Boat.
+- Coach peut sortir ; admin gère le parc (CRUD).
+- Photo d'impact : OPT-IN à la sortie/retour, pas bloquante.
+- Photos : LOCAL d'abord, sync cloud au Point B.
+- Scope MVP = C1–C6.
 
 ## C1 — modèle sortie + verrou + jeu de pelles + impact, AUCUN écran
 lib/ops/boat_out.dart : BoatOut (boatId, coachId, startedAt, plannedEnd, status, oarSetId)
@@ -220,22 +213,24 @@ Coque → maintenance, file visible coach/admin.
 Rameur affecté : notification « coque en maintenance ».
 Commit : feat(datar0w): impact photo + maintenance queue
 
+## C6 — sync Supabase (branche Point B)
+Tables boat_outs, oar_sets, impact_reports. RLS par club. Realtime sur boat_outs.
+Photos : upload Storage au sync (local d'abord).
+Commit : feat(datar0w): boat ops sync
+
 ## Hors scope
 Usure pelles (compteurs), calendrier multi-jours, réservation J-1, GPS hangar,
 inspection IA, télémétrie par siège.
 Ne pas redessiner /live /cox /tare /coach carte /replay /crew /club.
 
 flutter analyze clean. Tests ops verts.
-Un commit par lot C1…C5, dans cet ordre.
+Un commit par lot C1…C6, dans cet ordre.
 ```
 
 ---
 
 ## 6. Prochaine action
 
-1. **Débattre** la liste §2 et les décisions D1–D9 ci-dessus.
-2. Trancher → figer dans §3.
-3. Pousser le prompt §5 dans Cursor.
-4. C1 d'abord (modèle, pas d'écran), comme I1.
+Lancer **C1** directement dans Cursor (modèle, pas d'écran), comme I1.
 
-*Document vivant — créé pour cadrer le parc opérationnel DataR0w. À enrichir, pas à figer.*
+*Document vivant — ordre de build figé. À enrichir au fil des lots.*
