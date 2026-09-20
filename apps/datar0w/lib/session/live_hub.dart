@@ -65,6 +65,9 @@ class LiveHubState {
     this.az,
     this.cadenceSpm,
     this.hdgMag,
+    this.hrBpm,
+    this.spo2Pct,
+    this.hrSource,
   });
 
   final bool locationOk;
@@ -102,6 +105,9 @@ class LiveHubState {
   final double? az;
   final double? cadenceSpm;
   final double? hdgMag;
+  final int? hrBpm;
+  final int? spo2Pct;
+  final String? hrSource;
 
   bool get tareOk =>
       tareOffset != null &&
@@ -151,6 +157,9 @@ class LiveHubState {
     double? az,
     double? cadenceSpm,
     double? hdgMag,
+    int? hrBpm,
+    int? spo2Pct,
+    String? hrSource,
   }) {
     return LiveHubState(
       locationOk: locationOk ?? this.locationOk,
@@ -188,6 +197,9 @@ class LiveHubState {
       az: az ?? this.az,
       cadenceSpm: cadenceSpm ?? this.cadenceSpm,
       hdgMag: hdgMag ?? this.hdgMag,
+      hrBpm: hrBpm ?? this.hrBpm,
+      spo2Pct: spo2Pct ?? this.spo2Pct,
+      hrSource: hrSource ?? this.hrSource,
     );
   }
 }
