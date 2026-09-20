@@ -50,6 +50,7 @@ dependencies:
   flutter_foreground_task: ^11.0.3
   image_picker: ^1.2.0
   excel: ^4.0.6
+  supabase_flutter: ^2.9.0
 
 dev_dependencies:
   flutter_test:

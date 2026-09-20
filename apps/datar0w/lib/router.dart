@@ -24,6 +24,7 @@ import 'features/replay/screen_6.dart';
 import 'features/replay/screen_6r.dart';
 import 'features/tare/screen_2b.dart';
 import 'session/boat_class.dart';
+import 'sync/auth_screen.dart';
 
 abstract final class AppRoutes {
   static const identity = '/identity';
@@ -50,6 +51,7 @@ abstract final class AppRoutes {
   static const coachReplay = '/replay-coach';
   static const rowerReplay = '/replay';
   static const quai = '/quai';
+  static const auth = '/auth';
 
   /// Après tare : barreur → `/cox`, rameur → `/live`. Écrans distincts.
   static String afterTare(CrewRole role) =>
@@ -182,6 +184,11 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.quai,
       name: '7-quai',
       builder: (context, state) => const QuaiScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.auth,
+      name: 'auth',
+      builder: (context, state) => const AuthScreen(),
     ),
   ],
 );

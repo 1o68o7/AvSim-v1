@@ -35,6 +35,9 @@ DATAROW_API_BASE=http://192.168.x.x:8000
 python -m avsim.api
 ```
 
+Auth club (optionnelle) : `--dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...`.
+Sans ces clés, `/auth` affiche le mode local — **pas de crash**.
+
 Routes (sans OAuth) : `POST /datarow/sessions`, `.../tick`, `GET .../by-code/{code}`, `GET .../live`, `POST .../notes`, `GET .../export`.
 
 ## Gîte — lissage

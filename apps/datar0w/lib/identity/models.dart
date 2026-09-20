@@ -144,6 +144,7 @@ class Rower {
     this.oarSpec,
     this.level = RowerLevel.inconnu,
     this.clubId,
+    this.userId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -158,6 +159,7 @@ class Rower {
   final String? oarSpec;
   final RowerLevel level;
   final String? clubId;
+  final String? userId;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -181,6 +183,8 @@ class Rower {
     RowerLevel? level,
     String? clubId,
     bool clearClub = false,
+    String? userId,
+    bool clearUser = false,
     DateTime? updatedAt,
   }) {
     return Rower(
@@ -194,6 +198,7 @@ class Rower {
       oarSpec: clearOar ? null : (oarSpec ?? this.oarSpec),
       level: level ?? this.level,
       clubId: clearClub ? null : (clubId ?? this.clubId),
+      userId: clearUser ? null : (userId ?? this.userId),
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -210,6 +215,7 @@ class Rower {
         'oarSpec': oarSpec,
         'level': level.wire,
         'clubId': clubId,
+        if (userId != null) 'userId': userId,
         'createdAt': createdAt.toUtc().toIso8601String(),
         'updatedAt': updatedAt.toUtc().toIso8601String(),
       };
@@ -226,6 +232,7 @@ class Rower {
       oarSpec: j['oarSpec'] as String?,
       level: RowerLevelX.parse(j['level'] as String?),
       clubId: j['clubId'] as String?,
+      userId: j['userId'] as String?,
       createdAt: DateTime.parse(j['createdAt'] as String),
       updatedAt: DateTime.parse(j['updatedAt'] as String),
     );
