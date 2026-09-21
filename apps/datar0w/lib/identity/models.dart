@@ -145,6 +145,7 @@ class Rower {
     this.level = RowerLevel.inconnu,
     this.clubId,
     this.userId,
+    this.importId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -160,6 +161,8 @@ class Rower {
   final RowerLevel level;
   final String? clubId;
   final String? userId;
+  /// Présent si créé par un import CSV (annulation douce).
+  final String? importId;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -185,6 +188,8 @@ class Rower {
     bool clearClub = false,
     String? userId,
     bool clearUser = false,
+    String? importId,
+    bool clearImport = false,
     DateTime? updatedAt,
   }) {
     return Rower(
@@ -199,6 +204,7 @@ class Rower {
       level: level ?? this.level,
       clubId: clearClub ? null : (clubId ?? this.clubId),
       userId: clearUser ? null : (userId ?? this.userId),
+      importId: clearImport ? null : (importId ?? this.importId),
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -216,6 +222,7 @@ class Rower {
         'level': level.wire,
         'clubId': clubId,
         if (userId != null) 'userId': userId,
+        if (importId != null) 'importId': importId,
         'createdAt': createdAt.toUtc().toIso8601String(),
         'updatedAt': updatedAt.toUtc().toIso8601String(),
       };
@@ -233,6 +240,7 @@ class Rower {
       level: RowerLevelX.parse(j['level'] as String?),
       clubId: j['clubId'] as String?,
       userId: j['userId'] as String?,
+      importId: j['importId'] as String?,
       createdAt: DateTime.parse(j['createdAt'] as String),
       updatedAt: DateTime.parse(j['updatedAt'] as String),
     );
