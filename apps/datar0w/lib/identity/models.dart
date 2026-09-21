@@ -271,6 +271,7 @@ class Club {
     this.city,
     this.lat,
     this.lon,
+    this.licenceCountApprox,
     required this.createdAt,
   });
 
@@ -288,6 +289,8 @@ class Club {
   final String? city;
   final double? lat;
   final double? lon;
+  /// Estimation coach (Point G mock). Pas un effectif FFA.
+  final int? licenceCountApprox;
   final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
@@ -305,6 +308,7 @@ class Club {
         'city': city,
         'lat': lat,
         'lon': lon,
+        'licenceCountApprox': licenceCountApprox,
         'createdAt': createdAt.toUtc().toIso8601String(),
       };
 
@@ -323,6 +327,7 @@ class Club {
         city: j['city'] as String?,
         lat: (j['lat'] as num?)?.toDouble(),
         lon: (j['lon'] as num?)?.toDouble(),
+        licenceCountApprox: (j['licenceCountApprox'] as num?)?.toInt(),
         createdAt: DateTime.parse(j['createdAt'] as String),
       );
 
@@ -345,6 +350,8 @@ class Club {
     String? city,
     double? lat,
     double? lon,
+    int? licenceCountApprox,
+    bool clearLicenceCount = false,
   }) {
     return Club(
       id: id,
@@ -361,6 +368,9 @@ class Club {
       city: city ?? this.city,
       lat: lat ?? this.lat,
       lon: lon ?? this.lon,
+      licenceCountApprox: clearLicenceCount
+          ? null
+          : (licenceCountApprox ?? this.licenceCountApprox),
       createdAt: createdAt,
     );
   }

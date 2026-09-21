@@ -74,6 +74,28 @@ class HomeRowerScreen extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: ClubBanner(club: club, compact: true),
               ),
+            Wrap(
+              spacing: 8,
+              children: [
+                ChoiceChip(
+                  label: const Text('ENTRAÎNEMENT'),
+                  selected: ref.watch(boatConfigProvider).sessionMode ==
+                      SessionMode.training,
+                  onSelected: (_) => ref
+                      .read(boatConfigProvider.notifier)
+                      .setSessionMode(SessionMode.training),
+                ),
+                ChoiceChip(
+                  label: const Text('COMPÉTITION'),
+                  selected: ref.watch(boatConfigProvider).sessionMode ==
+                      SessionMode.competition,
+                  onSelected: (_) => ref
+                      .read(boatConfigProvider.notifier)
+                      .setSessionMode(SessionMode.competition),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
             FilledButton(
               onPressed: () => _continue(context, ref),
               child: const Text('CONTINUER'),

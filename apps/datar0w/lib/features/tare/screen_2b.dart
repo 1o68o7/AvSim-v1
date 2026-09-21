@@ -101,6 +101,8 @@ class _PortraitTare extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  const _TareMountWarning(),
+                  const SizedBox(height: 8),
                   const Text(
                     'Bateau à quai, coque calée. Penchez le téléphone : le chiffre doit bouger. Puis tare = ce niveau devient 0°.',
                     style: TextStyle(color: DeckColors.label),
@@ -147,7 +149,7 @@ class _PortraitTare extends ConsumerWidget {
                       ),
                     ),
                   ),
-                _TareCta(state: state),
+                _TareCta(state: state, landscape: false),
                 const SizedBox(height: 8),
                 Text(
                   'STATUT ÉTALONNAGE : ${_statusLine(state)}',
@@ -159,7 +161,7 @@ class _PortraitTare extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 FilledButton(
-                  onPressed: state.tareOk ? onStart : null,
+                  onPressed: null,
                   child: const Text('DÉMARRER LA SESSION'),
                 ),
               ],
@@ -392,6 +394,8 @@ class _LandscapeHud extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 8),
+                          const _TareMountWarning(),
+                          const SizedBox(height: 8),
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
@@ -444,7 +448,7 @@ class _LandscapeHud extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          _TareCta(state: state),
+                          _TareCta(state: state, landscape: true),
                           const SizedBox(height: 8),
                           Container(
                             padding: const EdgeInsets.all(10),
@@ -499,23 +503,51 @@ class _LandscapeHud extends ConsumerWidget {
 }
 
 class _TareCta extends ConsumerWidget {
-  const _TareCta({required this.state});
+  const _TareCta({required this.state, required this.landscape});
 
   final LiveHubState state;
+  final bool landscape;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final running = state.tareStatus == TareStatus.running;
     return FilledButton(
-      onPressed: running
+      onPressed: running || !landscape
           ? null
           : () => ref.read(liveHubProvider.notifier).beginTare(),
       child: Text(
-        state.tareStatus == TareStatus.failed
-            ? 'RECOMMENCER TARE'
-            : running
-                ? 'TARE EN COURS… ${state.tareElapsedS} s'
-                : 'TARE GÎTE',
+        !landscape
+            ? 'TOURNER EN PAYSAGE POUR TARER'
+            : state.tareStatus == TareStatus.failed
+                ? 'RECOMMENCER TARE'
+                : running
+                    ? 'TARE EN COURS… ${state.tareElapsedS} s'
+                    : 'TARE GÎTE',
+      ),
+    );
+  }
+}
+
+class _TareMountWarning extends StatelessWidget {
+  const _TareMountWarning();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(color: DeckColors.amber),
+      ),
+      child: const Text(
+        'POSITION DE SÉANCE — La tare mémorise le niveau actuel du téléphone. '
+        'Fixez-le d’abord comme en live (cale-pied, écran paysage, haut du tel à gauche). '
+        'Ne pas tarer à la verticale à la main : le zéro resterait celui du portrait.',
+        style: TextStyle(
+          color: DeckColors.amber,
+          fontSize: 11,
+          height: 1.35,
+        ),
       ),
     );
   }

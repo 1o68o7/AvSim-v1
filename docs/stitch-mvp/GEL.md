@@ -1,6 +1,6 @@
 # Gel Stitch → Flutter (DataR0w)
 
-*20 sept 2026. Projet Stitch `1264451048753434333` (DataR0w Rowing Dashboard).  
+*21 sept 2026. Projet Stitch `1264451048753434333` (DataR0w Rowing Dashboard).  
 Le kit `2860093974873970202` (Tx Couples) n’est **pas** porté.*
 
 DA Deck : `#0B0E12` / blanc / `#9AA0A6` / `#2A2F36` / CTA `#E8C547` / TRIBORD `#46C275` / BÂBORD `#E05353`.  
@@ -46,7 +46,7 @@ HTML utile (extraits, pas labo) : `docs/stitch-mvp/gel/`.
 | E3 Plans d’eau | `/waters` | **codé** |
 | E4 Localisation club | `/club` (pin carte) | **codé** |
 | I live — presets + mini-carte | `/live` | **codé** |
-| R1 Pairing BLE | `/devices` | **codé** (saisie locale ; scan GATT parser) |
+| R1 Pairing BLE | `/devices` | **codé** — scan `flutter_blue_plus` GATT 0x180D / 0x2A37 ; fake CI |
 | R2 Chip FC/SpO2 | overlay `/live` | **codé** (extrait, live Deck conservé) |
 | R3 Courbe FC replay | `/replay` | **codé** |
 | R4 Visibilité coach | chip `/coach` si `hrBpm` | **codé** |
@@ -72,6 +72,22 @@ HTML utile (extraits, pas labo) : `docs/stitch-mvp/gel/`.
 - Logo DataR0w isolé
 - Projet Tx Couples (`2860093974873970202`)
 
+## Add-ons produit (cette PR) — coller dans les routes gelées
+
+Base : `feat/datarow-reste-agent` (**PR #54 non mergée** au départ). Pas de 2ᵉ route métier.
+
+| Add-on | Route(s) | Écart | Action |
+|---|---|---|---|
+| 1 Hub vs compétition | `/presession` `/live` `/devices` `/quai` `/home/*` | Pas de sélecteur de mode | Sélecteur ENTRAÎNEMENT \| COMPÉTITION + bandeau « tel au quai » |
+| 2 Patch dorsal | `/devices` `/live` | `DeviceType.patchDorsal` existe, UI sangle only | États scan/pairé/log/sync/batterie + chip « patch — » |
+| 3 Feedback onboard | `/devices` `/presession` | — | 3 toggles cadence / gîte / HR, persistés |
+| 4 Sync post-course | `/quai` | Partager coach only | CTA Importer patch + chip sync |
+| 5 BLE HR (lot C) | `/devices` `/live` | Déjà | Conserver 0x180D ; chip ♥ discret |
+| 6 Club / calendrier | `/club` `/calendar` `/waters` | `ubarritz-cazaubon` | `uby-cazaubon` + bandeau AL/AC |
+| 7 Tare paysage | `/tare` | Cherry-pick #46 | Inchangé (2B Stitch paysage labo ignoré) |
+
+Stitch MCP (21 sept 2026) : **53** planches projet `1264451048753434333`. Mapping ci-dessus inchangé (une planche = une route existante). HTML labo non recopié.
+
 ## Hors scope gel
 
-F scraper FFA, G licenciés agrégés, patch dorsal, paiement, moteur AvSim.
+F scraper FFA, G licenciés FFA, firmware XIAO, LSTM, paiement, moteur AvSim.

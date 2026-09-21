@@ -1,17 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import 'devices.dart';
 
 class DeviceStore {
-  DeviceStore({this._root});
-  final Directory? _root;
+  DeviceStore({this.root});
+  final Directory? root;
 
   Future<File> _file() async {
-    final dir = _root ??
+    final dir = root ??
         Directory(
           p.join(
             (await getApplicationDocumentsDirectory()).path,
@@ -39,17 +40,7 @@ class DeviceStore {
       for (var i = 0; i < current.length; i++) {
         final e = current[i];
         if (e.rowerId == d.rowerId && e.isPrimary) {
-          current[i] = ConnectedDevice(
-            id: e.id,
-            rowerId: e.rowerId,
-            type: e.type,
-            name: e.name,
-            bleId: e.bleId,
-            isPrimary: false,
-            pairedAt: e.pairedAt,
-            lastSeenAt: e.lastSeenAt,
-            lastBattery: e.lastBattery,
-          );
+          current[i] = e.copyWith(isPrimary: false);
         }
       }
     }
@@ -59,3 +50,5 @@ class DeviceStore {
     );
   }
 }
+
+final deviceStoreProvider = Provider<DeviceStore>((_) => DeviceStore());

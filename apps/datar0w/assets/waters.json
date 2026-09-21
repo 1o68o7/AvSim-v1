@@ -42,6 +42,41 @@
       "lat": 45.1596,
       "lon": 1.5335,
       "length_m": 2000
+    },
+    {
+      "id": "allier-vichy",
+      "name": "Allier — Vichy",
+      "type": "competition",
+      "city": "Vichy",
+      "lat": 46.1318,
+      "lon": 3.4252,
+      "length_m": 2000
+    },
+    {
+      "id": "uby-cazaubon",
+      "name": "Lac de l’Uby — Cazaubon",
+      "type": "competition",
+      "city": "Cazaubon",
+      "lat": 43.934,
+      "lon": -0.038,
+      "length_m": 2000
+    },
+    {
+      "id": "lac-aiguebelette",
+      "name": "Lac d’Aiguebelette",
+      "type": "lac",
+      "city": "Aiguebelette",
+      "lat": 45.535,
+      "lon": 5.813,
+      "length_m": 2000
+    },
+    {
+      "id": "loire-orleans",
+      "name": "Loire — Orléans",
+      "type": "riviere",
+      "city": "Orléans",
+      "lat": 47.9029,
+      "lon": 1.9093
     }
   ]
 }

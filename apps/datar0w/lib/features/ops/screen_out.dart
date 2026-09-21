@@ -25,6 +25,7 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
   final Map<String, int> _qty = {};
   final Map<String, bool> _pick = {};
   bool _personal = false;
+  bool _patchABord = false;
   final _personalSpec = TextEditingController();
   String? _flash;
 
@@ -176,6 +177,13 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
                     title: const Text('Pelles personnelles'),
                     value: _personal,
                     onChanged: (v) => setState(() => _personal = v),
+                  ),
+                  FilterChip(
+                    label: Text(
+                      _patchABord ? 'patch à bord' : 'patch à bord ?',
+                    ),
+                    selected: _patchABord,
+                    onSelected: (v) => setState(() => _patchABord = v),
                   ),
                   if (_personal)
                     TextField(

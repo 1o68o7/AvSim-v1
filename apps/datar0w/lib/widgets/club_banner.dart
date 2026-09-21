@@ -55,6 +55,29 @@ class ClubBanner extends StatelessWidget {
                     club.slogan!,
                     style: TextStyle(color: primary, fontSize: 12),
                   ),
+                if (club.licenceCountApprox != null) ...[
+                  const SizedBox(height: 6),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: DeckColors.hairline),
+                      ),
+                      child: Text(
+                        '~${club.licenceCountApprox} licenciés',
+                        style: const TextStyle(
+                          color: DeckColors.amber,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

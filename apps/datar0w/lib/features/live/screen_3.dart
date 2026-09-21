@@ -9,8 +9,11 @@ import 'package:latlong2/latlong.dart';
 
 import '../../live/layout_controller.dart';
 import '../../live/layout_model.dart';
+import '../../identity/device_store.dart';
+import '../../identity/devices.dart';
 import '../../maps/deck_tiles.dart';
 import '../../router.dart';
+import '../../session/boat_config.dart';
 import '../../session/double_press_stop.dart';
 import '../../session/heel.dart';
 import '../../session/live_hub.dart';
@@ -32,11 +35,13 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   bool _stopArmed = false;
   HeelAlert _lastAlert = HeelAlert.none;
   bool _panel = false;
+  String _patchChip = 'patch —';
 
   @override
   void initState() {
     super.initState();
     unawaited(lockRowerLandscape());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadPatch());
   }
 
   @override
@@ -45,6 +50,21 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
     ref
         .read(liveHubProvider.notifier)
         .setDisplayRotation(displayRotationDegOf(context));
+  }
+
+  Future<void> _loadPatch() async {
+    try {
+      final list = await ref.read(deviceStoreProvider).list();
+      final p = list.where((d) => d.isPatch);
+      if (!mounted) return;
+      setState(() {
+        _patchChip = p.isEmpty
+            ? 'patch —'
+            : 'patch ${p.first.patchLink?.label ?? 'pairé'}';
+      });
+    } catch (_) {
+      if (mounted) setState(() => _patchChip = 'patch —');
+    }
   }
 
   Future<void> _onStop() async {
@@ -65,6 +85,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   Widget build(BuildContext context) {
     final s = ref.watch(liveHubProvider);
     final layout = ref.watch(liveLayoutProvider);
+    final mode = ref.watch(boatConfigProvider).sessionMode;
     final gite = s.displayGiteDeg ?? s.giteDeg;
     final alert = s.tareOk ? heelAlertFor(gite) : HeelAlert.none;
     if (alert != _lastAlert) {
@@ -91,7 +112,22 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
             children: [
               Column(
                 children: [
-                  _topBar(layout, s),
+                  _topBar(layout, s, mode),
+                  if (mode == SessionMode.competition)
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(8, 0, 8, 4),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'MODE COMPÉTITION — tel au quai',
+                          style: TextStyle(
+                            color: DeckColors.amber,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
                   Expanded(
                     child: Row(
                       children: [
@@ -124,7 +160,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
     );
   }
 
-  Widget _topBar(RowerLayout layout, LiveHubState s) {
+  Widget _topBar(RowerLayout layout, LiveHubState s, SessionMode mode) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
       child: Row(
@@ -144,6 +180,22 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
               '♥ —',
               style: TextStyle(color: DeckColors.muted, fontSize: 12),
             ),
+          const SizedBox(width: 8),
+          Text(
+            _patchChip,
+            style: const TextStyle(color: DeckColors.label, fontSize: 11),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            mode.label,
+            style: TextStyle(
+              color: mode == SessionMode.competition
+                  ? DeckColors.amber
+                  : DeckColors.label,
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           if (s.spo2Pct != null) ...[
             const SizedBox(width: 8),
             Text(
