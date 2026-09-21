@@ -1,6 +1,12 @@
 # DataR0w — projet Supabase (point B)
 
-Le téléphone reste utilisable **hors-ligne** (JSON `Documents/datar0w/`). Supabase est un miroir + sync. **Pas** de `samples.jsonl` dans le cloud.
+Le téléphone reste utilisable **hors-ligne** (JSON `Documents/datar0w/`). Supabase = miroir + sync identité / parc. **Pas** de `samples.jsonl` dans le cloud.
+
+État au 21 sept 2026 : voir `docs/CADRAGE-SUPABASE.md` et `docs/ETAT-DATAROW.md` §3.
+
+- Migrations `0001`–`0003` : sur **main** (schéma).
+- Client Dart outbox / Realtime : branche `cursor/datarow-supabase-b1-b4-7a63` seulement. PR #50 closed dirty — ne pas merger telle quelle.
+- Sans dart-define : `/auth` no-op, I1–I8 inchangés.
 
 ## Secrets
 
@@ -14,20 +20,14 @@ flutter run \
   --dart-define=SUPABASE_ANON_KEY=eyJ...
 ```
 
-Sans dart-define, le mode local (Passer / I1–I5) continue.
-
-## Créer le projet (dashboard, pas Cursor)
+## Créer le projet (dashboard, pas un agent)
 
 1. [supabase.com](https://supabase.com) → New project.
-2. SQL Editor → coller `migrations/0001_identity_core.sql` (ou CLI `supabase db push` si le projet est lié).
-3. Authentication → Providers → Email : **Magic link** ON. Redirect URL : `datarow://auth/callback`.
-4. Database → Replication / Realtime : activer **assignments**, **boats**, **rowers**.
-5. Copier Project URL + `anon` `public` key (pas `service_role`).
+2. SQL Editor → coller **dans l’ordre** `migrations/0001_identity_core.sql`, `0002_boat_ops.sql`, `0003_club_import.sql`.
+3. Authentication → Email : **Magic link** ON. Redirect : `datarow://auth/callback`.
+4. Realtime : `assignments`, `boats`, `rowers` — seulement quand le client Dart sera sur main.
+5. Copier Project URL + clé `anon` `public` (pas `service_role`).
 
-## Isolation (2 clubs / 2 users)
+## Isolation
 
-Fichier `tests/isolation_rls.sql` : scénario attendu (A ne voit pas B). À exécuter dans SQL Editor **après** deux comptes Auth.
-
-## Recette 2 téléphones
-
-Voir `docs/CADRAGE-IDENTITE-CLUB-EQUIPAGE.md` §9.6.
+Le fichier `tests/isolation_rls.sql` n’est **pas** sur main (il est sur la branche #50). Ne pas inventer un scénario SQL ici.
