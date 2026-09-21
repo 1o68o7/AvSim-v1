@@ -15,6 +15,7 @@ import '../../theme/deck_theme.dart';
 import '../../widgets/deck_widgets.dart';
 import '../../widgets/heel_banner.dart';
 import '../../widgets/heel_gauge.dart';
+import '../../widgets/live_affordances.dart';
 
 /// Paysage réduit — pas de gros SPM inventé. Un tél = hub bateau (IMU/GPS)
 /// ou poll API du tel qui logge.
@@ -59,6 +60,7 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
   Future<void> _onStop() async {
     final done = _stop.press();
     if (!done) {
+      hapticStopArmed();
       setState(() => _stopArmed = true);
       Future<void>.delayed(const Duration(seconds: 3), () {
         if (mounted) setState(() => _stopArmed = false);
@@ -94,7 +96,9 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
       body: HeelAlertOverlay(
         alert: alert,
         child: SafeArea(
-          child: Column(
+          child: Stack(
+            children: [
+              Column(
             children: [
               Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -201,6 +205,9 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
             ),
           ],
         ),
+              StopArmedBanner(visible: _stopArmed),
+            ],
+          ),
         ),
       ),
     );

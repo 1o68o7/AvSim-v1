@@ -22,6 +22,7 @@ import '../../theme/deck_theme.dart';
 import '../../widgets/heel_banner.dart';
 import '../../widgets/heel_gauge.dart';
 import '../../widgets/deck_widgets.dart';
+import '../../widgets/live_affordances.dart';
 
 class LiveScreen extends ConsumerStatefulWidget {
   const LiveScreen({super.key});
@@ -70,6 +71,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   Future<void> _onStop() async {
     final done = _stop.press();
     if (!done) {
+      hapticStopArmed();
       setState(() => _stopArmed = true);
       Future<void>.delayed(const Duration(seconds: 3), () {
         if (mounted) setState(() => _stopArmed = false);
@@ -112,7 +114,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
             children: [
               Column(
                 children: [
-                  _topBar(layout, s, mode),
+                  _topBar(s, mode),
                   if (mode == SessionMode.competition)
                     const Padding(
                       padding: EdgeInsets.fromLTRB(8, 0, 8, 4),
@@ -153,6 +155,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                 ],
               ),
               if (_panel) _customize(layout),
+              StopArmedBanner(visible: _stopArmed),
             ],
           ),
         ),
@@ -160,7 +163,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
     );
   }
 
-  Widget _topBar(RowerLayout layout, LiveHubState s, SessionMode mode) {
+  Widget _topBar(LiveHubState s, SessionMode mode) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
       child: Row(
@@ -204,25 +207,8 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
             ),
           ],
           const Spacer(),
-          Semantics(
-            button: true,
-            label: 'Preset ${layout.preset.label}',
-            child: GestureDetector(
-              onTap: () => setState(() => _panel = !_panel),
-              child: Container(
-                width: 48,
-                height: 48,
-                alignment: Alignment.center,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const BoxDecoration(
-                    color: DeckColors.amber,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ),
+          LiveLayoutButton(
+            onPressed: () => setState(() => _panel = !_panel),
           ),
         ],
       ),

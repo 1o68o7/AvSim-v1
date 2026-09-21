@@ -9,8 +9,8 @@ HEAD de travail : `main` (dart-defines #56 mergée). Produit = `apps/datar0w`.
 
 ## §0 Règles (ne pas négocier)
 
-1. Lots A et B : ne pas ouvrir C (LIVE-AFFORDANCE, COACH-IA, etc.).
-2. **Live / cox / coach** : aucun leading, aucun Accueil. Sortie live/cox = STOP 2× → `/quai`.
+1. Lots A–C : ne pas ouvrir D–I (COACH-IA, empty CTA, etc.).
+2. **Live / cox / coach** : aucun leading, aucun Accueil, aucun Retour. Sortie live/cox = STOP 2× → `/quai`.
 3. **Pas de #50.** Ne pas merger / rebase `cursor/datarow-supabase-b1-b4-7a63`. Ne pas toucher `lib/sync/` hors lecture.
 4. **Pas de secrets.** Pas de `dart_defines.json`, pas de `service_role`, pas d’URL/JWT projet.
 5. **Pas d’AvSim.** Ne pas rouvrir η / check_factor / sensors virtuels / StrokeGeometry / `params/*.yaml`.
@@ -64,4 +64,24 @@ Libellé unique : « Retour » (plus de « Retour profil » / Accueil).
 - `/live` et `/cox` : pas d’Accueil, pas de `DeckRetour` / Retour leading.
 - Gate « Réservé au coach » : Retour → `/`.
 - Tare en cours : pas de Retour (déjà `nav_test`).
+
+---
+
+## §2.5 Lot C — LIVE-AFFORDANCE
+
+| Contrôle | Attendu |
+|---|---|
+| Layout | Icône + texte `Layout`, hit ≥ 48×48. La pastille 10×10 n’est plus la seule commande. |
+| STOP 1er tap | Overlay « Encore une fois pour arrêter » + haptic. Timeout 3 s inchangé. |
+| STOP 2e tap | `/quai`. |
+| Nav | `/live` `/cox` `/coach` : 0 Accueil, 0 Retour. Deck 3 colonnes live conservé. |
+
+Hors Lot C : COACH-IA, empty CTA, ops qty, #50, ANDROID-GOLDEN.
+
+## Tests Lot C
+
+- `find.text('Layout')` sur live.
+- `find.text('Accueil')` nothing sur live.
+- 1er STOP → `Encore une fois pour arrêter`.
+
 
