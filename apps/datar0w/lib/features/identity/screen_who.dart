@@ -8,6 +8,41 @@ import '../../router.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 
+Future<void> _confirmDeleteRower(
+  BuildContext context,
+  WidgetRef ref,
+  Rower rower,
+) async {
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) {
+      final err = Theme.of(ctx).colorScheme.error;
+      return AlertDialog(
+        backgroundColor: DeckColors.surface,
+        title: const Text('Supprimer ce profil ?'),
+        content: Text(
+          '« ${rower.displayName} » sera retiré de ce téléphone. '
+          'Action locale, irréversible.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('ANNULER'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: err),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('SUPPRIMER'),
+          ),
+        ],
+      );
+    },
+  );
+  if (ok == true && context.mounted) {
+    await ref.read(identityProvider.notifier).deleteRower(rower.id);
+  }
+}
+
 class IdentityListScreen extends ConsumerWidget {
   const IdentityListScreen({super.key});
 
@@ -47,9 +82,8 @@ class IdentityListScreen extends ConsumerWidget {
                     ),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete_outline),
-                      onPressed: () => ref
-                          .read(identityProvider.notifier)
-                          .deleteRower(r.id),
+                      tooltip: 'Supprimer le profil',
+                      onPressed: () => _confirmDeleteRower(context, ref, r),
                     ),
                     onTap: () async {
                       await ref.read(identityProvider.notifier).selectRower(r.id);

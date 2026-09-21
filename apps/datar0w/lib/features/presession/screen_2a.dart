@@ -37,7 +37,7 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
     final info = cfg.info;
     final coxNeedsBoat = cfg.role == CrewRole.cox && !info.coxed;
     return DeckScaffold(
-      title: 'DATAR0W / 2A  ·  PRÉ-SESSION',
+      title: 'PRÉ-SESSION',
       subtitle: 'Configuration séance',
       leading: const DeckBackToProfile(),
       body: Column(

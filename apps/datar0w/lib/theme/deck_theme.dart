@@ -12,6 +12,8 @@ abstract final class DeckColors {
   static const Color amber = Color(0xFFE8C547);
   static const Color alert = Color(0xFFE8C547);
   static const Color onAlert = Color(0xFF0B0E12);
+  /// Erreur bloquante — distincte de l’ambre CTA / alerte gîte.
+  static const Color error = Color(0xFFE05353);
   static const Color babord = Color(0xFFE05353);
   static const Color tribord = Color(0xFF46C275);
   /// Bandeau alerte « trop tribords » — vert foncé (libellés restent [tribord]).
@@ -26,7 +28,8 @@ ThemeData buildDeckTheme() {
     onPrimary: DeckColors.onAlert,
     onSurface: DeckColors.text,
     outline: DeckColors.hairline,
-    error: DeckColors.amber,
+    error: DeckColors.error,
+    onError: DeckColors.text,
   );
 
   return ThemeData(

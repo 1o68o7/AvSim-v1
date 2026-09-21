@@ -37,7 +37,7 @@ class DeckScaffold extends StatelessWidget {
             Text(
               title,
               style: const TextStyle(
-                fontSize: 10,
+                fontSize: 15,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.4,
                 color: DeckColors.label,
@@ -47,7 +47,7 @@ class DeckScaffold extends StatelessWidget {
               Text(
                 subtitle!,
                 style: const TextStyle(
-                  fontSize: 10,
+                  fontSize: 11,
                   color: DeckColors.label,
                   letterSpacing: 0.8,
                 ),
