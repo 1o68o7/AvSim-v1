@@ -17,7 +17,8 @@ import '../../session/store.dart';
 import '../../session/summary.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
-import '../../widgets/deck_widgets.dart';
+import '../../identity/patch_sync.dart';
+import '../../widgets/mode_banner.dart';
 
 class QuaiScreen extends ConsumerStatefulWidget {
   const QuaiScreen({super.key});
@@ -32,6 +33,8 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
   String? _jsonlPath;
   String? _metaPath;
   String _chip = 'en attente réseau';
+  PatchSyncStatus _patchSync = PatchSyncStatus.idle;
+  final _patchStore = PatchSyncStore();
 
   @override
   void initState() {
@@ -43,18 +46,29 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
   Future<void> _load() async {
     final hub = ref.read(liveHubProvider);
     final id = hub.sessionId ?? await SessionStore.latestId();
-    if (id == null) return;
-    final samples = await SessionStore.loadSamples(id);
-    final meta = await SessionStore.loadMeta(id);
-    final dir = hub.sessionDir ?? '${(await SessionStore.sessionsRoot()).path}/$id';
+    if (id != null) {
+      final samples = await SessionStore.loadSamples(id);
+      final meta = await SessionStore.loadMeta(id);
+      final dir = hub.sessionDir ?? '${(await SessionStore.sessionsRoot()).path}/$id';
+      if (mounted) {
+        setState(() {
+          _summary = SessionSummary.fromSamples(samples);
+          _meta = meta;
+          _jsonlPath = '$dir/samples.jsonl';
+          _metaPath = '$dir/meta.json';
+          _chip = hub.net == 'hors ligne' ? 'en attente réseau' : hub.net;
+        });
+      }
+    }
+    final ps = await _patchStore.status();
+    if (mounted) setState(() => _patchSync = ps);
+  }
+
+  Future<void> _importPatch() async {
+    setState(() => _patchSync = PatchSyncStatus.pending);
+    await _patchStore.importMock();
     if (!mounted) return;
-    setState(() {
-      _summary = SessionSummary.fromSamples(samples);
-      _meta = meta;
-      _jsonlPath = '$dir/samples.jsonl';
-      _metaPath = '$dir/meta.json';
-      _chip = hub.net == 'hors ligne' ? 'en attente réseau' : hub.net;
-    });
+    setState(() => _patchSync = PatchSyncStatus.ok);
   }
 
   Future<void> _share() async {
@@ -95,6 +109,10 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (boat.sessionMode == SessionMode.competition) ...[
+              const CompetitionBanner(),
+              const SizedBox(height: 12),
+            ],
             const Text(
               'RÉSUMÉ D\'ACTIVITÉ',
               style: TextStyle(
@@ -160,6 +178,15 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
                       label: 'siège ${_meta!.seatIndex} / ${_meta!.side}',
                       ok: true,
                     ),
+                  DeckStatusChip(
+                    label: switch (_patchSync) {
+                      PatchSyncStatus.ok => 'sync OK',
+                      PatchSyncStatus.pending => 'en attente sync patch',
+                      PatchSyncStatus.idle => 'en attente sync patch',
+                    },
+                    ok: _patchSync == PatchSyncStatus.ok,
+                    alert: _patchSync != PatchSyncStatus.ok,
+                  ),
                 ],
               ),
             ),
@@ -179,6 +206,13 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
             OutlinedButton(
               onPressed: _share,
               child: const Text('PARTAGER AU COACH'),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: _patchSync == PatchSyncStatus.pending
+                  ? null
+                  : _importPatch,
+              child: const Text('IMPORTER PATCH'),
             ),
             if (showCheckIn) ...[
               const SizedBox(height: 8),
