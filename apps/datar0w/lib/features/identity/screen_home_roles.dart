@@ -60,7 +60,7 @@ class HomeCoxScreen extends ConsumerWidget {
                   ? const Center(
                       child: Text(
                         'Pas d’affectation barreur.\n'
-                        'Continuer : classe barrée + rôle (écran 2A).',
+                        'Continuer : classe barrée + rôle (pré-session).',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: DeckColors.muted, height: 1.4),
                       ),

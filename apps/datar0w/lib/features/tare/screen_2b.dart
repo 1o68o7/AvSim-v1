@@ -79,7 +79,7 @@ class _PortraitTare extends ConsumerWidget {
     final persp =
         boat.isCox ? HeelPerspective.cox : HeelPerspective.rower;
     return DeckScaffold(
-      title: 'DATAROW / 2B',
+      title: 'ÉTALONNAGE / TARE',
       subtitle: boat.isCox
           ? 'Tare gîte · ${boat.info.code.toUpperCase()} barreur ${boat.coxPosition.wire} · réf. barreur'
           : 'Tare gîte · ${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats} · réf. rameur',
@@ -216,8 +216,8 @@ class _LandscapeHud extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         boat.isCox
-                            ? 'DATAROW / 2B · TARE GÎTE · ${boat.info.code.toUpperCase()} barreur ${boat.coxPosition.wire} · Bateau à quai, coque calée.'
-                            : 'DATAROW / 2B · TARE GÎTE · ${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats} · Bateau à quai, coque calée.',
+                            ? 'TARE GÎTE · ${boat.info.code.toUpperCase()} barreur ${boat.coxPosition.wire} · Bateau à quai, coque calée.'
+                            : 'TARE GÎTE · ${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats} · Bateau à quai, coque calée.',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
