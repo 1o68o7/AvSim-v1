@@ -2,6 +2,8 @@
 
 Companion téléphone : GPS / IMU d’un hub (cale-pied ou bateau). **Pas une mesure AvSim.**
 
+Vérité produit : `docs/ETAT-DATAROW.md`. Sync club : `docs/CADRAGE-SUPABASE.md`.
+
 Un smartphone = **un hub / une place**. Multi-sièges = plusieurs tél. + `DATAROW_API_BASE` (plus tard). Pas de 8 IMU simulés.
 
 ## Lots
@@ -14,12 +16,12 @@ Un smartphone = **un hub / une place**. Multi-sièges = plusieurs tél. + `DATAR
 | Coach | Join code / dernière séance / séance live API. Écran 5 OSM + notes. Replay import jsonl. |
 | Classes | 1x, 2x, 2-, 4x, 4-, 4+, 8+. Rôle barreur 4+/8+. |
 | I1–I8 / C1–C6 / D1–D5 | **Codés** : identité, parc ops, import cabane, spinoscope. Mapping : `docs/stitch-mvp/GEL.md`. |
-| B (auth) | `/auth` magic link si `SUPABASE_URL` + `SUPABASE_ANON_KEY`. Sinon mode local, pas de crash. |
-| E / L | `/calendar` `/calendar/:id` `/waters` — JSON curaté, **pas** de scrape FFA. Filtres loisir / rando / master. |
-| I live | Presets blocs + mini-carte sur `/live` (Deck conservé). Swipe bord droit. |
-| R / J | Chip FC, `/devices` `/physio` `/consent`. Scan GATT Heart Rate (lot C). |
-| G mock | `club.licenceCountApprox` — chip « ~N licenciés », estimation club (pas FFA). |
-| Add-ons Stitch | Modes entraînement / compétition, patch dorsal (UI), sync quai, `uby-cazaubon`. Mapping : `docs/stitch-mvp/GEL.md`. Branche depuis `feat/datarow-reste-agent` (PR #54 ouverte). |
+| B (auth) | `/auth` + deep link. Magic link seulement si `SUPABASE_URL` + `SUPABASE_ANON_KEY`. Sinon local, pas de crash. Outbox Dart : pas sur main (branche #50). |
+| E / L | `/calendar` `/calendar/:id` `/waters` — JSON curaté, **pas** de scrape FFA. |
+| I live | Presets + mini-carte sur `/live` (Deck conservé). |
+| R / J | Chip FC, `/devices` `/physio` `/consent`. Scan GATT 0x180D. |
+| G mock | `club.licenceCountApprox` — estimation club, pas FFA. |
+| Add-ons | Modes entraînement / compétition, patch UI (mock), sync quai mock, `uby-cazaubon`. **Sur main.** |
 
 Routes : `/auth` `/calendar` `/calendar/:id` `/waters` `/consent` `/devices` `/physio`. Pas de route neuve add-on.
 
@@ -88,5 +90,5 @@ Pas de cible `windows/` desktop.
 
 ## Hors contrat
 
-Watts, η, slip, RTK, 10 Hz, Analyste, micro/caméra, High-Vis cyan, moteur AvSim, couloirs FISA sans GeoJSON.
-Identité / parc / import / calendrier / auth : **codés**. Hors contrat : Watts, η, scrape FFA live, paiement.
+Watts, η, slip, RTK, 10 Hz, Analyste, micro/caméra, High-Vis cyan, moteur AvSim, couloirs FISA sans GeoJSON, scrape FFA, paiement.
+Patch firmware et LSTM : parked. Identité / parc / import / calendrier / auth route : **codés**.
