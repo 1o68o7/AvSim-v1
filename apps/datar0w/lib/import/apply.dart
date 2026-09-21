@@ -1,6 +1,7 @@
 import '../identity/id.dart';
 import '../identity/models.dart';
 import 'mapping.dart';
+import 'rower_csv.dart';
 
 class ImportApplyResult {
   const ImportApplyResult({
@@ -112,6 +113,97 @@ List<ParkBoat> undoImport({
   required String importId,
 }) {
   return boats.where((b) => b.importId != importId).toList();
+}
+
+class RowerImportApplyResult {
+  const RowerImportApplyResult({
+    required this.importId,
+    required this.rowers,
+    required this.created,
+    required this.updated,
+    required this.ignored,
+  });
+
+  final String importId;
+  final List<Rower> rowers;
+  final int created;
+  final int updated;
+  final int ignored;
+}
+
+/// Doublon displayName+birthDate (casse ignorée) → mise à jour. importId sur créés.
+RowerImportApplyResult applyRowerImport({
+  required List<Rower> existing,
+  required List<ParsedRowerRow> rows,
+  String? clubId,
+  String? importId,
+}) {
+  final id = importId ?? newIdentityId();
+  final rowers = [...existing];
+  var created = 0;
+  var updated = 0;
+  var ignored = 0;
+
+  int indexOf(ParsedRowerRow r) {
+    final key = rowerDupKey(r.displayName!, r.birthDate!);
+    return rowers.indexWhere(
+      (x) => rowerDupKey(x.displayName, x.birthDate) == key,
+    );
+  }
+
+  final now = DateTime.now().toUtc();
+  for (final r in rows) {
+    if (!r.ok) {
+      ignored++;
+      continue;
+    }
+    final i = indexOf(r);
+    if (i >= 0) {
+      final prev = rowers[i];
+      rowers[i] = prev.copyWith(
+        sex: r.sex,
+        weightKg: r.weightKg,
+        heightCm: r.heightCm,
+        sidePref: r.sidePref,
+        level: r.level,
+        clubId: r.clubId ?? clubId ?? prev.clubId,
+        updatedAt: now,
+      );
+      updated++;
+    } else {
+      rowers.add(
+        Rower(
+          id: newIdentityId(),
+          displayName: r.displayName!,
+          birthDate: r.birthDate!,
+          sex: r.sex,
+          weightKg: r.weightKg,
+          heightCm: r.heightCm,
+          sidePref: r.sidePref,
+          level: r.level,
+          clubId: r.clubId ?? clubId,
+          importId: id,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+      created++;
+    }
+  }
+  return RowerImportApplyResult(
+    importId: id,
+    rowers: rowers,
+    created: created,
+    updated: updated,
+    ignored: ignored,
+  );
+}
+
+List<Rower> undoRowerImport({
+  required List<Rower> rowers,
+  required String importId,
+}) {
+  return rowers.where((r) => r.importId != importId).toList();
 }
 
 String resolveBoatClass(String? raw) {
