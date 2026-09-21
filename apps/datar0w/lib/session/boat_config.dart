@@ -10,6 +10,7 @@ class BoatConfig {
     this.role = CrewRole.rower,
     this.coxPosition = CoxPosition.rear,
     this.bassin = 'Bassin de Mantes-la-Jolie',
+    this.sessionMode = SessionMode.training,
   });
 
   final String classe;
@@ -17,6 +18,7 @@ class BoatConfig {
   final CrewRole role;
   final CoxPosition coxPosition;
   final String bassin;
+  final SessionMode sessionMode;
 
   BoatClassInfo get info => BoatClassInfo.of(classe);
 
@@ -52,6 +54,7 @@ class BoatConfig {
         'role': role.wire,
         'seatIndex': metaSeatIndex,
         if (isCox) 'coxPosition': coxPosition.wire,
+        'sessionMode': sessionMode.wire,
       };
 
   BoatConfig copyWith({
@@ -60,6 +63,7 @@ class BoatConfig {
     CrewRole? role,
     CoxPosition? coxPosition,
     String? bassin,
+    SessionMode? sessionMode,
   }) {
     final next = BoatConfig(
       classe: classe ?? this.classe,
@@ -67,6 +71,7 @@ class BoatConfig {
       role: role ?? this.role,
       coxPosition: coxPosition ?? this.coxPosition,
       bassin: bassin ?? this.bassin,
+      sessionMode: sessionMode ?? this.sessionMode,
     );
     return BoatConfig(
       classe: next.classe,
@@ -74,6 +79,7 @@ class BoatConfig {
       role: next.role,
       coxPosition: next.coxPosition,
       bassin: next.bassin,
+      sessionMode: next.sessionMode,
     );
   }
 }
@@ -102,6 +108,9 @@ class BoatConfigNotifier extends Notifier<BoatConfig> {
   void setCoxPosition(CoxPosition p) => state = state.copyWith(coxPosition: p);
 
   void setBassin(String v) => state = state.copyWith(bassin: v);
+
+  void setSessionMode(SessionMode m) =>
+      state = state.copyWith(sessionMode: m);
 }
 
 final boatConfigProvider =

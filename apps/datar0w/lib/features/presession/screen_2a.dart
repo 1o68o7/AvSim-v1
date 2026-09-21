@@ -7,6 +7,7 @@ import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
+import '../../widgets/mode_banner.dart';
 
 class PresessionScreen extends ConsumerStatefulWidget {
   const PresessionScreen({super.key});
@@ -45,6 +46,48 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               children: [
+                if (cfg.sessionMode == SessionMode.competition) ...[
+                  const CompetitionBanner(),
+                  const SizedBox(height: 16),
+                ],
+                const Text(
+                  'MODE',
+                  style: TextStyle(
+                    color: DeckColors.label,
+                    fontSize: 10,
+                    letterSpacing: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    ChoiceChip(
+                      label: const Text('ENTRAÎNEMENT'),
+                      selected: cfg.sessionMode == SessionMode.training,
+                      onSelected: (_) => ref
+                          .read(boatConfigProvider.notifier)
+                          .setSessionMode(SessionMode.training),
+                    ),
+                    ChoiceChip(
+                      label: const Text('COMPÉTITION'),
+                      selected: cfg.sessionMode == SessionMode.competition,
+                      onSelected: (_) => ref
+                          .read(boatConfigProvider.notifier)
+                          .setSessionMode(SessionMode.competition),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  cfg.sessionMode == SessionMode.competition
+                      ? 'Téléphone interdit en bateau (FFA / World Rowing). '
+                          'Patch autonome. Feedback = vibration / OLED patch '
+                          '(cadence, gîte, HR). Pas de liaison coach en course.'
+                      : 'Téléphone = hub GPS + IMU + BLE. Live Deck. 4G coach optionnelle.',
+                  style: const TextStyle(color: DeckColors.muted, fontSize: 12, height: 1.35),
+                ),
+                const SizedBox(height: 16),
                 const Text(
                   'PARAMÉTRAGE MATÉRIEL ET TÉLÉMÉTRIE AVANT MISE À L’EAU',
                   style: TextStyle(
@@ -243,7 +286,20 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                 const SizedBox(height: 8),
                 const _SensorRow(name: 'GPS', state: 'ACTIF', ok: true),
                 const _SensorRow(name: 'IMU', state: 'ACTIF', ok: true),
-                const _SensorRow(name: 'BLE', state: '— aucun', ok: false),
+                _SensorRow(
+                  name: 'BLE',
+                  state: cfg.sessionMode == SessionMode.competition
+                      ? 'course : patch'
+                      : 'sangle / patch',
+                  ok: true,
+                ),
+                _SensorRow(
+                  name: 'PATCH',
+                  state: cfg.sessionMode == SessionMode.competition
+                      ? 'autonome'
+                      : 'option',
+                  ok: cfg.sessionMode == SessionMode.competition,
+                ),
               ],
             ),
           ),
@@ -348,7 +404,9 @@ class _SensorRow extends StatelessWidget {
                 ? Icons.gps_fixed
                 : name == 'IMU'
                     ? Icons.screen_rotation
-                    : Icons.bluetooth_disabled,
+                    : name == 'PATCH'
+                        ? Icons.sensors
+                        : Icons.bluetooth,
             accent: ok,
             muted: !ok,
           ),

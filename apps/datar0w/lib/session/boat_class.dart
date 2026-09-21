@@ -38,6 +38,19 @@ enum CrewRole { rower, cox, coach }
 
 enum CoxPosition { rear, front }
 
+enum SessionMode { training, competition }
+
+extension SessionModeX on SessionMode {
+  String get wire =>
+      this == SessionMode.competition ? 'competition' : 'training';
+
+  String get label =>
+      this == SessionMode.competition ? 'COMPÉTITION' : 'ENTRAÎNEMENT';
+
+  static SessionMode parse(String? raw) =>
+      raw == 'competition' ? SessionMode.competition : SessionMode.training;
+}
+
 extension CoxPositionX on CoxPosition {
   String get wire => this == CoxPosition.front ? 'front' : 'rear';
 

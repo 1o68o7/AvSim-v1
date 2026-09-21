@@ -108,6 +108,28 @@ class HomeCoxScreen extends ConsumerWidget {
               },
               child: const Text('CONTINUER'),
             ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                ChoiceChip(
+                  label: const Text('ENTRAÎNEMENT'),
+                  selected: ref.watch(boatConfigProvider).sessionMode ==
+                      SessionMode.training,
+                  onSelected: (_) => ref
+                      .read(boatConfigProvider.notifier)
+                      .setSessionMode(SessionMode.training),
+                ),
+                ChoiceChip(
+                  label: const Text('COMPÉTITION'),
+                  selected: ref.watch(boatConfigProvider).sessionMode ==
+                      SessionMode.competition,
+                  onSelected: (_) => ref
+                      .read(boatConfigProvider.notifier)
+                      .setSessionMode(SessionMode.competition),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -178,6 +200,28 @@ class HomeCoachScreen extends ConsumerWidget {
             OutlinedButton(
               onPressed: () => context.go(AppRoutes.calendar),
               child: const Text('CALENDRIER'),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              children: [
+                ChoiceChip(
+                  label: const Text('ENTRAÎNEMENT'),
+                  selected: ref.watch(boatConfigProvider).sessionMode ==
+                      SessionMode.training,
+                  onSelected: (_) => ref
+                      .read(boatConfigProvider.notifier)
+                      .setSessionMode(SessionMode.training),
+                ),
+                ChoiceChip(
+                  label: const Text('COMPÉTITION'),
+                  selected: ref.watch(boatConfigProvider).sessionMode ==
+                      SessionMode.competition,
+                  onSelected: (_) => ref
+                      .read(boatConfigProvider.notifier)
+                      .setSessionMode(SessionMode.competition),
+                ),
+              ],
             ),
         ],
       ),
