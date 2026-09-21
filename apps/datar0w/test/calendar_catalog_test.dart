@@ -26,5 +26,9 @@ void main() {
     expect(blob.contains('ffaviron.fr/api'), isFalse);
     expect(blob.contains('@'), isFalse);
     expect(blob.contains('naissance'), isFalse);
+    expect(
+      File('assets/waters.json').readAsStringSync().contains('uby-cazaubon'),
+      isTrue,
+    );
   });
 }

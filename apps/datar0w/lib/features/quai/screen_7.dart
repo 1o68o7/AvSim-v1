@@ -17,6 +17,7 @@ import '../../session/store.dart';
 import '../../session/summary.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import '../../widgets/deck_widgets.dart';
 import '../../identity/patch_sync.dart';
 import '../../widgets/mode_banner.dart';
 
@@ -34,7 +35,6 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
   String? _metaPath;
   String _chip = 'en attente réseau';
   PatchSyncStatus _patchSync = PatchSyncStatus.idle;
-  final _patchStore = PatchSyncStore();
 
   @override
   void initState() {
@@ -44,29 +44,38 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
   }
 
   Future<void> _load() async {
-    final hub = ref.read(liveHubProvider);
-    final id = hub.sessionId ?? await SessionStore.latestId();
-    if (id != null) {
-      final samples = await SessionStore.loadSamples(id);
-      final meta = await SessionStore.loadMeta(id);
-      final dir = hub.sessionDir ?? '${(await SessionStore.sessionsRoot()).path}/$id';
-      if (mounted) {
-        setState(() {
-          _summary = SessionSummary.fromSamples(samples);
-          _meta = meta;
-          _jsonlPath = '$dir/samples.jsonl';
-          _metaPath = '$dir/meta.json';
-          _chip = hub.net == 'hors ligne' ? 'en attente réseau' : hub.net;
-        });
+    try {
+      final hub = ref.read(liveHubProvider);
+      final id = hub.sessionId ?? await SessionStore.latestId();
+      if (id != null) {
+        final samples = await SessionStore.loadSamples(id);
+        final meta = await SessionStore.loadMeta(id);
+        final dir = hub.sessionDir ??
+            '${(await SessionStore.sessionsRoot()).path}/$id';
+        if (mounted) {
+          setState(() {
+            _summary = SessionSummary.fromSamples(samples);
+            _meta = meta;
+            _jsonlPath = '$dir/samples.jsonl';
+            _metaPath = '$dir/meta.json';
+            _chip = hub.net == 'hors ligne' ? 'en attente réseau' : hub.net;
+          });
+        }
       }
+      final ps = await ref.read(patchSyncStoreProvider).status();
+      if (mounted) setState(() => _patchSync = ps);
+    } catch (_) {
+      if (!mounted) return;
+      try {
+        final ps = await ref.read(patchSyncStoreProvider).status();
+        setState(() => _patchSync = ps);
+      } catch (_) {}
     }
-    final ps = await _patchStore.status();
-    if (mounted) setState(() => _patchSync = ps);
   }
 
   Future<void> _importPatch() async {
     setState(() => _patchSync = PatchSyncStatus.pending);
-    await _patchStore.importMock();
+    await ref.read(patchSyncStoreProvider).importMock();
     if (!mounted) return;
     setState(() => _patchSync = PatchSyncStatus.ok);
   }

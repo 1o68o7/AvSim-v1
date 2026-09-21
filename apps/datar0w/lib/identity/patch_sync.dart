@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -62,3 +63,5 @@ class PatchSyncStore {
     );
   }
 }
+
+final patchSyncStoreProvider = Provider<PatchSyncStore>((_) => PatchSyncStore());
