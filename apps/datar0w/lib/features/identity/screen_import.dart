@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -12,7 +11,6 @@ import '../../import/apply.dart';
 import '../../import/mapping.dart';
 import '../../import/model_template.dart';
 import '../../import/xlsx_parser.dart';
-import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
@@ -68,6 +66,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
     if (!canCheckoutOps(snap, role)) {
       return const DeckScaffold(
         title: 'IMPORT',
+        retourToProfile: true,
         body: Center(
           child: Text(
             'Réservé au coach.',
@@ -80,10 +79,6 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
     return DeckScaffold(
       title: 'IMPORT PARC',
       subtitle: 'CSV ou Excel',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.club),
-        child: const Text('Retour'),
-      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [

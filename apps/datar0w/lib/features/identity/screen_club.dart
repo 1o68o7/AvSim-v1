@@ -137,10 +137,6 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
     return DeckScaffold(
       title: 'CLUB',
       subtitle: 'Un téléphone · un club',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.profile),
-        child: const Text('Retour'),
-      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [

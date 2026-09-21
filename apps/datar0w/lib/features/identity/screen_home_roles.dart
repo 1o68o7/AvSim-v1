@@ -46,10 +46,7 @@ class HomeCoxScreen extends ConsumerWidget {
     return DeckScaffold(
       title: 'ACCUEIL BARREUR',
       subtitle: boat?.name ?? 'sans affectation',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.profile),
-        child: const Text('Retour'),
-      ),
+      retourFallback: AppRoutes.profile,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         child: Column(
@@ -146,10 +143,7 @@ class HomeCoachScreen extends ConsumerWidget {
     return DeckScaffold(
       title: 'ACCUEIL COACH',
       subtitle: 'Composition · parc · live',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.profile),
-        child: const Text('Retour'),
-      ),
+      retourFallback: AppRoutes.profile,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         children: [

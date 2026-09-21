@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../identity/controller.dart';
 import '../../ops/controller.dart';
 import '../../ops/service.dart';
-import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
@@ -37,6 +35,7 @@ class _OpsInScreenState extends ConsumerState<OpsInScreen> {
     if (role != CrewRole.coach || !canCheckoutOps(ident, role)) {
       return const DeckScaffold(
         title: 'RETOUR',
+        retourToProfile: true,
         body: Center(
           child: Text(
             'Réservé au coach.',
@@ -50,10 +49,6 @@ class _OpsInScreenState extends ConsumerState<OpsInScreen> {
     return DeckScaffold(
       title: 'RETOUR DE PARC',
       subtitle: 'Check-in',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.homeCoach),
-        child: const Text('Retour'),
-      ),
       body: active.isEmpty
           ? const Center(
               child: Text(

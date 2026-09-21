@@ -166,6 +166,7 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
       });
       return const DeckScaffold(
         title: 'COMPOSITION',
+        retourToProfile: true,
         body: Center(
           child: Text(
             'Réservé au coach.',
@@ -190,10 +191,6 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
       title: 'COMPOSITION',
       subtitle: 'Coques prêtes · 1 tél. = 1 place',
       landscapeHint: true,
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.homeCoach),
-        child: const Text('Retour'),
-      ),
       body: ready.isEmpty && locked.isEmpty
           ? const Center(
               child: Text(

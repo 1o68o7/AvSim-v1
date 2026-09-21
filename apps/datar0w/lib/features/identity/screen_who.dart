@@ -52,6 +52,7 @@ class IdentityListScreen extends ConsumerWidget {
     return DeckScaffold(
       title: 'QUI RAME ?',
       subtitle: 'Profil local · pas de mot de passe',
+      showRetour: false,
       body: Column(
         children: [
           Expanded(

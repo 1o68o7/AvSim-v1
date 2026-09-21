@@ -99,10 +99,6 @@ class _BoatEditScreenState extends ConsumerState<BoatEditScreen> {
     if (!edit) {
       return DeckScaffold(
         title: 'COQUE',
-        leading: TextButton(
-          onPressed: () => context.go(AppRoutes.club),
-          child: const Text('Retour'),
-        ),
         body: const Center(
           child: Text(
             'Parc éditable par le coach seulement.',
@@ -114,10 +110,6 @@ class _BoatEditScreenState extends ConsumerState<BoatEditScreen> {
     return DeckScaffold(
       title: 'COQUE',
       subtitle: 'Parc du club',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.club),
-        child: const Text('Retour'),
-      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [

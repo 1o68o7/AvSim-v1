@@ -9,8 +9,8 @@ HEAD de travail : `main` (dart-defines #56 mergée). Produit = `apps/datar0w`.
 
 ## §0 Règles (ne pas négocier)
 
-1. **Lot A uniquement** dans cette passe : CONFIRM-DELETE, TITLES-HUMAN, COLOR-ERROR, AppBar 14–16 px.
-2. **Pas de nav live.** Ne pas toucher `/live`, `/cox`, `/coach`, double-STOP, presets, pastille layout, `automaticallyImplyLeading` global (NAV-BACK = lot ultérieur).
+1. Lots A et B : ne pas ouvrir C (LIVE-AFFORDANCE, COACH-IA, etc.).
+2. **Live / cox / coach** : aucun leading, aucun Accueil. Sortie live/cox = STOP 2× → `/quai`.
 3. **Pas de #50.** Ne pas merger / rebase `cursor/datarow-supabase-b1-b4-7a63`. Ne pas toucher `lib/sync/` hors lecture.
 4. **Pas de secrets.** Pas de `dart_defines.json`, pas de `service_role`, pas d’URL/JWT projet.
 5. **Pas d’AvSim.** Ne pas rouvrir η / check_factor / sensors virtuels / StrokeGeometry / `params/*.yaml`.
@@ -31,7 +31,22 @@ HEAD de travail : `main` (dart-defines #56 mergée). Produit = `apps/datar0w`.
 | COLOR-ERROR | `deck_theme.dart` | `ColorScheme.error` ≠ ambre CTA. Rouge `#E05353`. `primary` reste ambre. |
 | AppBar | `deck_scaffold.dart` | Titre **14–16 px**. Sous-titre plus petit, optionnel. |
 
-Hors Lot A (ne pas faire ici) : NAV-BACK, LIVE-AFFORDANCE, COACH-IA, empty CTA, ops qty, #50, ANDROID-GOLDEN.
+Hors Lot A (fait ailleurs) : NAV-BACK = Lot B. Pas de LIVE-AFFORDANCE / COACH-IA / #50.
+
+---
+
+## §2.4 Lot B — NAV-BACK (convention Retour)
+
+| Surface | Leading |
+|---|---|
+| `/live` `/cox` `/coach` | **Aucun**. Pas d’Accueil. |
+| Tare `running` | **Aucun** (ne pas jeter l’étalonnage). |
+| `/identity` | Aucun (racine). |
+| Gate « Réservé au coach » | **Retour** → toujours `/` |
+| Accueils rôle | **Retour** → pop si `canPop`, sinon `/` |
+| Ailleurs (`DeckScaffold`) | **Retour** → pop si `canPop`, sinon hub `/home/{rower,cox,coach}` |
+
+Libellé unique : « Retour » (plus de « Retour profil » / Accueil).
 
 ---
 
@@ -43,3 +58,10 @@ Hors Lot A (ne pas faire ici) : NAV-BACK, LIVE-AFFORDANCE, COACH-IA, empty CTA, 
 - `ColorScheme.error != DeckColors.amber`.
 - Titre AppBar `fontSize` ∈ [14, 16].
 - Pré-session / tare : pas de `2A` / `2B` visibles.
+
+## Tests Lot B
+
+- `/live` et `/cox` : pas d’Accueil, pas de `DeckRetour` / Retour leading.
+- Gate « Réservé au coach » : Retour → `/`.
+- Tare en cours : pas de Retour (déjà `nav_test`).
+

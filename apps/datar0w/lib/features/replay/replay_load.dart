@@ -140,7 +140,11 @@ class _ReplayLoadScreenState extends ConsumerState<ReplayLoadScreen> {
             ),
           ],
         ),
-        leading: BackButton(onPressed: widget.onBack),
+        automaticallyImplyLeading: false,
+        leading: TextButton(
+          onPressed: widget.onBack,
+          child: const Text('Retour'),
+        ),
         actions: [
           if (widget.allowImport)
             TextButton(

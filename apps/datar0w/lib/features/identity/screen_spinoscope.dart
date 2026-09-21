@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../calendar/loisir_store.dart';
 import '../../identity/controller.dart';
 import '../../identity/models.dart';
 import '../../ops/controller.dart';
-import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/club_banner.dart';
@@ -49,12 +47,6 @@ class _SpinoscopeScreenState extends ConsumerState<SpinoscopeScreen> {
     return DeckScaffold(
       title: 'SPINOSCOPE',
       subtitle: 'Vitrine du club',
-      leading: TextButton(
-        onPressed: () => context.go(
-          role == CrewRole.coach ? AppRoutes.homeCoach : AppRoutes.homeRower,
-        ),
-        child: const Text('Retour'),
-      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [

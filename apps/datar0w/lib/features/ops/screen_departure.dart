@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../identity/controller.dart';
 import '../../identity/format.dart';
@@ -8,7 +7,6 @@ import '../../ops/alignment.dart';
 import '../../ops/boat_out.dart';
 import '../../ops/controller.dart';
 import '../../ops/service.dart';
-import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
@@ -24,6 +22,7 @@ class OpsDepartureScreen extends ConsumerWidget {
     if (role != CrewRole.coach || !canCheckoutOps(ident, role)) {
       return const DeckScaffold(
         title: 'DÉPART',
+        retourToProfile: true,
         body: Center(
           child: Text(
             'Réservé au coach.',
@@ -47,10 +46,6 @@ class OpsDepartureScreen extends ConsumerWidget {
     return DeckScaffold(
       title: 'DÉPART',
       subtitle: 'Alignement · 8+ d’abord',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.homeCoach),
-        child: const Text('Retour'),
-      ),
       body: rows.isEmpty
           ? const Center(
               child: Text(

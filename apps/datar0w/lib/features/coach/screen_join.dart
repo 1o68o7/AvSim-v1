@@ -121,10 +121,6 @@ class _CoachJoinScreenState extends ConsumerState<CoachJoinScreen> {
                 child: const Text('SÉANCE LIVE (API)'),
               ),
             ],
-            TextButton(
-              onPressed: () => context.go(AppRoutes.profile),
-              child: const Text('Retour'),
-            ),
           ],
         ),
       ),

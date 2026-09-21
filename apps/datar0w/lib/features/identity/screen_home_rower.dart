@@ -47,10 +47,7 @@ class HomeRowerScreen extends ConsumerWidget {
     return DeckScaffold(
       title: 'ACCUEIL RAMEUR',
       subtitle: rower?.displayName ?? 'sans profil',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.profile),
-        child: const Text('Retour'),
-      ),
+      retourFallback: AppRoutes.profile,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         child: Column(
