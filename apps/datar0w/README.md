@@ -19,8 +19,9 @@ Un smartphone = **un hub / une place**. Multi-sièges = plusieurs tél. + `DATAR
 | I live | Presets blocs + mini-carte sur `/live` (Deck conservé). Swipe bord droit. |
 | R / J | Chip FC, `/devices` `/physio` `/consent`. Scan GATT Heart Rate (lot C). |
 | G mock | `club.licenceCountApprox` — chip « ~N licenciés », estimation club (pas FFA). |
+| Add-ons Stitch | Modes entraînement / compétition, patch dorsal (UI), sync quai, `uby-cazaubon`. Mapping : `docs/stitch-mvp/GEL.md`. Branche depuis `feat/datarow-reste-agent` (PR #54 ouverte). |
 
-Routes nouvelles : `/auth` `/calendar` `/calendar/:id` `/waters` `/consent` `/devices` `/physio`.
+Routes : `/auth` `/calendar` `/calendar/:id` `/waters` `/consent` `/devices` `/physio`. Pas de route neuve add-on.
 
 ## Un téléphone = un hub = une place
 
