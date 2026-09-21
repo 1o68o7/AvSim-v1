@@ -42,7 +42,7 @@ DATAROW_API_BASE=http://192.168.x.x:8000
 python -m avsim.api
 ```
 
-Auth club (optionnelle) : `--dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...`.
+Auth club (optionnelle) : `--dart-define-from-file=dart_defines.json` (voir Run / APK).
 Sans ces clés, `/auth` affiche le mode local — **pas de crash**.
 
 Routes (sans OAuth) : `POST /datarow/sessions`, `.../tick`, `GET .../by-code/{code}`, `GET .../live`, `POST .../notes`, `GET .../export`.
@@ -75,12 +75,16 @@ Chemin projet **sans espaces** recommandé (`C:\dev\AvSim-v1`).
 
 ```bash
 cd apps/datar0w
+cp dart_defines.example.json dart_defines.json
+# éditer dart_defines.json : URL projet + clé anon public (eyJ…), JAMAIS service_role / sb_secret
+
 flutter pub get
-flutter run --dart-define=DATAROW_API_BASE=http://192.168.1.10:8000
-flutter build apk --debug
+flutter run --release --dart-define-from-file=dart_defines.json
+flutter build apk --release --dart-define-from-file=dart_defines.json
+# APK : build/app/outputs/flutter-apk/app-release.apk
 ```
 
-APK : `apps/datar0w/build/app/outputs/flutter-apk/app-debug.apk`
+`dart_defines.json` est **local** (gitignore). Ne pas committer. Sans fichier / clés vides : mode local, pas de crash.
 
 SDK : `sdk.dir` dans `android/local.properties` (machine, **non committé**).  
 `compileSdk = 37` (permission_handler_android).  
