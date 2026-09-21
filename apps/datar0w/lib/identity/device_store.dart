@@ -40,17 +40,7 @@ class DeviceStore {
       for (var i = 0; i < current.length; i++) {
         final e = current[i];
         if (e.rowerId == d.rowerId && e.isPrimary) {
-          current[i] = ConnectedDevice(
-            id: e.id,
-            rowerId: e.rowerId,
-            type: e.type,
-            name: e.name,
-            bleId: e.bleId,
-            isPrimary: false,
-            pairedAt: e.pairedAt,
-            lastSeenAt: e.lastSeenAt,
-            lastBattery: e.lastBattery,
-          );
+          current[i] = e.copyWith(isPrimary: false);
         }
       }
     }
