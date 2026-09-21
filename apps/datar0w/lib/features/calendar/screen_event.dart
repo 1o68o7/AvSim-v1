@@ -65,6 +65,15 @@ class _EventSheetScreenState extends ConsumerState<EventSheetScreen> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             children: [
               Text(e.name, style: const TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  Chip(label: Text('licence ${e.licenceRequise}')),
+                  if (e.openToLoisir) const Chip(label: Text('ouvert loisir')),
+                  if (e.labellise != null) Chip(label: Text(e.labellise!)),
+                ],
+              ),
               if (blocked)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),

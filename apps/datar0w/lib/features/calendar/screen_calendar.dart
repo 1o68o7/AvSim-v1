@@ -75,7 +75,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                       title: Text(e.name),
                       subtitle: Text(
                         '${e.start.toIso8601String().split('T').first}'
-                        ' · ${e.city ?? '—'} · ${e.typeLabel}',
+                        ' · ${e.city ?? '—'} · ${e.typeLabel}'
+                        ' · ${e.licenceRequise}',
                       ),
                       onTap: () => context.go('/calendar/${e.id}'),
                     );
