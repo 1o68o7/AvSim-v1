@@ -4,7 +4,7 @@ import 'mapping.dart';
 
 /// Parse CSV UTF-8, séparateur `;` ou `,`, guillemets tolérés.
 ImportPreview parseCsv(String text) {
-  final lines = _splitLines(text);
+  final lines = splitCsvLines(text);
   if (lines.isEmpty) {
     return const ImportPreview(
       headers: [],
@@ -13,7 +13,7 @@ ImportPreview parseCsv(String text) {
       fatal: 'Fichier vide.',
     );
   }
-  final sep = _detectSep(lines.first);
+  final sep = detectCsvSep(lines.first);
   final headerCells = parseCsvLine(lines.first, sep);
   if (headerCells.isEmpty) {
     return const ImportPreview(
@@ -43,6 +43,10 @@ ImportPreview parseCsv(String text) {
 }
 
 ImportPreview parseCsvBytes(List<int> bytes) {
+  return parseCsv(decodeCsvBytes(bytes));
+}
+
+String decodeCsvBytes(List<int> bytes) {
   String text;
   try {
     text = utf8.decode(bytes, allowMalformed: true);
@@ -53,16 +57,16 @@ ImportPreview parseCsvBytes(List<int> bytes) {
     final latin = latin1.decode(bytes, allowInvalid: true);
     if (!latin.contains('\uFFFD')) text = latin;
   }
-  return parseCsv(text);
+  return text;
 }
 
-String _detectSep(String header) {
+String detectCsvSep(String header) {
   final sc = ';'.allMatches(header).length;
   final cc = ','.allMatches(header).length;
   return sc >= cc ? ';' : ',';
 }
 
-List<String> _splitLines(String text) {
+List<String> splitCsvLines(String text) {
   final t = text.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
   return t.split('\n');
 }
