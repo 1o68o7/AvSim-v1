@@ -116,10 +116,6 @@ class _RowerEditScreenState extends ConsumerState<RowerEditScreen> {
     return DeckScaffold(
       title: 'PROFIL RAMEUR',
       subtitle: 'Catégorie calculée · jamais saisie',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.identity),
-        child: const Text('Retour'),
-      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [

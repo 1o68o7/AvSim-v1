@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../health/consent_store.dart';
-import '../../router.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 
@@ -41,10 +39,6 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
     return DeckScaffold(
       title: 'DONNÉES SANTÉ',
       subtitle: 'informatif, pas médical',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.homeRower),
-        child: const Text('Retour'),
-      ),
       body: !_loaded
           ? const Center(child: CircularProgressIndicator())
           : ListView(

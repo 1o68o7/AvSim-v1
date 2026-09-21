@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../calendar/catalog.dart';
 import '../../maps/deck_tiles.dart';
-import '../../router.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 
@@ -17,10 +15,6 @@ class WatersScreen extends StatelessWidget {
     return DeckScaffold(
       title: 'PLANS D’EAU',
       subtitle: 'catalogue local',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.club),
-        child: const Text('Retour'),
-      ),
       body: FutureBuilder<CalendarCatalog>(
         future: CalendarCatalog.load(),
         builder: (context, snap) {

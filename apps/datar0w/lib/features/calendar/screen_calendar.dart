@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../calendar/catalog.dart';
 import '../../identity/controller.dart';
 import '../../identity/models.dart';
-import '../../router.dart';
 import '../../widgets/deck_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,10 +23,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return DeckScaffold(
       title: 'CALENDRIER',
       subtitle: 'catalogue curaté · pas un scrape FFA',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.homeCoach),
-        child: const Text('Retour'),
-      ),
       body: FutureBuilder<CalendarCatalog>(
         future: CalendarCatalog.load(),
         builder: (context, snap) {

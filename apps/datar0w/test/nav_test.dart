@@ -26,7 +26,7 @@ void main() {
         child: MaterialApp(home: PresessionScreen()),
       ),
     );
-    expect(find.text('Retour profil'), findsWidgets);
+    expect(find.text('Retour'), findsWidgets);
     expect(find.text('2 000 m'), findsNothing);
   });
 
@@ -39,10 +39,10 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('Retour profil'), findsWidgets);
+    expect(find.text('Retour'), findsWidgets);
     await tester.tap(find.text('TARE GÎTE'));
     await tester.pump();
-    expect(find.text('Retour profil'), findsNothing);
+    expect(find.text('Retour'), findsNothing);
   });
 
   testWidgets('BARREUR 8+ : /cox affiche l’écran barreur, pas le live rameur',

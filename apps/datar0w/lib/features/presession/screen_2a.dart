@@ -39,7 +39,6 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
     return DeckScaffold(
       title: 'PRÉ-SESSION',
       subtitle: 'Configuration séance',
-      leading: const DeckBackToProfile(),
       body: Column(
         children: [
           Expanded(
@@ -309,8 +308,8 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextButton(
-                  onPressed: () => context.go(AppRoutes.profile),
-                  child: const Text('Retour profil'),
+                  onPressed: () => performDeckRetour(context, ref),
+                  child: const Text('Retour'),
                 ),
                 const SizedBox(height: 4),
                 FilledButton(

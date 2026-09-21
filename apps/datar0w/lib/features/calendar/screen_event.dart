@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -11,7 +10,6 @@ import '../../calendar/models.dart';
 import '../../identity/controller.dart';
 import '../../identity/models.dart';
 import '../../maps/deck_tiles.dart';
-import '../../router.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 
@@ -45,10 +43,6 @@ class _EventSheetScreenState extends ConsumerState<EventSheetScreen> {
         if (e == null) {
           return DeckScaffold(
             title: 'ÉVÉNEMENT',
-            leading: TextButton(
-              onPressed: () => context.go(AppRoutes.calendar),
-              child: const Text('Retour'),
-            ),
             body: const Center(child: Text('Inconnu')),
           );
         }
@@ -57,10 +51,6 @@ class _EventSheetScreenState extends ConsumerState<EventSheetScreen> {
         return DeckScaffold(
           title: e.typeLabel.toUpperCase(),
           subtitle: e.city,
-          leading: TextButton(
-            onPressed: () => context.go(AppRoutes.calendar),
-            child: const Text('Retour'),
-          ),
           body: ListView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             children: [

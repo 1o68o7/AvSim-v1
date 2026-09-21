@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../identity/controller.dart';
 import '../router.dart';
@@ -66,10 +65,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     return DeckScaffold(
       title: 'COMPTE CLUB',
       subtitle: SyncConfig.enabled ? 'lien e-mail · optionnel' : 'mode local',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.identity),
-        child: const Text('Retour'),
-      ),
+      retourFallback: AppRoutes.identity,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [

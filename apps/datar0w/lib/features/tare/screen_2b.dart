@@ -83,7 +83,7 @@ class _PortraitTare extends ConsumerWidget {
       subtitle: boat.isCox
           ? 'Tare gîte · ${boat.info.code.toUpperCase()} barreur ${boat.coxPosition.wire} · réf. barreur'
           : 'Tare gîte · ${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats} · réf. rameur',
-      leading: running ? null : const DeckBackToProfile(),
+      showRetour: !running,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -204,7 +204,7 @@ class _LandscapeHud extends ConsumerWidget {
                 child: Row(
                   children: [
                     if (!running) ...[
-                      const DeckBackToProfile(compact: true),
+                      const DeckRetour(compact: true),
                       const SizedBox(width: 4),
                     ],
                     Container(

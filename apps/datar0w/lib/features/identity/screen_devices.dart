@@ -148,10 +148,6 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
     return DeckScaffold(
       title: 'MES OBJETS',
       subtitle: 'sangle GATT 0x180D · patch dorsal · pas de montre',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.homeRower),
-        child: const Text('Retour'),
-      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [

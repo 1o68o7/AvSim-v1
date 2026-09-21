@@ -2,13 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 
 import '../../identity/controller.dart';
 import '../../ops/controller.dart';
-import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
@@ -114,10 +112,6 @@ class MaintenanceQueueScreen extends ConsumerWidget {
     return DeckScaffold(
       title: 'MAINTENANCE',
       subtitle: 'Impacts signalés',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.homeCoach),
-        child: const Text('Retour'),
-      ),
       body: ops.openImpacts.isEmpty
           ? const Center(
               child: Text(

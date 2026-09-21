@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../calendar/loisir_store.dart';
 import '../../identity/controller.dart';
-import '../../router.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 
@@ -17,10 +15,6 @@ class PhysioScreen extends ConsumerWidget {
     return DeckScaffold(
       title: 'MES CONSTANTES',
       subtitle: 'informatif · pas médical',
-      leading: TextButton(
-        onPressed: () => context.go(AppRoutes.homeRower),
-        child: const Text('Retour'),
-      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
