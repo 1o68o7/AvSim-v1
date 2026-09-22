@@ -1,6 +1,6 @@
 # DataR0w — état des lieux (vérité)
 
-*21 septembre 2026. HEAD de référence : `main` (`35fc866` + ce commit).*
+*22 septembre 2026. HEAD de référence : `main` (`79365cd`) + import rameurs (cette PR).*
 
 Ce fichier **gagne** sur `docs/CADRAGE-IDENTITE-CLUB-EQUIPAGE.md` (en-tête périmé : I1–I5 *sont* codés), sur les briefs juillet, et sur tout agent qui voudrait rouvrir η / CAN / High-Vis.
 
@@ -21,7 +21,7 @@ Ce n’est **pas** une mesure AvSim. Watts / η / slip / RTK : hors contrat club
 | Chantier | Quoi | État sur `main` |
 |---|---|---|
 | **1 — App club Flutter** | Identité, parc, live Deck, calendrier, BLE HR, modes | **Cockpit UI livré**. Patch / sync quai = **mock** |
-| **2 — Sync club (Supabase)** | Auth magic link + miroir identité / parc / équipage | **Schéma SQL sur main**. Client Dart outbox **pas** sur main |
+| **2 — Sync club (Supabase)** | Auth Google + magic link + schéma SQL | **Schéma `0001`–`0004` sur main**. Outbox Dart **pas** sur main (#50) |
 | **3 — AvSim** | Moteur 1DOF + UI Analyste `web/` | **Gelé**. Ne pas retoucher F_peak / η / check_factor |
 
 Hardware patch (XIAO nRF52840 + MAX86141) et mail LSTM Pitto : **parked** (hors cette passe).
@@ -33,13 +33,14 @@ Hardware patch (XIAO nRF52840 + MAX86141) et mail LSTM Pitto : **parked** (hors 
 ### 2.1 Livré et utilisable hors-ligne
 
 - Identité I1–I8 : `/identity` `/club` `/crew` `/home/{rower,cox,coach}`
+- Onboarding O1–O4 (hors Stitch) : `/auth` Google + email ; `/club/login` ; `/onboarding/rower` ; `/club/join` ; homes `/home/{intendant,director,treasurer,admin}` (squelette)
 - Parc C1–C5 : `/ops/out` `/ops/in` `/ops/departure` `/ops/maintenance`
-- Import D1–D5 : `/club/import` `/spinoscope`
+- Import D : `/club/import` **Parc | Rameurs** (preview + undo `importId`) ; `/spinoscope`
 - Séance : `/` → `/presession` → `/tare` → `/live` ou `/cox` → `/quai` → `/replay`
 - Coach : `/coach` OSM + notes ; `/replay-coach`
 - Calendrier E/L : JSON curaté `assets/ffa_calendar_2026.json` — **zéro HTTP FFA**
 - BLE : scan GATT Heart Rate `0x180D` / `0x2A37` ; refus → chip `♥ —`, GPS intact
-- Auth route `/auth` + deep link `datarow://auth/callback` ; **no-op sans clés**
+- Auth : Google OAuth + magic link, deep link `datarow://auth/callback` ; **no-op sans clés**
 - Modes : `ENTRAÎNEMENT` | `COMPÉTITION` (bandeau « tel au quai »)
 - `/devices` : sangle + `DeviceType.patchDorsal` + toggles feedback (persistés)
 - `/quai` : CTA « Importer patch » = **jsonl mock**
@@ -75,17 +76,18 @@ Détail opérationnel : `docs/CADRAGE-SUPABASE.md` + `supabase/README.md`.
 - `supabase/migrations/0001_identity_core.sql` — clubs, members, rowers, boats, assignments, RLS
 - `0002_boat_ops.sql` — parc / sorties
 - `0003_club_import.sql` — import cabane / storage blason
-- App : `/auth` + scheme `datarow://auth/callback`
+- `0004_club_roles.sql` — treasurer / intendant / director + demandes de rôle
+- `supabase/tests/isolation_rls.sql` — recette isolation (porté #50)
+- App : `/auth` Google + magic link, scheme `datarow://auth/callback`
 - Sans `SUPABASE_URL` + `SUPABASE_ANON_KEY` : mode local, **pas de crash**
 
 ### Pas sur `main` (branche conservée)
 
 PR #50 **closed dirty**, branche `cursor/datarow-supabase-b1-b4-7a63` :
 
-- `apps/datar0w/lib/sync/` (outbox, LWW `updated_at`, delta pull)
-- magic link Dart branché au store (`Rower.userId`)
+- `apps/datar0w/lib/sync/` outbox, LWW `updated_at`, delta pull (le fichier `auth_google.dart` **est** sur main)
 - Realtime `assignments` + chip coach
-- `supabase/tests/isolation_rls.sql`
+- magic link branché au store tel que sur #50 (à réécrire, pas merger)
 
 **Décision figée (21 sept)** : on ne rebase / merge **pas** #50 tant que le schéma main (0002/0003) et le live Deck n’ont pas un client sync réécrit par-dessus `main` actuel. Deux téléphones club ne sont pas le chemin critique.
 
@@ -107,9 +109,9 @@ Ne plus le traiter comme le produit.
 
 Voir `docs/GIT-HOUSEKEEPING.md`.
 
-- PR ouvertes DataR0w / AvSim : **0**
-- Branches remote : `main` + `cursor/datarow-supabase-b1-b4-7a63` (code B unique)
-- Cimetière `cursor/*` juillet : supprimé
+- PR ouvertes : voir GitHub (import rameurs = cette PR si pas encore mergée)
+- Branche #50 `cursor/datarow-supabase-b1-b4-7a63` : outbox unique, **ne pas merger**
+- Onboarding O1–O5 : sur `main` (`79365cd`, PR #62)
 
 ---
 
