@@ -1,7 +1,10 @@
+import 'package:excel/excel.dart';
+
 import '../identity/ffa_categories.dart';
 import '../identity/models.dart';
 import 'csv_parser.dart';
 import 'mapping.dart';
+import 'xlsx_parser.dart';
 
 enum MappedRowerCol {
   name,
@@ -255,3 +258,71 @@ RowerLevel parseRowerLevelLoose(String? raw) {
 /// La catégorie n'est jamais lue du CSV : uniquement [ageCategory](birthDate).
 AgeCategory categoryFromImportBirth(DateTime birth, {int? seasonYear}) =>
     ageCategory(birth, seasonYear: seasonYear);
+
+RowerImportPreview parseRowerSpreadsheetBytes(
+  List<int> bytes, {
+  String? filename,
+}) {
+  final name = (filename ?? '').toLowerCase();
+  if ((name.endsWith('.xls') && !name.endsWith('.xlsx')) ||
+      looksLikeXls(bytes)) {
+    if (!looksLikeXlsx(bytes)) {
+      return const RowerImportPreview(
+        headers: [],
+        mapped: [],
+        rows: [],
+        fatal: xlsLegacyMessage,
+      );
+    }
+  }
+  if (name.endsWith('.csv') || name.endsWith('.txt')) {
+    return parseRowerCsvBytes(bytes);
+  }
+  if (looksLikeXlsx(bytes) || name.endsWith('.xlsx')) {
+    return parseRowerXlsxBytes(bytes);
+  }
+  return parseRowerCsvBytes(bytes);
+}
+
+RowerImportPreview parseRowerXlsxBytes(List<int> bytes) {
+  Excel book;
+  try {
+    book = Excel.decodeBytes(bytes);
+  } catch (_) {
+    return const RowerImportPreview(
+      headers: [],
+      mapped: [],
+      rows: [],
+      fatal: 'Fichier XLSX illisible.',
+    );
+  }
+  if (book.tables.isEmpty) {
+    return const RowerImportPreview(
+      headers: [],
+      mapped: [],
+      rows: [],
+      fatal: 'Classeur vide.',
+    );
+  }
+  final sheet = book.tables.values.first;
+  if (sheet.rows.isEmpty) {
+    return const RowerImportPreview(
+      headers: [],
+      mapped: [],
+      rows: [],
+      fatal: 'Feuille vide.',
+    );
+  }
+  final buf = StringBuffer();
+  for (var r = 0; r < sheet.rows.length; r++) {
+    final line = sheet.rows[r];
+    final cells = <String>[];
+    final n = line.length;
+    for (var i = 0; i < n; i++) {
+      cells.add((line[i]?.value?.toString() ?? '').trim());
+    }
+    if (cells.every((c) => c.isEmpty)) continue;
+    buf.writeln(cells.join(';'));
+  }
+  return parseRowerCsv(buf.toString());
+}
