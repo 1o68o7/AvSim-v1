@@ -4,6 +4,7 @@ import '../import/apply.dart';
 import '../import/cloud_sync.dart';
 import '../import/mapping.dart';
 import '../session/boat_class.dart';
+import '../sync/supabase_boot.dart';
 import 'models.dart';
 import 'store.dart';
 
@@ -205,6 +206,65 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     final prefs = await _store.loadState();
     await _store.saveState(prefs.copyWith(clubRole: role));
     await _refresh();
+  }
+
+  Future<void> becomeCox() async {
+    await setClubRole(ClubMemberRole.cox);
+  }
+
+  /// Code club local ou RPC `join_club`. Vide = rameur solo.
+  Future<bool> joinClubByCode(String? code) async {
+    final raw = (code ?? '').trim();
+    if (raw.isEmpty) return true;
+    final client = supabaseOrNull();
+    if (client != null) {
+      try {
+        await client.rpc('join_club', params: {'p_code': raw});
+      } catch (_) {}
+    }
+    final needle = raw.toUpperCase();
+    for (final c in state.clubs) {
+      if ((c.shortCode ?? '').toUpperCase() == needle) {
+        await selectClub(c.id);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<Rower> completeRowerOnboarding({
+    required String displayName,
+    required DateTime birthDate,
+    RowerSex sex = RowerSex.m,
+    String? ffaLicence,
+    String? clubCode,
+    bool coxToo = false,
+  }) async {
+    var rower = Rower.create(
+      displayName: displayName.trim(),
+      birthDate: birthDate,
+      sex: sex,
+    );
+    final lic = ffaLicence?.trim();
+    if (lic != null && lic.isNotEmpty) {
+      rower = rower.copyWith(ffaLicence: lic);
+    }
+    await saveRower(rower);
+    if (clubCode != null && clubCode.trim().isNotEmpty) {
+      final ok = await joinClubByCode(clubCode);
+      if (ok) {
+        final club = state.activeClub;
+        if (club != null) {
+          await saveRower(rower.copyWith(clubId: club.id));
+        }
+      }
+    }
+    if (coxToo) {
+      await becomeCox();
+    } else {
+      await setClubRole(ClubMemberRole.rower);
+    }
+    return rower;
   }
 
   Future<ImportApplyResult?> confirmImport(List<ParsedBoatRow> rows) async {

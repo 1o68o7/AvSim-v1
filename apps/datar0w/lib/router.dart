@@ -29,12 +29,14 @@ import 'features/quai/screen_7.dart';
 import 'features/replay/screen_6.dart';
 import 'features/replay/screen_6r.dart';
 import 'features/tare/screen_2b.dart';
+import 'onboarding/screen_rower.dart';
 import 'session/boat_class.dart';
 import 'sync/auth_screen.dart';
 
 abstract final class AppRoutes {
   static const identity = '/identity';
   static const identityEdit = '/identity/edit';
+  static const rowerOnboard = '/onboarding/rower';
   static const homeRower = '/home/rower';
   static const homeCox = '/home/cox';
   static const homeCoach = '/home/coach';
@@ -85,6 +87,11 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => RowerEditScreen(
         rowerId: state.uri.queryParameters['id'],
       ),
+    ),
+    GoRoute(
+      path: AppRoutes.rowerOnboard,
+      name: 'onboarding-rower',
+      builder: (context, state) => const RowerOnboardingScreen(),
     ),
     GoRoute(
       path: AppRoutes.homeRower,

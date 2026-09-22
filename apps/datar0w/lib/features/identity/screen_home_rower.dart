@@ -114,6 +114,13 @@ class HomeRowerScreen extends ConsumerWidget {
               onPressed: () => context.go(AppRoutes.physio),
               child: const Text('MES CONSTANTES'),
             ),
+            TextButton(
+              onPressed: () async {
+                await ref.read(identityProvider.notifier).becomeCox();
+                if (context.mounted) context.go(AppRoutes.homeCox);
+              },
+              child: const Text('Je barre aussi'),
+            ),
           ],
         ),
       ),

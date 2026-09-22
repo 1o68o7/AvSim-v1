@@ -33,7 +33,7 @@ void main() {
         clubMemberRole: null,
         hasRowerProfile: false,
       ),
-      AppRoutes.identityEdit,
+      AppRoutes.rowerOnboard,
     );
     expect(
       resolvePostLogin(

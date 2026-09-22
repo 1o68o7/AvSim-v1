@@ -66,7 +66,7 @@ extension RowerLevelX on RowerLevel {
   }
 }
 
-enum ClubMemberRole { rower, coach, admin }
+enum ClubMemberRole { rower, cox, coach, admin }
 
 extension ClubMemberRoleX on ClubMemberRole {
   String get wire => name;
@@ -77,6 +77,8 @@ extension ClubMemberRoleX on ClubMemberRole {
         return ClubMemberRole.coach;
       case 'rower':
         return ClubMemberRole.rower;
+      case 'cox':
+        return ClubMemberRole.cox;
       default:
         return ClubMemberRole.admin;
     }
@@ -145,6 +147,7 @@ class Rower {
     this.level = RowerLevel.inconnu,
     this.clubId,
     this.userId,
+    this.ffaLicence,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -160,6 +163,8 @@ class Rower {
   final RowerLevel level;
   final String? clubId;
   final String? userId;
+  /// Licence FFA saisie libre, optionnelle. Pas une preuve d'identité.
+  final String? ffaLicence;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -185,6 +190,8 @@ class Rower {
     bool clearClub = false,
     String? userId,
     bool clearUser = false,
+    String? ffaLicence,
+    bool clearFfaLicence = false,
     DateTime? updatedAt,
   }) {
     return Rower(
@@ -199,6 +206,7 @@ class Rower {
       level: level ?? this.level,
       clubId: clearClub ? null : (clubId ?? this.clubId),
       userId: clearUser ? null : (userId ?? this.userId),
+      ffaLicence: clearFfaLicence ? null : (ffaLicence ?? this.ffaLicence),
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -216,6 +224,7 @@ class Rower {
         'level': level.wire,
         'clubId': clubId,
         if (userId != null) 'userId': userId,
+        if (ffaLicence != null) 'ffaLicence': ffaLicence,
         'createdAt': createdAt.toUtc().toIso8601String(),
         'updatedAt': updatedAt.toUtc().toIso8601String(),
       };
@@ -233,6 +242,7 @@ class Rower {
       level: RowerLevelX.parse(j['level'] as String?),
       clubId: j['clubId'] as String?,
       userId: j['userId'] as String?,
+      ffaLicence: j['ffaLicence'] as String?,
       createdAt: DateTime.parse(j['createdAt'] as String),
       updatedAt: DateTime.parse(j['updatedAt'] as String),
     );

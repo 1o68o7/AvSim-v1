@@ -27,11 +27,11 @@ String resolvePostLogin({
   }
   if (clubMemberRole == 'cox') return AppRoutes.homeCox;
   if (clubMemberRole == 'rower') {
-    return hasRowerProfile ? AppRoutes.homeRower : AppRoutes.identityEdit;
+    return hasRowerProfile ? AppRoutes.homeRower : AppRoutes.rowerOnboard;
   }
 
   if (door == OnboardingDoor.club) return AppRoutes.clubJoin;
-  return hasRowerProfile ? AppRoutes.homeRower : AppRoutes.identityEdit;
+  return hasRowerProfile ? AppRoutes.homeRower : AppRoutes.rowerOnboard;
 }
 
 String homeRouteForClubRole(String role) {
