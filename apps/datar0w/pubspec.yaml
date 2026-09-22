@@ -54,6 +54,10 @@ dependencies:
   app_links: ^7.2.1
   url_launcher: ^6.3.2
   flutter_blue_plus: ^1.35.5
+  archive: ^3.6.1
+  crypto: ^3.0.6
+  sqlite3: ^2.7.0
+  sqlite3_flutter_libs: ^0.5.28
 
 dev_dependencies:
   flutter_test:

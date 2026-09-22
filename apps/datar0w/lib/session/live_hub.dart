@@ -23,6 +23,7 @@ import 'heel.dart';
 import 'model.dart';
 import 'rower_orientation.dart';
 import 'session_fgs.dart';
+import 'session_sync.dart';
 import 'store.dart';
 import 'tare_math.dart';
 import 'tel_cadence.dart';
@@ -693,9 +694,20 @@ class LiveHub extends Notifier<LiveHubState> {
       await s.cancel();
     }
     _sessionSubs.clear();
+    final sid = state.sessionId;
+    final dir = _store?.directory;
     await _store?.markEnded();
     await _store?.close();
     _store = null;
+    if (sid != null) {
+      unawaited(() async {
+        try {
+          final sync = await SessionSync.instance();
+          await sync.enqueueAfterStop(sid, dir: dir);
+          await sync.drain();
+        } catch (_) {}
+      }());
+    }
     try {
       await WakelockPlus.disable();
     } catch (_) {}
