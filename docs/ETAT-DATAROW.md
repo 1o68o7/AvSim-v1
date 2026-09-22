@@ -1,6 +1,6 @@
 # DataR0w — état des lieux (vérité)
 
-*22 septembre 2026. HEAD de référence : `main` (`79365cd`) + import rameurs (cette PR).*
+*22 septembre 2026. HEAD de référence : `main`.*
 
 Ce fichier **gagne** sur `docs/CADRAGE-IDENTITE-CLUB-EQUIPAGE.md` (en-tête périmé : I1–I5 *sont* codés), sur les briefs juillet, et sur tout agent qui voudrait rouvrir η / CAN / High-Vis.
 
@@ -21,10 +21,17 @@ Ce n’est **pas** une mesure AvSim. Watts / η / slip / RTK : hors contrat club
 | Chantier | Quoi | État sur `main` |
 |---|---|---|
 | **1 — App club Flutter** | Identité, parc, live Deck, calendrier, BLE HR, modes | **Cockpit UI livré**. Patch / sync quai = **mock** |
-| **2 — Sync club (Supabase)** | Auth Google + magic link + schéma SQL | **Schéma `0001`–`0004` sur main**. Outbox Dart **pas** sur main (#50) |
-| **3 — AvSim** | Moteur 1DOF + UI Analyste `web/` | **Gelé**. Ne pas retoucher F_peak / η / check_factor |
+| **2 — Sync club (Supabase)** | Auth Google + magic link + schéma SQL | **Schéma `0001`–`0004` sur main**. Outbox séance = PR #66 (draft). Outbox identité #50 = **standby** |
+| **3 — AvSim** | Moteur 1DOF + UI Analyste `web/` | **Gelé** (banc labo). Ne pas retoucher F_peak / η / check_factor |
 
-Hardware patch (XIAO nRF52840 + MAX86141) et mail LSTM Pitto : **parked** (hors cette passe).
+### Standby — on y revient bientôt (ne pas jeter)
+
+| Sujet | Où | Statut |
+|---|---|---|
+| Outbox identité #50 | `archive/standby-pr-50-outbox` (`8b0f603`) + ancienne ref `cursor/datarow-supabase-b1-b4-7a63` | **Standby**. Ne pas merger. Source d’idées (LWW, realtime assignments). |
+| Firmware patch + GATT tél. | `docs/CADRAGE-CAPTEUR-PATCH-DORSAL.md`, `docs/BRIEF-GOODWAY-PATCH-DORSAL.md` | **Critique prochain cycle**. Remplace le mock `/quai`. |
+| LSTM PyTorch force | `docs/MAIL-PITTO-LSTM-FORCE-ESTIMATION.md` | **Critique prochain cycle**. Jamais de fausse courbe F avant modèle validé. |
+| AvSim 1DOF | `STATE.md`, `src/avsim/`, `web/` | Gelé comme produit. Conservé comme banc. |
 
 ---
 
@@ -69,7 +76,7 @@ Mapping Stitch → routes : `docs/stitch-mvp/GEL.md`. Une planche = une route. P
 
 ## 3. Chantier 2 — Supabase (point B)
 
-Détail opérationnel : `docs/CADRAGE-SUPABASE.md` + `supabase/README.md`.
+Détail opérationnel : `docs/CADRAGE-SUPABASE.md` + `docs/CADRAGE-SYNC-TELEMETRIE-BACKUP.md` + `supabase/README.md`.
 
 ### Sur `main` aujourd’hui
 
@@ -77,29 +84,28 @@ Détail opérationnel : `docs/CADRAGE-SUPABASE.md` + `supabase/README.md`.
 - `0002_boat_ops.sql` — parc / sorties
 - `0003_club_import.sql` — import cabane / storage blason
 - `0004_club_roles.sql` — treasurer / intendant / director + demandes de rôle
-- `supabase/tests/isolation_rls.sql` — recette isolation (porté #50)
 - App : `/auth` Google + magic link, scheme `datarow://auth/callback`
 - Sans `SUPABASE_URL` + `SUPABASE_ANON_KEY` : mode local, **pas de crash**
 
-### Pas sur `main` (branche conservée)
+### Standby — PR #50
 
-PR #50 **closed dirty**, branche `cursor/datarow-supabase-b1-b4-7a63` :
+PR **closed dirty**. Ref archive : `archive/standby-pr-50-outbox` @ `8b0f603`.
+Ancienne ref : `cursor/datarow-supabase-b1-b4-7a63` (même SHA, à ne plus utiliser dans les prompts).
 
-- `apps/datar0w/lib/sync/` outbox, LWW `updated_at`, delta pull (le fichier `auth_google.dart` **est** sur main)
+Contenu à réutiliser plus tard **fichier par fichier**, jamais `git merge` :
+- idées outbox LWW `updated_at` / delta pull identité
 - Realtime `assignments` + chip coach
-- magic link branché au store tel que sur #50 (à réécrire, pas merger)
-
-**Décision figée (21 sept)** : on ne rebase / merge **pas** #50 tant que le schéma main (0002/0003) et le live Deck n’ont pas un client sync réécrit par-dessus `main` actuel. Deux téléphones club ne sont pas le chemin critique.
+- tests RLS isolation
 
 **Interdit dans Supabase** : `samples.jsonl`, télémétrie 1 Hz, `service_role` client, scrape FFA.
 
 ---
 
-## 4. Chantier 3 — AvSim (gelé)
+## 4. Chantier 3 — AvSim (gelé comme produit)
 
-Ne plus le traiter comme le produit.
+Banc labo conservé. Ne plus le traiter comme le produit club.
 
-- Fermeture force close. Limites 1DOF documentées (`STATE.md`) : `v_mean` bas, `η_blade` ~0,62, `check_factor` ~3,1, `F_peak=1100 N` hors bande eau.
+- Fermeture force close. Limites 1DOF documentées (`STATE.md`).
 - UI Analyste `web/` + FastAPI = banc simulé. Badge **Simulé** obligatoire.
 - PR juillet #8–#16 **closed stale**. Ne pas rouvrir StrokeGeometry / sensors CAN / envelope pour « faire plus joli ».
 
@@ -109,9 +115,8 @@ Ne plus le traiter comme le produit.
 
 Voir `docs/GIT-HOUSEKEEPING.md`.
 
-- PR ouvertes : voir GitHub (import rameurs = cette PR si pas encore mergée)
-- Branche #50 `cursor/datarow-supabase-b1-b4-7a63` : outbox unique, **ne pas merger**
-- Onboarding O1–O5 : sur `main` (`79365cd`, PR #62)
+- PR ouvertes draft : #65 historique séances, #66 sync télémétrie
+- #50 : standby `archive/standby-pr-50-outbox` — **ne pas merger**
 
 ---
 
@@ -120,7 +125,7 @@ Voir `docs/GIT-HOUSEKEEPING.md`.
 1. Pas de capteur force sur aviron / dame de nage.
 2. Entraînement = tél. hub GPS+IMU+BLE. Compétition = patch autonome, tél. au quai.
 3. Force / puissance = estimation (LSTM) plus tard ; jamais une fausse courbe.
-4. JSON local = vérité UI. Cloud = miroir identité / parc / méta séance.
+4. JSON local = vérité UI. Cloud = miroir identité / parc / méta séance + bucket télémétrie.
 5. Séance sans profil (« Passer ») reste possible.
 6. Un téléphone = un club actif au MVP.
 7. Côté / pelles = `Assignment`, pas `Rower.sidePref`.
@@ -130,13 +135,11 @@ Voir `docs/GIT-HOUSEKEEPING.md`.
 
 ---
 
-## 7. Prochain geste (après cette passe doc)
+## 7. Prochain geste
 
-Parked : mail Pitto, firmware patch.
+1. Merge #65 (historique + partage) puis rebuild APK sans désinstall.
+2. Merge #66 + SQL `0005`/`0006` + bucket `session-telemetry`.
+3. Extraire GCZEKF, travailler les séances réelles.
+4. Ensuite seulement : firmware GATT quai, puis LSTM PyTorch sur jeux réels.
 
-Quand on reprend le code :
-
-1. Soit client sync réécrit **depuis main** (pas un merge brute de #50).
-2. Soit proto firmware log + GATT quai (remplace le mock `/quai`).
-
-Pas de nouvel écran Stitch.
+Pas de nouvel écran Stitch. Pas de merge #50.
