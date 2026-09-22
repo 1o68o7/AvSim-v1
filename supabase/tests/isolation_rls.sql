@@ -1,0 +1,49 @@
+-- Isolation RLS DataR0w (recette). Prérequis : migrations 0001–0004
+-- et deux users Auth (uid_a, uid_b). Ne pas exécuter tel quel :
+-- remplacer les UUID. Document de recette + assertions attendues.
+--
+-- Porté depuis la branche #50 (PR closed dirty) vers main, étendu O5 :
+-- un `rower` ne peut pas INSERT boats / rowers ;
+-- un coach du club A ne lit pas le club B.
+--
+-- 1. Session A (auth.uid() = uid_a) : insert club A.
+--    → handle_new_club pose A admin. A SELECT clubs → 1 ligne.
+-- 2. Session B : insert club B. B SELECT clubs → 1 ligne (la sienne).
+-- 3. B SELECT clubs WHERE id = club_a → 0 lignes (is_club_member faux).
+-- 4. B insert boat sur club_a → rejeté (boats_write / club_role).
+-- 5. A insert rower sur club_a OK. B SELECT rowers → 0 (pas membre).
+-- 6. A pose uid_b comme `rower` sur club A. Session B :
+--    INSERT boats / rowers sur club A → rejeté (pas admin|coach).
+-- 7. Coach A SELECT boats du club B → 0.
+
+-- Exemple (à adapter) :
+-- set request.jwt.claim.sub = '11111111-1111-1111-1111-111111111111';
+-- insert into public.clubs (name, short_code) values ('Club A', 'CNA');
+-- select count(*) from public.clubs; -- 1
+--
+-- set request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
+-- insert into public.clubs (name, short_code) values ('Club B', 'CNB');
+-- select count(*) from public.clubs; -- 1 (pas 2)
+--
+-- -- Isolation inter-clubs
+-- select count(*) from public.clubs
+--   where short_code = 'CNA'; -- 0 pour B
+--
+-- insert into public.boats (club_id, name, class, seats, cox)
+--   select id, '8 volé', '8+', 8, true from public.clubs where short_code = 'CNA';
+-- -- → FAIL boats_write
+--
+-- -- Rower ne write pas le parc
+-- -- (en session admin A) :
+-- -- insert into public.club_members (club_id, user_id, role)
+-- --   values (<club_a>, '2222…', 'rower');
+-- -- session B :
+-- insert into public.boats (club_id, name, class, seats, cox)
+--   select id, 'skiff', '1x', 1, false from public.clubs where short_code = 'CNA';
+-- -- → FAIL (club_role = rower ∉ admin|coach|intendant)
+--
+-- insert into public.rowers (club_id, display_name, birth_date, sex)
+--   select id, 'Intrus', '2000-01-01', 'M' from public.clubs where short_code = 'CNA';
+-- -- → FAIL (rower ∉ rowers_write admin|coach)
+
+select 1 as isolation_rls_recipe_loaded;

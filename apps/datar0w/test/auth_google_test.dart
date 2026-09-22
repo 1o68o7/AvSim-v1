@@ -8,8 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'identity_test_helpers.dart';
 
 class _FakeBackend implements AuthBackend {
-  _FakeBackend({this.userId});
-
   String? userId;
   int googleCalls = 0;
   int magicCalls = 0;

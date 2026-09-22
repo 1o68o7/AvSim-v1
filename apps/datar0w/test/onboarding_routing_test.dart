@@ -61,11 +61,11 @@ void main() {
       routes: [
         GoRoute(
           path: AppRoutes.clubLogin,
-          builder: (_, __) => const AuthScreen(clubDoor: true),
+          builder: (_, _) => const AuthScreen(clubDoor: true),
         ),
         GoRoute(
           path: AppRoutes.auth,
-          builder: (_, __) => const AuthScreen(),
+          builder: (_, _) => const AuthScreen(),
         ),
       ],
     );

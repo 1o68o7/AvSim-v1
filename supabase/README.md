@@ -30,4 +30,6 @@ flutter run \
 
 ## Isolation
 
-Le fichier `tests/isolation_rls.sql` n’est **pas** sur main (il est sur la branche #50). Ne pas inventer un scénario SQL ici.
+`tests/isolation_rls.sql` : recette deux clubs / deux users. Un `rower` n’écrit
+pas `boats`/`rowers`. Un coach A ne lit pas le club B. À jouer dans le SQL
+Editor après 0001–0004 (UUID à remplacer).
