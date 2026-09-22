@@ -23,7 +23,9 @@ flutter run \
 ## Créer le projet (dashboard, pas un agent)
 
 1. [supabase.com](https://supabase.com) → New project.
-2. SQL Editor → coller **dans l’ordre** `migrations/0001_identity_core.sql`, `0002_boat_ops.sql`, `0003_club_import.sql`, `0004_club_roles.sql`.
+2. SQL Editor → coller **dans l’ordre** `0001` … `0006` (`session_meta` +
+   bucket privé `session-telemetry`, `rower_physio` opt-in). **Pas** de
+   `samples.jsonl` dans Postgres.
 3. Authentication → Email : **Magic link** ON. Redirect : `datarow://auth/callback`.
 4. Realtime : `assignments`, `boats`, `rowers` — seulement quand le client Dart sera sur main.
 5. Copier Project URL + clé `anon` `public` (pas `service_role`).
@@ -31,5 +33,6 @@ flutter run \
 ## Isolation
 
 `tests/isolation_rls.sql` : recette deux clubs / deux users. Un `rower` n’écrit
-pas `boats`/`rowers`. Un coach A ne lit pas le club B. À jouer dans le SQL
-Editor après 0001–0004 (UUID à remplacer).
+pas `boats`/`rowers`. Un coach A ne lit pas le club B. `session_meta` : pas
+d’écriture sur la séance d’un autre ; `rower_physio` = soi seulement.
+À jouer dans le SQL Editor après 0001–0006 (UUID à remplacer).
