@@ -138,6 +138,14 @@ class SessionStore {
     return dir;
   }
 
+  /// Lecture seule. Ne crée pas `sessions/`.
+  static Future<Directory?> sessionsRootIfPresent() async {
+    final docs = await getApplicationDocumentsDirectory();
+    final dir = Directory('${docs.path}/sessions');
+    if (!dir.existsSync()) return null;
+    return dir;
+  }
+
   Future<Directory> open({
     required double tareOffset,
     String? tareQuality,
