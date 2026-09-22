@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -11,18 +12,13 @@ import '../../import/apply.dart';
 import '../../import/mapping.dart';
 import '../../import/model_template.dart';
 import '../../import/rower_csv.dart';
+import '../../import/rower_template.dart';
 import '../../import/xlsx_parser.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 
 enum _ImportKind { park, rowers }
-
-/// En-têtes + 2 exemples (extrait vers `rower_template.dart` au lot R3).
-const _rowerCsvTemplateFallback =
-    'Nom;Sexe;Naissance;Poids;Taille;Cote;Niveau;Club\n'
-    'Camille Dupont;F;1998-05-10;62;172;babord;competiteur;\n'
-    'Jean Martin;M;1975-03-22;78;181;tribord;loisir;\n';
 
 class ClubImportScreen extends ConsumerStatefulWidget {
   const ClubImportScreen({super.key});
@@ -56,8 +52,8 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
       );
       return;
     }
-    final f = File('${dir.path}/datarow_rameurs_modele.csv');
-    await f.writeAsString(_rowerCsvTemplateFallback);
+    final f = File('${dir.path}/$rowerCsvFilename');
+    await f.writeAsString(rowerCsvTemplate());
     await SharePlus.instance.share(
       ShareParams(files: [XFile(f.path)], text: 'Modèle rameurs DataR0w'),
     );
@@ -89,6 +85,16 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
     final r = await ref.read(identityProvider.notifier).confirmImport(p.rows);
     if (!mounted) return;
     setState(() => _parkReport = r);
+  }
+
+  Future<void> _loadBordeaux() async {
+    final text = await rootBundle.loadString('assets/seed/rameurs_bordeaux.csv');
+    if (!mounted) return;
+    setState(() {
+      _flash = null;
+      _rowerPreview = parseRowerCsv(text);
+      _rowerReport = null;
+    });
   }
 
   Future<void> _confirmRowers() async {
@@ -149,6 +155,13 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
             onPressed: _pick,
             child: const Text('IMPORTER UN FICHIER'),
           ),
+          if (_kind == _ImportKind.rowers) ...[
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: _loadBordeaux,
+              child: const Text('CHARGER LA BASE BORDEAUX'),
+            ),
+          ],
           if (_kind == _ImportKind.park) ..._parkSection(snap) else ..._rowerSection(snap),
         ],
       ),

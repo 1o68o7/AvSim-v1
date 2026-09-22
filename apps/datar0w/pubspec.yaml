@@ -79,6 +79,8 @@ flutter:
   assets:
     - assets/ffa_calendar_2026.json
     - assets/waters.json
+    - assets/seed/rameurs_bordeaux.csv
+    - assets/seed/rameurs_bordeaux_template.csv
 
   fonts:
     - family: JetBrainsMono
