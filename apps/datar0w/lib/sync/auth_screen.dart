@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../identity/controller.dart';
 import '../router.dart';
@@ -149,6 +150,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           if (_msg != null) ...[
             const SizedBox(height: 16),
             Text(_msg!, style: const TextStyle(color: DeckColors.amber)),
+          ],
+          if (!widget.clubDoor) ...[
+            const SizedBox(height: 24),
+            TextButton(
+              onPressed: () => context.go(AppRoutes.profile),
+              child: const Text('Sans compte (loisir)'),
+            ),
+            TextButton(
+              onPressed: () => context.go(AppRoutes.clubLogin),
+              child: const Text('Espace club'),
+            ),
           ],
         ],
       ),

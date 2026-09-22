@@ -113,7 +113,11 @@ class IdentityListScreen extends ConsumerWidget {
                 ),
                 TextButton(
                   onPressed: () => context.go(AppRoutes.auth),
-                  child: const Text('Compte club'),
+                  child: const Text('Connexion'),
+                ),
+                TextButton(
+                  onPressed: () => context.go(AppRoutes.clubLogin),
+                  child: const Text('Espace club'),
                 ),
               ],
             ),

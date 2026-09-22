@@ -58,6 +58,8 @@ abstract final class AppRoutes {
   static const rowerReplay = '/replay';
   static const quai = '/quai';
   static const auth = '/auth';
+  static const clubLogin = '/club/login';
+  static const clubJoin = '/club/join';
   static const calendar = '/calendar';
   static const waters = '/waters';
   static const consent = '/consent';
@@ -200,6 +202,16 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.auth,
       name: 'auth',
       builder: (context, state) => const AuthScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.clubLogin,
+      name: 'club-login',
+      builder: (context, state) => const AuthScreen(clubDoor: true),
+    ),
+    GoRoute(
+      path: AppRoutes.clubJoin,
+      name: 'club-join',
+      builder: (context, state) => const ClubScreen(),
     ),
     GoRoute(
       path: AppRoutes.calendar,
