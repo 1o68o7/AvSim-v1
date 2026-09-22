@@ -5,6 +5,7 @@ import 'package:datar0w/router.dart';
 import 'package:datar0w/sync/auth_google.dart';
 import 'package:datar0w/sync/auth_session.dart';
 import 'package:datar0w/sync/club_remote.dart';
+import 'package:datar0w/sync/club_sql.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -102,6 +103,55 @@ void main() {
     );
     await n.decideJoinRequest(req!, accept: true);
     expect(remote.approvals[req.id], isTrue);
+  });
+
+  test('sql : reserved → out (contrainte boats.status)', () {
+    expect(sqlBoatStatus(BoatParkStatus.reserved), 'out');
+    expect(sqlBoatStatus(BoatParkStatus.ready), 'ready');
+  });
+
+  test('saveBoat pousse upsertBoat', () async {
+    final remote = MemoryClubRemote();
+    final container = ProviderContainer(
+      overrides: [identityStoreOverride(), clubRemoteOverride(remote)],
+    );
+    addTearDown(container.dispose);
+    final n = container.read(identityProvider.notifier);
+    await n.createClubAsAdmin(name: 'CNB', shortCode: 'CNB');
+    final club = container.read(identityProvider).clubs.single;
+    await n.saveBoat(
+      ParkBoat.create(clubId: club.id, name: 'Empacher', classe: '8+'),
+    );
+    expect(remote.boats.single['name'], 'Empacher');
+    expect(remote.boats.single['class'], '8+');
+    expect(remote.boats.single['club_id'], club.id);
+  });
+
+  test('hydrate fusionne bateaux cloud absents en local', () async {
+    final boat = ParkBoat.create(
+      clubId: 'club-cloud',
+      name: 'Filippi',
+      classe: '4-',
+    );
+    final remote = MemoryClubRemote()
+      ..membership = const RemoteMembership(
+        clubId: 'club-cloud',
+        role: 'intendant',
+      )
+      ..clubs['club-cloud'] = const RemoteClub(
+        id: 'club-cloud',
+        name: 'Cloud',
+        shortCode: 'CLD',
+      )
+      ..park = RemotePark(boats: [boat]);
+    final container = ProviderContainer(
+      overrides: [identityStoreOverride(), clubRemoteOverride(remote)],
+    );
+    addTearDown(container.dispose);
+    await container.read(identityProvider.notifier).hydrateFromCloud('u-1');
+    final snap = container.read(identityProvider);
+    expect(snap.boats.single.name, 'Filippi');
+    expect(snap.prefs.clubRole, ClubMemberRole.intendant);
   });
 }
 

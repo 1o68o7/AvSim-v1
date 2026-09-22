@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../identity/models.dart';
+import 'club_sql.dart';
 import 'supabase_boot.dart';
 
 final clubRemoteProvider = Provider<ClubRemote>((ref) => LiveClubRemote());
@@ -28,6 +30,18 @@ class RemoteMembership {
   final String? rowerId;
 }
 
+class RemotePark {
+  const RemotePark({
+    this.boats = const [],
+    this.rowers = const [],
+    this.assignments = const [],
+  });
+
+  final List<ParkBoat> boats;
+  final List<Rower> rowers;
+  final List<Assignment> assignments;
+}
+
 /// Miroir master-data club. No-op sans session / sans clés. Pas l’outbox #50.
 abstract class ClubRemote {
   Future<RemoteMembership?> membershipFor(String userId);
@@ -39,6 +53,9 @@ abstract class ClubRemote {
   });
   Future<void> upsertRower(Map<String, dynamic> row);
   Future<void> approveJoin(String requestId, {required bool accept});
+  Future<void> upsertBoat(Map<String, dynamic> row);
+  Future<void> upsertAssignment(Map<String, dynamic> row);
+  Future<RemotePark> parkForClub(String clubId);
 }
 
 class SilentClubRemote implements ClubRemote {
@@ -62,9 +79,26 @@ class SilentClubRemote implements ClubRemote {
 
   @override
   Future<void> approveJoin(String requestId, {required bool accept}) async {}
+
+  @override
+  Future<void> upsertBoat(Map<String, dynamic> row) async {}
+
+  @override
+  Future<void> upsertAssignment(Map<String, dynamic> row) async {}
+
+  @override
+  Future<RemotePark> parkForClub(String clubId) async => const RemotePark();
 }
 
 class LiveClubRemote implements ClubRemote {
+  Future<void> _upsert(String table, Map<String, dynamic> row) async {
+    final client = supabaseOrNull();
+    if (client == null) return;
+    try {
+      await client.from(table).upsert(row);
+    } catch (_) {}
+  }
+
   @override
   Future<RemoteMembership?> membershipFor(String userId) async {
     final client = supabaseOrNull();
@@ -75,9 +109,9 @@ class LiveClubRemote implements ClubRemote {
           .select('club_id, role, rower_id')
           .eq('user_id', userId)
           .limit(1);
-      final list = data is List ? data : const [];
+      final list = asRowList(data);
       if (list.isEmpty) return null;
-      final row = Map<String, dynamic>.from(list.first as Map);
+      final row = list.first;
       final clubId = row['club_id'] as String?;
       if (clubId == null) return null;
       return RemoteMembership(
@@ -100,9 +134,9 @@ class LiveClubRemote implements ClubRemote {
           .select('id, name, short_code')
           .eq('id', id)
           .limit(1);
-      final list = data is List ? data : const [];
+      final list = asRowList(data);
       if (list.isEmpty) return null;
-      final row = Map<String, dynamic>.from(list.first as Map);
+      final row = list.first;
       return RemoteClub(
         id: row['id'] as String,
         name: row['name'] as String? ?? '',
@@ -131,13 +165,14 @@ class LiveClubRemote implements ClubRemote {
   }
 
   @override
-  Future<void> upsertRower(Map<String, dynamic> row) async {
-    final client = supabaseOrNull();
-    if (client == null) return;
-    try {
-      await client.from('rowers').upsert(row);
-    } catch (_) {}
-  }
+  Future<void> upsertRower(Map<String, dynamic> row) => _upsert('rowers', row);
+
+  @override
+  Future<void> upsertBoat(Map<String, dynamic> row) => _upsert('boats', row);
+
+  @override
+  Future<void> upsertAssignment(Map<String, dynamic> row) =>
+      _upsert('assignments', row);
 
   @override
   Future<void> approveJoin(String requestId, {required bool accept}) async {
@@ -150,12 +185,39 @@ class LiveClubRemote implements ClubRemote {
       );
     } catch (_) {}
   }
+
+  @override
+  Future<RemotePark> parkForClub(String clubId) async {
+    final client = supabaseOrNull();
+    if (client == null) return const RemotePark();
+    try {
+      final boats = asRowList(
+        await client.from('boats').select().eq('club_id', clubId),
+      );
+      final rowers = asRowList(
+        await client.from('rowers').select().eq('club_id', clubId),
+      );
+      final assignments = asRowList(
+        await client.from('assignments').select().eq('club_id', clubId),
+      );
+      return RemotePark(
+        boats: [for (final r in boats) ?boatFromSql(r)],
+        rowers: [for (final r in rowers) ?rowerFromSql(r)],
+        assignments: [for (final r in assignments) ?assignmentFromSql(r)],
+      );
+    } catch (_) {
+      return const RemotePark();
+    }
+  }
 }
 
 class MemoryClubRemote implements ClubRemote {
   RemoteMembership? membership;
   final clubs = <String, RemoteClub>{};
   final rowers = <Map<String, dynamic>>[];
+  final boats = <Map<String, dynamic>>[];
+  final assignments = <Map<String, dynamic>>[];
+  RemotePark park = const RemotePark();
   final approvals = <String, bool>{};
   int insertClubCalls = 0;
 
@@ -181,7 +243,20 @@ class MemoryClubRemote implements ClubRemote {
   }
 
   @override
+  Future<void> upsertBoat(Map<String, dynamic> row) async {
+    boats.add(row);
+  }
+
+  @override
+  Future<void> upsertAssignment(Map<String, dynamic> row) async {
+    assignments.add(row);
+  }
+
+  @override
   Future<void> approveJoin(String requestId, {required bool accept}) async {
     approvals[requestId] = accept;
   }
+
+  @override
+  Future<RemotePark> parkForClub(String clubId) async => park;
 }

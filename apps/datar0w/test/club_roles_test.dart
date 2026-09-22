@@ -82,5 +82,17 @@ void main() {
     await tester.pump();
     expect(find.text('ACCUEIL INTENDANT'), findsOneWidget);
     expect(find.text('MAINTENANCE'), findsOneWidget);
+    expect(find.text('IMPORT PARC'), findsOneWidget);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [identityStoreOverride()],
+        child: const MaterialApp(
+          home: ClubRoleHomeScreen(role: ClubMemberRole.admin),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('IMPORT'), findsOneWidget);
+    expect(find.text('COMPOSITION'), findsOneWidget);
   });
 }

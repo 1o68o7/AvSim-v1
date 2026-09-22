@@ -6,6 +6,7 @@ import '../import/mapping.dart';
 import '../session/boat_class.dart';
 import '../sync/auth_google.dart';
 import '../sync/club_remote.dart';
+import '../sync/club_sql.dart';
 import '../sync/supabase_boot.dart';
 import 'models.dart';
 import 'store.dart';
@@ -191,7 +192,7 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     await _store.upsertClub(club);
     final prefs = await _store.loadState();
     await _store.saveState(prefs.copyWith(activeClubId: club.id));
-    await ClubImportSync(identity: _store).snapshotOutbox();
+    await _flushImportQuiet();
     await _refresh();
   }
 
@@ -203,6 +204,7 @@ class IdentityController extends Notifier<IdentitySnapshot> {
 
   Future<void> saveBoat(ParkBoat boat) async {
     await _store.upsertBoat(boat);
+    await _remote.upsertBoat(boatToSql(boat));
     await _refresh();
   }
 
@@ -213,6 +215,13 @@ class IdentityController extends Notifier<IdentitySnapshot> {
 
   Future<void> saveCrew(String boatId, List<Assignment> crew) async {
     await _store.replaceAssignmentsForBoat(boatId, crew);
+    final clubId =
+        state.boatById(boatId)?.clubId ?? state.prefs.activeClubId;
+    if (clubId != null) {
+      for (final a in crew) {
+        await _remote.upsertAssignment(assignmentToSql(a, clubId));
+      }
+    }
     await _refresh();
   }
 
@@ -275,14 +284,7 @@ class IdentityController extends Notifier<IdentitySnapshot> {
         if (club != null) {
           rower = rower.copyWith(clubId: club.id);
           await saveRower(rower);
-          await _remote.upsertRower({
-            'id': rower.id,
-            'club_id': club.id,
-            'user_id': rower.userId,
-            'display_name': rower.displayName,
-            'birth_date': rower.birthDate.toUtc().toIso8601String().split('T').first,
-            'sex': rower.sex.wire,
-          });
+          await _remote.upsertRower(rowerToSql(rower));
         }
       }
     }
@@ -323,7 +325,37 @@ class IdentityController extends Notifier<IdentitySnapshot> {
         activeRowerId: m.rowerId ?? prefs.activeRowerId,
       ),
     );
+    await _mergeRemotePark(m.clubId);
     await _refresh();
+  }
+
+  Future<void> _mergeRemotePark(String clubId) async {
+    final park = await _remote.parkForClub(clubId);
+    final haveBoat = {for (final b in state.boats) b.id};
+    for (final b in park.boats) {
+      if (!haveBoat.contains(b.id)) await _store.upsertBoat(b);
+    }
+    final haveRower = {for (final r in state.rowers) r.id};
+    for (final r in park.rowers) {
+      if (!haveRower.contains(r.id)) await _store.upsertRower(r);
+    }
+    final byBoat = <String, List<Assignment>>{};
+    for (final a in park.assignments) {
+      byBoat.putIfAbsent(a.boatId, () => []).add(a);
+    }
+    for (final e in byBoat.entries) {
+      if (state.assignmentsForBoat(e.key).isEmpty) {
+        await _store.replaceAssignmentsForBoat(e.key, e.value);
+      }
+    }
+  }
+
+  Future<void> _flushImportQuiet() async {
+    final sync = ClubImportSync(identity: _store);
+    await sync.snapshotOutbox();
+    try {
+      await sync.flush();
+    } catch (_) {}
   }
 
   Future<void> createClubAsAdmin({
@@ -393,7 +425,10 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     await _store.replaceAllBoats(r.boats);
     final prefs = await _store.loadState();
     await _store.saveState(prefs.copyWith(lastImportId: r.importId));
-    await ClubImportSync(identity: _store).snapshotOutbox();
+    for (final b in r.boats) {
+      await _remote.upsertBoat(boatToSql(b));
+    }
+    await _flushImportQuiet();
     await _refresh();
     return r;
   }

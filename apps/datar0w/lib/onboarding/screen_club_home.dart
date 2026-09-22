@@ -52,12 +52,40 @@ class ClubRoleHomeScreen extends ConsumerWidget {
               onPressed: () => context.go(AppRoutes.opsMaintenance),
               child: const Text('MAINTENANCE'),
             ),
+            OutlinedButton(
+              onPressed: () => context.go(AppRoutes.clubImport),
+              child: const Text('IMPORT PARC'),
+            ),
           ],
-          if (role == ClubMemberRole.director || role == ClubMemberRole.admin)
+          if (role == ClubMemberRole.director ||
+              role == ClubMemberRole.admin) ...[
             OutlinedButton(
               onPressed: () => context.go(AppRoutes.clubJoin),
               child: const Text('DEMANDES DE RÔLE'),
             ),
+            OutlinedButton(
+              onPressed: () => context.go(AppRoutes.spinoscope),
+              child: const Text('SPINOSCOPE'),
+            ),
+            OutlinedButton(
+              onPressed: () => context.go(AppRoutes.calendar),
+              child: const Text('CALENDRIER'),
+            ),
+          ],
+          if (role == ClubMemberRole.admin) ...[
+            OutlinedButton(
+              onPressed: () => context.go(AppRoutes.clubImport),
+              child: const Text('IMPORT'),
+            ),
+            OutlinedButton(
+              onPressed: () => context.go(AppRoutes.crew),
+              child: const Text('COMPOSITION'),
+            ),
+            OutlinedButton(
+              onPressed: () => context.go(AppRoutes.opsOut),
+              child: const Text('PARC'),
+            ),
+          ],
           OutlinedButton(
             onPressed: () => context.go(AppRoutes.club),
             child: const Text('CLUB'),
