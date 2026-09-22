@@ -31,7 +31,8 @@ HTML utile (extraits, pas labo) : `docs/stitch-mvp/gel/`.
 | Écran 6 — Coach Replay | `/replay-coach` | **codé** |
 | Écran 7 — Quai | `/quai` | **codé** |
 | Replay rameur | `/replay` | **codé** |
-| D1 Import cabane | `/club/import` | **codé** (D1) |
+| D1 Import cabane | `/club/import` mode Parc | **codé** (D1) |
+| Import rameurs (hors Stitch, Point D add-on) | `/club/import` mode Rameurs | **codé** — même écran, pas de 54ᵉ planche |
 | D2 Fiche bateau enrichie | `/club/boat` | **codé** (D) |
 | D3 Identité club | `/club` | **codé** (D3) |
 | D4 Spinoscope | `/spinoscope` | **codé** (D4) — L5 **étend**, pas un 2ᵉ écran |
@@ -59,7 +60,11 @@ HTML utile (extraits, pas labo) : `docs/stitch-mvp/gel/`.
 | L3 Signalement | `/calendar/:id` | **codé** |
 | L4 Historique rameur | `/physio` + profil | **codé** |
 | L5 Spinoscope loisir | `/spinoscope` | **codé** (étend D4) |
-| Auth club (Point B) | `/auth` | **codé** (local si pas de clés) |
+| Auth club (Point B) | `/auth` | **codé** — Google + magic link fallback (local si pas de clés) |
+| Porte club (O2, hors Stitch) | `/club/login` | **codé** |
+| Profil rameur 1er login (O3) | `/onboarding/rower` | **codé** |
+| Rejoindre / créer club (O4) | `/club/join` | **codé** |
+| Homes rôles étendus (O4 squelette) | `/home/intendant` `/director` `/treasurer` `/admin` | **codé** — pas de planche Stitch ; trésorier métier hors lot |
 
 ## Ignorés (labo / doublons)
 
@@ -86,7 +91,7 @@ Base : `feat/datarow-reste-agent` (**PR #54 non mergée** au départ). Pas de 2�
 | 6 Club / calendrier | `/club` `/calendar` `/waters` | `ubarritz-cazaubon` | `uby-cazaubon` + bandeau AL/AC |
 | 7 Tare paysage | `/tare` | Cherry-pick #46 | Inchangé (2B Stitch paysage labo ignoré) |
 
-Stitch MCP (21 sept 2026) : **53** planches projet `1264451048753434333`. Mapping ci-dessus inchangé (une planche = une route existante). HTML labo non recopié.
+Stitch MCP (22 sept 2026) : **53** planches projet `1264451048753434333`. Mapping inchangé (une planche = une route existante). HTML labo non recopié. Routes onboarding / import rameurs = Flutter sans nouvelle planche.
 
 ## Hors scope gel
 

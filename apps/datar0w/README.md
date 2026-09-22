@@ -15,8 +15,8 @@ Un smartphone = **un hub / une place**. Multi-sièges = plusieurs tél. + `DATAR
 | G (API hub) | FastAPI `/datarow/*` + client si `DATAROW_API_BASE` (sinon fichier local). HTTP fail ≠ stop logger. |
 | Coach | Join code / dernière séance / séance live API. Écran 5 OSM + notes. Replay import jsonl. |
 | Classes | 1x, 2x, 2-, 4x, 4-, 4+, 8+. Rôle barreur 4+/8+. |
-| I1–I8 / C1–C6 / D1–D5 | **Codés** : identité, parc ops, import cabane, spinoscope. Mapping : `docs/stitch-mvp/GEL.md`. |
-| B (auth) | `/auth` + deep link. Magic link seulement si `SUPABASE_URL` + `SUPABASE_ANON_KEY`. Sinon local, pas de crash. Outbox Dart : pas sur main (branche #50). |
+| I1–I8 / C1–C6 / D1–D5 | **Codés** : identité, parc ops, import cabane **et rameurs** (`/club/import`), spinoscope. Mapping : `docs/stitch-mvp/GEL.md`. |
+| B / O | `/auth` Google + magic link ; `/club/login` `/onboarding/rower` `/club/join`. Sans dart-define : local, pas de crash. Outbox : pas sur main (#50). |
 | E / L | `/calendar` `/calendar/:id` `/waters` — JSON curaté, **pas** de scrape FFA. |
 | I live | Presets + mini-carte sur `/live` (Deck conservé). |
 | R / J | Chip FC, `/devices` `/physio` `/consent`. Scan GATT 0x180D. |
