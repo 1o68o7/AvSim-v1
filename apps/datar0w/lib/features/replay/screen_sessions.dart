@@ -41,6 +41,7 @@ class _SessionRow {
 class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
   List<_SessionRow> _rows = const [];
   bool _loading = true;
+  final Set<String> _selected = {};
 
   @override
   void initState() {
@@ -56,7 +57,9 @@ class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
       if (role != null && role.isNotEmpty && m.role.toLowerCase() != role) {
         return false;
       }
-      if (code != null && code.isNotEmpty && (m.code ?? '').toUpperCase() != code) {
+      if (code != null &&
+          code.isNotEmpty &&
+          (m.code ?? '').toUpperCase() != code) {
         return false;
       }
       return true;
@@ -93,6 +96,23 @@ class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
     return '$base?id=${Uri.encodeQueryComponent(id)}';
   }
 
+  void _snack(String msg) {
+    final m = ScaffoldMessenger.maybeOf(context);
+    m?.showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  Future<void> _shareSelected() async {
+    final ids = _selected.toList();
+    if (ids.isEmpty) return;
+    final prep = await prepareBulkSessionZip(ids);
+    if (!mounted) return;
+    if (prep.tooHeavy || prep.bytes == null) {
+      _snack('trop lourd, envoie séance par séance');
+      return;
+    }
+    await shareBulkSessionZip(ids);
+  }
+
   @override
   Widget build(BuildContext context) {
     return DeckScaffold(
@@ -113,60 +133,99 @@ class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
                     style: TextStyle(color: DeckColors.muted, height: 1.4),
                   ),
                 )
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  itemCount: _rows.length,
-                  separatorBuilder: (context, index) => const Divider(height: 1),
-                  itemBuilder: (context, i) {
-                    final row = _rows[i];
-                    final m = row.meta;
-                    final code = (m.code ?? '').trim();
-                    final km = row.distM;
-                    final kmLabel = (km != null && km > 0)
-                        ? '${(km / 1000).toStringAsFixed(2)} km'
-                        : '— km';
-                    final dur = row.duration == null
-                        ? '—'
-                        : formatDuration(row.duration!);
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            code.isEmpty ? m.id : code.toUpperCase(),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.4,
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                        itemCount: _rows.length,
+                        separatorBuilder: (context, index) =>
+                            const Divider(height: 1),
+                        itemBuilder: (context, i) {
+                          final row = _rows[i];
+                          final m = row.meta;
+                          final code = (m.code ?? '').trim();
+                          final km = row.distM;
+                          final kmLabel = (km != null && km > 0)
+                              ? '${(km / 1000).toStringAsFixed(2)} km'
+                              : '— km';
+                          final dur = row.duration == null
+                              ? '—'
+                              : formatDuration(row.duration!);
+                          final checked = _selected.contains(m.id);
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Checkbox(
+                                  value: checked,
+                                  onChanged: (v) {
+                                    setState(() {
+                                      if (v == true) {
+                                        _selected.add(m.id);
+                                      } else {
+                                        _selected.remove(m.id);
+                                      }
+                                    });
+                                  },
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Text(
+                                        code.isEmpty
+                                            ? m.id
+                                            : code.toUpperCase(),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 1.4,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${m.classe}  ·  $dur  ·  $kmLabel  ·  '
+                                        '${formatSessionDay(m.startedAt ?? m.endedAt)}',
+                                        style: const TextStyle(
+                                          color: DeckColors.muted,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                context.go(_replayPath(m.id)),
+                                            child: const Text('REPLAY'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () =>
+                                                shareLocalSession(m.id),
+                                            child: const Text('ENVOYER'),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${m.classe}  ·  $dur  ·  $kmLabel  ·  '
-                            '${formatSessionDay(m.startedAt ?? m.endedAt)}',
-                            style: const TextStyle(
-                              color: DeckColors.muted,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              TextButton(
-                                onPressed: () =>
-                                    context.go(_replayPath(m.id)),
-                                child: const Text('REPLAY'),
-                              ),
-                              TextButton(
-                                onPressed: () => shareLocalSession(m.id),
-                                child: const Text('PARTAGER'),
-                              ),
-                            ],
-                          ),
-                        ],
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ),
+                    if (_selected.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: FilledButton(
+                          onPressed: _shareSelected,
+                          child: const Text('ENVOYER LA SÉLECTION'),
+                        ),
+                      ),
+                  ],
                 ),
     );
   }
