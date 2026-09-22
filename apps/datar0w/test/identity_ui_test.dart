@@ -87,6 +87,7 @@ void main() {
     await tester.pump();
     expect(find.text('TÉLÉCHARGER LE MODÈLE CSV'), findsOneWidget);
     expect(find.text('IMPORTER UN FICHIER'), findsOneWidget);
+    expect(find.text('CHARGER LA BASE BORDEAUX'), findsOneWidget);
   });
 
   testWidgets('import : hors coach → réservé', (tester) async {
