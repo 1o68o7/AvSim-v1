@@ -9,7 +9,7 @@
 | Schéma SQL `0001`–`0004` | `supabase/migrations/` sur **main** | Sur main |
 | Auth Google + magic link | `apps/datar0w` **main** | Sur main |
 | Outbox / sync Dart | branche #50 (closed dirty) | **Ne pas merger** — réécrire depuis main |
-| Sync télémétrie + backup | — | **Ce cadrage** — à coder (lots S1–S5) |
+| Sync télémétrie + backup | `0005` `0006` + outbox Dart + CI offsite | **cette PR** (lots S1–S6) |
 
 ---
 
@@ -174,3 +174,28 @@ lib/health/
 15. **Soft-delete seulement** : pas de `DELETE` dur immédiat sur blobs ni rows séance (fenêtre 30 j).
 
 *Fin du cadrage — 22 septembre 2026.*
+
+---
+
+## 8. Livré (PR sync télémétrie)
+
+Mapping SQL livré vs §3.1 : `session_meta.sync_id` = `id` ; `owner_user_id` = `user_id` ;
+`class` = `boat_class` ; `dist_m` / `duration_s` / `byte_size`. Soft-delete `deleted_at`.
+Bucket `session-telemetry` privé, prefix `club_id`. `0006` : `share_with_coach` +
+`consent_at` (opt-in). Pas de jsonl en Postgres.
+
+**Restauration (2 étapes)** — test trimestriel (§2.4 / recette §6.6) :
+
+1. **Metadata** : `pg_restore --no-owner -d "$STAGING_URL" datarow-YYYYMMDD.dump`
+   puis vérifier `session_meta` (`sync_id`, `payload_sha256`, `storage_path`) et
+   `rower_physio`.
+2. **Bytes** : recopier `storage/session-telemetry/{club_id}/{sync_id}.zip` vers le
+   bucket du projet. Contrôler sha256 vs `payload_sha256`. Ne pas réinjecter le
+   jsonl dans SQL.
+
+CI : `.github/workflows/datarow-offsite-backup.yml` +
+`scripts/datarow-offsite-backup.sh` (no-op sans secrets). Rétention offsite ≥ 90 j.
+
+Calendrier drill : T1 jan / T2 avr / T3 juil / T4 oct — restore staging 1+2,
+plus isolation RLS au T2, fenêtre soft-delete au T3, rotation clés au T4.
+
