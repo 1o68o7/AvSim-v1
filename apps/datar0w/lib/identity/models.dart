@@ -66,7 +66,7 @@ extension RowerLevelX on RowerLevel {
   }
 }
 
-enum ClubMemberRole { rower, cox, coach, admin }
+enum ClubMemberRole { rower, cox, coach, admin, treasurer, intendant, director }
 
 extension ClubMemberRoleX on ClubMemberRole {
   String get wire => name;
@@ -79,6 +79,12 @@ extension ClubMemberRoleX on ClubMemberRole {
         return ClubMemberRole.rower;
       case 'cox':
         return ClubMemberRole.cox;
+      case 'treasurer':
+        return ClubMemberRole.treasurer;
+      case 'intendant':
+        return ClubMemberRole.intendant;
+      case 'director':
+        return ClubMemberRole.director;
       default:
         return ClubMemberRole.admin;
     }
@@ -393,6 +399,65 @@ class Club {
       createdAt: DateTime.now().toUtc(),
     );
   }
+}
+
+class ClubJoinRequest {
+  const ClubJoinRequest({
+    required this.id,
+    required this.clubId,
+    required this.userId,
+    required this.requestedRole,
+    this.status = 'pending',
+    required this.createdAt,
+  });
+
+  final String id;
+  final String clubId;
+  final String userId;
+  final ClubMemberRole requestedRole;
+  final String status;
+  final DateTime createdAt;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'clubId': clubId,
+        'userId': userId,
+        'requestedRole': requestedRole.wire,
+        'status': status,
+        'createdAt': createdAt.toUtc().toIso8601String(),
+      };
+
+  static ClubJoinRequest fromJson(Map<String, dynamic> j) => ClubJoinRequest(
+        id: j['id'] as String,
+        clubId: j['clubId'] as String,
+        userId: j['userId'] as String,
+        requestedRole: ClubMemberRoleX.parse(j['requestedRole'] as String?),
+        status: j['status'] as String? ?? 'pending',
+        createdAt: DateTime.parse(j['createdAt'] as String),
+      );
+
+  static ClubJoinRequest create({
+    required String clubId,
+    required String userId,
+    required ClubMemberRole requestedRole,
+  }) {
+    return ClubJoinRequest(
+      id: newIdentityId(),
+      clubId: clubId,
+      userId: userId,
+      requestedRole: requestedRole,
+      createdAt: DateTime.now().toUtc(),
+    );
+  }
+
+  ClubJoinRequest copyWith({String? status}) => ClubJoinRequest(
+        id: id,
+        clubId: clubId,
+        userId: userId,
+        requestedRole: requestedRole,
+        status: status ?? this.status,
+        createdAt: createdAt,
+      );
 }
 
 class ParkBoat {

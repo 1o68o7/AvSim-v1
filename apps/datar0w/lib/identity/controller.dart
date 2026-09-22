@@ -17,6 +17,7 @@ class IdentitySnapshot {
     this.boats = const [],
     this.assignments = const [],
     this.trophies = const [],
+    this.joinRequests = const [],
     this.prefs = const IdentityPrefs(),
   });
 
@@ -25,6 +26,7 @@ class IdentitySnapshot {
   final List<ParkBoat> boats;
   final List<Assignment> assignments;
   final List<Trophy> trophies;
+  final List<ClubJoinRequest> joinRequests;
   final IdentityPrefs prefs;
 
   Rower? get activeRower {
@@ -132,6 +134,7 @@ class IdentityController extends Notifier<IdentitySnapshot> {
       boats: store.tryListBoatsSync() ?? const [],
       assignments: store.tryListAssignmentsSync() ?? const [],
       trophies: store.tryListTrophiesSync() ?? const [],
+      joinRequests: store.tryListJoinRequestsSync() ?? const [],
       prefs: store.tryLoadPrefsSync() ?? const IdentityPrefs(),
     );
   }
@@ -143,6 +146,7 @@ class IdentityController extends Notifier<IdentitySnapshot> {
       boats: await _store.listBoats(),
       assignments: await _store.listAssignments(),
       trophies: await _store.listTrophies(),
+      joinRequests: await _store.listJoinRequests(),
       prefs: await _store.loadState(),
     );
   }
@@ -267,6 +271,55 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     return rower;
   }
 
+  Future<void> createClubAsAdmin({
+    required String name,
+    String? shortCode,
+  }) async {
+    final club = Club.create(name: name.trim(), shortCode: shortCode?.trim());
+    await saveClub(club);
+    await setClubRole(ClubMemberRole.admin);
+  }
+
+  Future<ClubJoinRequest?> requestClubRole({
+    required String code,
+    required ClubMemberRole role,
+    String userId = 'local',
+  }) async {
+    final needle = code.trim().toUpperCase();
+    Club? club;
+    for (final c in state.clubs) {
+      if ((c.shortCode ?? '').toUpperCase() == needle) club = c;
+    }
+    if (club == null) return null;
+    final client = supabaseOrNull();
+    if (client != null) {
+      try {
+        await client.rpc(
+          'request_club_role',
+          params: {'p_code': code.trim(), 'p_role': role.wire},
+        );
+      } catch (_) {}
+    }
+    final req = ClubJoinRequest.create(
+      clubId: club.id,
+      userId: userId,
+      requestedRole: role,
+    );
+    await _store.upsertJoinRequest(req);
+    await _refresh();
+    return req;
+  }
+
+  Future<void> decideJoinRequest(ClubJoinRequest req, {required bool accept}) async {
+    final actor = state.prefs.clubRole;
+    if (actor != ClubMemberRole.admin && actor != ClubMemberRole.director) {
+      return;
+    }
+    final next = req.copyWith(status: accept ? 'approved' : 'rejected');
+    await _store.upsertJoinRequest(next);
+    await _refresh();
+  }
+
   Future<ImportApplyResult?> confirmImport(List<ParsedBoatRow> rows) async {
     final club = state.activeClub;
     if (club == null) return null;
@@ -318,7 +371,8 @@ bool canEditPark(IdentitySnapshot snap, CrewRole session) =>
 bool canCheckoutOps(IdentitySnapshot snap, CrewRole session) =>
     session == CrewRole.coach &&
     (snap.prefs.clubRole == ClubMemberRole.coach ||
-        snap.prefs.clubRole == ClubMemberRole.admin);
+        snap.prefs.clubRole == ClubMemberRole.admin ||
+        snap.prefs.clubRole == ClubMemberRole.intendant);
 
 bool boatAllowsRower(ParkBoat boat, Rower rower) {
   if (rower.level == RowerLevel.loisir) return boat.loisirOk;

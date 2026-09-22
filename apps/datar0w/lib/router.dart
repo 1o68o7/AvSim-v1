@@ -29,6 +29,9 @@ import 'features/quai/screen_7.dart';
 import 'features/replay/screen_6.dart';
 import 'features/replay/screen_6r.dart';
 import 'features/tare/screen_2b.dart';
+import 'identity/models.dart';
+import 'onboarding/screen_club_home.dart';
+import 'onboarding/screen_club_join.dart';
 import 'onboarding/screen_rower.dart';
 import 'session/boat_class.dart';
 import 'sync/auth_screen.dart';
@@ -40,6 +43,10 @@ abstract final class AppRoutes {
   static const homeRower = '/home/rower';
   static const homeCox = '/home/cox';
   static const homeCoach = '/home/coach';
+  static const homeIntendant = '/home/intendant';
+  static const homeDirector = '/home/director';
+  static const homeTreasurer = '/home/treasurer';
+  static const homeAdmin = '/home/admin';
   static const club = '/club';
   static const clubBoat = '/club/boat';
   static const clubImport = '/club/import';
@@ -107,6 +114,30 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.homeCoach,
       name: 'home-coach',
       builder: (context, state) => const HomeCoachScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.homeIntendant,
+      name: 'home-intendant',
+      builder: (context, state) =>
+          const ClubRoleHomeScreen(role: ClubMemberRole.intendant),
+    ),
+    GoRoute(
+      path: AppRoutes.homeDirector,
+      name: 'home-director',
+      builder: (context, state) =>
+          const ClubRoleHomeScreen(role: ClubMemberRole.director),
+    ),
+    GoRoute(
+      path: AppRoutes.homeTreasurer,
+      name: 'home-treasurer',
+      builder: (context, state) =>
+          const ClubRoleHomeScreen(role: ClubMemberRole.treasurer),
+    ),
+    GoRoute(
+      path: AppRoutes.homeAdmin,
+      name: 'home-admin',
+      builder: (context, state) =>
+          const ClubRoleHomeScreen(role: ClubMemberRole.admin),
     ),
     GoRoute(
       path: AppRoutes.club,
@@ -218,7 +249,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.clubJoin,
       name: 'club-join',
-      builder: (context, state) => const ClubScreen(),
+      builder: (context, state) => const ClubJoinScreen(),
     ),
     GoRoute(
       path: AppRoutes.calendar,

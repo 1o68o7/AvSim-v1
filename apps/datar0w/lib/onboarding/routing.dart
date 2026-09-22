@@ -41,11 +41,15 @@ String homeRouteForClubRole(String role) {
     case 'rower':
       return AppRoutes.homeRower;
     case 'coach':
-    case 'admin':
-    case 'intendant':
-    case 'director':
-    case 'treasurer':
       return AppRoutes.homeCoach;
+    case 'admin':
+      return AppRoutes.homeAdmin;
+    case 'intendant':
+      return AppRoutes.homeIntendant;
+    case 'director':
+      return AppRoutes.homeDirector;
+    case 'treasurer':
+      return AppRoutes.homeTreasurer;
     default:
       return AppRoutes.homeRower;
   }

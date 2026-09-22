@@ -135,6 +135,25 @@ class IdentityStore {
     await _writeList('trophies.json', list.map((e) => e.toJson()).toList());
   }
 
+  Future<List<ClubJoinRequest>> listJoinRequests() async {
+    final raw = await _readList('join_requests.json');
+    return raw.map(ClubJoinRequest.fromJson).toList();
+  }
+
+  Future<void> upsertJoinRequest(ClubJoinRequest r) async {
+    final list = await listJoinRequests();
+    final i = list.indexWhere((e) => e.id == r.id);
+    if (i >= 0) {
+      list[i] = r;
+    } else {
+      list.add(r);
+    }
+    await _writeList(
+      'join_requests.json',
+      list.map((e) => e.toJson()).toList(),
+    );
+  }
+
   Future<List<Assignment>> listAssignments() async {
     final raw = await _readList('assignments.json');
     return raw.map(Assignment.fromJson).toList();
@@ -235,6 +254,11 @@ class IdentityStore {
   List<Trophy>? tryListTrophiesSync() {
     final raw = _tryReadListSync('trophies.json');
     return raw?.map(Trophy.fromJson).toList();
+  }
+
+  List<ClubJoinRequest>? tryListJoinRequestsSync() {
+    final raw = _tryReadListSync('join_requests.json');
+    return raw?.map(ClubJoinRequest.fromJson).toList();
   }
 
   List<Map<String, dynamic>>? _tryReadListSync(String name) {

@@ -22,7 +22,7 @@ void main() {
         door: OnboardingDoor.club,
         clubMemberRole: 'admin',
       ),
-      AppRoutes.homeCoach,
+      AppRoutes.homeAdmin,
     );
   });
 
