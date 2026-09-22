@@ -28,6 +28,7 @@ import 'features/profile/screen_1.dart';
 import 'features/quai/screen_7.dart';
 import 'features/replay/screen_6.dart';
 import 'features/replay/screen_6r.dart';
+import 'features/replay/screen_sessions.dart';
 import 'features/tare/screen_2b.dart';
 import 'identity/models.dart';
 import 'onboarding/screen_club_home.dart';
@@ -65,6 +66,7 @@ abstract final class AppRoutes {
   static const coachLive = '/coach';
   static const coachReplay = '/replay-coach';
   static const rowerReplay = '/replay';
+  static const sessions = '/sessions';
   static const quai = '/quai';
   static const auth = '/auth';
   static const clubLogin = '/club/login';
@@ -224,12 +226,32 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.coachReplay,
       name: '6-coach-replay',
-      builder: (context, state) => const CoachReplayScreen(),
+      builder: (context, state) => CoachReplayScreen(
+        sessionId: state.uri.queryParameters['id'],
+      ),
     ),
     GoRoute(
       path: AppRoutes.rowerReplay,
       name: '6r-replay-rameur',
-      builder: (context, state) => const RowerReplayScreen(),
+      builder: (context, state) => RowerReplayScreen(
+        sessionId: state.uri.queryParameters['id'],
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.sessions,
+      name: 'sessions',
+      builder: (context, state) => SessionHistoryScreen(
+        fromCoach: state.uri.queryParameters['from'] == 'coach',
+        roleFilter: state.uri.queryParameters['role'],
+        codeFilter: state.uri.queryParameters['code'],
+      ),
+    ),
+    GoRoute(
+      path: '${AppRoutes.sessions}/:id',
+      redirect: (context, state) {
+        final id = state.pathParameters['id'] ?? '';
+        return '${AppRoutes.rowerReplay}?id=${Uri.encodeQueryComponent(id)}';
+      },
     ),
     GoRoute(
       path: AppRoutes.quai,

@@ -131,11 +131,54 @@ class SessionStore {
   Directory? directory;
   SessionMeta? meta;
 
+  /// Documents/sessions. Crée le dossier (écriture d’une nouvelle séance).
   static Future<Directory> sessionsRoot() async {
     final docs = await getApplicationDocumentsDirectory();
     final dir = Directory('${docs.path}/sessions');
     await dir.create(recursive: true);
     return dir;
+  }
+
+  /// Lecture seule. Ne crée pas `sessions/` (boot / historique).
+  static Future<Directory?> sessionsRootIfPresent() async {
+    final docs = await getApplicationDocumentsDirectory();
+    final dir = Directory('${docs.path}/sessions');
+    if (!dir.existsSync()) return null;
+    return dir;
+  }
+
+  static DateTime? _listSortInstant(SessionMeta m) {
+    final raw = m.endedAt ?? m.startedAt;
+    if (raw == null || raw.isEmpty) return null;
+    return DateTime.tryParse(raw);
+  }
+
+  /// Scan lecture seule. Dossier sans `meta.json` : ignoré, jamais effacé.
+  static Future<List<SessionMeta>> listSessions({Directory? root}) async {
+    final base = root ?? await sessionsRootIfPresent();
+    if (base == null || !base.existsSync()) return [];
+    final out = <SessionMeta>[];
+    await for (final entity in base.list()) {
+      if (entity is! Directory) continue;
+      final metaFile = File('${entity.path}/meta.json');
+      if (!metaFile.existsSync()) continue;
+      try {
+        final raw = jsonDecode(await metaFile.readAsString());
+        if (raw is! Map) continue;
+        out.add(SessionMeta.fromJson(Map<String, dynamic>.from(raw)));
+      } catch (_) {
+        // format inconnu : ne pas wipe
+      }
+    }
+    out.sort((a, b) {
+      final ka = _listSortInstant(a);
+      final kb = _listSortInstant(b);
+      if (ka == null && kb == null) return 0;
+      if (ka == null) return 1;
+      if (kb == null) return -1;
+      return kb.compareTo(ka);
+    });
+    return out;
   }
 
   Future<Directory> open({
@@ -232,9 +275,13 @@ class SessionStore {
     _imuSink = null;
   }
 
-  static Future<List<SessionSample>> loadSamples(String sessionId) async {
-    final root = await sessionsRoot();
-    final file = File('${root.path}/$sessionId/samples.jsonl');
+  static Future<List<SessionSample>> loadSamples(
+    String sessionId, {
+    Directory? root,
+  }) async {
+    final base = root ?? await sessionsRootIfPresent();
+    if (base == null) return [];
+    final file = File('${base.path}/$sessionId/samples.jsonl');
     if (!file.existsSync()) return [];
     final lines = await file.readAsLines();
     final out = <SessionSample>[];
@@ -252,7 +299,8 @@ class SessionStore {
     String sessionId,
     Map<String, dynamic> note,
   ) async {
-    final root = await sessionsRoot();
+    final root = await sessionsRootIfPresent();
+    if (root == null) return;
     final store = SessionStore(sessionId);
     store.directory = Directory('${root.path}/$sessionId');
     if (!store.directory!.existsSync()) return;
@@ -260,7 +308,8 @@ class SessionStore {
   }
 
   static Future<List<SessionNote>> loadNotes(String sessionId) async {
-    final root = await sessionsRoot();
+    final root = await sessionsRootIfPresent();
+    if (root == null) return [];
     final file = File('${root.path}/$sessionId/notes.json');
     if (!file.existsSync()) return [];
     final raw = jsonDecode(await file.readAsString());
@@ -271,9 +320,13 @@ class SessionStore {
         .toList();
   }
 
-  static Future<SessionMeta?> loadMeta(String sessionId) async {
-    final root = await sessionsRoot();
-    final file = File('${root.path}/$sessionId/meta.json');
+  static Future<SessionMeta?> loadMeta(
+    String sessionId, {
+    Directory? root,
+  }) async {
+    final base = root ?? await sessionsRootIfPresent();
+    if (base == null) return null;
+    final file = File('${base.path}/$sessionId/meta.json');
     if (!file.existsSync()) return null;
     return SessionMeta.fromJson(
       jsonDecode(await file.readAsString()) as Map<String, dynamic>,
@@ -281,8 +334,8 @@ class SessionStore {
   }
 
   static Future<String?> findIdByCode(String code) async {
-    final root = await sessionsRoot();
-    if (!root.existsSync()) return null;
+    final root = await sessionsRootIfPresent();
+    if (root == null) return null;
     final needle = code.trim().toUpperCase();
     await for (final entity in root.list()) {
       if (entity is! Directory) continue;
@@ -297,8 +350,8 @@ class SessionStore {
   }
 
   static Future<String?> latestId() async {
-    final root = await sessionsRoot();
-    if (!root.existsSync()) return null;
+    final root = await sessionsRootIfPresent();
+    if (root == null) return null;
     final dirs = root
         .listSync()
         .whereType<Directory>()

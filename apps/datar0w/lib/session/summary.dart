@@ -88,6 +88,16 @@ String formatClockRange(String? startedAt, String? endedAt) {
   return '${fmt(startedAt)} — ${fmt(endedAt)}';
 }
 
+String formatSessionDay(String? iso) {
+  if (iso == null || iso.isEmpty) return '—';
+  final d = DateTime.tryParse(iso);
+  if (d == null) return '—';
+  final l = d.toLocal();
+  final dd = l.day.toString().padLeft(2, '0');
+  final mm = l.month.toString().padLeft(2, '0');
+  return '$dd/$mm/${l.year}';
+}
+
 String formatDuration(Duration d) {
   final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
   final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');

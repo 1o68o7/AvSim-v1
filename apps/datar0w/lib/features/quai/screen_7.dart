@@ -201,13 +201,27 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
             ),
             const SizedBox(height: 12),
             FilledButton(
-              onPressed: () => context.go(AppRoutes.rowerReplay),
+              onPressed: () {
+                final id = _meta?.id;
+                context.go(
+                  id == null || id.isEmpty
+                      ? AppRoutes.rowerReplay
+                      : '${AppRoutes.rowerReplay}?id=${Uri.encodeQueryComponent(id)}',
+                );
+              },
               child: const Text('REPLAY'),
             ),
             if (code != null && code.isNotEmpty) ...[
               const SizedBox(height: 8),
               TextButton(
-                onPressed: () => context.go(AppRoutes.coachReplay),
+                onPressed: () {
+                  final id = _meta?.id;
+                  context.go(
+                    id == null || id.isEmpty
+                        ? AppRoutes.coachReplay
+                        : '${AppRoutes.coachReplay}?id=${Uri.encodeQueryComponent(id)}',
+                  );
+                },
                 child: const Text('Replay coach'),
               ),
             ],

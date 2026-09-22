@@ -11,8 +11,8 @@ import 'identity_test_helpers.dart';
 
 void main() {
   test('BARREUR après tare → /cox, rameur → /live', () {
-    expect(AppRoutes.cox, '/cox');
-    expect(AppRoutes.live, '/live');
+    expect(AppRoutes.sessions, '/sessions');
+    expect(AppRoutes.rowerReplay, '/replay');
     expect(AppRoutes.afterTare(CrewRole.cox), AppRoutes.cox);
     expect(AppRoutes.afterTare(CrewRole.rower), AppRoutes.live);
     expect(AppRoutes.afterTare(CrewRole.cox), isNot(AppRoutes.live));
