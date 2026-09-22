@@ -114,6 +114,11 @@ class _CoachJoinScreenState extends ConsumerState<CoachJoinScreen> {
               onPressed: () => _join(last: true),
               child: const Text('DERNIÈRE SÉANCE (MÊME TÉL.)'),
             ),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: () => context.go('${AppRoutes.sessions}?from=coach'),
+              child: const Text('TOUTES LES SÉANCES LOCALES'),
+            ),
             if (api) ...[
               const SizedBox(height: 8),
               OutlinedButton(
