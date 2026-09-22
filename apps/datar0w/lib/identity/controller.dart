@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../import/apply.dart';
 import '../import/cloud_sync.dart';
 import '../import/mapping.dart';
+import '../import/rower_csv.dart';
 import '../session/boat_class.dart';
 import 'models.dart';
 import 'store.dart';
@@ -221,6 +222,30 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     await ClubImportSync(identity: _store).snapshotOutbox();
     await _refresh();
     return r;
+  }
+
+  Future<RowerImportApplyResult> confirmImportRowers(
+    List<ParsedRowerRow> rows,
+  ) async {
+    final r = applyRowerImport(
+      existing: state.rowers,
+      rows: rows,
+      clubId: state.activeClub?.id,
+    );
+    await _store.replaceAllRowers(r.rowers);
+    final prefs = await _store.loadState();
+    await _store.saveState(prefs.copyWith(lastRowerImportId: r.importId));
+    await _refresh();
+    return r;
+  }
+
+  Future<void> undoLastRowerImport() async {
+    final id = state.prefs.lastRowerImportId;
+    if (id == null) return;
+    await _store.deleteRowersByImportId(id);
+    final prefs = await _store.loadState();
+    await _store.saveState(prefs.copyWith(clearRowerImport: true));
+    await _refresh();
   }
 
   Future<void> undoLastImport() async {

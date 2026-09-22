@@ -98,6 +98,16 @@ class IdentityStore {
     await _writeList('boats.json', boats.map((e) => e.toJson()).toList());
   }
 
+  Future<void> replaceAllRowers(List<Rower> rowers) async {
+    await _writeList('rowers.json', rowers.map((e) => e.toJson()).toList());
+  }
+
+  Future<void> deleteRowersByImportId(String importId) async {
+    final list = await listRowers();
+    list.removeWhere((e) => e.importId == importId);
+    await _writeList('rowers.json', list.map((e) => e.toJson()).toList());
+  }
+
   Future<void> deleteBoatsByImportId(String importId) async {
     final list = await listBoats();
     list.removeWhere((e) => e.importId == importId);
@@ -258,6 +268,7 @@ class IdentityPrefs {
     this.activeClubId,
     this.clubRole = ClubMemberRole.admin,
     this.lastImportId,
+    this.lastRowerImportId,
   });
 
   final String? activeRowerId;
@@ -265,21 +276,27 @@ class IdentityPrefs {
   /// Rôle club (Point B `club_members.role`). Défaut admin = téléphone qui tient le parc.
   final ClubMemberRole clubRole;
   final String? lastImportId;
+  final String? lastRowerImportId;
 
   IdentityPrefs copyWith({
     String? activeRowerId,
     String? activeClubId,
     ClubMemberRole? clubRole,
     String? lastImportId,
+    String? lastRowerImportId,
     bool clearRower = false,
     bool clearClub = false,
     bool clearImport = false,
+    bool clearRowerImport = false,
   }) {
     return IdentityPrefs(
       activeRowerId: clearRower ? null : (activeRowerId ?? this.activeRowerId),
       activeClubId: clearClub ? null : (activeClubId ?? this.activeClubId),
       clubRole: clubRole ?? this.clubRole,
       lastImportId: clearImport ? null : (lastImportId ?? this.lastImportId),
+      lastRowerImportId: clearRowerImport
+          ? null
+          : (lastRowerImportId ?? this.lastRowerImportId),
     );
   }
 
@@ -288,6 +305,7 @@ class IdentityPrefs {
         'activeClubId': activeClubId,
         'clubRole': clubRole.wire,
         'lastImportId': lastImportId,
+        'lastRowerImportId': lastRowerImportId,
       };
 
   static IdentityPrefs fromJson(Map<String, dynamic> j) => IdentityPrefs(
@@ -295,5 +313,6 @@ class IdentityPrefs {
         activeClubId: j['activeClubId'] as String?,
         clubRole: ClubMemberRoleX.parse(j['clubRole'] as String?),
         lastImportId: j['lastImportId'] as String?,
+        lastRowerImportId: j['lastRowerImportId'] as String?,
       );
 }
