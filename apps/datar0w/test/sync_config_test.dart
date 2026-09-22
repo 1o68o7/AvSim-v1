@@ -23,6 +23,7 @@ void main() {
     );
     await tester.pump();
     expect(find.text('mode local'), findsOneWidget);
+    expect(find.text('CONTINUER AVEC GOOGLE'), findsOneWidget);
     expect(find.text('ENVOYER LE LIEN'), findsNothing);
     expect(find.textContaining('Pas de clés cloud'), findsOneWidget);
   });
