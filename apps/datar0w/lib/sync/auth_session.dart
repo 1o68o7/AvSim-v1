@@ -101,7 +101,7 @@ class _AuthSessionBinderState extends ConsumerState<AuthSessionBinder> {
         }
         final auth = ref.read(authGoogleProvider);
         auth.sessionUserId = auth.backend.currentUserId();
-        if (auth.sessionUserId != null) _goPostLogin();
+        if (auth.sessionUserId != null) unawaited(_goPostLogin());
       });
     } catch (_) {}
   }
@@ -110,18 +110,23 @@ class _AuthSessionBinderState extends ConsumerState<AuthSessionBinder> {
     final auth = ref.read(authGoogleProvider);
     final ok = await auth.handleDeepLink(uri);
     if (!ok || !mounted) return;
-    _goPostLogin();
+    await _goPostLogin();
   }
 
-  void _goPostLogin() {
+  Future<void> _goPostLogin() async {
     final path = routerPath(_router);
     if (!canRedirectAfterAuth(path)) return;
     final auth = ref.read(authGoogleProvider);
+    final uid = auth.sessionUserId;
+    if (uid != null) {
+      await ref.read(identityProvider.notifier).hydrateFromCloud(uid);
+    }
+    if (!mounted) return;
     final door = doorFromPath(path, auth.lastDoor);
     final dest = destinationAfterAuth(
       door: door,
       snap: ref.read(identityProvider),
-      sessionUserId: auth.sessionUserId,
+      sessionUserId: uid,
     );
     _router.go(dest);
   }

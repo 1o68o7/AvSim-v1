@@ -4,6 +4,8 @@ import '../import/apply.dart';
 import '../import/cloud_sync.dart';
 import '../import/mapping.dart';
 import '../session/boat_class.dart';
+import '../sync/auth_google.dart';
+import '../sync/club_remote.dart';
 import '../sync/supabase_boot.dart';
 import 'models.dart';
 import 'store.dart';
@@ -115,6 +117,14 @@ class IdentitySnapshot {
 /// Notifier : racine test = lecture sync ; sinon premier frame vide + reload.
 class IdentityController extends Notifier<IdentitySnapshot> {
   IdentityStore get _store => ref.read(identityStoreProvider);
+  ClubRemote get _remote => ref.read(clubRemoteProvider);
+
+  String? get _sessionUserId {
+    final fromAuth = ref.read(authGoogleProvider).sessionUserId;
+    if (fromAuth != null && fromAuth.isNotEmpty) return fromAuth;
+    final id = supabaseOrNull()?.auth.currentUser?.id;
+    return id is String ? id : null;
+  }
 
   @override
   IdentitySnapshot build() {
@@ -249,6 +259,10 @@ class IdentityController extends Notifier<IdentitySnapshot> {
       birthDate: birthDate,
       sex: sex,
     );
+    final uid = _sessionUserId;
+    if (uid != null) {
+      rower = rower.copyWith(userId: uid);
+    }
     final lic = ffaLicence?.trim();
     if (lic != null && lic.isNotEmpty) {
       rower = rower.copyWith(ffaLicence: lic);
@@ -259,7 +273,16 @@ class IdentityController extends Notifier<IdentitySnapshot> {
       if (ok) {
         final club = state.activeClub;
         if (club != null) {
-          await saveRower(rower.copyWith(clubId: club.id));
+          rower = rower.copyWith(clubId: club.id);
+          await saveRower(rower);
+          await _remote.upsertRower({
+            'id': rower.id,
+            'club_id': club.id,
+            'user_id': rower.userId,
+            'display_name': rower.displayName,
+            'birth_date': rower.birthDate.toUtc().toIso8601String().split('T').first,
+            'sex': rower.sex.wire,
+          });
         }
       }
     }
@@ -271,6 +294,38 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     return rower;
   }
 
+  /// Applique `club_members` cloud sur le store local. No-op hors session.
+  Future<void> hydrateFromCloud(String userId) async {
+    final m = await _remote.membershipFor(userId);
+    if (m == null) return;
+    var known = false;
+    for (final c in state.clubs) {
+      if (c.id == m.clubId) known = true;
+    }
+    if (!known) {
+      final rc = await _remote.clubById(m.clubId);
+      if (rc != null) {
+        await _store.upsertClub(
+          Club(
+            id: rc.id,
+            name: rc.name,
+            shortCode: rc.shortCode,
+            createdAt: DateTime.now().toUtc(),
+          ),
+        );
+      }
+    }
+    final prefs = await _store.loadState();
+    await _store.saveState(
+      prefs.copyWith(
+        activeClubId: m.clubId,
+        clubRole: ClubMemberRoleX.parse(m.role),
+        activeRowerId: m.rowerId ?? prefs.activeRowerId,
+      ),
+    );
+    await _refresh();
+  }
+
   Future<void> createClubAsAdmin({
     required String name,
     String? shortCode,
@@ -278,13 +333,19 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     final club = Club.create(name: name.trim(), shortCode: shortCode?.trim());
     await saveClub(club);
     await setClubRole(ClubMemberRole.admin);
+    await _remote.insertClub(
+      id: club.id,
+      name: club.name,
+      shortCode: club.shortCode,
+    );
   }
 
   Future<ClubJoinRequest?> requestClubRole({
     required String code,
     required ClubMemberRole role,
-    String userId = 'local',
+    String? userId,
   }) async {
+    userId ??= _sessionUserId ?? 'local';
     final needle = code.trim().toUpperCase();
     Club? club;
     for (final c in state.clubs) {
@@ -317,6 +378,7 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     }
     final next = req.copyWith(status: accept ? 'approved' : 'rejected');
     await _store.upsertJoinRequest(next);
+    await _remote.approveJoin(req.id, accept: accept);
     await _refresh();
   }
 

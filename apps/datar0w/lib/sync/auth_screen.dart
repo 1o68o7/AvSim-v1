@@ -39,11 +39,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   OnboardingDoor get _door =>
       widget.clubDoor ? OnboardingDoor.club : OnboardingDoor.rower;
 
-  void _goPostLogin() {
+  Future<void> _goPostLogin() async {
+    final uid = _auth.sessionUserId;
+    if (uid != null) {
+      await ref.read(identityProvider.notifier).hydrateFromCloud(uid);
+    }
+    if (!mounted) return;
     final dest = destinationAfterAuth(
       door: _door,
       snap: ref.read(identityProvider),
-      sessionUserId: _auth.sessionUserId,
+      sessionUserId: uid,
     );
     context.go(dest);
   }
