@@ -16,7 +16,6 @@ import '../sync/outbox_db.dart';
 
 const kLocalRetentionFifo = 30;
 const kSoftDeleteDays = 30;
-const kResumableMinBytes = 10 * 1024 * 1024;
 
 class UploadResult {
   const UploadResult({
@@ -69,6 +68,9 @@ class SessionSync {
     this.now,
   });
 
+  static TelemetryGateway Function() resolveGateway =
+      () => const SilentTelemetryGateway();
+
   final OutboxDb db;
   TelemetryGateway gateway;
   DateTime Function()? now;
@@ -96,7 +98,10 @@ class SessionSync {
   static Future<SessionSync> openLocal() async {
     final docs = await getApplicationDocumentsDirectory();
     final file = File(p.join(docs.path, 'datar0w', 'session_outbox.sqlite'));
-    final sync = SessionSync(db: OutboxDb.openFile(file));
+    final sync = SessionSync(
+      db: OutboxDb.openFile(file),
+      gateway: resolveGateway(),
+    );
     _shared = sync;
     return sync;
   }
