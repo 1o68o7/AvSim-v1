@@ -6,6 +6,7 @@ import 'package:datar0w/features/identity/screen_spinoscope.dart';
 import 'package:datar0w/features/identity/screen_who.dart';
 import 'package:datar0w/identity/controller.dart';
 import 'package:datar0w/identity/models.dart';
+import 'package:datar0w/session/boat_config.dart';
 import 'package:datar0w/widgets/club_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -65,6 +66,28 @@ void main() {
     expect(find.text('+ Ajouter'), findsNothing);
     expect(find.text('ENREGISTRER LE CLUB'), findsNothing);
     expect(find.text('IMPORTER UN FICHIER'), findsNothing);
+  });
+
+  testWidgets('import coach : chips Parc / Rameurs', (tester) async {
+    final container = ProviderContainer(
+      overrides: [identityStoreOverride()],
+    );
+    addTearDown(container.dispose);
+    container.read(boatConfigProvider.notifier).setRole(CrewRole.coach);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(home: ClubImportScreen()),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('PARC'), findsOneWidget);
+    expect(find.text('RAMEURS'), findsOneWidget);
+    await tester.tap(find.text('RAMEURS'));
+    await tester.pump();
+    expect(find.text('TÉLÉCHARGER LE MODÈLE CSV'), findsOneWidget);
+    expect(find.text('IMPORTER UN FICHIER'), findsOneWidget);
+    expect(find.text('CHARGER LA BASE BORDEAUX'), findsOneWidget);
   });
 
   testWidgets('import : hors coach → réservé', (tester) async {

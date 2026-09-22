@@ -1,3 +1,4 @@
+import 'package:datar0w/onboarding/routing.dart';
 import 'package:datar0w/sync/auth_google.dart';
 import 'package:datar0w/sync/auth_screen.dart';
 import 'package:datar0w/sync/config.dart';
@@ -14,10 +15,13 @@ class _FakeBackend implements AuthBackend {
   String? lastEmail;
   Uri? lastRecover;
 
+  String? lastRedirect;
+
   @override
   Future<bool> startGoogle({required String redirectTo}) async {
     googleCalls++;
-    expect(redirectTo, SyncConfig.redirect);
+    lastRedirect = redirectTo;
+    expect(redirectTo, startsWith(SyncConfig.redirect));
     userId ??= 'user-google';
     return true;
   }
@@ -29,7 +33,8 @@ class _FakeBackend implements AuthBackend {
   }) async {
     magicCalls++;
     lastEmail = email;
-    expect(redirectTo, SyncConfig.redirect);
+    lastRedirect = redirectTo;
+    expect(redirectTo, startsWith(SyncConfig.redirect));
   }
 
   @override
@@ -51,6 +56,7 @@ void main() {
     expect(auth.lastMethod, 'google');
     expect(auth.sessionUserId, 'user-google');
     expect(fake.googleCalls, 1);
+    expect(fake.lastRedirect, redirectToFor(OnboardingDoor.rower));
   });
 
   test('fallback magic link déclenché', () async {
@@ -69,6 +75,11 @@ void main() {
     expect(isAuthCallback(uri), isTrue);
     expect(await auth.handleDeepLink(uri), isTrue);
     expect(auth.sessionUserId, 'user-link');
+    expect(auth.lastDoor, OnboardingDoor.rower);
+
+    final clubUri = Uri.parse('datarow://auth/callback?code=pkce&door=club');
+    expect(await auth.handleDeepLink(clubUri), isTrue);
+    expect(auth.lastDoor, OnboardingDoor.club);
     expect(
       await auth.handleDeepLink(Uri.parse('https://evil.example/callback')),
       isFalse,
