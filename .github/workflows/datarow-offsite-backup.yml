@@ -1,0 +1,27 @@
+# Offsite backup DataR0w (pg_dump + Storage). Secrets GitHub seulement.
+# Quotidien 03:17 UTC. No-op si DATABASE_URL absent.
+name: datarow-offsite-backup
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: pg_dump + Storage → S3/B2
+        env:
+          DATABASE_URL: ${{ secrets.DATAROW_DATABASE_URL }}
+          SUPABASE_PROJECT_REF: ${{ secrets.DATAROW_SUPABASE_REF }}
+          DATAROW_OFFSITE_URI: ${{ secrets.DATAROW_OFFSITE_URI }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.DATAROW_OFFSITE_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DATAROW_OFFSITE_SECRET }}
+          AWS_DEFAULT_REGION: ${{ secrets.DATAROW_OFFSITE_REGION }}
+          DATAROW_BACKUP_RETENTION_DAYS: '90'
+        run: |
+          chmod +x scripts/datarow-offsite-backup.sh
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+          ./scripts/datarow-offsite-backup.sh
