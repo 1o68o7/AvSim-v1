@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../identity/controller.dart';
+import '../onboarding/routing.dart';
 import '../router.dart';
 import '../theme/deck_theme.dart';
 import '../widgets/deck_scaffold.dart';
 import 'auth_google.dart';
+import 'auth_session.dart';
 import 'config.dart';
 import 'supabase_boot.dart';
 
@@ -34,6 +36,18 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   AuthGoogle get _auth => ref.read(authGoogleProvider);
 
+  OnboardingDoor get _door =>
+      widget.clubDoor ? OnboardingDoor.club : OnboardingDoor.rower;
+
+  void _goPostLogin() {
+    final dest = destinationAfterAuth(
+      door: _door,
+      snap: ref.read(identityProvider),
+      sessionUserId: _auth.sessionUserId,
+    );
+    context.go(dest);
+  }
+
   Future<void> _google() async {
     setState(() {
       _busy = true;
@@ -44,10 +58,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         setState(() => _msg = 'Pas de clés cloud. Mode local inchangé.');
         return;
       }
-      final ok = await _auth.signInWithGoogle();
+      final ok = await _auth.signInWithGoogle(door: _door);
+      if (!mounted) return;
+      if (_auth.sessionUserId != null) {
+        _goPostLogin();
+        return;
+      }
       setState(() {
         _msg = ok
-            ? 'Connexion Google lancée.'
+            ? 'Connexion Google lancée. Reviens via le lien datarow://'
             : 'Google indisponible. Essaie par email.';
       });
     } catch (_) {
@@ -69,7 +88,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         setState(() => _msg = 'Pas de clés cloud. Mode local inchangé.');
         return;
       }
-      await _auth.signInWithMagicLink(mail);
+      await _auth.signInWithMagicLink(mail, door: _door);
       setState(() => _msg = 'Lien envoyé. Ouvre le mail sur ce téléphone.');
     } catch (_) {
       setState(() => _msg = 'Envoi impossible. Mode local inchangé.');
@@ -135,6 +154,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           ],
           if (uid != null) ...[
             const SizedBox(height: 16),
+            FilledButton(
+              onPressed: _goPostLogin,
+              child: const Text('CONTINUER'),
+            ),
+            const SizedBox(height: 8),
             const Text(
               'Connecté — rattache un profil local :',
               style: TextStyle(color: DeckColors.tribord, fontSize: 12),
