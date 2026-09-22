@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:datar0w/identity/models.dart';
+import 'package:datar0w/identity/store.dart';
 import 'package:datar0w/import/apply.dart';
 import 'package:datar0w/import/rower_csv.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -97,6 +100,30 @@ void main() {
     final withId = r.copyWith(importId: 'imp-1');
     expect(withId.toJson()['importId'], 'imp-1');
     expect(withId.copyWith(clearImport: true).importId, isNull);
+  });
+
+  test('store : replaceAllRowers + undo par importId', () async {
+    final dir = Directory(
+      '/tmp/datar0w-rowers-${DateTime.now().microsecondsSinceEpoch}',
+    );
+    dir.createSync(recursive: true);
+    addTearDown(() {
+      if (dir.existsSync()) dir.deleteSync(recursive: true);
+    });
+    final store = IdentityStore(root: dir);
+    const csv = 'Nom;Naissance;Niveau\nLina;2001-04-04;loisir\n';
+    final preview = parseRowerCsv(csv);
+    final r = applyRowerImport(existing: const [], rows: preview.rows);
+    await store.replaceAllRowers(r.rowers);
+    await store.saveState(IdentityPrefs(lastRowerImportId: r.importId));
+    expect((await store.listRowers()).length, 1);
+    expect((await store.loadState()).lastRowerImportId, r.importId);
+    await store.deleteRowersByImportId(r.importId);
+    await store.saveState(
+      (await store.loadState()).copyWith(clearRowerImport: true),
+    );
+    expect(await store.listRowers(), isEmpty);
+    expect((await store.loadState()).lastRowerImportId, isNull);
   });
 
   test('pas d’email / licence dans le mapping', () {
