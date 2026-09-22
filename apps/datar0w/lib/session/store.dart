@@ -139,11 +139,7 @@ class SessionStore {
     return dir;
   }
 
-<<<<<<< HEAD
   /// Lecture seule. Ne crée pas `sessions/` (boot / historique).
-=======
-  /// Lecture seule. Ne crée pas `sessions/`.
->>>>>>> 58ee8a5 (feat(datar0w): session sync outbox + ACK gate)
   static Future<Directory?> sessionsRootIfPresent() async {
     final docs = await getApplicationDocumentsDirectory();
     final dir = Directory('${docs.path}/sessions');
@@ -151,7 +147,6 @@ class SessionStore {
     return dir;
   }
 
-<<<<<<< HEAD
   static DateTime? _listSortInstant(SessionMeta m) {
     final raw = m.endedAt ?? m.startedAt;
     if (raw == null || raw.isEmpty) return null;
@@ -186,8 +181,6 @@ class SessionStore {
     return out;
   }
 
-=======
->>>>>>> 58ee8a5 (feat(datar0w): session sync outbox + ACK gate)
   Future<Directory> open({
     required double tareOffset,
     String? tareQuality,
