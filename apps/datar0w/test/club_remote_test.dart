@@ -6,6 +6,7 @@ import 'package:datar0w/sync/auth_google.dart';
 import 'package:datar0w/sync/auth_session.dart';
 import 'package:datar0w/sync/club_remote.dart';
 import 'package:datar0w/sync/club_sql.dart';
+import 'package:datar0w/import/rower_csv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -152,6 +153,28 @@ void main() {
     final snap = container.read(identityProvider);
     expect(snap.boats.single.name, 'Filippi');
     expect(snap.prefs.clubRole, ClubMemberRole.intendant);
+  });
+
+  test('import rameurs pousse upsertRower si club actif', () async {
+    final remote = MemoryClubRemote();
+    final container = ProviderContainer(
+      overrides: [identityStoreOverride(), clubRemoteOverride(remote)],
+    );
+    addTearDown(container.dispose);
+    final n = container.read(identityProvider.notifier);
+    await n.createClubAsAdmin(name: 'CNB', shortCode: 'CNB');
+    await n.confirmImportRowers([
+      ParsedRowerRow(
+        line: 2,
+        cells: const {},
+        displayName: 'Camille',
+        birthDate: DateTime.utc(1998, 5, 10),
+        sex: RowerSex.f,
+      ),
+    ]);
+    expect(remote.rowers, isNotEmpty);
+    expect(remote.rowers.last['display_name'], 'Camille');
+    expect(remote.rowers.last['club_id'], isNotNull);
   });
 }
 

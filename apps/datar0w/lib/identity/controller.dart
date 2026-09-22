@@ -445,6 +445,10 @@ class IdentityController extends Notifier<IdentitySnapshot> {
     await _store.replaceAllRowers(r.rowers);
     final prefs = await _store.loadState();
     await _store.saveState(prefs.copyWith(lastRowerImportId: r.importId));
+    for (final rower in r.rowers) {
+      if (rower.clubId == null) continue;
+      await _remote.upsertRower(rowerToSql(rower));
+    }
     await _refresh();
     return r;
   }
