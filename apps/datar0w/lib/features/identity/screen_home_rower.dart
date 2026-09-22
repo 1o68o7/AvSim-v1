@@ -99,6 +99,10 @@ class HomeRowerScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             TextButton(
+              onPressed: () => context.go(AppRoutes.sessions),
+              child: const Text('MES SÉANCES'),
+            ),
+            TextButton(
               onPressed: () => context.go(AppRoutes.spinoscope),
               child: const Text('SPINOSCOPE'),
             ),

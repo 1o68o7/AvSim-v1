@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../session/live_hub.dart';
 import '../../session/model.dart';
+import '../../session/share_files.dart';
 import '../../session/store.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_widgets.dart';
@@ -29,12 +30,15 @@ class ReplayLoadScreen extends ConsumerStatefulWidget {
     super.key,
     required this.title,
     required this.onBack,
+    this.sessionId,
     this.showEval = true,
     this.allowImport = true,
   });
 
   final String title;
   final VoidCallback onBack;
+  /// Si fourni (query `?id=`), charge cette séance — pas `latestId`.
+  final String? sessionId;
   final bool showEval;
   final bool allowImport;
 
@@ -46,6 +50,7 @@ class _ReplayLoadScreenState extends ConsumerState<ReplayLoadScreen> {
   ReplayBundle? _bundle;
   bool _loading = true;
   String? _error;
+  String? _loadedId;
 
   @override
   void initState() {
@@ -58,13 +63,16 @@ class _ReplayLoadScreenState extends ConsumerState<ReplayLoadScreen> {
       _loading = true;
       _error = null;
     });
-    final id =
-        ref.read(liveHubProvider).sessionId ?? await SessionStore.latestId();
+    final asked = widget.sessionId?.trim();
+    final id = (asked != null && asked.isNotEmpty)
+        ? asked
+        : (ref.read(liveHubProvider).sessionId ?? await SessionStore.latestId());
     if (id == null) {
       if (mounted) {
         setState(() {
           _bundle = const ReplayBundle(samples: [], notes: []);
           _loading = false;
+          _loadedId = null;
         });
       }
       return;
@@ -74,10 +82,14 @@ class _ReplayLoadScreenState extends ConsumerState<ReplayLoadScreen> {
     final meta = await SessionStore.loadMeta(id);
     if (mounted) {
       setState(() {
+        _loadedId = id;
         _bundle = ReplayBundle(
           samples: samples,
           notes: notes,
           meta: meta,
+          sourceLabel: asked != null && asked.isNotEmpty
+              ? (meta?.code ?? id)
+              : 'dernière séance',
         );
         _loading = false;
       });
@@ -146,6 +158,11 @@ class _ReplayLoadScreenState extends ConsumerState<ReplayLoadScreen> {
           child: const Text('Retour'),
         ),
         actions: [
+          if (_loadedId != null)
+            TextButton(
+              onPressed: () => shareLocalSession(_loadedId!),
+              child: const Text('PARTAGER'),
+            ),
           if (widget.allowImport)
             TextButton(
               onPressed: _import,
