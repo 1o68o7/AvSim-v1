@@ -49,6 +49,14 @@ class DeviceStore {
       jsonEncode(current.map((e) => e.toJson()).toList()),
     );
   }
+
+  Future<void> remove(String id) async {
+    final current = await list();
+    current.removeWhere((e) => e.id == id);
+    await (await _file()).writeAsString(
+      jsonEncode(current.map((e) => e.toJson()).toList()),
+    );
+  }
 }
 
 final deviceStoreProvider = Provider<DeviceStore>((_) => DeviceStore());

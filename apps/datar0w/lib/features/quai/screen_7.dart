@@ -201,6 +201,11 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
             ),
             const SizedBox(height: 12),
             FilledButton(
+              onPressed: _share,
+              child: const Text('PARTAGER AU COACH'),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton(
               onPressed: () {
                 final id = _meta?.id;
                 context.go(
@@ -225,11 +230,6 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
                 child: const Text('Replay coach'),
               ),
             ],
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: _share,
-              child: const Text('PARTAGER AU COACH'),
-            ),
             const SizedBox(height: 8),
             OutlinedButton(
               onPressed: _patchSync == PatchSyncStatus.pending

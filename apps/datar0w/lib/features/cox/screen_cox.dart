@@ -12,6 +12,7 @@ import '../../session/heel.dart';
 import '../../session/live_hub.dart';
 import '../../session/rower_orientation.dart';
 import '../../theme/deck_theme.dart';
+import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
 import '../../widgets/heel_banner.dart';
 import '../../widgets/heel_gauge.dart';
@@ -100,21 +101,9 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
             children: [
               Column(
             children: [
-              Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              child: Row(
-                children: [
-                  const DataR0wMark(compact: true),
-                  const SizedBox(width: 8),
-                  Text(
-                    '/  BARREUR  $tag',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 1.1,
-                    ),
-                  ),
-                  const Spacer(),
+              DeckSessionHeader(
+                title: 'BARREUR  $tag',
+                trailing: [
                   DeckStatusChip(label: 'GÎTE BATEAU', ok: gite != null),
                   const SizedBox(width: 8),
                   DeckStatusChip(
@@ -125,8 +114,6 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
                   ),
                 ],
               ),
-            ),
-            const Divider(height: 1, color: DeckColors.hairline),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8),

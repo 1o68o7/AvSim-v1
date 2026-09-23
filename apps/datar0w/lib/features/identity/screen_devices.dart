@@ -104,6 +104,11 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
     if (mounted) setState(() => _linkOk = ok);
   }
 
+  Future<void> _forget(ConnectedDevice d) async {
+    await _store.remove(d.id);
+    await _reload();
+  }
+
   Future<void> _mockPatch() async {
     final rower = ref.read(identityProvider).activeRower;
     if (rower == null) return;
@@ -136,15 +141,41 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
     await _reload();
   }
 
+  IconData _iconFor(ConnectedDevice d) {
+    if (d.isPatch) return Icons.sensors;
+    switch (d.type) {
+      case DeviceType.chestStrap:
+        return Icons.monitor_heart;
+      case DeviceType.armBand:
+        return Icons.watch;
+      case DeviceType.watch:
+        return Icons.watch;
+      default:
+        return Icons.bluetooth;
+    }
+  }
+
+  String _lastSync(ConnectedDevice d) {
+    final t = d.lastSeenAt ?? d.pairedAt;
+    final diff = DateTime.now().toUtc().difference(t);
+    if (diff.inMinutes < 2) return 'il y a un instant';
+    if (diff.inMinutes < 60) return 'il y a ${diff.inMinutes} min';
+    if (diff.inHours < 24) return 'il y a ${diff.inHours} h';
+    return 'il y a ${diff.inDays} j';
+  }
+
   @override
   Widget build(BuildContext context) {
     final rower = ref.watch(identityProvider).activeRower;
     final hr = ref.watch(cardioHubProvider);
     final heart = (!_linkOk || _denied || hr == null) ? '♥ —' : '♥ ${hr.bpm}';
     final patches = _list.where((d) => d.isPatch).toList();
+    final patchBat = patches.isEmpty ? null : patches.first.lastBattery;
     final patchChip = _patchDenied || patches.isEmpty
         ? 'patch —'
-        : 'patch ${patches.first.patchLink?.label ?? 'pairé'}';
+        : (patchBat == null
+            ? 'patch ${patches.first.patchLink?.label ?? 'pairé'}'
+            : 'patch $patchBat %');
     return DeckScaffold(
       title: 'MES OBJETS',
       subtitle: 'sangle GATT 0x180D · patch dorsal · pas de montre',
@@ -177,78 +208,162 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
               ),
             ),
           const SizedBox(height: 16),
+          DeckSectionLabel(
+            'Objets appairés',
+            trailing: Text(
+              '${_list.length}',
+              style: const TextStyle(
+                color: DeckColors.label,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
           if (_list.isEmpty)
-            const Text(
-              'Scanner une sangle (0x180D) ou apparier un patch dorsal (mock).',
-              style: TextStyle(color: DeckColors.muted, height: 1.4),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                border: Border.all(color: DeckColors.hairline),
+              ),
+              child: const Text(
+                'Aucun objet connecté.\n'
+                'Scanner une sangle (0x180D) ou apparier un patch dorsal (mock).',
+                style: TextStyle(color: DeckColors.muted, height: 1.4),
+              ),
             ),
           for (final d in _list)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(d.name),
-              subtitle: Text(
-                [
-                  if (d.isPrimary) 'primaire',
-                  d.isPatch ? 'patch dorsal' : d.type.name,
-                  if (d.isPatch && d.patchLink != null) d.patchLink!.label,
-                  if (d.bleId != null) d.bleId!,
-                ].join(' · '),
-              ),
-              trailing: d.lastBattery == null
-                  ? null
-                  : Text('${d.lastBattery} %'),
-              onTap: rower == null
-                  ? null
-                  : () async {
-                      if (d.isPatch) {
-                        await _savePatch(
-                          d.copyWith(
-                            patchLink: PatchLinkState.logLocal,
-                            lastSeenAt: DateTime.now().toUtc(),
-                          ),
-                        );
-                        return;
-                      }
-                      if (d.bleId == null) return;
-                      await _store.upsert(
-                        d.copyWith(
-                          isPrimary: true,
-                          lastSeenAt: DateTime.now().toUtc(),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Material(
+                color: DeckColors.surfaceHigh,
+                child: InkWell(
+                  onTap: rower == null
+                      ? null
+                      : () async {
+                          if (d.isPatch) {
+                            await _savePatch(
+                              d.copyWith(
+                                patchLink: PatchLinkState.logLocal,
+                                lastSeenAt: DateTime.now().toUtc(),
+                              ),
+                            );
+                            return;
+                          }
+                          if (d.bleId == null) return;
+                          await _store.upsert(
+                            d.copyWith(
+                              isPrimary: true,
+                              lastSeenAt: DateTime.now().toUtc(),
+                            ),
+                          );
+                          await _reload();
+                          await _connect(d.bleId!);
+                        },
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: DeckColors.hairline),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            DeckIconBox(
+                              icon: _iconFor(d),
+                              accent: d.isPatch || d.isPrimary,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    d.name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  Text(
+                                    [
+                                      if (d.isPrimary) 'primaire',
+                                      d.isPatch
+                                          ? 'patch dorsal'
+                                          : 'sangle FC',
+                                      if (d.isPatch && d.patchLink != null)
+                                        d.patchLink!.label,
+                                    ].join(' · '),
+                                    style: const TextStyle(
+                                      color: DeckColors.muted,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (d.lastBattery != null)
+                              Text(
+                                '${d.lastBattery} %',
+                                style: TextStyle(
+                                  color: (d.lastBattery ?? 100) < 20
+                                      ? DeckColors.amber
+                                      : DeckColors.tribord,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                          ],
                         ),
-                      );
-                      await _reload();
-                      await _connect(d.bleId!);
-                    },
+                        const SizedBox(height: 8),
+                        Text(
+                          'Dernier sync : ${_lastSync(d)}',
+                          style: const TextStyle(
+                            color: DeckColors.label,
+                            fontSize: 11,
+                          ),
+                        ),
+                        if (d.lastBattery != null) ...[
+                          const SizedBox(height: 8),
+                          ClipRect(
+                            child: LinearProgressIndicator(
+                              value: (d.lastBattery! / 100).clamp(0.0, 1.0),
+                              minHeight: 4,
+                              backgroundColor: DeckColors.hairline,
+                              color: (d.lastBattery ?? 100) < 20
+                                  ? DeckColors.amber
+                                  : DeckColors.tribord,
+                            ),
+                          ),
+                        ],
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () => _forget(d),
+                            child: Text(d.isPatch ? 'OUBLIER' : 'DÉCONNECTER'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
           if (_hits.isNotEmpty) ...[
             const SizedBox(height: 8),
-            const Text(
-              'TROUVÉS',
-              style: TextStyle(
-                color: DeckColors.label,
-                fontSize: 11,
-                letterSpacing: 1.1,
-              ),
-            ),
+            const DeckSectionLabel('Trouvés à proximité'),
             for (final h in _hits)
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(h.name),
-                subtitle: Text('RSSI ${h.rssi} dBm'),
-                trailing: const Text('APPAIRER'),
+                subtitle: Text('RSSI ${h.rssi} dBm · tap pour appairer'),
+                trailing: const Icon(Icons.add_link, color: DeckColors.amber),
                 onTap: rower == null ? null : () => _pair(h),
               ),
           ],
           if (patches.isNotEmpty) ...[
             const SizedBox(height: 16),
-            const Text(
-              'FEEDBACK PATCH',
-              style: TextStyle(
-                color: DeckColors.label,
-                fontSize: 11,
-                letterSpacing: 1.1,
-              ),
-            ),
+            const DeckSectionLabel('Feedback patch'),
             const Text(
               'Personnel onboard (vibration / petit OLED). '
               'Pas de liaison coach pendant une course. Pas de firmware ici.',
@@ -282,12 +397,21 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
           const SizedBox(height: 16),
           FilledButton(
             onPressed: rower == null || _scanning ? null : _scan,
-            child: Text(_scanning ? 'SCAN…' : 'SCANNER'),
+            child: Text(
+              _scanning ? 'SCAN…' : '+ AJOUTER UN OBJET (SCAN BLE)',
+            ),
           ),
           const SizedBox(height: 8),
           OutlinedButton(
             onPressed: rower == null ? null : _mockPatch,
             child: const Text('APPARIER PATCH (MOCK)'),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Le patch dorsal mesure FC, SpO2 (au repos), température de peau '
+            'et orientation du torse. La sangle améliore la fidélité FC. '
+            'États patch = mock jusqu’au firmware.',
+            style: TextStyle(color: DeckColors.muted, fontSize: 11, height: 1.4),
           ),
           TextButton(
             onPressed: () => context.go(AppRoutes.consent),

@@ -17,6 +17,7 @@ import '../../session/store.dart';
 import '../../session/summary.dart';
 import '../../maps/deck_tiles.dart';
 import '../../theme/deck_theme.dart';
+import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
 import '../../widgets/heel_banner.dart';
 import '../../widgets/heel_gauge.dart';
@@ -106,54 +107,38 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
         child: Column(
           children: [
             HeelBanner(alert: alert),
-            SizedBox(
-              height: 32,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Row(
-                  children: [
-                    const DataR0wMark(compact: true),
-                    const SizedBox(width: 8),
-                    const Text(
-                      '/  COACH LIVE',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1.1,
-                      ),
-                    ),
-                    const Spacer(),
-                    DeckStatusChip(
-                      label: live || apiLive ? 'LIVE' : 'FICHIER',
-                      ok: live || apiLive,
-                    ),
-                    if (last?.hrBpm != null) ...[
-                      const SizedBox(width: 8),
-                      DeckStatusChip(
-                        label: '♥ ${last!.hrBpm}',
-                        ok: true,
-                      ),
-                    ],
-                    const SizedBox(width: 8),
-                    Text(
-                      () {
-                        final boat = ref.watch(boatConfigProvider);
-                        final tag = boat.info.code.toUpperCase();
-                        final seats = boat.seats > 1
-                            ? '  ·  ${boat.seats} sièges'
-                            : '';
-                        return hub.code == null
-                            ? tag
-                            : '$tag  ${hub.code}$seats';
-                      }(),
-                      style: const TextStyle(
-                        color: DeckColors.label,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
+            DeckSessionHeader(
+              title: 'COACH LIVE',
+              trailing: [
+                DeckStatusChip(
+                  label: live || apiLive ? 'LIVE' : 'FICHIER',
+                  ok: live || apiLive,
                 ),
-              ),
+                if (last?.hrBpm != null) ...[
+                  const SizedBox(width: 8),
+                  DeckStatusChip(
+                    label: '♥ ${last!.hrBpm}',
+                    ok: true,
+                  ),
+                ],
+                const SizedBox(width: 8),
+                Text(
+                  () {
+                    final boat = ref.watch(boatConfigProvider);
+                    final tag = boat.info.code.toUpperCase();
+                    final seats = boat.seats > 1
+                        ? '  ·  ${boat.seats} sièges'
+                        : '';
+                    return hub.code == null
+                        ? tag
+                        : '$tag  ${hub.code}$seats';
+                  }(),
+                  style: const TextStyle(
+                    color: DeckColors.label,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
             ),
             const Divider(height: 1, color: DeckColors.hairline),
             Builder(
