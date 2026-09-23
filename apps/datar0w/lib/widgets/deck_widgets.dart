@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../identity/format.dart';
+import '../identity/models.dart';
 import '../theme/deck_theme.dart';
 
 /// Pastille statut (Stitch : 1px hairline, pastille carrée).
@@ -156,6 +158,247 @@ class DeckIconBox extends StatelessWidget {
         ),
       ),
       child: Icon(icon, size: 22, color: c),
+    );
+  }
+}
+
+/// Titre de section Deck (Stitch hairline + letter-spacing).
+class DeckSectionLabel extends StatelessWidget {
+  const DeckSectionLabel(this.text, {super.key, this.trailing});
+
+  final String text;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            text.toUpperCase(),
+            style: const TextStyle(
+              color: DeckColors.label,
+              fontSize: 11,
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        if (trailing != null) trailing!,
+      ],
+    );
+  }
+}
+
+/// Cellule fiche (label + valeur), grille Stitch accueil / physio.
+class DeckFactCell extends StatelessWidget {
+  const DeckFactCell({
+    super.key,
+    required this.label,
+    required this.value,
+    this.hint,
+    this.accent,
+  });
+
+  final String label;
+  final String value;
+  final String? hint;
+  final Color? accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: const TextStyle(
+            color: DeckColors.label,
+            fontSize: 9,
+            letterSpacing: 1.1,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            color: accent ?? DeckColors.text,
+            fontWeight: FontWeight.w700,
+            fontSize: 14,
+            letterSpacing: 0.4,
+          ),
+        ),
+        if (hint != null)
+          Text(
+            hint!,
+            style: const TextStyle(color: DeckColors.muted, fontSize: 10),
+          ),
+      ],
+    );
+  }
+}
+
+/// Pastille côté BÂBORD / TRIBORD (Stitch).
+class DeckSideChip extends StatelessWidget {
+  const DeckSideChip(this.side, {super.key});
+
+  final SidePref side;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = sideLabel(side);
+    final color = switch (side) {
+      SidePref.babord => DeckColors.babord,
+      SidePref.tribord => DeckColors.tribord,
+      SidePref.none => DeckColors.label,
+    };
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(width: 8, height: 8, color: color),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: TextStyle(
+            color: color,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.0,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Répartition latérale sièges (étrave → poupe). Siège 1 = nage.
+class DeckSeatStrip extends StatelessWidget {
+  const DeckSeatStrip({
+    super.key,
+    required this.seats,
+    required this.assignments,
+    this.highlightSeat,
+    this.coxed = false,
+  });
+
+  final int seats;
+  final List<Assignment> assignments;
+  final int? highlightSeat;
+  final bool coxed;
+
+  Assignment? _at(int seat) {
+    for (final a in assignments) {
+      if (a.role != 'cox' && a.seatIndex == seat) return a;
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cells = <Widget>[];
+    for (var seat = seats; seat >= 1; seat--) {
+      final a = _at(seat);
+      final hi = highlightSeat == seat;
+      final side = a?.side ?? SidePref.none;
+      final short = switch (side) {
+        SidePref.babord => 'BÂB',
+        SidePref.tribord => 'TRI',
+        SidePref.none => '—',
+      };
+      final color = hi
+          ? DeckColors.amber
+          : switch (side) {
+              SidePref.babord => DeckColors.babord,
+              SidePref.tribord => DeckColors.tribord,
+              SidePref.none => DeckColors.label,
+            };
+      cells.add(
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              color: hi ? DeckColors.amber : DeckColors.bg,
+              border: Border.all(
+                color: hi ? DeckColors.amber : DeckColors.hairline,
+              ),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  '$seat',
+                  style: TextStyle(
+                    color: hi ? DeckColors.onAlert : DeckColors.label,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  short,
+                  style: TextStyle(
+                    color: hi ? DeckColors.onAlert : color,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    if (coxed) {
+      cells.add(
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              border: Border.all(color: DeckColors.hairline),
+            ),
+            child: const Column(
+              children: [
+                Text(
+                  'C',
+                  style: TextStyle(
+                    color: DeckColors.label,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  'COX',
+                  style: TextStyle(
+                    color: DeckColors.text,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'ÉTRAVE',
+              style: TextStyle(color: DeckColors.label, fontSize: 9),
+            ),
+            Text(
+              'POUPE',
+              style: TextStyle(color: DeckColors.label, fontSize: 9),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Row(children: cells),
+      ],
     );
   }
 }
