@@ -8,7 +8,7 @@ import '../../session/model.dart';
 import '../../session/share_files.dart';
 import '../../session/store.dart';
 import '../../theme/deck_theme.dart';
-import '../../widgets/deck_widgets.dart';
+import '../../widgets/deck_scaffold.dart';
 import 'replay_body.dart';
 
 class ReplayBundle {
@@ -133,29 +133,17 @@ class _ReplayLoadScreenState extends ConsumerState<ReplayLoadScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: DeckColors.bg,
-      appBar: AppBar(
-        toolbarHeight: 48,
-        title: Row(
-          children: [
-            const DataR0wMark(compact: true),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                widget.title,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12,
-                  letterSpacing: 1.2,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
-        ),
-        automaticallyImplyLeading: false,
+      appBar: DeckAppBar(
+        title: widget.title,
         leading: TextButton(
+          style: TextButton.styleFrom(
+            visualDensity: VisualDensity.compact,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
           onPressed: widget.onBack,
-          child: const Text('Retour'),
+          child: const Text('Retour', style: TextStyle(fontSize: 12)),
         ),
         actions: [
           if (_loadedId != null)

@@ -25,7 +25,8 @@ class ProfileScreen extends ConsumerWidget {
     return DeckScaffold(
       title: 'SÉLECTION PROFIL',
       subtitle: rower == null ? 'sans profil (loisir)' : rower.displayName,
-      retourFallback: AppRoutes.identity,
+      showRetour: false,
+      centerBrandOnly: true,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
         children: [

@@ -19,6 +19,7 @@ import '../../session/heel.dart';
 import '../../session/live_hub.dart';
 import '../../session/rower_orientation.dart';
 import '../../theme/deck_theme.dart';
+import '../../widgets/deck_scaffold.dart';
 import '../../widgets/heel_banner.dart';
 import '../../widgets/heel_gauge.dart';
 import '../../widgets/deck_widgets.dart';
@@ -164,54 +165,53 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   }
 
   Widget _topBar(LiveHubState s, SessionMode mode) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
-      child: Row(
-        children: [
-          if (s.hrBpm != null)
-            Text(
-              '♥ ${s.hrBpm}',
-              style: TextStyle(
-                color: (s.hrBpm ?? 0) > 180
-                    ? DeckColors.babord
-                    : DeckColors.tribord,
-                fontWeight: FontWeight.w700,
-              ),
-            )
-          else
-            const Text(
-              '♥ —',
-              style: TextStyle(color: DeckColors.muted, fontSize: 12),
-            ),
-          const SizedBox(width: 8),
+    return DeckSessionHeader(
+      title: 'LIVE',
+      trailing: [
+        if (s.hrBpm != null)
           Text(
-            _patchChip,
-            style: const TextStyle(color: DeckColors.label, fontSize: 11),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            mode.label,
+            '♥ ${s.hrBpm}',
             style: TextStyle(
-              color: mode == SessionMode.competition
-                  ? DeckColors.amber
-                  : DeckColors.label,
-              fontSize: 10,
+              color: (s.hrBpm ?? 0) > 180
+                  ? DeckColors.babord
+                  : DeckColors.tribord,
               fontWeight: FontWeight.w700,
+              fontSize: 12,
             ),
+          )
+        else
+          const Text(
+            '♥ —',
+            style: TextStyle(color: DeckColors.muted, fontSize: 12),
           ),
-          if (s.spo2Pct != null) ...[
-            const SizedBox(width: 8),
-            Text(
-              'SpO2 ${s.spo2Pct}%',
-              style: const TextStyle(color: DeckColors.label, fontSize: 12),
-            ),
-          ],
-          const Spacer(),
-          LiveLayoutButton(
-            onPressed: () => setState(() => _panel = !_panel),
+        const SizedBox(width: 8),
+        Text(
+          _patchChip,
+          style: const TextStyle(color: DeckColors.label, fontSize: 11),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          mode.label,
+          style: TextStyle(
+            color: mode == SessionMode.competition
+                ? DeckColors.amber
+                : DeckColors.label,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        if (s.spo2Pct != null) ...[
+          const SizedBox(width: 8),
+          Text(
+            'SpO2 ${s.spo2Pct}%',
+            style: const TextStyle(color: DeckColors.label, fontSize: 12),
           ),
         ],
-      ),
+        const SizedBox(width: 8),
+        LiveLayoutButton(
+          onPressed: () => setState(() => _panel = !_panel),
+        ),
+      ],
     );
   }
 
