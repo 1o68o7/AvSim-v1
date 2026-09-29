@@ -1,4 +1,4 @@
--- Isolation RLS DataR0w (recette). Prérequis : migrations 0001–0004
+-- Isolation RLS DataR0w (recette). Prérequis : migrations 0001–0006
 -- et deux users Auth (uid_a, uid_b). Ne pas exécuter tel quel :
 -- remplacer les UUID. Document de recette + assertions attendues.
 --
@@ -45,5 +45,33 @@
 -- insert into public.rowers (club_id, display_name, birth_date, sex)
 --   select id, 'Intrus', '2000-01-01', 'M' from public.clubs where short_code = 'CNA';
 -- -- → FAIL (rower ∉ rowers_write admin|coach)
+
+-- 8. session_meta (0005) — rower A n'INSERT pas pour owner B.
+--    Session rower club A :
+-- insert into public.session_meta (
+--   sync_id, club_id, owner_user_id, local_session_id,
+--   payload_sha256, storage_path)
+-- values (
+--   gen_random_uuid(),
+--   (select id from public.clubs where short_code = 'CNB'),
+--   '11111111-1111-1111-1111-111111111111',
+--   'local-stolen',
+--   '00',
+--   'club-b/x.zip');
+-- -- → FAIL session_meta_insert (pas membre club B) OU owner ≠ auth.uid()
+--
+-- -- Rower B SELECT session_meta du club A → 0 (is_club_member faux).
+-- -- Rower A UPDATE session_meta dont owner_user_id = uid_b → FAIL.
+-- -- DELETE session_meta → FAIL (using false). Soft-delete = UPDATE deleted_at
+-- -- par le owner uniquement.
+--
+-- 9. rower_physio (0006) — soi seulement en WRITE.
+-- -- Session rower A :
+-- insert into public.rower_physio (club_id, rower_id, user_id, share_with_coach)
+--   select club_id, id, '2222…', false from public.rowers where display_name = 'Intrus';
+-- -- → FAIL (user_id ≠ auth.uid())
+-- -- Coach SELECT physio share_with_coach = false → 0.
+-- -- Coach SELECT physio share_with_coach = true (même club) → 1.
+-- -- Coach UPDATE rower_physio → FAIL (user_id ≠ auth.uid()).
 
 select 1 as isolation_rls_recipe_loaded;

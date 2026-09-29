@@ -4,13 +4,17 @@ import 'package:go_router/go_router.dart';
 
 import '../../calendar/loisir_store.dart';
 import '../../health/consent_store.dart';
+import '../../health/physio_store.dart';
 import '../../identity/controller.dart';
 import '../../router.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
+import '../../sync/physio_sync.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
+
+final physioStoreProvider = Provider<PhysioStore>((ref) => PhysioStore());
 
 enum _PhysioWindow { d7, d28, d90 }
 
@@ -22,6 +26,8 @@ class PhysioScreen extends ConsumerStatefulWidget {
 }
 
 class _PhysioScreenState extends ConsumerState<PhysioScreen> {
+  PhysioRecord _r = const PhysioRecord();
+  bool _consentLoaded = false;
   _PhysioWindow _window = _PhysioWindow.d28;
   List<_SessionRow> _rows = const [];
   bool _loading = true;
@@ -29,7 +35,7 @@ class _PhysioScreenState extends ConsumerState<PhysioScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+    _boot();
   }
 
   Duration get _span => switch (_window) {
@@ -38,7 +44,18 @@ class _PhysioScreenState extends ConsumerState<PhysioScreen> {
         _PhysioWindow.d90 => const Duration(days: 90),
       };
 
-  Future<void> _load() async {
+  Future<void> _boot() async {
+    final r = await ref.read(physioStoreProvider).load();
+    if (mounted) {
+      setState(() {
+        _r = r;
+        _consentLoaded = true;
+      });
+    }
+    await _loadSessions();
+  }
+
+  Future<void> _loadSessions() async {
     setState(() => _loading = true);
     final rowerId = ref.read(identityProvider).activeRower?.id;
     final metas = await SessionStore.listSessions();
@@ -47,7 +64,8 @@ class _PhysioScreenState extends ConsumerState<PhysioScreen> {
       if (rowerId != null && m.rowerId != null && m.rowerId != rowerId) {
         return false;
       }
-      final start = m.startedAt == null ? null : DateTime.tryParse(m.startedAt!);
+      final start =
+          m.startedAt == null ? null : DateTime.tryParse(m.startedAt!);
       if (start == null) return true;
       return !start.isBefore(cutoff);
     }).toList();
@@ -64,6 +82,28 @@ class _PhysioScreenState extends ConsumerState<PhysioScreen> {
     });
   }
 
+  Future<void> _save(PhysioRecord r) async {
+    final ident = ref.read(identityProvider);
+    final rower = ident.activeRower;
+    final n = r.copyWith(
+      rowerId: rower?.id,
+      clubId: rower?.clubId ?? ident.activeClub?.id,
+      userId: rower?.userId,
+      consentAt:
+          r.consent ? (r.consentAt ?? DateTime.now().toUtc()) : r.consentAt,
+    );
+    await ref.read(physioStoreProvider).save(n);
+    await ConsentStore().save(
+      HealthConsent(
+        accepted: n.consent,
+        shareWithCoach: n.shareWithCoach,
+        at: n.consentAt,
+      ),
+    );
+    await syncRowerPhysio(n);
+    if (mounted) setState(() => _r = n);
+  }
+
   @override
   Widget build(BuildContext context) {
     final rower = ref.watch(identityProvider).activeRower;
@@ -71,200 +111,222 @@ class _PhysioScreenState extends ConsumerState<PhysioScreen> {
     return DeckScaffold(
       title: 'MES CONSTANTES',
       subtitle: 'informatif · pas médical',
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        children: [
-          const DeckSectionLabel('Readiness'),
-          const SizedBox(height: 8),
-          const Text(
-            '—',
-            style: TextStyle(fontSize: 48, fontWeight: FontWeight.w700),
-          ),
-          const Text(
-            'Pas assez de séances avec FC pour un score.',
-            style: TextStyle(color: DeckColors.muted),
-          ),
-          const SizedBox(height: 20),
-          Wrap(
-            spacing: 8,
-            children: [
-              for (final w in _PhysioWindow.values)
-                ChoiceChip(
-                  label: Text(switch (w) {
-                    _PhysioWindow.d7 => '7 JOURS',
-                    _PhysioWindow.d28 => '28 JOURS',
-                    _PhysioWindow.d90 => '90 JOURS',
-                  }),
-                  selected: _window == w,
-                  onSelected: (_) {
-                    setState(() => _window = w);
-                    _load();
-                  },
-                ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          const DeckSectionLabel('Dernière séance'),
-          const SizedBox(height: 8),
-          if (_loading)
-            const Text('…', style: TextStyle(color: DeckColors.muted))
-          else if (latest == null)
-            const Text(
-              'Aucune séance dans la fenêtre. Courbe FC + cadence + V sol : '
-              'voir replay après STOP.',
-              style: TextStyle(color: DeckColors.muted, height: 1.4),
-            )
-          else
-            _LatestCard(row: latest),
-          if (latest != null) ...[
-            const SizedBox(height: 16),
-            const DeckSectionLabel('Métriques clés'),
-            const SizedBox(height: 8),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              childAspectRatio: 1.55,
+      body: !_consentLoaded
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
               children: [
-                InstrumentPod(
-                  label: 'Distance',
-                  value: (latest.summary.distM / 1000).toStringAsFixed(2),
-                  unit: 'KM',
-                ),
-                InstrumentPod(
-                  label: 'Durée',
-                  value: formatDuration(latest.summary.duration),
-                  unit: 'MIN',
-                ),
-                InstrumentPod(
-                  label: 'Cadence moy.',
-                  value: latest.summary.cadenceMean == null
-                      ? '—'
-                      : latest.summary.cadenceMean!.toStringAsFixed(0),
-                  unit: 'SPM',
-                ),
-                InstrumentPod(
-                  label: 'Gîte RMS',
-                  value: latest.summary.giteRms.toStringAsFixed(1),
-                  unit: '°',
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'FC moy / max — non dispo ici (voir replay). '
-              'Pas de courbe inventée.',
-              style: TextStyle(color: DeckColors.label, fontSize: 11),
-            ),
-          ],
-          const SizedBox(height: 20),
-          DeckSectionLabel(
-            'Historique séances',
-            trailing: Text(
-              '${_rows.length}',
-              style: const TextStyle(color: DeckColors.label, fontSize: 11),
-            ),
-          ),
-          const SizedBox(height: 8),
-          for (final row in _rows)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Material(
-                color: DeckColors.surfaceHigh,
-                child: InkWell(
-                  onTap: () => context.go(
-                    '${AppRoutes.rowerReplay}?id=${Uri.encodeQueryComponent(row.meta.id)}',
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: DeckColors.hairline),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          formatClockRange(
-                            row.meta.startedAt,
-                            row.meta.endedAt,
-                          ),
-                          style: const TextStyle(
-                            color: DeckColors.label,
-                            fontSize: 10,
-                          ),
-                        ),
-                        Text(
-                          '${row.meta.classe.toUpperCase()}'
-                          '${row.meta.bassin == null ? '' : ' · ${row.meta.bassin}'}',
-                          style: const TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                        Text(
-                          'Dist ${(row.summary.distM / 1000).toStringAsFixed(2)} km · '
-                          'SPM ${row.summary.cadenceMean?.toStringAsFixed(0) ?? '—'} · '
-                          '${formatDuration(row.summary.duration)}',
-                          style: const TextStyle(
-                            color: DeckColors.muted,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: _r.consent,
+                  onChanged: (v) => _save(
+                    _r.copyWith(
+                      consent: v == true,
+                      shareWithCoach: v == true ? _r.shareWithCoach : false,
                     ),
                   ),
+                  title: const Text('Consentement santé (FC / constantes)'),
+                  subtitle: const Text(
+                    'Données de santé, usage informatif, pas médical. '
+                    'Aucun diagnostic. Opt-in R6.',
+                    style: TextStyle(color: DeckColors.muted, fontSize: 12),
+                  ),
                 ),
-              ),
-            ),
-          const SizedBox(height: 16),
-          const DeckSectionLabel('Parcours loisirs'),
-          const SizedBox(height: 8),
-          FutureBuilder(
-            future: LoisirStore().list(),
-            builder: (context, snap) {
-              final mine = (snap.data ?? const [])
-                  .where((p) => rower == null || p.rowerId == rower.id)
-                  .toList();
-              if (mine.isEmpty) {
-                return const Text(
-                  'Aucune régate / rando / master signalé.',
-                  style: TextStyle(color: DeckColors.muted),
-                );
-              }
-              return Column(
-                children: [
-                  for (final p in mine)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(p.type),
-                      subtitle: Text(p.tempsCourse ?? p.eventId),
-                    ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          OutlinedButton(
-            onPressed: () => context.go(AppRoutes.consent),
-            child: const Text('GÉRER LE PARTAGE COACH'),
-          ),
-          FutureBuilder(
-            future: ConsentStore().load(),
-            builder: (context, snap) {
-              final c = snap.data;
-              final shared = c?.shareWithCoach == true;
-              return Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  shared
-                      ? 'Partage coach : activé (opt-in).'
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Partager avec le coach'),
+                  value: _r.shareWithCoach,
+                  onChanged: !_r.consent
+                      ? null
+                      : (v) => _save(_r.copyWith(shareWithCoach: v)),
+                ),
+                Text(
+                  _r.shareWithCoach
+                      ? 'Partage coach : activé (opt-in). Sync rower_physio si clés.'
                       : 'Partage coach : privé par défaut.',
                   style: const TextStyle(color: DeckColors.muted, fontSize: 11),
                 ),
-              );
-            },
-          ),
-        ],
-      ),
+                const SizedBox(height: 16),
+                const DeckSectionLabel('Readiness'),
+                const SizedBox(height: 8),
+                const Text(
+                  '—',
+                  style: TextStyle(fontSize: 48, fontWeight: FontWeight.w700),
+                ),
+                const Text(
+                  'Pas assez de séances avec FC pour un score.',
+                  style: TextStyle(color: DeckColors.muted),
+                ),
+                const SizedBox(height: 20),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    for (final w in _PhysioWindow.values)
+                      ChoiceChip(
+                        label: Text(switch (w) {
+                          _PhysioWindow.d7 => '7 JOURS',
+                          _PhysioWindow.d28 => '28 JOURS',
+                          _PhysioWindow.d90 => '90 JOURS',
+                        }),
+                        selected: _window == w,
+                        onSelected: (_) {
+                          setState(() => _window = w);
+                          _loadSessions();
+                        },
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                const DeckSectionLabel('Dernière séance'),
+                const SizedBox(height: 8),
+                if (_loading)
+                  const Text('…', style: TextStyle(color: DeckColors.muted))
+                else if (latest == null)
+                  const Text(
+                    'Aucune séance dans la fenêtre. Courbe FC + cadence + V sol : '
+                    'voir replay après STOP.',
+                    style: TextStyle(color: DeckColors.muted, height: 1.4),
+                  )
+                else
+                  _LatestCard(row: latest),
+                if (latest != null) ...[
+                  const SizedBox(height: 16),
+                  const DeckSectionLabel('Métriques clés'),
+                  const SizedBox(height: 8),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: 1.55,
+                    children: [
+                      InstrumentPod(
+                        label: 'Distance',
+                        value: (latest.summary.distM / 1000).toStringAsFixed(2),
+                        unit: 'KM',
+                      ),
+                      InstrumentPod(
+                        label: 'Durée',
+                        value: formatDuration(latest.summary.duration),
+                        unit: 'MIN',
+                      ),
+                      InstrumentPod(
+                        label: 'Cadence moy.',
+                        value: latest.summary.cadenceMean == null
+                            ? '—'
+                            : latest.summary.cadenceMean!.toStringAsFixed(0),
+                        unit: 'SPM',
+                      ),
+                      InstrumentPod(
+                        label: 'Gîte RMS',
+                        value: latest.summary.giteRms.toStringAsFixed(1),
+                        unit: '°',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'FC moy / max — non dispo ici (voir replay). '
+                    'Pas de courbe inventée.',
+                    style: TextStyle(color: DeckColors.label, fontSize: 11),
+                  ),
+                ],
+                const SizedBox(height: 20),
+                DeckSectionLabel(
+                  'Historique séances',
+                  trailing: Text(
+                    '${_rows.length}',
+                    style: const TextStyle(
+                      color: DeckColors.label,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                for (final row in _rows)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Material(
+                      color: DeckColors.surfaceHigh,
+                      child: InkWell(
+                        onTap: () => context.go(
+                          '${AppRoutes.rowerReplay}?id=${Uri.encodeQueryComponent(row.meta.id)}',
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: DeckColors.hairline),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                formatClockRange(
+                                  row.meta.startedAt,
+                                  row.meta.endedAt,
+                                ),
+                                style: const TextStyle(
+                                  color: DeckColors.label,
+                                  fontSize: 10,
+                                ),
+                              ),
+                              Text(
+                                '${row.meta.classe.toUpperCase()}'
+                                '${row.meta.bassin == null ? '' : ' · ${row.meta.bassin}'}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              Text(
+                                'Dist ${(row.summary.distM / 1000).toStringAsFixed(2)} km · '
+                                'SPM ${row.summary.cadenceMean?.toStringAsFixed(0) ?? '—'} · '
+                                '${formatDuration(row.summary.duration)}',
+                                style: const TextStyle(
+                                  color: DeckColors.muted,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                const DeckSectionLabel('Parcours loisirs'),
+                const SizedBox(height: 8),
+                FutureBuilder(
+                  future: LoisirStore().list(),
+                  builder: (context, snap) {
+                    final mine = (snap.data ?? const [])
+                        .where((p) => rower == null || p.rowerId == rower.id)
+                        .toList();
+                    if (mine.isEmpty) {
+                      return const Text(
+                        'Aucune régate / rando / master signalé.',
+                        style: TextStyle(color: DeckColors.muted),
+                      );
+                    }
+                    return Column(
+                      children: [
+                        for (final p in mine)
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(p.type),
+                            subtitle: Text(p.tempsCourse ?? p.eventId),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton(
+                  onPressed: () => context.go(AppRoutes.consent),
+                  child: const Text('GÉRER LE PARTAGE COACH'),
+                ),
+              ],
+            ),
     );
   }
 }
@@ -311,7 +373,11 @@ class _LatestCard extends StatelessWidget {
           const SizedBox(height: 8),
           const Text(
             'Overlay multi-courbes : ouvrir le replay (pas de FC inventée ici).',
-            style: TextStyle(color: DeckColors.muted, fontSize: 11, height: 1.35),
+            style: TextStyle(
+              color: DeckColors.muted,
+              fontSize: 11,
+              height: 1.35,
+            ),
           ),
         ],
       ),
