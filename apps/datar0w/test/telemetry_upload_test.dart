@@ -314,4 +314,90 @@ void main() {
       '$club|GCZEKF',
     });
   });
+
+  test('cloud code=QEPSSL local_session_id=uuid → UPDATE + ACK', () async {
+    const club = '169c88f1-8627-4e6e-a757-9b225c568771';
+    const cloudSync = 'cccccccc-dddd-4eee-8fff-000000000000';
+    const cloudLocal = '11111111-2222-4333-8444-999999999999';
+    sink.seedMeta({
+      'sync_id': cloudSync,
+      'club_id': club,
+      'local_session_id': cloudLocal,
+      'code': 'QEPSSL',
+      'owner_user_id': '143623bb-577b-4efc-ab39-154a6ecd2de8',
+      'storage_path': '$club/$cloudSync.zip',
+      'payload_sha256': 'old',
+      'byte_size': 1,
+      'synced_at': '2026-09-30T11:49:00Z',
+    });
+
+    final engine = _engine(sink);
+    final row = OutboxRow(
+      syncId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+      path: dir.path,
+    );
+    final r = await engine.uploadAndUpsert(
+      row: row,
+      pack: packSessionDir(dir),
+      meta: const {'code': 'QEPSSL'},
+    );
+    expect(r.acked, isTrue);
+    expect(sink.metas, hasLength(1));
+    expect(sink.metas[cloudSync]?['local_session_id'], cloudLocal);
+    expect(sink.metasByCode['$club|QEPSSL']?['sync_id'], cloudSync);
+    expect(sink.metas.containsKey(row.syncId), isFalse);
+  });
+
+  test('42501 → pas de throw, error code dans UploadResult', () async {
+    sink.failMetaForLocal = 'QEPSSL';
+    sink.failMetaPgCode = '42501';
+    final engine = _engine(sink);
+    final r = await engine.uploadAndUpsert(
+      row: OutboxRow(
+        syncId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+        path: dir.path,
+      ),
+      pack: packSessionDir(dir),
+      meta: const {'code': 'QEPSSL'},
+    );
+    expect(r.acked, isFalse);
+    expect(r.error, '42501');
+  });
+
+  test('23505 + zip → ACK sans throw', () async {
+    sink.failMetaForLocal = 'QEPSSL';
+    sink.failMetaPgCode = '23505';
+    final engine = _engine(sink);
+    final r = await engine.uploadAndUpsert(
+      row: OutboxRow(
+        syncId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+        path: dir.path,
+      ),
+      pack: packSessionDir(dir),
+      meta: const {'code': 'QEPSSL'},
+    );
+    expect(r.acked, isTrue);
+    expect(sink.blobs, isNotEmpty);
+  });
+
+  test('minimalSessionMetaPayload drop class / nulls', () {
+    final m = minimalSessionMetaPayload({
+      'sync_id': 's',
+      'club_id': 'c',
+      'local_session_id': 'QEPSSL',
+      'code': 'QEPSSL',
+      'owner_user_id': 'u',
+      'storage_path': 'c/s.zip',
+      'payload_sha256': 'h',
+      'byte_size': 1,
+      'synced_at': 't',
+      'class': '8+',
+      'rower_id': null,
+      'started_at': 'x',
+    });
+    expect(m.containsKey('class'), isFalse);
+    expect(m.containsKey('rower_id'), isFalse);
+    expect(m.containsKey('started_at'), isFalse);
+    expect(m['code'], 'QEPSSL');
+  });
 }

@@ -143,4 +143,66 @@ void main() {
     expect(gw.calls, 1);
     expect(sync.db.all().single.acked, isTrue);
   });
+
+  test('3 rows outbox : 1 fail n’empêche pas les 2 autres ACK', () async {
+    final root = await Directory.systemTemp.createTemp('datar0w_3row_');
+    addTearDown(() async {
+      if (root.existsSync()) await root.delete(recursive: true);
+    });
+
+    Future<Directory> mk(String code) async {
+      final d = Directory('${root.path}/$code');
+      await d.create();
+      await File('${d.path}/meta.json').writeAsString('{"code":"$code"}');
+      await File('${d.path}/samples.jsonl').writeAsString('{}\n');
+      return d;
+    }
+
+    final q = await mk('QEPSSL');
+    final g = await mk('GT9JDK');
+    final c = await mk('GCZEKF');
+
+    final selective = _SelectiveGw(failCodes: {'QEPSSL'});
+    sync = SessionSync(
+      db: OutboxDb.memory(),
+      gateway: selective,
+      now: () => t,
+      resolveOwnerUserId: () => 'uid-1',
+      resolveClubId: () => 'club-1',
+      ensureClub: () async => 'club-1',
+    );
+    await sync.enqueueAfterStop('QEPSSL', dir: q);
+    await sync.enqueueAfterStop('GT9JDK', dir: g);
+    await sync.enqueueAfterStop('GCZEKF', dir: c);
+    await sync.retryManual();
+
+    final byCode = {
+      for (final r in sync.db.all()) r.path.split('/').last: r,
+    };
+    expect(byCode['QEPSSL']!.acked, isFalse);
+    expect(byCode['QEPSSL']!.lastError, '42501');
+    expect(byCode['GT9JDK']!.acked, isTrue);
+    expect(byCode['GCZEKF']!.acked, isTrue);
+    expect(selective.calls, 3);
+  });
+}
+
+class _SelectiveGw implements TelemetryGateway {
+  _SelectiveGw({required this.failCodes});
+  final Set<String> failCodes;
+  int calls = 0;
+
+  @override
+  Future<UploadResult> uploadAndUpsert({
+    required OutboxRow row,
+    required SessionPack pack,
+    required Map<String, dynamic> meta,
+  }) async {
+    calls++;
+    final code = row.path.split('/').last;
+    if (failCodes.contains(code)) {
+      return const UploadResult(ok: false, error: '42501');
+    }
+    return const UploadResult(ok: true, acked: true);
+  }
 }

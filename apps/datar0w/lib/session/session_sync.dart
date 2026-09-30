@@ -202,8 +202,8 @@ class SessionSync {
     return ensureActiveClubForSync(resolveOwnerUserId: resolveOwnerUserId);
   }
 
-  /// Tap « renvoyer » : ensure club (membership) → enqueue + push **toutes**
-  /// les rows non-ACK (attempts 0…N).
+  /// Tap « renvoyer » : ensure club → enqueue + push **chaque** row !acked.
+  /// Un échec (ex. QEPSSL) n’empêche pas INSERT/ACK des autres.
   Future<void> retryManual() async {
     try {
       await _ensureClub();
@@ -220,14 +220,29 @@ class SessionSync {
       final err = (uid == null || uid.isEmpty) ? 'pas d\'uid' : 'pas de club';
       for (final row in db.all()) {
         if (row.acked) continue;
-        // Pas de fake ACK — bandeau / outbox restent.
         db.save(row.copyWith(lastError: err));
       }
       return;
     }
-    for (final row in db.all()) {
-      if (row.acked) continue;
-      await _push(row, manual: true);
+    // Snapshot : éviter de sauter des rows si la liste mute.
+    final pending = db.all().where((r) => !r.acked).toList();
+    for (final row in pending) {
+      final code = p.basename(row.path);
+      try {
+        await _push(row, manual: true);
+        final after = db.bySyncId(row.syncId);
+        debugPrint(
+          'retryManual $code → '
+          'acked=${after?.acked} err=${after?.lastError}',
+        );
+      } catch (e) {
+        debugPrint('retryManual $code throw: $e');
+        db.save(row.copyWith(
+          attempts: row.attempts + 1,
+          lastError: '$e',
+          nextRetryAt: _now(),
+        ));
+      }
     }
   }
 
@@ -443,16 +458,16 @@ class _SessionSyncHostState extends State<SessionSyncHost>
     });
   }
 
-  /// Pas de pavé PostgREST dans le bandeau.
+  /// Bandeau : `sync: 42501` / `23505` / `409` — pas le pavé PostgREST.
   static String _shortSyncError(String raw) {
     if (raw == 'pas de club' || raw == 'pas d\'uid') return raw;
-    if (raw.contains('23505') ||
-        raw.contains('session_meta_pkey') ||
-        raw.contains('déjà')) {
-      return 'déjà synchro';
-    }
+    final pg = RegExp(r'^(42501|23505|409|PGRST\d+)$').firstMatch(raw.trim());
+    if (pg != null) return pg.group(1)!;
+    final embedded =
+        RegExp(r'\b(42501|23505|409|PGRST\d+)\b').firstMatch(raw);
+    if (embedded != null) return embedded.group(1)!;
     if (raw.startsWith('pas de ')) return raw;
-    if (raw.startsWith('storage:')) return 'storage';
+    if (raw.startsWith('storage')) return 'storage';
     if (raw.contains('session_meta')) return 'session_meta';
     if (raw.length > 32) return raw.substring(0, 32);
     return raw;
