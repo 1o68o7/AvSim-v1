@@ -67,6 +67,8 @@ class SessionSync {
     required this.db,
     this.gateway = const SilentTelemetryGateway(),
     this.now,
+    this.resolveOwnerUserId,
+    this.resolveClubId,
   });
 
   static TelemetryGateway Function() resolveGateway =
@@ -76,7 +78,18 @@ class SessionSync {
   TelemetryGateway gateway;
   DateTime Function()? now;
 
+  /// Injecté en tests. Prod : [defaultOwnerUserId].
+  final String? Function()? resolveOwnerUserId;
+
+  /// Injecté en tests. Prod : [defaultActiveClubId].
+  final String? Function()? resolveClubId;
+
   DateTime _now() => now?.call() ?? DateTime.now().toUtc();
+
+  String? _ownerUserId() =>
+      resolveOwnerUserId?.call() ?? defaultOwnerUserId();
+
+  String? _clubId() => resolveClubId?.call() ?? defaultActiveClubId();
 
   static SessionSync? _shared;
 
@@ -136,8 +149,8 @@ class SessionSync {
   }
 
   bool get hasAuthAndClub {
-    final uid = defaultOwnerUserId();
-    final club = defaultActiveClubId();
+    final uid = _ownerUserId();
+    final club = _clubId();
     return uid != null &&
         uid.isNotEmpty &&
         club != null &&
@@ -179,12 +192,27 @@ class SessionSync {
     await applyLocalRetentionFifo();
   }
 
+  /// Tap « renvoyer » : enqueue local + push **toutes** les rows non-ACK
+  /// (attempts 0…N), pas seulement ≥ 3.
   Future<void> retryManual() async {
+    try {
+      await enqueueExistingLocalSessions();
+    } catch (e) {
+      debugPrint('retryManual enqueueExistingLocalSessions: $e');
+    }
+    if (!hasAuthAndClub) {
+      final uid = _ownerUserId();
+      final err = (uid == null || uid.isEmpty) ? 'pas d\'uid' : 'pas de club';
+      for (final row in db.all()) {
+        if (row.acked) continue;
+        // Pas de fake ACK — bandeau / outbox restent.
+        db.save(row.copyWith(lastError: err));
+      }
+      return;
+    }
     for (final row in db.all()) {
       if (row.acked) continue;
-      if (row.attempts >= 3) {
-        await _push(row, manual: true);
-      }
+      await _push(row, manual: true);
     }
   }
 
@@ -283,6 +311,8 @@ class _SessionSyncHostState extends State<SessionSyncHost>
     with WidgetsBindingObserver {
   StreamSubscription<List<ConnectivityResult>>? _net;
   SessionSync? _sync;
+  String? _bannerStatus;
+  Timer? _statusTimer;
 
   @override
   void initState() {
@@ -313,8 +343,46 @@ class _SessionSyncHostState extends State<SessionSyncHost>
     }
   }
 
+  Future<void> _onBannerRetry() async {
+    final sync = _sync;
+    if (sync == null) return;
+    final ackedBefore =
+        sync.db.all().where((r) => r.acked).length;
+    try {
+      await sync.enqueueExistingLocalSessions();
+      await sync.drain(enqueueExisting: true);
+      await sync.retryManual();
+    } catch (e) {
+      debugPrint('SessionSyncHost retry: $e');
+    }
+    if (!mounted) return;
+    final ackedAfter = sync.db.all().where((r) => r.acked).length;
+    final nOk = ackedAfter - ackedBefore;
+    String status;
+    if (nOk > 0) {
+      status = 'sync: ok $nOk';
+    } else {
+      String? err;
+      for (final r in sync.db.all()) {
+        if (!r.acked && r.lastError != null && r.lastError!.isNotEmpty) {
+          err = r.lastError;
+          break;
+        }
+      }
+      status = err != null ? 'sync: $err' : 'sync: nack';
+    }
+    // Texte bandeau 2 s (haut d’écran) — pas un SnackBar sous le CTA.
+    _statusTimer?.cancel();
+    setState(() => _bannerStatus = status);
+    _statusTimer = Timer(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      setState(() => _bannerStatus = null);
+    });
+  }
+
   @override
   void dispose() {
+    _statusTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     unawaited(_net?.cancel());
     super.dispose();
@@ -323,23 +391,24 @@ class _SessionSyncHostState extends State<SessionSyncHost>
   @override
   Widget build(BuildContext context) {
     final n = _sync?.unsyncedBannerCount ?? 0;
-    final banner = n <= 0
+    final status = _bannerStatus;
+    final showBanner = n > 0 || status != null;
+    final label = status ??
+        (n == 1
+            ? '1 séance non synchronisée — renvoyer'
+            : '$n séances non synchronisées — renvoyer');
+    final banner = !showBanner
         ? null
         : Material(
             color: DeckColors.amber,
             child: SafeArea(
               bottom: false,
               child: InkWell(
-                onTap: () async {
-                  await _sync?.retryManual();
-                  if (mounted) setState(() {});
-                },
+                onTap: status != null ? null : () => unawaited(_onBannerRetry()),
                 child: Padding(
                   padding: const EdgeInsets.all(10),
                   child: Text(
-                    n == 1
-                        ? '1 séance non synchronisée — renvoyer'
-                        : '$n séances non synchronisées — renvoyer',
+                    label,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: DeckColors.onAlert,

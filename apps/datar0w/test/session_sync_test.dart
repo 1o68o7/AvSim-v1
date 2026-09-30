@@ -96,4 +96,51 @@ void main() {
     expect(sync.db.insertIdempotent(a).syncId, a.syncId);
     expect(gw.calls, 0);
   });
+
+  test('retryManual attempts=0 → _push (gateway appelé)', () async {
+    sync = SessionSync(
+      db: OutboxDb.memory(),
+      gateway: gw,
+      now: () => t,
+      resolveOwnerUserId: () => 'uid-1',
+      resolveClubId: () => 'club-1',
+    );
+    await sync.enqueueAfterStop('s1', dir: dir);
+    expect(sync.db.all().single.attempts, 0);
+    expect(gw.calls, 0);
+    await sync.retryManual();
+    expect(gw.calls, 1);
+    expect(sync.db.all().single.acked, isFalse);
+  });
+
+  test('retryManual sans uid → 0 push, lastError posé', () async {
+    sync = SessionSync(
+      db: OutboxDb.memory(),
+      gateway: gw,
+      now: () => t,
+      resolveOwnerUserId: () => null,
+      resolveClubId: () => 'club-1',
+    );
+    await sync.enqueueAfterStop('s1', dir: dir);
+    await sync.retryManual();
+    expect(gw.calls, 0);
+    final row = sync.db.all().single;
+    expect(row.acked, isFalse);
+    expect(row.lastError, 'pas d\'uid');
+  });
+
+  test('retryManual uid+club + gateway ok → acked', () async {
+    gw.ack = true;
+    sync = SessionSync(
+      db: OutboxDb.memory(),
+      gateway: gw,
+      now: () => t,
+      resolveOwnerUserId: () => 'uid-1',
+      resolveClubId: () => 'club-1',
+    );
+    await sync.enqueueAfterStop('s1', dir: dir);
+    await sync.retryManual();
+    expect(gw.calls, 1);
+    expect(sync.db.all().single.acked, isTrue);
+  });
 }
