@@ -68,7 +68,7 @@ void main() {
     expect(find.text('IMPORTER UN FICHIER'), findsNothing);
   });
 
-  testWidgets('import coach : chips Parc / Rameurs', (tester) async {
+  testWidgets('import coach ST-07 : zones Bateaux / Rameurs', (tester) async {
     final container = ProviderContainer(
       overrides: [identityStoreOverride()],
     );
@@ -81,13 +81,14 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('PARC'), findsOneWidget);
-    expect(find.text('RAMEURS'), findsOneWidget);
-    await tester.tap(find.text('RAMEURS'));
-    await tester.pump();
-    expect(find.text('TÉLÉCHARGER LE MODÈLE CSV'), findsOneWidget);
-    expect(find.text('IMPORTER UN FICHIER'), findsOneWidget);
-    expect(find.text('CHARGER LA BASE BORDEAUX'), findsOneWidget);
+    expect(find.text('IMPORT CABANE'), findsOneWidget);
+    expect(find.text('Bateaux.csv'), findsOneWidget);
+    expect(find.text('Rameurs.csv'), findsOneWidget);
+    expect(
+      find.textContaining('stockées cloud'),
+      findsOneWidget,
+    );
+    expect(find.text('ENVOYER VERS LE CLUB'), findsNothing);
   });
 
   testWidgets('import : hors coach → réservé', (tester) async {
@@ -99,7 +100,7 @@ void main() {
     );
     await tester.pump();
     expect(find.text('Réservé au coach.'), findsOneWidget);
-    expect(find.text('CONFIRMER L’IMPORT'), findsNothing);
+    expect(find.text('ENVOYER VERS LE CLUB'), findsNothing);
   });
 
   testWidgets('composition : hors coach → réservé', (tester) async {
