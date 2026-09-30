@@ -36,15 +36,16 @@ import 'onboarding/screen_club_home.dart';
 import 'onboarding/screen_club_join.dart';
 import 'onboarding/screen_rower.dart';
 import 'session/boat_class.dart';
-import 'session/rower_orientation.dart';
 import 'sync/auth_callback_screen.dart';
 import 'sync/auth_google.dart';
 import 'sync/auth_screen.dart';
 import 'widgets/safe_route.dart';
 
+/// try/catch builder → Page introuvable (pas de lock orientation ici :
+/// le lock portrait hub de #72 cassait le paysage live/cox).
 Widget _hub(String dest, Widget child) => SafeRoute(
       dest: dest,
-      builder: (_) => PortraitLockScope(child: child),
+      builder: (_) => child,
     );
 
 abstract final class AppRoutes {
