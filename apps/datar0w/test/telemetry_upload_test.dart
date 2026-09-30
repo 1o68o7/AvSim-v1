@@ -76,6 +76,7 @@ void main() {
     await sync.enqueueAfterStop('QEPSSL', dir: dir);
     await sync.drain(enqueueExisting: false);
     expect(sync.db.all().single.acked, isFalse);
+    expect(sync.db.all().single.lastError, 'pas d\'uid');
     expect(sink.blobs, isEmpty);
     expect(sink.metas, isEmpty);
   });
@@ -93,6 +94,7 @@ void main() {
     await sync.enqueueAfterStop('QEPSSL', dir: dir);
     await sync.drain(enqueueExisting: false);
     expect(sync.db.all().single.acked, isFalse);
+    expect(sync.db.all().single.lastError, 'pas de club');
     expect(sink.blobs, isEmpty);
   });
 
