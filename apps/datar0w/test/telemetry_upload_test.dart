@@ -197,4 +197,121 @@ void main() {
     expect(again, 2);
     expect(sync.db.all(), hasLength(2));
   });
+
+  test('2e push QEPSSL même sync_id → ACK, une seule ligne', () async {
+    final engine = _engine(sink);
+    final pack = packSessionDir(dir);
+    const club = '169c88f1-8627-4e6e-a757-9b225c568771';
+    final row = OutboxRow(
+      syncId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+      path: dir.path,
+    );
+    final r1 = await engine.uploadAndUpsert(
+      row: row,
+      pack: pack,
+      meta: const {'code': 'QEPSSL'},
+    );
+    expect(r1.acked, isTrue);
+    expect(sink.metas, hasLength(1));
+    expect(sink.metasByLocal['$club|QEPSSL'], isNotNull);
+
+    final r2 = await engine.uploadAndUpsert(
+      row: row,
+      pack: pack,
+      meta: const {'code': 'QEPSSL'},
+    );
+    expect(r2.acked, isTrue);
+    expect(sink.metas, hasLength(1));
+    expect(sink.metasByLocal, hasLength(1));
+  });
+
+  test('2e push QEPSSL autre sync_id → UPDATE, pas de 2e ligne', () async {
+    final engine = _engine(sink);
+    final pack = packSessionDir(dir);
+    const club = '169c88f1-8627-4e6e-a757-9b225c568771';
+    final first = OutboxRow(
+      syncId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+      path: dir.path,
+    );
+    final r1 = await engine.uploadAndUpsert(
+      row: first,
+      pack: pack,
+      meta: const {'code': 'QEPSSL'},
+    );
+    expect(r1.acked, isTrue);
+
+    // Re-enqueue local avec un nouveau sync_id (cas 23505 pkey / unique).
+    final second = OutboxRow(
+      syncId: 'bbbbbbbb-cccc-4ddd-8eee-ffffffffffff',
+      path: dir.path,
+    );
+    final r2 = await engine.uploadAndUpsert(
+      row: second,
+      pack: pack,
+      meta: const {'code': 'QEPSSL'},
+    );
+    expect(r2.acked, isTrue);
+    expect(sink.metasByLocal, hasLength(1));
+    expect(sink.metas, hasLength(1));
+    expect(
+      sink.metasByLocal['$club|QEPSSL']?['sync_id'],
+      first.syncId,
+    );
+    expect(sink.metas.containsKey(second.syncId), isFalse);
+  });
+
+  test('GT9JDK / GCZEKF absents → vrai INSERT (nouveaux sync_id)', () async {
+    final engine = _engine(sink);
+    final pack = packSessionDir(dir);
+    const club = '169c88f1-8627-4e6e-a757-9b225c568771';
+
+    final q = OutboxRow(
+      syncId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
+      path: dir.path,
+    );
+    await engine.uploadAndUpsert(
+      row: q,
+      pack: pack,
+      meta: const {'code': 'QEPSSL'},
+    );
+
+    final gtDir = Directory(p.join(dir.parent.path, 'GT9JDK'));
+    await gtDir.create();
+    await File(p.join(gtDir.path, 'meta.json'))
+        .writeAsString('{"code":"GT9JDK"}');
+    await File(p.join(gtDir.path, 'samples.jsonl')).writeAsString('{}\n');
+    final gt = OutboxRow(
+      syncId: '11111111-2222-4333-8444-555555555555',
+      path: gtDir.path,
+    );
+    final rGt = await engine.uploadAndUpsert(
+      row: gt,
+      pack: packSessionDir(gtDir),
+      meta: const {'code': 'GT9JDK'},
+    );
+    expect(rGt.acked, isTrue);
+
+    final gcDir = Directory(p.join(dir.parent.path, 'GCZEKF'));
+    await gcDir.create();
+    await File(p.join(gcDir.path, 'meta.json'))
+        .writeAsString('{"code":"GCZEKF"}');
+    await File(p.join(gcDir.path, 'samples.jsonl')).writeAsString('{}\n');
+    final gc = OutboxRow(
+      syncId: '66666666-7777-4888-8999-aaaaaaaaaaaa',
+      path: gcDir.path,
+    );
+    final rGc = await engine.uploadAndUpsert(
+      row: gc,
+      pack: packSessionDir(gcDir),
+      meta: const {'code': 'GCZEKF'},
+    );
+    expect(rGc.acked, isTrue);
+
+    expect(sink.metas, hasLength(3));
+    expect(sink.metasByLocal.keys.toSet(), {
+      '$club|QEPSSL',
+      '$club|GT9JDK',
+      '$club|GCZEKF',
+    });
+  });
 }

@@ -387,7 +387,7 @@ class _SessionSyncHostState extends State<SessionSyncHost>
     final sync = _sync;
     if (sync == null) return;
     final ackedBefore =
-        sync.db.all().where((r) => r.acked).length;
+        sync.db.all().where((r) => r.acked).map((r) => r.syncId).toSet();
     try {
       await _ensureClub();
       if (sync.hasAuthAndClub) {
@@ -402,12 +402,15 @@ class _SessionSyncHostState extends State<SessionSyncHost>
       debugPrint('SessionSyncHost retry: $e');
     }
     if (!mounted) return;
-    final ackedAfter = sync.db.all().where((r) => r.acked).length;
-    final nOk = ackedAfter - ackedBefore;
+    final newly = sync.db
+        .all()
+        .where((r) => r.acked && !ackedBefore.contains(r.syncId))
+        .toList();
+    final codes = [for (final r in newly) p.basename(r.path)];
     String? err;
     for (final r in sync.db.all()) {
       if (!r.acked && r.lastError != null && r.lastError!.isNotEmpty) {
-        err = r.lastError;
+        err = _shortSyncError(r.lastError!);
         break;
       }
     }
@@ -420,9 +423,16 @@ class _SessionSyncHostState extends State<SessionSyncHost>
       });
       return;
     }
-    final status = nOk > 0
-        ? 'sync: ok $nOk'
-        : (err != null ? 'sync: $err' : 'sync: nack');
+    final String status;
+    if (codes.length == 1) {
+      status = 'sync: ok ${codes.single}';
+    } else if (codes.length > 1) {
+      status = 'sync: ok ${codes.length}';
+    } else if (err != null) {
+      status = 'sync: $err';
+    } else {
+      status = 'sync: nack';
+    }
     setState(() {
       _offerClubCta = false;
       _bannerStatus = status;
@@ -431,6 +441,21 @@ class _SessionSyncHostState extends State<SessionSyncHost>
       if (!mounted) return;
       setState(() => _bannerStatus = null);
     });
+  }
+
+  /// Pas de pavé PostgREST dans le bandeau.
+  static String _shortSyncError(String raw) {
+    if (raw == 'pas de club' || raw == 'pas d\'uid') return raw;
+    if (raw.contains('23505') ||
+        raw.contains('session_meta_pkey') ||
+        raw.contains('déjà')) {
+      return 'déjà synchro';
+    }
+    if (raw.startsWith('pas de ')) return raw;
+    if (raw.startsWith('storage:')) return 'storage';
+    if (raw.contains('session_meta')) return 'session_meta';
+    if (raw.length > 32) return raw.substring(0, 32);
+    return raw;
   }
 
   void _onBannerTap() {
