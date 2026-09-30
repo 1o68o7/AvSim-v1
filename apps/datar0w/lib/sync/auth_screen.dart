@@ -35,15 +35,21 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   AuthGoogle get _auth => ref.read(authGoogleProvider);
 
   String? get _uid =>
-      _auth.sessionUserId ?? supabaseOrNull()?.auth.currentUser?.id as String?;
+      _auth.sessionUserId ?? supabaseOrNull()?.auth.currentUser?.id;
 
   String? get _emailLabel {
-    try {
-      final e = supabaseOrNull()?.auth.currentUser?.email;
-      return e is String && e.isNotEmpty ? e : null;
-    } catch (_) {
-      return null;
-    }
+    final e = supabaseOrNull()?.auth.currentUser?.email;
+    return (e != null && e.isNotEmpty) ? e : null;
+  }
+
+  void _snackCloudUnavailable() {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    messenger
+      ?..hideCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(content: Text('Cloud indisponible')),
+      );
+    setState(() => _msg = 'Cloud indisponible');
   }
 
   Future<void> _goPostLogin() async {
@@ -61,14 +67,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     context.go(dest);
   }
 
+  /// Même client Supabase que l’email (`supabaseOrNull` typé).
   Future<void> _google() async {
     setState(() {
       _busy = true;
       _msg = null;
     });
     try {
-      if (!SyncConfig.enabled) {
-        setState(() => _msg = 'Pas de clés cloud. Mode local inchangé.');
+      if (supabaseOrNull() == null) {
+        _snackCloudUnavailable();
         return;
       }
       final ok = await _auth.signInWithGoogle(door: OnboardingDoor.rower);
@@ -79,11 +86,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       }
       setState(() {
         _msg = ok
-            ? 'Connexion Google lancée. Reviens via le lien datarow://'
+            ? 'Connexion Google lancée. Reviens via datarow://auth/callback'
             : 'Google indisponible. Essaie par email.';
       });
     } catch (e) {
-      setState(() => _msg = 'Google indisponible. $e');
+      if (!mounted) return;
+      setState(() => _msg = 'Google indisponible.');
+      ScaffoldMessenger.maybeOf(context)
+        ?..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('Cloud indisponible')),
+        );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -97,14 +110,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       _msg = null;
     });
     try {
-      if (!SyncConfig.enabled) {
-        setState(() => _msg = 'Pas de clés cloud. Mode local inchangé.');
+      if (supabaseOrNull() == null) {
+        _snackCloudUnavailable();
         return;
       }
       await _auth.signInWithMagicLink(mail, door: OnboardingDoor.rower);
       setState(() => _msg = 'Lien envoyé. Ouvre le mail sur ce téléphone.');
     } catch (e) {
-      setState(() => _msg = 'Envoi impossible. $e');
+      setState(() => _msg = 'Envoi impossible.');
     } finally {
       if (mounted) setState(() => _busy = false);
     }

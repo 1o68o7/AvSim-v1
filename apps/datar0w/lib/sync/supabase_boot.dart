@@ -18,7 +18,12 @@ Future<void> bootSupabase() async {
   }
 }
 
-dynamic supabaseOrNull() {
+/// Client typé — **pas** `dynamic`.
+///
+/// `signInWithOAuth` est une *extension* `GoTrueClientSignInProvider`
+/// (supabase_flutter). Via `dynamic`, Dart ne la résout pas →
+/// `NoSuchMethodError: GoTrueClient has no instance method 'signInWithOAuth'`.
+SupabaseClient? supabaseOrNull() {
   if (!SyncConfig.enabled) return null;
   try {
     return Supabase.instance.client;

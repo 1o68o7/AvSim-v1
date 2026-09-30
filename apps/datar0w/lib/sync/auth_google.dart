@@ -25,10 +25,11 @@ class LiveAuthBackend implements AuthBackend {
   Future<bool> startGoogle({required String redirectTo}) async {
     final client = supabaseOrNull();
     if (client == null) return false;
-    return await client.auth.signInWithOAuth(
+    // Extension supabase_flutter sur GoTrueClient (nécessite client typé).
+    return client.auth.signInWithOAuth(
       OAuthProvider.google,
       redirectTo: redirectTo,
-    ) as bool;
+    );
   }
 
   @override
@@ -59,10 +60,7 @@ class LiveAuthBackend implements AuthBackend {
   }
 
   @override
-  String? currentUserId() {
-    final id = supabaseOrNull()?.auth.currentUser?.id;
-    return id is String ? id : null;
-  }
+  String? currentUserId() => supabaseOrNull()?.auth.currentUser?.id;
 }
 
 bool isAuthCallback(Uri uri) =>

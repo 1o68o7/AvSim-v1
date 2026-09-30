@@ -17,6 +17,18 @@ void main() {
     expect(ClubMemberRoleX.parse('director'), ClubMemberRole.director);
     expect(homeRouteForClubRole('intendant'), AppRoutes.homeIntendant);
     expect(homeRouteForClubRole('director'), AppRoutes.homeDirector);
+    expect(
+      homeRouteForClubMemberRole(ClubMemberRole.admin),
+      AppRoutes.homeAdmin,
+    );
+    expect(
+      homeRouteForClubMemberRole(ClubMemberRole.coach),
+      AppRoutes.homeCoach,
+    );
+    expect(
+      homeRouteForClubMemberRole(ClubMemberRole.rower),
+      AppRoutes.homeRower,
+    );
   });
 
   test('créer un club → admin ; demande soumise à validation', () async {

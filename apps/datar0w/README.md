@@ -44,6 +44,23 @@ python -m avsim.api
 
 Auth club (optionnelle) : `--dart-define-from-file=dart_defines.json` (voir Run / APK).
 Sans ces clés, `/auth` affiche le mode local — **pas de crash**.
+`supabase == null` → SnackBar « Cloud indisponible » (pas de `NoSuchMethodError`).
+
+### Supabase Dashboard — URLs à coller (Google + magic link)
+
+Authentication → URL Configuration :
+
+| Champ | Valeur exacte |
+|---|---|
+| **Site URL** | `datarow://auth/callback` |
+| **Redirect URLs** | `datarow://auth/callback` |
+
+Pas de `localhost:3000…`, pas d’URL https inventée. Le Client Secret Google
+reste dans le dashboard Supabase (Providers → Google) — **jamais** en
+`dart_defines` / app.
+
+Deep link : `datarow://auth/callback?code=…` → session ; `?error=…` → écran
+erreur lisible (pas 404, pas retour silencieux `/identity`).
 
 Routes (sans OAuth) : `POST /datarow/sessions`, `.../tick`, `GET .../by-code/{code}`, `GET .../live`, `POST .../notes`, `GET .../export`.
 
