@@ -83,9 +83,13 @@ class _AuthSessionBinderState extends ConsumerState<AuthSessionBinder> {
   void initState() {
     super.initState();
     final source = ref.read(authLinkSourceProvider);
-    _links = source.links.listen((uri) => unawaited(_onLink(uri)));
+    // Zone.root : l’I/O IdentityStore ne doit pas rester coincée sous
+    // FakeAsync des widget tests (listen hérite sinon de la zone du pump).
+    _links = source.links.listen((uri) {
+      unawaited(Zone.root.run(() => _onLink(uri)));
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_consumeInitial(source));
+      unawaited(Zone.root.run(() => _consumeInitial(source)));
     });
   }
 
@@ -117,6 +121,22 @@ class _AuthSessionBinderState extends ConsumerState<AuthSessionBinder> {
   }
 
   Future<void> _onLink(Uri uri) async {
+    if (!isAuthCallback(uri) &&
+        uri.path != AppRoutes.authCallback &&
+        !uri.path.endsWith('/auth/callback')) {
+      return;
+    }
+    final params = <String, String>{...uri.queryParameters};
+    if (uri.fragment.isNotEmpty) {
+      params.addAll(Uri.splitQueryString(uri.fragment));
+    }
+    // error= → écran callback lisible (pas silence /identity, pas 404).
+    final err = params['error'] ?? params['error_code'] ?? '';
+    if (err.isNotEmpty) {
+      final q = Uri(queryParameters: params).query;
+      _router.go('${AppRoutes.authCallback}?$q');
+      return;
+    }
     final auth = ref.read(authGoogleProvider);
     final ok = await auth.handleDeepLink(uri);
     if (!ok || !mounted) return;
@@ -134,9 +154,14 @@ class _AuthSessionBinderState extends ConsumerState<AuthSessionBinder> {
     final auth = ref.read(authGoogleProvider);
     final uid = auth.sessionUserId;
     if (uid != null) {
-      await ref.read(identityProvider.notifier).hydrateFromCloud(uid);
-      // Au cas où hydrate no-op (membership déjà posé côté ensure).
-      await ref.read(identityProvider.notifier).ensureActiveClubFromMembership();
+      try {
+        await ref.read(identityProvider.notifier).hydrateFromCloud(uid);
+        await ref
+            .read(identityProvider.notifier)
+            .ensureActiveClubFromMembership();
+      } catch (e) {
+        debugPrint('[auth_session] hydrate: $e');
+      }
     }
     if (!mounted) return;
     final door = doorFromPath(path, auth.lastDoor);

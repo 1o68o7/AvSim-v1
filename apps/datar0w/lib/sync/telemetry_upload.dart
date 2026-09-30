@@ -328,8 +328,8 @@ class TelemetryUploadEngine implements TelemetryGateway {
         'session_meta upsert PostgrestException '
         'code=$pg message=${e.message}',
       );
-      // 23505 = déjà la même séance ; zip poussé → ACK.
-      if (pg == '23505' && (zipOk || await sink.objectExists(path))) {
+      // 23505 = déjà la même séance ; zip poussé juste avant → ACK.
+      if (pg == '23505' && zipOk) {
         debugPrint('session_meta 23505 + zip → ACK code=$code');
         return const UploadResult(ok: true, acked: true);
       }
@@ -338,7 +338,7 @@ class TelemetryUploadEngine implements TelemetryGateway {
     } catch (e) {
       debugPrint('session_meta upsert FAIL: $e');
       final pg = postgrestErrorCode(e);
-      if (pg == '23505' && (zipOk || await sink.objectExists(path))) {
+      if (pg == '23505' && zipOk) {
         return const UploadResult(ok: true, acked: true);
       }
       return UploadResult(
@@ -375,7 +375,8 @@ class SupabaseBlobSink implements BlobSink {
       final slash = storagePath.lastIndexOf('/');
       final folder = slash >= 0 ? storagePath.substring(0, slash) : '';
       final name = slash >= 0 ? storagePath.substring(slash + 1) : storagePath;
-      final listed = await client.storage.from('session-telemetry').list(folder);
+      final listed =
+          await client.storage.from('session-telemetry').list(path: folder);
       for (final f in listed) {
         if (f.name == name) return true;
       }

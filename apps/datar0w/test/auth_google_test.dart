@@ -107,8 +107,8 @@ void main() {
     await tester.enterText(find.byType(TextField), 'ada@example.com');
     await tester.tap(find.text('ENVOYER LE LIEN'));
     await tester.pump();
-    // Sans dart-define : pas d’appel réseau, message local.
+    // Sans dart-define : pas d’appel réseau, SnackBar cloud.
     expect(SyncConfig.enabled, isFalse);
-    expect(find.textContaining('Pas de clés cloud'), findsWidgets);
+    expect(find.textContaining('Cloud indisponible'), findsWidgets);
   });
 }

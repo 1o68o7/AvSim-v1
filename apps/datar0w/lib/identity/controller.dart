@@ -125,8 +125,7 @@ class IdentityController extends Notifier<IdentitySnapshot> {
   String? get _sessionUserId {
     final fromAuth = ref.read(authGoogleProvider).sessionUserId;
     if (fromAuth != null && fromAuth.isNotEmpty) return fromAuth;
-    final id = supabaseOrNull()?.auth.currentUser?.id;
-    return id is String ? id : null;
+    return supabaseOrNull()?.auth.currentUser?.id;
   }
 
   @override

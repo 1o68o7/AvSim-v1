@@ -38,15 +38,34 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
     return out;
   }
 
+  String _friendlyError(Map<String, String> params) {
+    final code = (params['error'] ?? params['error_code'] ?? '').trim();
+    var desc = (params['error_description'] ?? '').trim();
+    if (desc.isNotEmpty) {
+      try {
+        desc = Uri.decodeComponent(desc.replaceAll('+', ' '));
+      } catch (_) {}
+    }
+    final lower = '$code $desc'.toLowerCase();
+    if (lower.contains('access_denied')) {
+      return 'Connexion Google refusée ou annulée.';
+    }
+    if (lower.contains('otp') || lower.contains('expired')) {
+      return 'Lien expiré. Renvoie un lien depuis Connexion.';
+    }
+    if (code.isNotEmpty && desc.isNotEmpty) return '$desc ($code)';
+    if (desc.isNotEmpty) return desc;
+    if (code.isNotEmpty) return 'Connexion impossible ($code).';
+    return 'Connexion impossible.';
+  }
+
   Future<void> _handle() async {
     final params = _params(widget.uri);
-    final err = params['error'] ??
-        params['error_code'] ??
-        params['error_description'];
-    if (err != null && err.isNotEmpty) {
+    final errKey = params['error'] ?? params['error_code'];
+    if (errKey != null && errKey.isNotEmpty) {
       if (!mounted) return;
       setState(() {
-        _error = err;
+        _error = _friendlyError(params);
         _busy = false;
       });
       return;
@@ -78,9 +97,6 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final expired = (_error ?? '').toLowerCase().contains('otp') ||
-        (_error ?? '').toLowerCase().contains('expired') ||
-        (_error ?? '').toLowerCase().contains('access_denied');
     return DeckScaffold(
       title: 'CONNEXION',
       subtitle: 'retour auth',
@@ -93,22 +109,21 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    expired
-                        ? 'Lien expiré ou refusé ($_error).'
-                        : 'Connexion impossible ($_error).',
+                    _error ?? 'Connexion impossible.',
                     style: const TextStyle(
                       color: DeckColors.amber,
                       height: 1.4,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
                     onPressed: () => context.go(AppRoutes.auth),
-                    child: const Text('RENVOYER UN LIEN'),
+                    child: const Text('RETOUR CONNEXION'),
                   ),
                   TextButton(
                     onPressed: () => context.go(AppRoutes.identity),
-                    child: const Text('Retour'),
+                    child: const Text('Accueil'),
                   ),
                 ],
               ),

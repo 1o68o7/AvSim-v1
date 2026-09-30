@@ -5,9 +5,11 @@ import 'package:datar0w/identity/models.dart';
 import 'package:datar0w/identity/store.dart';
 import 'package:datar0w/onboarding/routing.dart';
 import 'package:datar0w/router.dart';
+import 'package:datar0w/sync/auth_callback_screen.dart';
 import 'package:datar0w/sync/auth_google.dart';
 import 'package:datar0w/sync/auth_links.dart';
 import 'package:datar0w/sync/auth_session.dart';
+import 'package:datar0w/sync/club_remote.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -95,6 +97,7 @@ Future<void> _pump({
     ProviderScope(
       overrides: [
         identityStoreOverride(),
+        clubRemoteOverride(MemoryClubRemote()),
         authGoogleProvider.overrideWithValue(auth),
         authLinkSourceProvider.overrideWithValue(links),
       ],
@@ -106,6 +109,16 @@ Future<void> _pump({
   );
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 50));
+}
+
+/// FakeAsync ne complète pas l’I/O IdentityStore — il faut [runAsync].
+Future<void> _emitAuthLink(WidgetTester tester, _MemLinks links, Uri uri) async {
+  await tester.runAsync(() async {
+    links.controller.add(uri);
+    // hydrateFromCloud + ensureActiveClub (disque) puis go().
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+  });
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -171,12 +184,11 @@ void main() {
       links: links,
     );
     expect(find.text('AUTH'), findsOneWidget);
-    await tester.runAsync(() async {
-      links.controller.add(
-        Uri.parse('datarow://auth/callback?code=pkce&door=rower'),
-      );
-    });
-    await tester.pumpAndSettle();
+    await _emitAuthLink(
+      tester,
+      links,
+      Uri.parse('datarow://auth/callback?code=pkce&door=rower'),
+    );
     expect(find.text('ONBOARD'), findsOneWidget);
     addTearDown(links.controller.close);
   });
@@ -190,10 +202,11 @@ void main() {
       auth: AuthGoogle(backend: _FakeBackend()),
       links: links,
     );
-    links.controller.add(
+    await _emitAuthLink(
+      tester,
+      links,
       Uri.parse('datarow://auth/callback?code=pkce&door=club'),
     );
-    await tester.pumpAndSettle();
     expect(find.text('ONBOARD'), findsOneWidget);
     expect(find.text('CLUB-JOIN'), findsNothing);
     addTearDown(links.controller.close);
@@ -208,8 +221,11 @@ void main() {
       auth: AuthGoogle(backend: _FakeBackend()),
       links: links,
     );
-    links.controller.add(Uri.parse('datarow://auth/callback?code=pkce'));
-    await tester.pumpAndSettle();
+    await _emitAuthLink(
+      tester,
+      links,
+      Uri.parse('datarow://auth/callback?code=pkce'),
+    );
     expect(find.text('LIVE'), findsOneWidget);
     expect(find.text('ONBOARD'), findsNothing);
     addTearDown(links.controller.close);
@@ -221,14 +237,68 @@ void main() {
     final links = _MemLinks(
       seed: Uri.parse('datarow://auth/callback?code=pkce&door=rower'),
     );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          identityStoreOverride(),
+          clubRemoteOverride(MemoryClubRemote()),
+          authGoogleProvider.overrideWithValue(
+            AuthGoogle(backend: _FakeBackend()),
+          ),
+          authLinkSourceProvider.overrideWithValue(links),
+        ],
+        child: AuthSessionBinder(
+          router: router,
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      ),
+    );
+    // 1er frame → post-frame _consumeInitial ; I/O dans runAsync.
+    await tester.pump();
+    await tester.runAsync(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+    });
+    await tester.pumpAndSettle();
+    expect(find.text('ONBOARD'), findsOneWidget);
+    addTearDown(links.controller.close);
+  });
+
+  testWidgets('error= depuis deep link → /auth/callback, pas /identity',
+      (tester) async {
+    final router = GoRouter(
+      initialLocation: AppRoutes.identity,
+      routes: [
+        GoRoute(
+          path: AppRoutes.identity,
+          builder: (_, _) => const Text('IDENTITY'),
+        ),
+        GoRoute(
+          path: AppRoutes.authCallback,
+          builder: (context, state) => AuthCallbackScreen(uri: state.uri),
+        ),
+        GoRoute(
+          path: AppRoutes.auth,
+          builder: (_, _) => const Text('AUTH'),
+        ),
+      ],
+    );
+    final links = _MemLinks();
     await _pump(
       tester: tester,
       router: router,
       auth: AuthGoogle(backend: _FakeBackend()),
       links: links,
     );
-    await tester.pump();
-    expect(find.text('ONBOARD'), findsOneWidget);
+    expect(find.text('IDENTITY'), findsOneWidget);
+    // error= → go sync, pas d’hydrate.
+    links.controller.add(
+      Uri.parse(
+        'datarow://auth/callback?error=access_denied&error_description=denied',
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Google refusée'), findsOneWidget);
+    expect(find.text('IDENTITY'), findsNothing);
     addTearDown(links.controller.close);
   });
 }

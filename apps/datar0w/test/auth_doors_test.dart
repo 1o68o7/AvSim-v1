@@ -226,9 +226,40 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(find.textContaining('expiré'), findsOneWidget);
-    expect(find.text('RENVOYER UN LIEN'), findsOneWidget);
-    await tester.tap(find.text('RENVOYER UN LIEN'));
+    expect(find.text('RETOUR CONNEXION'), findsOneWidget);
+    await tester.tap(find.text('RETOUR CONNEXION'));
     await tester.pumpAndSettle();
     expect(find.text('AUTH'), findsOneWidget);
+  });
+
+  testWidgets('callback error=access_denied : message Google lisible',
+      (tester) async {
+    final router = GoRouter(
+      initialLocation:
+          '${AppRoutes.authCallback}?error=access_denied&error_description=User+denied',
+      routes: [
+        GoRoute(
+          path: AppRoutes.authCallback,
+          builder: (context, state) => AuthCallbackScreen(uri: state.uri),
+        ),
+        GoRoute(
+          path: AppRoutes.auth,
+          builder: (_, __) => const Text('AUTH'),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          identityStoreOverride(),
+          authGoogleProvider.overrideWithValue(AuthGoogle()),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.textContaining('Google refusée'), findsOneWidget);
+    expect(find.text('IDENTITY'), findsNothing);
   });
 }

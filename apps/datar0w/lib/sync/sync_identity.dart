@@ -9,7 +9,7 @@ import 'supabase_boot.dart';
 String? defaultOwnerUserId() {
   try {
     final id = supabaseOrNull()?.auth.currentUser?.id;
-    return id is String && id.isNotEmpty ? id : null;
+    return (id != null && id.isNotEmpty) ? id : null;
   } catch (_) {
     return null;
   }
