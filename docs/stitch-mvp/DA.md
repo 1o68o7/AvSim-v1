@@ -63,4 +63,5 @@ Sentence case partout sur accueils / compte. Pas d’ALL CAPS cockpit hors label
 | DR-52 | `148b587626d34495802b73e50a1294a5` |
 | DR-33 | `e08d021b58c74847946c9e712f6502ee` |
 
-Détail challenge + scores : [`DA-CHALLENGE-2026.md`](./DA-CHALLENGE-2026.md).
+Détail challenge + scores : [`DA-CHALLENGE-2026.md`](./DA-CHALLENGE-2026.md).  
+Inventaire planches Bassin (états) : [`DA-INVENTAIRE-BASSIN.md`](./DA-INVENTAIRE-BASSIN.md).
