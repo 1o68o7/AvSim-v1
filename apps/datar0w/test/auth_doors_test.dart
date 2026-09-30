@@ -70,32 +70,38 @@ void main() {
     );
   });
 
+  GoRouter _identityRouter() => GoRouter(
+        initialLocation: AppRoutes.identity,
+        routes: [
+          GoRoute(
+            path: AppRoutes.identity,
+            builder: (_, __) => const IdentityListScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.homeRower,
+            builder: (_, __) => const Text('HOME-ROWER'),
+          ),
+          GoRoute(
+            path: AppRoutes.profile,
+            builder: (_, __) => const Text('PROFILS'),
+          ),
+          GoRoute(
+            path: AppRoutes.auth,
+            builder: (_, __) => const Text('AUTH'),
+          ),
+          GoRoute(
+            path: AppRoutes.identityEdit,
+            builder: (_, __) => const Text('EDIT'),
+          ),
+        ],
+      );
+
   testWidgets('tap profil /identity → /home/rower (pas /)', (tester) async {
     final rower = Rower.create(
       displayName: 'Camille Test',
       birthDate: DateTime(1998, 5, 10),
     );
-    final router = GoRouter(
-      initialLocation: AppRoutes.identity,
-      routes: [
-        GoRoute(
-          path: AppRoutes.identity,
-          builder: (_, __) => const IdentityListScreen(),
-        ),
-        GoRoute(
-          path: AppRoutes.homeRower,
-          builder: (_, __) => const Text('HOME-ROWER'),
-        ),
-        GoRoute(
-          path: AppRoutes.profile,
-          builder: (_, __) => const Text('PROFILS'),
-        ),
-        GoRoute(
-          path: AppRoutes.auth,
-          builder: (_, __) => const Text('AUTH'),
-        ),
-      ],
-    );
+    final router = _identityRouter();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -111,6 +117,21 @@ void main() {
     expect(find.text('HOME-ROWER'), findsOneWidget);
     expect(find.text('PROFILS'), findsNothing);
     expect(router.state.uri.path, AppRoutes.homeRower);
+  });
+
+  testWidgets('tap Connexion /identity → /auth', (tester) async {
+    final router = _identityRouter();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [identityStoreOverride()],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Connexion'));
+    await tester.pumpAndSettle();
+    expect(find.text('AUTH'), findsOneWidget);
+    expect(router.state.uri.path, AppRoutes.auth);
   });
 
   testWidgets('Passer (sans profil) absent si flag release', (tester) async {

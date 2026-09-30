@@ -12,10 +12,16 @@ import 'auth_links.dart';
 import 'supabase_boot.dart';
 
 /// Pas d'Accueil injecté sur live / cox / coach, même après un callback.
-bool canRedirectAfterAuth(String path) =>
-    path != AppRoutes.live &&
-    path != AppRoutes.cox &&
-    path != AppRoutes.coachLive;
+/// Sur `/identity`, seul un deep link réussi peut rediriger (pas tokenRefreshed).
+bool canRedirectAfterAuth(String path, {bool fromDeepLink = false}) {
+  if (path == AppRoutes.live ||
+      path == AppRoutes.cox ||
+      path == AppRoutes.coachLive) {
+    return false;
+  }
+  if (path == AppRoutes.identity && !fromDeepLink) return false;
+  return true;
+}
 
 OnboardingDoor doorFromPath(String path, OnboardingDoor fallback) {
   if (path == AppRoutes.auth || path == AppRoutes.authCallback) {
@@ -98,13 +104,16 @@ class _AuthSessionBinderState extends ConsumerState<AuthSessionBinder> {
     try {
       _auth = client.auth.onAuthStateChange.listen((data) {
         final event = '${data.event}';
+        // tokenRefreshed ne doit pas recoller / forcer une nav depuis /identity.
         if (!event.contains('signedIn') &&
             !event.contains('tokenRefreshed')) {
           return;
         }
         final auth = ref.read(authGoogleProvider);
         auth.sessionUserId = auth.backend.currentUserId();
-        if (auth.sessionUserId != null) unawaited(_goPostLogin());
+        if (auth.sessionUserId != null) {
+          unawaited(_goPostLogin(fromDeepLink: false));
+        }
       });
     } catch (_) {}
   }
@@ -113,12 +122,17 @@ class _AuthSessionBinderState extends ConsumerState<AuthSessionBinder> {
     final auth = ref.read(authGoogleProvider);
     final ok = await auth.handleDeepLink(uri);
     if (!ok || !mounted) return;
-    await _goPostLogin();
+    await _goPostLogin(fromDeepLink: true);
   }
 
-  Future<void> _goPostLogin() async {
+  Future<void> _goPostLogin({required bool fromDeepLink}) async {
     final path = routerPath(_router);
-    if (!canRedirectAfterAuth(path)) return;
+    if (!canRedirectAfterAuth(path, fromDeepLink: fromDeepLink)) {
+      debugPrint(
+        '[auth_session] skip post-login path=$path fromDeepLink=$fromDeepLink',
+      );
+      return;
+    }
     final auth = ref.read(authGoogleProvider);
     final uid = auth.sessionUserId;
     if (uid != null) {
@@ -131,6 +145,7 @@ class _AuthSessionBinderState extends ConsumerState<AuthSessionBinder> {
       snap: ref.read(identityProvider),
       sessionUserId: uid,
     );
+    debugPrint('[auth_session] post-login path=$path → $dest');
     _router.go(dest);
   }
 

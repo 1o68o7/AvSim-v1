@@ -17,6 +17,33 @@ bool debugHidePasserSansProfil = false;
 bool get allowPasserSansProfil =>
     kDebugMode && !debugHidePasserSansProfil;
 
+String _currentPath(BuildContext context) {
+  try {
+    return GoRouterState.of(context).uri.path;
+  } catch (_) {
+    try {
+      return GoRouter.of(context).state.uri.path;
+    } catch (_) {
+      return '?';
+    }
+  }
+}
+
+/// Log avant/après pour diagnostiquer les go no-op (release OnePlus).
+void goFromIdentity(BuildContext context, String dest) {
+  final from = _currentPath(context);
+  debugPrint('[identity] go BEFORE path=$from dest=$dest');
+  context.go(dest);
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (!context.mounted) {
+      debugPrint('[identity] go AFTER  unmounted (wanted $dest)');
+      return;
+    }
+    final after = _currentPath(context);
+    debugPrint('[identity] go AFTER  path=$after (wanted $dest)');
+  });
+}
+
 Future<void> _confirmDeleteRower(
   BuildContext context,
   WidgetRef ref,
@@ -103,7 +130,7 @@ class IdentityListScreen extends ConsumerWidget {
                       final dest = isRowerProfilePlayable(r)
                           ? AppRoutes.homeRower
                           : AppRoutes.rowerOnboard;
-                      context.go(dest);
+                      goFromIdentity(context, dest);
                     },
                   ),
               ],
@@ -115,7 +142,8 @@ class IdentityListScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 FilledButton(
-                  onPressed: () => context.go(AppRoutes.identityEdit),
+                  onPressed: () =>
+                      goFromIdentity(context, AppRoutes.identityEdit),
                   child: const Text('CRÉER UN PROFIL'),
                 ),
                 if (allowPasserSansProfil) ...[
@@ -126,14 +154,14 @@ class IdentityListScreen extends ConsumerWidget {
                           .read(identityProvider.notifier)
                           .selectRower(null);
                       if (context.mounted) {
-                        context.go(AppRoutes.profile);
+                        goFromIdentity(context, AppRoutes.profile);
                       }
                     },
                     child: const Text('Passer (sans profil)'),
                   ),
                 ],
                 TextButton(
-                  onPressed: () => context.go(AppRoutes.auth),
+                  onPressed: () => goFromIdentity(context, AppRoutes.auth),
                   child: const Text('Connexion'),
                 ),
               ],
