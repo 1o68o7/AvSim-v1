@@ -133,20 +133,20 @@ class TelemetryUploadEngine implements TelemetryGateway {
   }) async {
     final owner = _ownerUserId();
     if (owner == null || owner.isEmpty) {
-      debugPrint('session_meta skip: pas d’auth.uid() — pas d’ACK');
+      debugPrint('session_meta skip: pas d’uid — pas d’ACK ni zip');
       return const UploadResult(
         ok: false,
         acked: false,
-        error: 'owner_user_id manquant (auth.uid())',
+        error: 'pas d\'uid',
       );
     }
     final clubId = _clubId(meta);
     if (clubId == null || clubId.isEmpty) {
-      debugPrint('session_meta skip: pas de club_id — pas d’upload');
+      debugPrint('session_meta skip: pas de club — pas d’upload');
       return const UploadResult(
         ok: false,
         acked: false,
-        error: 'club_id manquant (activeClubId / meta)',
+        error: 'pas de club',
       );
     }
     final localId = localSessionIdFor(row, meta);
