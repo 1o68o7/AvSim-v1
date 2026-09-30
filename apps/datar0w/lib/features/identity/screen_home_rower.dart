@@ -141,9 +141,24 @@ class HomeRowerScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 12),
+          // ST-04 — cartes rameur (pas de cartes staff).
           FilledButton(
             onPressed: () => _continue(context, ref),
-            child: const Text('CONTINUER VERS LA SÉANCE'),
+            child: const Text('NOUVELLE SÉANCE'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: () => context.go(AppRoutes.sessions),
+            child: const Text('MES SÉANCES'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: () => context.go(
+              rower == null
+                  ? AppRoutes.identity
+                  : '${AppRoutes.identityEdit}?id=${Uri.encodeQueryComponent(rower.id)}',
+            ),
+            child: const Text('PROFIL'),
           ),
           const SizedBox(height: 8),
           OutlinedButton(
@@ -153,10 +168,6 @@ class HomeRowerScreen extends ConsumerWidget {
             child: Text(showClub ? 'MON CLUB' : 'REJOINDRE UN CLUB'),
           ),
           const SizedBox(height: 8),
-          TextButton(
-            onPressed: () => context.go(AppRoutes.sessions),
-            child: const Text('MES SÉANCES'),
-          ),
           TextButton(
             onPressed: () => context.go(AppRoutes.devices),
             child: const Text('MES OBJETS'),
