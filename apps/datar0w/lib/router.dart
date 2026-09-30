@@ -17,6 +17,7 @@ import 'features/identity/screen_home_roles.dart';
 import 'features/identity/screen_home_rower.dart';
 import 'features/identity/screen_import.dart';
 import 'features/identity/screen_rower_edit.dart';
+import 'features/identity/screen_settings.dart';
 import 'features/identity/screen_spinoscope.dart';
 import 'features/identity/screen_who.dart';
 import 'features/ops/screen_departure.dart';
@@ -83,6 +84,7 @@ abstract final class AppRoutes {
   static const authCallback = '/auth/callback';
   static const clubLogin = '/club/login';
   static const clubJoin = '/club/join';
+  static const settings = '/settings';
   static const calendar = '/calendar';
   static const waters = '/waters';
   static const consent = '/consent';
@@ -309,6 +311,12 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.authCallback,
       name: 'auth-callback',
       builder: (context, state) => AuthCallbackScreen(uri: state.uri),
+    ),
+    GoRoute(
+      path: AppRoutes.settings,
+      name: 'settings',
+      builder: (context, state) =>
+          _hub(AppRoutes.settings, const SettingsScreen()),
     ),
     GoRoute(
       path: AppRoutes.clubLogin,

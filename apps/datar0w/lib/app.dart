@@ -5,6 +5,7 @@ import 'router.dart';
 import 'session/session_sync.dart';
 import 'sync/auth_session.dart';
 import 'theme/deck_theme.dart';
+import 'widgets/nav_swipe.dart';
 
 class DataR0wApp extends StatelessWidget {
   const DataR0wApp({super.key, this.router});
@@ -17,6 +18,7 @@ class DataR0wApp extends StatelessWidget {
     // AuthSessionBinder hors MaterialApp (écoute intents).
     // SessionSyncHost DANS builder MaterialApp : la bannière sync ne doit
     // JAMAIS remonter MaterialApp.router (sinon reset → /identity).
+    // NavSwipeHost : swipe droite = arrière, gauche = avant (hors live/cox).
     return AuthSessionBinder(
       router: cfg,
       child: MaterialApp.router(
@@ -24,8 +26,11 @@ class DataR0wApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: buildDeckTheme(),
         routerConfig: cfg,
-        builder: (context, child) => SessionSyncHost(
-          child: child ?? const SizedBox.shrink(),
+        builder: (context, child) => NavSwipeHost(
+          router: cfg,
+          child: SessionSyncHost(
+            child: child ?? const SizedBox.shrink(),
+          ),
         ),
       ),
     );
