@@ -104,11 +104,9 @@ class _AuthSessionBinderState extends ConsumerState<AuthSessionBinder> {
     try {
       _auth = client.auth.onAuthStateChange.listen((data) {
         final event = '${data.event}';
-        // tokenRefreshed ne doit pas recoller / forcer une nav depuis /identity.
-        if (!event.contains('signedIn') &&
-            !event.contains('tokenRefreshed')) {
-          return;
-        }
+        // Pas de tokenRefreshed : il volait la nav après un go() utilisateur.
+        // Deep link réussi passe par _onLink → fromDeepLink: true.
+        if (!event.contains('signedIn')) return;
         final auth = ref.read(authGoogleProvider);
         auth.sessionUserId = auth.backend.currentUserId();
         if (auth.sessionUserId != null) {
