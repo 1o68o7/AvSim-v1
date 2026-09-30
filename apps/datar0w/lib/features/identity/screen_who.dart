@@ -17,6 +17,30 @@ bool debugHidePasserSansProfil = false;
 bool get allowPasserSansProfil =>
     kDebugMode && !debugHidePasserSansProfil;
 
+/// Log + garde : si la location n’a pas bougé après 300 ms → SnackBar visible
+/// (pas d’adb / logcat sur le terrain).
+Future<void> goFromIdentity(BuildContext context, String dest) async {
+  final router = GoRouter.of(context);
+  final from = router.state.uri.path;
+  Object? goError;
+  debugPrint('[identity] go BEFORE path=$from dest=$dest');
+  try {
+    router.go(dest);
+  } catch (e, st) {
+    goError = e;
+    debugPrint('[identity] go THROW $e\n$st');
+  }
+  await Future<void>.delayed(const Duration(milliseconds: 300));
+  if (!context.mounted) return;
+  final after = router.state.uri.path;
+  debugPrint('[identity] go AFTER  path=$after (wanted $dest)');
+  if (after == dest) return;
+  final err = goError ?? 'reste sur $after';
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Navigation bloquée : $dest $err')),
+  );
+}
+
 Future<void> _confirmDeleteRower(
   BuildContext context,
   WidgetRef ref,
@@ -96,14 +120,25 @@ class IdentityListScreen extends ConsumerWidget {
                       onPressed: () => _confirmDeleteRower(context, ref, r),
                     ),
                     onTap: () async {
-                      await ref
-                          .read(identityProvider.notifier)
-                          .selectRower(r.id);
-                      if (!context.mounted) return;
-                      final dest = isRowerProfilePlayable(r)
-                          ? AppRoutes.homeRower
-                          : AppRoutes.rowerOnboard;
-                      context.go(dest);
+                      try {
+                        await ref
+                            .read(identityProvider.notifier)
+                            .selectRower(r.id);
+                        if (!context.mounted) return;
+                        final dest = isRowerProfilePlayable(r)
+                            ? AppRoutes.homeRower
+                            : AppRoutes.rowerOnboard;
+                        await goFromIdentity(context, dest);
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Navigation bloquée : ${AppRoutes.homeRower} $e',
+                            ),
+                          ),
+                        );
+                      }
                     },
                   ),
               ],
@@ -115,25 +150,62 @@ class IdentityListScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 FilledButton(
-                  onPressed: () => context.go(AppRoutes.identityEdit),
+                  onPressed: () async {
+                    try {
+                      await goFromIdentity(context, AppRoutes.identityEdit);
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Navigation bloquée : ${AppRoutes.identityEdit} $e',
+                          ),
+                        ),
+                      );
+                    }
+                  },
                   child: const Text('CRÉER UN PROFIL'),
                 ),
                 if (allowPasserSansProfil) ...[
                   const SizedBox(height: 8),
                   TextButton(
                     onPressed: () async {
-                      await ref
-                          .read(identityProvider.notifier)
-                          .selectRower(null);
-                      if (context.mounted) {
-                        context.go(AppRoutes.profile);
+                      try {
+                        await ref
+                            .read(identityProvider.notifier)
+                            .selectRower(null);
+                        if (context.mounted) {
+                          await goFromIdentity(context, AppRoutes.profile);
+                        }
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Navigation bloquée : ${AppRoutes.profile} $e',
+                            ),
+                          ),
+                        );
                       }
                     },
                     child: const Text('Passer (sans profil)'),
                   ),
                 ],
                 TextButton(
-                  onPressed: () => context.go(AppRoutes.auth),
+                  onPressed: () async {
+                    try {
+                      await goFromIdentity(context, AppRoutes.auth);
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Navigation bloquée : ${AppRoutes.auth} $e',
+                          ),
+                        ),
+                      );
+                    }
+                  },
                   child: const Text('Connexion'),
                 ),
               ],

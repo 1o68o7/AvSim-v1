@@ -6,6 +6,7 @@ import 'package:datar0w/onboarding/routing.dart';
 import 'package:datar0w/router.dart';
 import 'package:datar0w/sync/auth_callback_screen.dart';
 import 'package:datar0w/sync/auth_google.dart';
+import 'package:datar0w/widgets/safe_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -70,32 +71,38 @@ void main() {
     );
   });
 
+  GoRouter _identityRouter() => GoRouter(
+        initialLocation: AppRoutes.identity,
+        routes: [
+          GoRoute(
+            path: AppRoutes.identity,
+            builder: (_, __) => const IdentityListScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.homeRower,
+            builder: (_, __) => const Text('HOME-ROWER'),
+          ),
+          GoRoute(
+            path: AppRoutes.profile,
+            builder: (_, __) => const Text('PROFILS'),
+          ),
+          GoRoute(
+            path: AppRoutes.auth,
+            builder: (_, __) => const Text('AUTH'),
+          ),
+          GoRoute(
+            path: AppRoutes.identityEdit,
+            builder: (_, __) => const Text('EDIT'),
+          ),
+        ],
+      );
+
   testWidgets('tap profil /identity → /home/rower (pas /)', (tester) async {
     final rower = Rower.create(
       displayName: 'Camille Test',
       birthDate: DateTime(1998, 5, 10),
     );
-    final router = GoRouter(
-      initialLocation: AppRoutes.identity,
-      routes: [
-        GoRoute(
-          path: AppRoutes.identity,
-          builder: (_, __) => const IdentityListScreen(),
-        ),
-        GoRoute(
-          path: AppRoutes.homeRower,
-          builder: (_, __) => const Text('HOME-ROWER'),
-        ),
-        GoRoute(
-          path: AppRoutes.profile,
-          builder: (_, __) => const Text('PROFILS'),
-        ),
-        GoRoute(
-          path: AppRoutes.auth,
-          builder: (_, __) => const Text('AUTH'),
-        ),
-      ],
-    );
+    final router = _identityRouter();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -107,10 +114,63 @@ void main() {
     );
     await tester.pump();
     await tester.tap(find.text('Camille Test'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
     expect(find.text('HOME-ROWER'), findsOneWidget);
     expect(find.text('PROFILS'), findsNothing);
     expect(router.state.uri.path, AppRoutes.homeRower);
+    expect(find.textContaining('Navigation bloquée'), findsNothing);
+  });
+
+  testWidgets('tap Connexion /identity → /auth', (tester) async {
+    final router = _identityRouter();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [identityStoreOverride()],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Connexion'));
+    await tester.pump(); // lance le Future.delayed 300 ms
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(find.text('AUTH'), findsOneWidget);
+    expect(router.state.uri.path, AppRoutes.auth);
+    expect(find.textContaining('Navigation bloquée'), findsNothing);
+  });
+
+  testWidgets('go no-op → SnackBar Navigation bloquée', (tester) async {
+    final router = GoRouter(
+      initialLocation: AppRoutes.identity,
+      routes: [
+        GoRoute(
+          path: AppRoutes.identity,
+          builder: (_, __) => const IdentityListScreen(),
+        ),
+        // /auth volontairement absent → go peut échouer / rester
+      ],
+      errorBuilder: (_, state) => PageIntrouvableScreen(
+        dest: state.uri.toString(),
+        error: state.error,
+      ),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [identityStoreOverride()],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Connexion'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    // Soit errorBuilder (Page introuvable + dest), soit SnackBar si path inchangé.
+    final blocked = find.textContaining('Navigation bloquée');
+    final missing = find.text('Page introuvable');
+    expect(
+      blocked.evaluate().isNotEmpty || missing.evaluate().isNotEmpty,
+      isTrue,
+    );
   });
 
   testWidgets('Passer (sans profil) absent si flag release', (tester) async {

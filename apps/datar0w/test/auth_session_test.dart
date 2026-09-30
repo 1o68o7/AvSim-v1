@@ -148,9 +148,14 @@ void main() {
     );
   });
 
-  test('canRedirectAfterAuth protège live/cox/coach', () {
+  test('canRedirectAfterAuth protège live/cox/coach + identity sans deep link',
+      () {
     expect(canRedirectAfterAuth(AppRoutes.auth), isTrue);
-    expect(canRedirectAfterAuth(AppRoutes.identity), isTrue);
+    expect(canRedirectAfterAuth(AppRoutes.identity), isFalse);
+    expect(
+      canRedirectAfterAuth(AppRoutes.identity, fromDeepLink: true),
+      isTrue,
+    );
     expect(canRedirectAfterAuth(AppRoutes.live), isFalse);
     expect(canRedirectAfterAuth(AppRoutes.cox), isFalse);
     expect(canRedirectAfterAuth(AppRoutes.coachLive), isFalse);
