@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../identity/controller.dart';
 import '../../identity/format.dart';
 import '../../identity/models.dart';
+import '../../onboarding/routing.dart';
 import '../../ops/controller.dart';
 import '../../router.dart';
 import '../../session/boat_config.dart';
@@ -251,7 +252,10 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
             ],
             const SizedBox(height: 8),
             TextButton(
-              onPressed: () => context.go(AppRoutes.profile),
+              onPressed: () {
+                final role = ref.read(boatConfigProvider).role;
+                context.go(sessionRoleHome(role));
+              },
               child: const Text('RETOUR ACCUEIL'),
             ),
           ],

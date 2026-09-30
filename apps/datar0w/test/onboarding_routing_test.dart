@@ -45,13 +45,13 @@ void main() {
     );
   });
 
-  test('chemin sans compte → /', () {
+  test('chemin sans compte → /home/rower (plus /)', () {
     expect(
       resolvePostLogin(
         door: OnboardingDoor.rower,
         skipAccount: true,
       ),
-      AppRoutes.profile,
+      AppRoutes.homeRower,
     );
   });
 

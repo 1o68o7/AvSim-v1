@@ -8,7 +8,7 @@ import '../router.dart';
 import '../theme/deck_theme.dart';
 import '../widgets/deck_scaffold.dart';
 
-/// ST-03 — Accueil staff. Déconnexion → `/settings`.
+/// Accueil staff — cartes filtrées par rôle. Pas de sélecteur Rameur/Coach/Barreur.
 class ClubRoleHomeScreen extends ConsumerWidget {
   const ClubRoleHomeScreen({super.key, required this.role});
 
@@ -48,8 +48,8 @@ class ClubRoleHomeScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          if (role == ClubMemberRole.admin ||
-              role == ClubMemberRole.director) ...[
+          // admin : tout
+          if (role == ClubMemberRole.admin) ...[
             _StaffCard(
               title: 'Import cabane',
               subtitle: 'Bateaux et rameurs CSV',
@@ -63,17 +63,40 @@ class ClubRoleHomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 10),
             _StaffCard(
-              title: 'Séances cloud',
-              subtitle: 'session_meta du club',
+              title: 'Séances du club',
+              subtitle: 'session_meta cloud',
+              onTap: () => context.go(AppRoutes.clubSessions),
+            ),
+            const SizedBox(height: 10),
+            _StaffCard(
+              title: 'Composition',
+              subtitle: 'Équipage',
+              onTap: () => context.go(AppRoutes.crew),
+            ),
+            const SizedBox(height: 10),
+            _StaffCard(
+              title: 'Calendrier',
+              subtitle: 'Événements',
+              onTap: () => context.go(AppRoutes.calendar),
+            ),
+            const SizedBox(height: 16),
+          ],
+          // director : demandes + séances club + club
+          if (role == ClubMemberRole.director) ...[
+            _StaffCard(
+              title: 'Demandes',
+              subtitle: 'Rejoindre / rôles',
+              onTap: () => context.go(AppRoutes.clubJoin),
+            ),
+            const SizedBox(height: 10),
+            _StaffCard(
+              title: 'Séances du club',
+              subtitle: 'session_meta cloud',
               onTap: () => context.go(AppRoutes.clubSessions),
             ),
             const SizedBox(height: 16),
           ],
-          if (role == ClubMemberRole.treasurer)
-            const Text(
-              'Cotisations / budget : plus tard.',
-              style: TextStyle(color: DeckColors.amber),
-            ),
+          // intendant : parc + maintenance + import bateaux
           if (role == ClubMemberRole.intendant) ...[
             OutlinedButton(
               onPressed: () => context.go(AppRoutes.opsOut),
@@ -89,22 +112,20 @@ class ClubRoleHomeScreen extends ConsumerWidget {
             ),
             OutlinedButton(
               onPressed: () => context.go(AppRoutes.clubImport),
-              child: const Text('IMPORT PARC'),
+              child: const Text('IMPORT BATEAUX'),
+            ),
+            const SizedBox(height: 8),
+          ],
+          // treasurer : club + séances (pas de trésorerie neuve)
+          if (role == ClubMemberRole.treasurer) ...[
+            const Text(
+              'Cotisations / budget : plus tard.',
+              style: TextStyle(color: DeckColors.amber),
             ),
             const SizedBox(height: 8),
             OutlinedButton(
               onPressed: () => context.go(AppRoutes.clubSessions),
-              child: const Text('SÉANCES CLOUD'),
-            ),
-          ],
-          if (role == ClubMemberRole.admin) ...[
-            OutlinedButton(
-              onPressed: () => context.go(AppRoutes.crew),
-              child: const Text('COMPOSITION'),
-            ),
-            OutlinedButton(
-              onPressed: () => context.go(AppRoutes.calendar),
-              child: const Text('CALENDRIER'),
+              child: const Text('SÉANCES DU CLUB'),
             ),
           ],
           OutlinedButton(

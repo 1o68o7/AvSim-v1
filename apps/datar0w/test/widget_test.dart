@@ -46,7 +46,7 @@ void main() {
     );
     await tester.pump();
     await tester.pump();
-    expect(find.textContaining('CONTINUER'), findsOneWidget);
+    expect(find.text('NOUVELLE SÉANCE'), findsOneWidget);
     expect(find.textContaining('Pas d’affectation'), findsOneWidget);
     expect(find.text('MES SÉANCES'), findsOneWidget);
     expect(find.text('Ajouter'), findsNothing);

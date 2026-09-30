@@ -34,13 +34,13 @@ void main() {
     expect(find.byType(DeckRetour), findsNothing);
   });
 
-  testWidgets('gate coach : Retour → /', (tester) async {
+  testWidgets('gate coach : Retour → hub rôle séance (plus /)', (tester) async {
     final router = GoRouter(
       initialLocation: AppRoutes.clubImport,
       routes: [
         GoRoute(
-          path: AppRoutes.profile,
-          builder: (_, __) => const Text('HUB-PROFIL'),
+          path: AppRoutes.homeRower,
+          builder: (_, __) => const Text('HUB-HOME'),
         ),
         GoRoute(
           path: AppRoutes.clubImport,
@@ -58,6 +58,6 @@ void main() {
     expect(find.text('Retour'), findsOneWidget);
     await tester.tap(find.text('Retour'));
     await tester.pumpAndSettle();
-    expect(find.text('HUB-PROFIL'), findsOneWidget);
+    expect(find.text('HUB-HOME'), findsOneWidget);
   });
 }

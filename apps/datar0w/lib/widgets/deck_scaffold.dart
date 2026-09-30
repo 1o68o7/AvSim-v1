@@ -2,17 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../router.dart';
+import '../onboarding/routing.dart';
 import '../session/boat_config.dart';
 import '../theme/deck_theme.dart';
 import 'deck_widgets.dart';
 
 /// Hub d’accueil selon le rôle séance.
-String deckRoleHub(CrewRole role) => switch (role) {
-      CrewRole.rower => AppRoutes.homeRower,
-      CrewRole.cox => AppRoutes.homeCox,
-      CrewRole.coach => AppRoutes.homeCoach,
-    };
+String deckRoleHub(CrewRole role) => sessionRoleHome(role);
 
 /// Convention §2.4 : pop si possible, sinon hub rôle (ou [alwaysGo] / [fallback]).
 void performDeckRetour(
@@ -227,9 +223,9 @@ class DeckScaffold extends StatelessWidget {
   final Widget? leading;
   /// Faux sur `/identity` et tare en cours.
   final bool showRetour;
-  /// Gate « Réservé au coach » → toujours `/`.
+  /// Gate « Réservé au coach » → accueil rôle séance (plus `/`).
   final bool retourToProfile;
-  /// Si pas de pop : cette route plutôt que le hub rôle (homes → `/`).
+  /// Si pas de pop : cette route plutôt que le hub rôle séance.
   final String? retourFallback;
   final List<Widget>? actions;
   /// Profils Stitch : marque seule centrée.
@@ -240,7 +236,8 @@ class DeckScaffold extends StatelessWidget {
     final Widget? lead = leading ??
         (showRetour && !centerBrandOnly
             ? DeckRetour(
-                alwaysGo: retourToProfile ? AppRoutes.profile : null,
+                // Plus de go(`/`) — hub rôle séance (rower/cox/coach).
+                useSessionHub: retourToProfile,
                 fallback: retourFallback,
               )
             : null);
@@ -276,11 +273,14 @@ class DeckRetour extends ConsumerWidget {
     super.key,
     this.compact = false,
     this.alwaysGo,
+    this.useSessionHub = false,
     this.fallback,
   });
 
   final bool compact;
   final String? alwaysGo;
+  /// Si vrai : `go` vers l’accueil du rôle séance (plus `/`).
+  final bool useSessionHub;
   final String? fallback;
 
   @override
@@ -292,12 +292,17 @@ class DeckRetour extends ConsumerWidget {
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
-      onPressed: () => performDeckRetour(
-        context,
-        ref,
-        alwaysGo: alwaysGo,
-        fallback: fallback,
-      ),
+      onPressed: () {
+        final hub = useSessionHub
+            ? sessionRoleHome(ref.read(boatConfigProvider).role)
+            : alwaysGo;
+        performDeckRetour(
+          context,
+          ref,
+          alwaysGo: hub,
+          fallback: fallback,
+        );
+      },
       child: Text(
         'Retour',
         overflow: TextOverflow.ellipsis,
@@ -307,14 +312,14 @@ class DeckRetour extends ConsumerWidget {
   }
 }
 
-/// @Deprecated alias — même convention que [DeckRetour] vers `/`.
-class DeckBackToProfile extends StatelessWidget {
+/// @Deprecated alias — Retour vers hub rôle séance.
+class DeckBackToProfile extends ConsumerWidget {
   const DeckBackToProfile({super.key, this.compact = false});
 
   final bool compact;
 
   @override
-  Widget build(BuildContext context) {
-    return DeckRetour(compact: compact, alwaysGo: AppRoutes.profile);
+  Widget build(BuildContext context, WidgetRef ref) {
+    return DeckRetour(compact: compact, useSessionHub: true);
   }
 }

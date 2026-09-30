@@ -94,7 +94,7 @@ void main() {
     await tester.pump();
     expect(find.text('ACCUEIL INTENDANT'), findsOneWidget);
     expect(find.text('MAINTENANCE'), findsOneWidget);
-    expect(find.text('IMPORT PARC'), findsOneWidget);
+    expect(find.text('IMPORT BATEAUX'), findsOneWidget);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [identityStoreOverride()],
@@ -104,7 +104,7 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('IMPORT'), findsOneWidget);
+    expect(find.text('IMPORT CABANE'), findsOneWidget);
     expect(find.text('COMPOSITION'), findsOneWidget);
   });
 }

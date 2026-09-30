@@ -177,12 +177,12 @@ class HomeRowerScreen extends ConsumerWidget {
             child: const Text('MES CONSTANTES'),
           ),
           TextButton(
-            onPressed: () => context.go(AppRoutes.spinoscope),
-            child: const Text('SPINOSCOPE'),
-          ),
-          TextButton(
             onPressed: () => context.go(AppRoutes.consent),
             child: const Text('DONNÉES SANTÉ'),
+          ),
+          TextButton(
+            onPressed: () => context.go(AppRoutes.settings),
+            child: const Text('RÉGLAGES'),
           ),
           TextButton(
             onPressed: () async {
@@ -190,10 +190,6 @@ class HomeRowerScreen extends ConsumerWidget {
               if (context.mounted) context.go(AppRoutes.homeCox);
             },
             child: const Text('Je barre aussi'),
-          ),
-          TextButton(
-            onPressed: () => context.go(AppRoutes.profile),
-            child: const Text('Rôle bateau (rameur / coach / barreur)'),
           ),
           TextButton(
             onPressed: () => context.go(AppRoutes.identity),

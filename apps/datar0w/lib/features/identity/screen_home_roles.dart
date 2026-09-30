@@ -49,7 +49,7 @@ class HomeCoxScreen extends ConsumerWidget {
     return DeckScaffold(
       title: 'ACCUEIL BARREUR',
       subtitle: boat?.name ?? 'sans affectation',
-      retourFallback: AppRoutes.profile,
+      retourFallback: AppRoutes.homeCox,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
@@ -186,12 +186,17 @@ class HomeCoxScreen extends ConsumerWidget {
               );
               context.go(AppRoutes.presession);
             },
-            child: const Text('CONTINUER VERS LA SÉANCE'),
+            child: const Text('CONTINUER LA SÉANCE'),
           ),
           const SizedBox(height: 8),
-          TextButton(
+          OutlinedButton(
             onPressed: () => context.go(AppRoutes.club),
-            child: const Text('REVOIR LE PARC COQUES'),
+            child: const Text('REVOIR COQUE'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: () => context.go(AppRoutes.sessions),
+            child: const Text('MES SÉANCES'),
           ),
         ],
       ),
@@ -450,8 +455,12 @@ class HomeCoachScreen extends ConsumerWidget {
             ],
           ),
           OutlinedButton(
+            onPressed: () => context.go(AppRoutes.clubImport),
+            child: const Text('IMPORT CABANE'),
+          ),
+          OutlinedButton(
             onPressed: () => context.go(AppRoutes.clubSessions),
-            child: const Text('SÉANCES CLOUD'),
+            child: const Text('SÉANCES DU CLUB'),
           ),
           OutlinedButton(
             onPressed: () => context.go(AppRoutes.sessions),

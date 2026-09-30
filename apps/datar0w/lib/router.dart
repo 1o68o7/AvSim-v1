@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'features/calendar/screen_calendar.dart';
@@ -27,13 +28,14 @@ import 'features/ops/screen_in.dart';
 import 'features/ops/screen_out.dart';
 import 'features/live/screen_3.dart';
 import 'features/presession/screen_2a.dart';
-import 'features/profile/screen_1.dart';
 import 'features/quai/screen_7.dart';
 import 'features/replay/screen_6.dart';
 import 'features/replay/screen_6r.dart';
 import 'features/replay/screen_sessions.dart';
 import 'features/tare/screen_2b.dart';
+import 'identity/controller.dart';
 import 'identity/models.dart';
+import 'onboarding/routing.dart';
 import 'onboarding/screen_club_home.dart';
 import 'onboarding/screen_club_join.dart';
 import 'onboarding/screen_rower.dart';
@@ -42,6 +44,26 @@ import 'sync/auth_callback_screen.dart';
 import 'sync/auth_google.dart';
 import 'sync/auth_screen.dart';
 import 'widgets/safe_route.dart';
+
+/// Guard écriture club : rameur/cox → `/home/rower` + SnackBar.
+String? _staffToolsRedirect(BuildContext context, GoRouterState state) {
+  if (!isClubStaffToolsPath(state.uri.path)) return null;
+  try {
+    final snap = ProviderScope.containerOf(context).read(identityProvider);
+    final denied = clubStaffToolsRedirect(snap);
+    if (denied != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final messenger = ScaffoldMessenger.maybeOf(context);
+        messenger?.showSnackBar(
+          const SnackBar(content: Text('Réservé au club')),
+        );
+      });
+    }
+    return denied;
+  } catch (_) {
+    return AppRoutes.homeRower;
+  }
+}
 
 /// try/catch builder → Page introuvable (pas de lock orientation ici :
 /// le lock portrait hub de #72 cassait le paysage live/cox).
@@ -201,17 +223,20 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.clubImport,
       name: 'club-import',
+      redirect: _staffToolsRedirect,
       builder: (context, state) => const ClubImportScreen(),
     ),
     GoRoute(
       path: AppRoutes.clubSessions,
       name: 'club-sessions',
+      redirect: _staffToolsRedirect,
       builder: (context, state) =>
           _hub(AppRoutes.clubSessions, const ClubSessionsScreen()),
     ),
     GoRoute(
       path: '${AppRoutes.clubSessions}/:code',
       name: 'club-session-detail',
+      redirect: _staffToolsRedirect,
       builder: (context, state) => _hub(
             '${AppRoutes.clubSessions}/:code',
             ClubSessionDetailScreen(
@@ -227,32 +252,46 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.crew,
       name: 'crew',
+      redirect: _staffToolsRedirect,
       builder: (context, state) => const CrewScreen(),
     ),
     GoRoute(
       path: AppRoutes.opsOut,
       name: 'ops-out',
+      redirect: _staffToolsRedirect,
       builder: (context, state) => const OpsOutScreen(),
     ),
     GoRoute(
       path: AppRoutes.opsIn,
       name: 'ops-in',
+      redirect: _staffToolsRedirect,
       builder: (context, state) => const OpsInScreen(),
     ),
     GoRoute(
       path: AppRoutes.opsDeparture,
       name: 'ops-departure',
+      redirect: _staffToolsRedirect,
       builder: (context, state) => const OpsDepartureScreen(),
     ),
     GoRoute(
       path: AppRoutes.opsMaintenance,
       name: 'ops-maintenance',
+      redirect: _staffToolsRedirect,
       builder: (context, state) => const MaintenanceQueueScreen(),
     ),
+    // `/` n’est plus ProfileScreen — redirect vers l’accueil métier.
     GoRoute(
       path: AppRoutes.profile,
-      name: '1-profils',
-      builder: (context, state) => const ProfileScreen(),
+      name: '1-root-redirect',
+      redirect: (context, state) {
+        try {
+          final snap =
+              ProviderScope.containerOf(context).read(identityProvider);
+          return resolveRootRedirect(snap);
+        } catch (_) {
+          return AppRoutes.identity;
+        }
+      },
     ),
     GoRoute(
       path: AppRoutes.presession,
