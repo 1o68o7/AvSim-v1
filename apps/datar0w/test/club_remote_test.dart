@@ -4,8 +4,10 @@ import 'package:datar0w/onboarding/routing.dart';
 import 'package:datar0w/router.dart';
 import 'package:datar0w/sync/auth_google.dart';
 import 'package:datar0w/sync/auth_session.dart';
+import 'package:datar0w/identity/store.dart';
 import 'package:datar0w/sync/club_remote.dart';
 import 'package:datar0w/sync/club_sql.dart';
+import 'package:datar0w/sync/sync_identity.dart';
 import 'package:datar0w/import/rower_csv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,6 +15,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'identity_test_helpers.dart';
 
 void main() {
+  setUp(() {
+    debugResetActiveClubIdMemory();
+    IdentityStore.debugResetResolvedRoot();
+  });
+
+  tearDown(() {
+    debugResetActiveClubIdMemory();
+    IdentityStore.debugResetResolvedRoot();
+  });
+
   test('créer un club pousse insertClub (pas d’outbox #50)', () async {
     final remote = MemoryClubRemote();
     final container = ProviderContainer(
@@ -52,6 +64,7 @@ void main() {
     expect(snap.prefs.activeClubId, 'club-cloud');
     expect(snap.prefs.clubRole, ClubMemberRole.coach);
     expect(snap.clubs.single.name, 'Aviron Cloud');
+    expect(defaultActiveClubId(), 'club-cloud');
     expect(
       destinationAfterAuth(
         door: OnboardingDoor.club,

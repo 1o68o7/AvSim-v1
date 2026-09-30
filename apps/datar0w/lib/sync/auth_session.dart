@@ -135,6 +135,8 @@ class _AuthSessionBinderState extends ConsumerState<AuthSessionBinder> {
     final uid = auth.sessionUserId;
     if (uid != null) {
       await ref.read(identityProvider.notifier).hydrateFromCloud(uid);
+      // Au cas où hydrate no-op (membership déjà posé côté ensure).
+      await ref.read(identityProvider.notifier).ensureActiveClubFromMembership();
     }
     if (!mounted) return;
     final door = doorFromPath(path, auth.lastDoor);

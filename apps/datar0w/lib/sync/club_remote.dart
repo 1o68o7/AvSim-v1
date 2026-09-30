@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../identity/models.dart';
@@ -104,6 +105,7 @@ class LiveClubRemote implements ClubRemote {
     final client = supabaseOrNull();
     if (client == null) return null;
     try {
+      // Plusieurs clubs → premier membership (pas d’UUID inventé).
       final data = await client
           .from('club_members')
           .select('club_id, role, rower_id')
@@ -119,7 +121,8 @@ class LiveClubRemote implements ClubRemote {
         role: row['role'] as String? ?? 'rower',
         rowerId: row['rower_id'] as String?,
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('club_members membershipFor FAIL: $e');
       return null;
     }
   }

@@ -9,6 +9,7 @@ import '../sync/auth_google.dart';
 import '../sync/club_remote.dart';
 import '../sync/club_sql.dart';
 import '../sync/supabase_boot.dart';
+import '../sync/sync_identity.dart' show ensureActiveClubForSync;
 import 'models.dart';
 import 'store.dart';
 
@@ -165,6 +166,16 @@ class IdentityController extends Notifier<IdentitySnapshot> {
 
   Future<void> _refresh() async {
     state = await _reload();
+    notifyActiveClubId(state.prefs.activeClubId);
+  }
+
+  /// Login / boot sync : si prefs.activeClubId null + membership cloud → pose.
+  Future<String?> ensureActiveClubFromMembership() async {
+    return ensureActiveClubForSync(
+      store: _store,
+      remote: _remote,
+      resolveOwnerUserId: () => _sessionUserId,
+    );
   }
 
   Future<void> saveRower(Rower rower) async {
@@ -298,9 +309,16 @@ class IdentityController extends Notifier<IdentitySnapshot> {
   }
 
   /// Applique `club_members` cloud sur le store local. No-op hors session.
+  /// Si prefs.activeClubId déjà posé : conserve, met à jour rôle / parc.
+  /// Sinon : 1 membership → ce club ; plusieurs → premier (limit remote).
   Future<void> hydrateFromCloud(String userId) async {
     final m = await _remote.membershipFor(userId);
-    if (m == null) return;
+    if (m == null) {
+      // Prefs peuvent déjà avoir un club local — publier pour sync.
+      final prefs = await _store.loadState();
+      notifyActiveClubId(prefs.activeClubId);
+      return;
+    }
     var known = false;
     for (final c in state.clubs) {
       if (c.id == m.clubId) known = true;
@@ -319,14 +337,21 @@ class IdentityController extends Notifier<IdentitySnapshot> {
       }
     }
     final prefs = await _store.loadState();
+    // Ne pas inventer un 2e club : membership existant uniquement.
+    final clubId = (prefs.activeClubId != null &&
+            prefs.activeClubId!.isNotEmpty)
+        ? prefs.activeClubId!
+        : m.clubId;
     await _store.saveState(
       prefs.copyWith(
-        activeClubId: m.clubId,
-        clubRole: ClubMemberRoleX.parse(m.role),
+        activeClubId: clubId,
+        clubRole: clubId == m.clubId
+            ? ClubMemberRoleX.parse(m.role)
+            : prefs.clubRole,
         activeRowerId: m.rowerId ?? prefs.activeRowerId,
       ),
     );
-    await _mergeRemotePark(m.clubId);
+    await _mergeRemotePark(clubId);
     await _refresh();
   }
 

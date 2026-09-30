@@ -50,6 +50,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     final uid = _uid;
     if (uid != null) {
       await ref.read(identityProvider.notifier).hydrateFromCloud(uid);
+      await ref.read(identityProvider.notifier).ensureActiveClubFromMembership();
     }
     if (!mounted) return;
     final dest = destinationAfterAuth(
