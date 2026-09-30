@@ -351,12 +351,16 @@ class _SessionSyncHostState extends State<SessionSyncHost>
               ),
             ),
           );
-    if (banner == null) return widget.child;
+    // Toujours le même arbre (Stack) : basculer child↔Stack remontait
+    // MaterialApp.router et recollait GoRouter sur initialLocation=/identity.
     return Stack(
+      fit: StackFit.expand,
       children: [
         widget.child,
-        Positioned(top: 0, left: 0, right: 0, child: banner),
+        if (banner != null)
+          Positioned(top: 0, left: 0, right: 0, child: banner),
       ],
     );
   }
 }
+
