@@ -17,29 +17,16 @@ bool debugHidePasserSansProfil = false;
 bool get allowPasserSansProfil =>
     kDebugMode && !debugHidePasserSansProfil;
 
-String _currentPath(BuildContext context) {
-  try {
-    return GoRouterState.of(context).uri.path;
-  } catch (_) {
-    try {
-      return GoRouter.of(context).state.uri.path;
-    } catch (_) {
-      return '?';
-    }
-  }
-}
-
 /// Log avant/après pour diagnostiquer les go no-op (release OnePlus).
+/// Lit `GoRouter.state` (pas `GoRouterState.of` du widget, figé tant que
+/// l’élément /identity n’est pas démonté).
 void goFromIdentity(BuildContext context, String dest) {
-  final from = _currentPath(context);
+  final router = GoRouter.of(context);
+  final from = router.state.uri.path;
   debugPrint('[identity] go BEFORE path=$from dest=$dest');
-  context.go(dest);
+  router.go(dest);
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (!context.mounted) {
-      debugPrint('[identity] go AFTER  unmounted (wanted $dest)');
-      return;
-    }
-    final after = _currentPath(context);
+    final after = router.state.uri.path;
     debugPrint('[identity] go AFTER  path=$after (wanted $dest)');
   });
 }
