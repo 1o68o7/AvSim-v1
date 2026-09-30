@@ -11,6 +11,7 @@ import '../../session/double_press_stop.dart';
 import '../../session/heel.dart';
 import '../../session/live_hub.dart';
 import '../../session/rower_orientation.dart';
+import '../../session/session_sync.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
@@ -68,9 +69,15 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
       });
       return;
     }
-    await ref.read(liveHubProvider.notifier).stop();
+    final stopped = await ref.read(liveHubProvider.notifier).stop();
     if (!mounted) return;
     context.go(AppRoutes.quai);
+    final sid = stopped.sessionId;
+    if (sid != null) {
+      unawaited(
+        SessionSync.autosyncAfterStop(sid, dir: stopped.directory),
+      );
+    }
   }
 
   @override

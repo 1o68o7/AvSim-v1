@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _Gw implements TelemetryGateway {
-  _Gw({this.ack = false});
-  bool ack;
+  _Gw();
+  bool ack = false;
   int calls = 0;
 
   @override
@@ -68,7 +68,7 @@ void main() {
     expect(sync.db.all().single.attempts, 3);
   });
 
-  testWidgets('bandeau 1 séance non synchronisée — renvoyer', (tester) async {
+  testWidgets('bandeau ST-09 EN FILE sous AppBar, chip seul', (tester) async {
     await sync.enqueueAfterStop('s1', dir: dir);
     await sync.drain(enqueueExisting: false);
     t = t.add(const Duration(minutes: 2));
@@ -85,7 +85,45 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(find.text('1 séance non synchronisée — renvoyer'), findsOneWidget);
+    expect(find.text('EN FILE'), findsOneWidget);
+    expect(find.text('1 en file'), findsOneWidget);
+    expect(find.text('body'), findsOneWidget);
+  });
+
+  test('autosyncAfterStop sans uid → enqueue, 0 upload', () async {
+    SessionSync.debugReplace(
+      SessionSync(
+        db: OutboxDb.memory(),
+        gateway: gw,
+        now: () => t,
+        resolveOwnerUserId: () => null,
+        resolveClubId: () => null,
+      ),
+    );
+    addTearDown(() => SessionSync.debugReplace(null));
+    await SessionSync.autosyncAfterStop('s1', dir: dir);
+    final shared = SessionSync.shared();
+    expect(shared.db.all(), hasLength(1));
+    expect(shared.db.all().single.acked, isFalse);
+    expect(gw.calls, 0);
+  });
+
+  test('autosyncAfterStop uid+club → drain/upload', () async {
+    gw.ack = true;
+    SessionSync.debugReplace(
+      SessionSync(
+        db: OutboxDb.memory(),
+        gateway: gw,
+        now: () => t,
+        resolveOwnerUserId: () => 'uid-1',
+        resolveClubId: () => 'club-1',
+        ensureClub: () async => 'club-1',
+      ),
+    );
+    addTearDown(() => SessionSync.debugReplace(null));
+    await SessionSync.autosyncAfterStop('s1', dir: dir);
+    expect(gw.calls, greaterThan(0));
+    expect(SessionSync.shared().db.all().single.acked, isTrue);
   });
 
   test('re-push même sync_id = no-op', () async {

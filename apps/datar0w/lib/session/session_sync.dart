@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../router.dart';
 import '../theme/deck_theme.dart';
+import '../widgets/deck_scaffold.dart';
 
 import 'session_pack.dart';
 import 'store.dart';
@@ -18,6 +19,17 @@ import '../sync/sync_identity.dart';
 
 const kLocalRetentionFifo = 30;
 const kSoftDeleteDays = 30;
+
+/// Résultat de [LiveHub.stopSession] — sync après `/quai`.
+class StopResult {
+  const StopResult({this.sessionId, this.directory});
+
+  final String? sessionId;
+  final Directory? directory;
+}
+
+/// État bandeau ST-09.
+enum SyncBannerKind { local, enFile, cloud }
 
 class UploadResult {
   const UploadResult({
@@ -123,6 +135,30 @@ class SessionSync {
     );
     _shared = sync;
     return sync;
+  }
+
+  /// C1 : après `/quai` — enqueue + drain si uid + activeClubId.
+  /// Sans uid/club : enqueue local seulement, pas d’upload.
+  static Future<void> autosyncAfterStop(
+    String sessionId, {
+    Directory? dir,
+  }) async {
+    try {
+      final sync = await SessionSync.instance();
+      try {
+        await sync._ensureClub();
+      } catch (e) {
+        debugPrint('autosyncAfterStop ensureClub: $e');
+      }
+      await sync.enqueueAfterStop(sessionId, dir: dir);
+      if (!sync.hasAuthAndClub) {
+        debugPrint('autosyncAfterStop: pas uid/club — file locale only');
+        return;
+      }
+      await sync.drain(enqueueExisting: true);
+    } catch (e) {
+      debugPrint('autosyncAfterStop: $e');
+    }
   }
 
   /// Après STOP. N’écrit rien dans `sessions/` (pack en lecture).
@@ -247,6 +283,15 @@ class SessionSync {
   }
 
   int get unsyncedBannerCount => db.bannerCount();
+
+  /// Rows en file (!acked) — bandeau ST-09 « N en file ».
+  int get pendingCount => db.all().where((r) => !r.acked).length;
+
+  SyncBannerKind get bannerKind {
+    if (pendingCount > 0) return SyncBannerKind.enFile;
+    if (hasAuthAndClub) return SyncBannerKind.cloud;
+    return SyncBannerKind.local;
+  }
 
   Future<void> _push(OutboxRow row, {required bool manual}) async {
     final dir = Directory(row.path);
@@ -492,46 +537,109 @@ class _SessionSyncHostState extends State<SessionSyncHost>
 
   @override
   Widget build(BuildContext context) {
-    final n = _sync?.unsyncedBannerCount ?? 0;
+    final sync = _sync;
+    final pending = sync?.pendingCount ?? 0;
+    final kind = sync?.bannerKind ?? SyncBannerKind.local;
     final status = _bannerStatus;
-    final showBanner = n > 0 || status != null || _offerClubCta;
-    final label = _offerClubCta
-        ? (status ?? 'pas de club — Choisir un club')
-        : (status ??
-            (n == 1
-                ? '1 séance non synchronisée — renvoyer'
-                : '$n séances non synchronisées — renvoyer'));
-    final banner = !showBanner
-        ? null
-        : Material(
-            color: DeckColors.amber,
-            child: SafeArea(
-              bottom: false,
-              child: InkWell(
-                onTap: () => _onBannerTap(),
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: DeckColors.onAlert,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
+    final showStrip =
+        sync != null && (pending > 0 || status != null || _offerClubCta);
+    // ST-09 : 36 px sous AppBar (pas overlay sur la barre titre).
+    final top = MediaQuery.paddingOf(context).top + DeckAppBar.kToolbar;
+
+    Widget? strip;
+    if (showStrip) {
+      final chipLabel = _offerClubCta
+          ? 'CLUB'
+          : switch (kind) {
+              SyncBannerKind.local => 'LOCAL',
+              SyncBannerKind.enFile => 'EN FILE',
+              SyncBannerKind.cloud => 'CLOUD',
+            };
+      final chipColor = _offerClubCta
+          ? DeckColors.amber
+          : switch (kind) {
+              SyncBannerKind.local => DeckColors.label,
+              SyncBannerKind.enFile => DeckColors.amber,
+              SyncBannerKind.cloud => DeckColors.tribord,
+            };
+      final right = status ??
+          (_offerClubCta
+              ? 'Choisir un club'
+              : (pending > 0 ? '$pending en file' : ''));
+      // Fond + texte ignorés ; seul le chip reçoit les taps (ST-09).
+      strip = SizedBox(
+        height: 36,
+        child: Stack(
+          children: [
+            IgnorePointer(
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  color: DeckColors.surface,
+                  border: Border(
+                    bottom: BorderSide(color: DeckColors.hairline),
+                  ),
+                ),
+                child: const SizedBox.expand(),
+              ),
+            ),
+            Positioned(
+              left: 12,
+              top: 4,
+              bottom: 4,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _onBannerTap,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: chipColor),
+                      color: chipColor.withValues(alpha: 0.12),
+                    ),
+                    child: Text(
+                      chipLabel,
+                      style: TextStyle(
+                        color: chipColor,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                        letterSpacing: 1.1,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          );
-    // Toujours le même arbre (Stack) : basculer child↔Stack remontait
-    // MaterialApp.router et recollait GoRouter sur initialLocation=/identity.
+            if (right.isNotEmpty)
+              Positioned(
+                right: 12,
+                top: 0,
+                bottom: 0,
+                child: IgnorePointer(
+                  child: Center(
+                    child: Text(
+                      right,
+                      style: const TextStyle(
+                        color: DeckColors.label,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+
+    // Toujours Stack : basculer child↔Stack remontait MaterialApp.router.
     return Stack(
       fit: StackFit.expand,
       children: [
         widget.child,
-        if (banner != null)
-          Positioned(top: 0, left: 0, right: 0, child: banner),
+        if (strip != null)
+          Positioned(top: top, left: 0, right: 0, child: strip),
       ],
     );
   }

@@ -18,6 +18,7 @@ import '../../session/double_press_stop.dart';
 import '../../session/heel.dart';
 import '../../session/live_hub.dart';
 import '../../session/rower_orientation.dart';
+import '../../session/session_sync.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 import '../../widgets/heel_banner.dart';
@@ -79,9 +80,16 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
       });
       return;
     }
-    await ref.read(liveHubProvider.notifier).stop();
+    final stopped = await ref.read(liveHubProvider.notifier).stop();
     if (!mounted) return;
     context.go(AppRoutes.quai);
+    // C1 : sync après /quai — sans tap bandeau.
+    final sid = stopped.sessionId;
+    if (sid != null) {
+      unawaited(
+        SessionSync.autosyncAfterStop(sid, dir: stopped.directory),
+      );
+    }
   }
 
   @override

@@ -685,9 +685,10 @@ class LiveHub extends Notifier<LiveHubState> {
     );
   }
 
-  Future<void> stop() => stopSession();
+  Future<StopResult> stop() => stopSession();
 
-  Future<void> stopSession() async {
+  /// Ferme la séance. Sync cloud = [SessionSync.autosyncAfterStop] **après** `/quai`.
+  Future<StopResult> stopSession() async {
     _tick?.cancel();
     _tick = null;
     for (final s in _sessionSubs) {
@@ -699,15 +700,6 @@ class LiveHub extends Notifier<LiveHubState> {
     await _store?.markEnded();
     await _store?.close();
     _store = null;
-    if (sid != null) {
-      unawaited(() async {
-        try {
-          final sync = await SessionSync.instance();
-          await sync.enqueueAfterStop(sid, dir: dir);
-          await sync.drain();
-        } catch (_) {}
-      }());
-    }
     try {
       await WakelockPlus.disable();
     } catch (_) {}
@@ -715,6 +707,7 @@ class LiveHub extends Notifier<LiveHubState> {
     unawaited(unlockRowerOrientations());
     _cadence.reset();
     state = state.copyWith(logging: false);
+    return StopResult(sessionId: sid, directory: dir);
   }
 
   Future<String?> joinAsCoach(String rawCode) async {

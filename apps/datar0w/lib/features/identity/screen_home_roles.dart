@@ -450,8 +450,16 @@ class HomeCoachScreen extends ConsumerWidget {
             ],
           ),
           OutlinedButton(
+            onPressed: () => context.go(AppRoutes.clubSessions),
+            child: const Text('SÉANCES CLOUD'),
+          ),
+          OutlinedButton(
             onPressed: () => context.go(AppRoutes.sessions),
             child: const Text('MES SÉANCES'),
+          ),
+          TextButton(
+            onPressed: () => context.go(AppRoutes.settings),
+            child: const Text('RÉGLAGES'),
           ),
           TextButton(
             onPressed: () => context.go(AppRoutes.identity),
