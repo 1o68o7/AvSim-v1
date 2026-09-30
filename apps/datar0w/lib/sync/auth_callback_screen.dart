@@ -65,6 +65,7 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
     final uid = auth.sessionUserId;
     if (uid != null) {
       await ref.read(identityProvider.notifier).hydrateFromCloud(uid);
+      await ref.read(identityProvider.notifier).ensureActiveClubFromMembership();
     }
     if (!mounted) return;
     final dest = destinationAfterAuth(

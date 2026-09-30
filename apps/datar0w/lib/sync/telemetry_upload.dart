@@ -101,12 +101,13 @@ class TelemetryUploadEngine implements TelemetryGateway {
   /// Injecté en tests. Prod : [defaultOwnerUserId] = auth.uid().
   final String? Function()? resolveOwnerUserId;
 
-  /// Injecté en tests. Prod : prefs.activeClubId puis meta.json.
+  /// Injecté en tests. Prod : prefs.activeClubId (membership via ensure).
   final String? Function()? resolveClubId;
 
   String? _ownerUserId() =>
       resolveOwnerUserId?.call() ?? defaultOwnerUserId();
 
+  /// Club = prefs / mémoire hydrate — **pas** meta.json (JSONL sans club_id).
   String? _clubId(Map<String, dynamic> meta) {
     final fromResolver = resolveClubId?.call();
     if (fromResolver != null && fromResolver.trim().isNotEmpty) {
@@ -115,12 +116,6 @@ class TelemetryUploadEngine implements TelemetryGateway {
     final fromPrefs = defaultActiveClubId();
     if (fromPrefs != null && fromPrefs.trim().isNotEmpty) {
       return fromPrefs.trim();
-    }
-    final fromMeta = (meta['clubId'] as String?) ?? (meta['club_id'] as String?);
-    if (fromMeta != null &&
-        fromMeta.trim().isNotEmpty &&
-        fromMeta.trim() != 'unknown') {
-      return fromMeta.trim();
     }
     return null;
   }

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../router.dart';
 import '../theme/deck_theme.dart';
 
 import 'session_pack.dart';
@@ -69,6 +70,7 @@ class SessionSync {
     this.now,
     this.resolveOwnerUserId,
     this.resolveClubId,
+    this.ensureClub,
   });
 
   static TelemetryGateway Function() resolveGateway =
@@ -83,6 +85,9 @@ class SessionSync {
 
   /// Injecté en tests. Prod : [defaultActiveClubId].
   final String? Function()? resolveClubId;
+
+  /// Injecté en tests. Prod : [ensureActiveClubForSync].
+  final Future<String?> Function()? ensureClub;
 
   DateTime _now() => now?.call() ?? DateTime.now().toUtc();
 
@@ -192,9 +197,19 @@ class SessionSync {
     await applyLocalRetentionFifo();
   }
 
-  /// Tap « renvoyer » : enqueue local + push **toutes** les rows non-ACK
-  /// (attempts 0…N), pas seulement ≥ 3.
+  Future<String?> _ensureClub() async {
+    if (ensureClub != null) return ensureClub!();
+    return ensureActiveClubForSync(resolveOwnerUserId: resolveOwnerUserId);
+  }
+
+  /// Tap « renvoyer » : ensure club (membership) → enqueue + push **toutes**
+  /// les rows non-ACK (attempts 0…N).
   Future<void> retryManual() async {
+    try {
+      await _ensureClub();
+    } catch (e) {
+      debugPrint('retryManual ensureActiveClub: $e');
+    }
     try {
       await enqueueExistingLocalSessions();
     } catch (e) {
@@ -298,10 +313,18 @@ class SessionSync {
 }
 
 class SessionSyncHost extends StatefulWidget {
-  const SessionSyncHost({super.key, required this.child, this.sync});
+  const SessionSyncHost({
+    super.key,
+    required this.child,
+    this.sync,
+    this.ensureClub,
+  });
 
   final Widget child;
   final SessionSync? sync;
+
+  /// Injecté en tests. Prod : [ensureActiveClubForSync].
+  final Future<String?> Function()? ensureClub;
 
   @override
   State<SessionSyncHost> createState() => _SessionSyncHostState();
@@ -313,6 +336,8 @@ class _SessionSyncHostState extends State<SessionSyncHost>
   SessionSync? _sync;
   String? _bannerStatus;
   Timer? _statusTimer;
+  /// CTA « Choisir un club » si uid ok mais aucun membership / prefs.
+  bool _offerClubCta = false;
 
   @override
   void initState() {
@@ -321,17 +346,32 @@ class _SessionSyncHostState extends State<SessionSyncHost>
     _boot();
   }
 
+  Future<String?> _ensureClub() async {
+    if (widget.ensureClub != null) return widget.ensureClub!();
+    if (_sync?.ensureClub != null) return _sync!.ensureClub!();
+    return ensureActiveClubForSync();
+  }
+
+  Future<void> _ensureClubAndDrain() async {
+    try {
+      await _ensureClub();
+    } catch (e) {
+      debugPrint('SessionSyncHost ensureClub: $e');
+    }
+    await _sync?.drain(enqueueExisting: true);
+  }
+
   Future<void> _boot() async {
     try {
       _sync = widget.sync ?? await SessionSync.openLocal();
-      await _sync!.drain(enqueueExisting: true);
+      await _ensureClubAndDrain();
       if (mounted) setState(() {});
     } catch (e) {
       debugPrint('SessionSyncHost boot: $e');
     }
     try {
       _net = Connectivity().onConnectivityChanged.listen((_) {
-        unawaited(_sync?.drain(enqueueExisting: true));
+        unawaited(_ensureClubAndDrain());
       });
     } catch (_) {}
   }
@@ -339,7 +379,7 @@ class _SessionSyncHostState extends State<SessionSyncHost>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      unawaited(_sync?.drain(enqueueExisting: true));
+      unawaited(_ensureClubAndDrain());
     }
   }
 
@@ -349,35 +389,57 @@ class _SessionSyncHostState extends State<SessionSyncHost>
     final ackedBefore =
         sync.db.all().where((r) => r.acked).length;
     try {
-      await sync.enqueueExistingLocalSessions();
-      await sync.drain(enqueueExisting: true);
-      await sync.retryManual();
+      await _ensureClub();
+      if (sync.hasAuthAndClub) {
+        if (mounted) setState(() => _offerClubCta = false);
+        await sync.enqueueExistingLocalSessions();
+        await sync.drain(enqueueExisting: true);
+        await sync.retryManual();
+      } else {
+        await sync.retryManual();
+      }
     } catch (e) {
       debugPrint('SessionSyncHost retry: $e');
     }
     if (!mounted) return;
     final ackedAfter = sync.db.all().where((r) => r.acked).length;
     final nOk = ackedAfter - ackedBefore;
-    String status;
-    if (nOk > 0) {
-      status = 'sync: ok $nOk';
-    } else {
-      String? err;
-      for (final r in sync.db.all()) {
-        if (!r.acked && r.lastError != null && r.lastError!.isNotEmpty) {
-          err = r.lastError;
-          break;
-        }
+    String? err;
+    for (final r in sync.db.all()) {
+      if (!r.acked && r.lastError != null && r.lastError!.isNotEmpty) {
+        err = r.lastError;
+        break;
       }
-      status = err != null ? 'sync: $err' : 'sync: nack';
     }
-    // Texte bandeau 2 s (haut d’écran) — pas un SnackBar sous le CTA.
     _statusTimer?.cancel();
-    setState(() => _bannerStatus = status);
+    if (err == 'pas de club') {
+      // CTA persistante — pas seulement le texte 2 s.
+      setState(() {
+        _offerClubCta = true;
+        _bannerStatus = 'pas de club — Choisir un club';
+      });
+      return;
+    }
+    final status = nOk > 0
+        ? 'sync: ok $nOk'
+        : (err != null ? 'sync: $err' : 'sync: nack');
+    setState(() {
+      _offerClubCta = false;
+      _bannerStatus = status;
+    });
     _statusTimer = Timer(const Duration(seconds: 2), () {
       if (!mounted) return;
       setState(() => _bannerStatus = null);
     });
+  }
+
+  void _onBannerTap() {
+    if (_offerClubCta) {
+      appRouter.go(AppRoutes.clubJoin);
+      return;
+    }
+    if (_bannerStatus != null) return;
+    unawaited(_onBannerRetry());
   }
 
   @override
@@ -392,11 +454,13 @@ class _SessionSyncHostState extends State<SessionSyncHost>
   Widget build(BuildContext context) {
     final n = _sync?.unsyncedBannerCount ?? 0;
     final status = _bannerStatus;
-    final showBanner = n > 0 || status != null;
-    final label = status ??
-        (n == 1
-            ? '1 séance non synchronisée — renvoyer'
-            : '$n séances non synchronisées — renvoyer');
+    final showBanner = n > 0 || status != null || _offerClubCta;
+    final label = _offerClubCta
+        ? (status ?? 'pas de club — Choisir un club')
+        : (status ??
+            (n == 1
+                ? '1 séance non synchronisée — renvoyer'
+                : '$n séances non synchronisées — renvoyer'));
     final banner = !showBanner
         ? null
         : Material(
@@ -404,7 +468,7 @@ class _SessionSyncHostState extends State<SessionSyncHost>
             child: SafeArea(
               bottom: false,
               child: InkWell(
-                onTap: status != null ? null : () => unawaited(_onBannerRetry()),
+                onTap: () => _onBannerTap(),
                 child: Padding(
                   padding: const EdgeInsets.all(10),
                   child: Text(

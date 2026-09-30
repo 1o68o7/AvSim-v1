@@ -1,10 +1,24 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import 'models.dart';
+
+/// Mémoire club actif pour [defaultActiveClubId] (sync_identity).
+String? _activeClubIdMemory;
+
+void notifyActiveClubId(String? id) {
+  _activeClubIdMemory =
+      (id != null && id.isNotEmpty) ? id : null;
+}
+
+String? rememberedActiveClubId() => _activeClubIdMemory;
+
+@visibleForTesting
+void debugResetActiveClubIdMemory() => _activeClubIdMemory = null;
 
 /// CRUD JSON sous `Documents/datar0w/`.
 class IdentityStore {
@@ -12,14 +26,26 @@ class IdentityStore {
 
   final Directory? _rootOverride;
 
+  /// Root Documents résolu (prod) — permet [tryLoadPrefsSync] après hydrate.
+  static String? _resolvedDocsRoot;
+
+  @visibleForTesting
+  static void debugResetResolvedRoot() => _resolvedDocsRoot = null;
+
   Future<Directory> root() async {
     if (_rootOverride != null) {
       await _rootOverride.create(recursive: true);
       return _rootOverride;
     }
+    if (_resolvedDocsRoot != null) {
+      final cached = Directory(_resolvedDocsRoot!);
+      await cached.create(recursive: true);
+      return cached;
+    }
     final docs = await getApplicationDocumentsDirectory();
     final dir = Directory(p.join(docs.path, 'datar0w'));
     await dir.create(recursive: true);
+    _resolvedDocsRoot = dir.path;
     return dir;
   }
 
@@ -209,6 +235,8 @@ class IdentityStore {
     await File(p.join(dir.path, 'state.json')).writeAsString(
       const JsonEncoder.withIndent('  ').convert(prefs.toJson()),
     );
+    // Relu par defaultActiveClubId() (sync) après hydrate / selectClub.
+    notifyActiveClubId(prefs.activeClubId);
   }
 
   Future<List<Map<String, dynamic>>> _readList(String name) async {
@@ -230,10 +258,12 @@ class IdentityStore {
     );
   }
 
-  /// Lecture synchrone si le store a un répertoire imposé (tests).
+  /// Lecture synchrone : root imposé (tests) **ou** Documents déjà résolu
+  /// via [root] (prod, après premier boot / hydrate).
   IdentityPrefs? tryLoadPrefsSync() {
-    final dir = _rootOverride;
-    if (dir == null) return null;
+    final path = _rootOverride?.path ?? _resolvedDocsRoot;
+    if (path == null) return null;
+    final dir = Directory(path);
     dir.createSync(recursive: true);
     final f = File(p.join(dir.path, 'state.json'));
     if (!f.existsSync()) return const IdentityPrefs();
