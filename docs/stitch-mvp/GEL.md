@@ -1,13 +1,32 @@
 # Gel Stitch → Flutter (DataR0w)
 
-*21 sept 2026. Projet Stitch `1264451048753434333` (DataR0w Rowing Dashboard).  
+*21 sept 2026 · maj 30 sept 2026 (ST-01…ST-10).  
+Projet Stitch `1264451048753434333` (DataR0w Rowing Dashboard).  
 Le kit `2860093974873970202` (Tx Couples) n’est **pas** porté.*
 
 DA Deck : `#0B0E12` / blanc / `#9AA0A6` / `#2A2F36` / CTA `#E8C547` / TRIBORD `#46C275` / BÂBORD `#E05353`.  
-Pas de cyan High-Vis. Pas de jargon Stitch (SYS_ID, STAGE PROTOCOL, SENSOR SYNC).  
+Pas de cyan High-Vis. Pas de jargon Stitch (SYS_ID, STAGE PROTOCOL, SENSOR SYNC, AEROTELEMETRY).  
 Pas d’Accueil sur `/live` `/cox` `/coach`.
 
 HTML utile (extraits, pas labo) : `docs/stitch-mvp/gel/`.
+
+## Inventaire backlog ST (MCP 30 sept 2026)
+
+| Stitch | Route Flutter | Statut |
+|---|---|---|
+| ST-01 — /auth session ON | `/auth` | **fait** (cette PR) — CONTINUER + Rattacher + DÉCONNEXION |
+| ST-02 — /auth session OFF | `/auth` | **fait** (cette PR) — Google + email, pas « Espace club » |
+| ST-03 — Accueil staff | `/home/admin` | **absent** UI lot — PR suivante |
+| ST-04 — Accueil rameur | `/home/rower` | **absent** UI lot — PR suivante (lien réglages déjà) |
+| ST-05 — Séances du club | `/club/sessions` | **absent** — route à créer |
+| ST-06 — Fiche séance | `/club/sessions/:code` | **absent** |
+| ST-07 — Import CSV | `/club/import` | **absent** polish — PR suivante |
+| ST-08 — Licence FFA | onboard licence | **absent** |
+| ST-09 — Bandeau sync | `SessionSyncHost` | **absent** polish — PR suivante |
+| ST-10 — Réglages + déconnexion | `/settings` | **fait** (cette PR) — dialogue, JSONL intacts |
+
+HTML gelés : `gel/ST-01-auth-session-on.html`, `ST-02-auth-session-off.html`, `ST-10-settings-logout.html`.  
+Navigation : swipe droite = arrière, swipe gauche = avant (`NavSwipeHost`, hors live/cox/tare).
 
 ## Mapping
 
@@ -60,7 +79,8 @@ HTML utile (extraits, pas labo) : `docs/stitch-mvp/gel/`.
 | L3 Signalement | `/calendar/:id` | **codé** |
 | L4 Historique rameur | `/physio` + profil | **codé** |
 | L5 Spinoscope loisir | `/spinoscope` | **codé** (étend D4) |
-| Auth club (Point B) | `/auth` | **codé** — Google + magic link fallback (local si pas de clés) |
+| Auth club (Point B) + ST-01/ST-02 | `/auth` | **codé** — Google + magic link ; deux états session |
+| ST-10 Réglages | `/settings` | **codé** — déconnexion sans wipe JSONL |
 | Porte club (O2, hors Stitch) | `/club/login` | **codé** |
 | Profil rameur 1er login (O3) | `/onboarding/rower` | **codé** |
 | Rejoindre / créer club (O4) | `/club/join` | **codé** |

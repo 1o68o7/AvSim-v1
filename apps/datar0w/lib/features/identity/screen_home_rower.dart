@@ -63,6 +63,13 @@ class HomeRowerScreen extends ConsumerWidget {
       title: 'ACCUEIL RAMEUR',
       subtitle: rower?.displayName ?? 'sans profil',
       retourFallback: AppRoutes.identity,
+      actions: [
+        IconButton(
+          tooltip: 'Réglages',
+          onPressed: () => context.go(AppRoutes.settings),
+          icon: const Icon(Icons.settings_outlined),
+        ),
+      ],
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [

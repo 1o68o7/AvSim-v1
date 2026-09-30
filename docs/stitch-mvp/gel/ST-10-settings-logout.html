@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-primary": "#3b2f00", "on-tertiary-container": "#005982", "tertiary-fixed": "#c9e6ff", "primary-container": "#e8c547", "surface-container-high": "#272a2f", "on-primary-fixed": "#231b00", "on-tertiary-fixed": "#001e2f", "outline-dim": "#4c4635", "on-error-container": "#ffdad6", "secondary-container": "#41474d", "error-container": "#93000a", "inverse-primary": "#725c00", "on-tertiary": "#00344e", "secondary-fixed": "#dde3e9", "on-primary-fixed-variant": "#564500", "on-background": "#e1e2e8", "primary-fixed": "#ffe07c", "on-secondary-fixed": "#161c21", "secondary-fixed-dim": "#c1c7cd", "surface-container-low": "#191c20", "outline-variant": "#4c4635", "telemetry-cadence": "#46c275", "on-secondary-container": "#b0b6bc", "on-secondary-fixed-variant": "#41474d", "surface-variant": "#323539", "on-surface-variant": "#cfc6af", "on-secondary": "#2b3136", "surface-container-lowest": "#0b0e12", "primary-fixed-dim": "#e7c446", "surface-dim": "#111418", "surface-container": "#1d2024", "inverse-surface": "#e1e2e8", "on-primary-container": "#655100", "surface-container-highest": "#323539", "surface-tint": "#e7c446", "error": "#ffb4ab", "on-tertiary-fixed-variant": "#004b6f", "on-error": "#690005", "outline": "#98907b", "tertiary-container": "#8fcfff", "on-surface": "#e1e2e8", "inverse-on-surface": "#2e3135", "tertiary": "#cde7ff", "surface": "#111418", "tertiary-fixed-dim": "#8dcdfd", "background": "#111418", "surface-bright": "#36393e", "secondary": "#c1c7cd", "primary": "#ffe285" }, borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" }, spacing: { "space-md": "0.5rem", "space-xl": "1rem", "gutter-lg": "0.75rem", "margin-lg": "1rem", "gutter-sm": "0.25rem", margin: "0.75rem", "space-lg": "0.75rem", "margin-sm": "0.5rem", gutter: "0.5rem", "space-xs": "0.125rem", "space-sm": "0.25rem" }, fontFamily: { "body-sm": ["JetBrains Mono"], "headline-md": ["JetBrains Mono"], "label-md": ["JetBrains Mono"], "body-lg": ["JetBrains Mono"], "headline-lg": ["JetBrains Mono"], "label-lg": ["JetBrains Mono"], "body-md": ["JetBrains Mono"], "headline-sm": ["JetBrains Mono"], "label-sm": ["JetBrains Mono"], "headline-lg-mobile": ["JetBrains Mono"] }, fontSize: { "body-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "400" }], "headline-md": ["20px", { lineHeight: "24px", letterSpacing: "0em", fontWeight: "600" }], "label-md": ["10px", { lineHeight: "12px", letterSpacing: "0.08em", fontWeight: "500" }], "body-lg": ["16px", { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" }], "headline-lg": ["32px", { lineHeight: "36px", letterSpacing: "-0.02em", fontWeight: "700" }], "label-lg": ["12px", { lineHeight: "16px", letterSpacing: "0.06em", fontWeight: "600" }], "body-md": ["13px", { lineHeight: "18px", letterSpacing: "0.01em", fontWeight: "400" }], "headline-sm": ["16px", { lineHeight: "20px", letterSpacing: "0.02em", fontWeight: "600" }], "label-sm": ["9px", { lineHeight: "10px", letterSpacing: "0.1em", fontWeight: "500" }], "headline-lg-mobile": ["24px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "700" }] } } } };</script><style>@layer base{html,body{width:100%;margin:0;padding:0;background-color:#0b0e12;color:#e1e2e8;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface-container-lowest font-body-md text-on-surface min-h-screen flex flex-col antialiased selection:bg-primary selection:text-on-primary"><header class="fixed top-0 w-full z-50 pt-safe bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.4)]"><div class="h-16 px-margin flex items-center justify-between"><div class="flex items-center gap-space-sm"><button aria-label="Retour" class="min-w-[48px] min-h-[48px] px-space-sm flex items-center justify-center gap-space-xs text-on-surface-variant hover:text-primary transition-colors focus:outline-none" onclick="history.back()" type="button"><span class="material-symbols-outlined text-[18px]">chevron_left</span><span class="font-label-lg text-label-lg tracking-wider uppercase font-semibold">RETOUR</span></button><div class="flex items-center gap-space-sm pl-space-xs"><div aria-hidden="true" class="w-1.5 h-1.5 bg-telemetry-cadence rounded-none animate-pulse"></div><h1 class="font-headline-sm text-headline-sm uppercase text-on-surface tracking-wide select-none">Réglages Système</h1></div></div><div class="flex items-center gap-space-md"><div class="hidden sm:flex flex-col items-end"><span class="font-label-sm text-label-sm text-on-surface-variant leading-none">ST-10 DECK</span><span class="font-label-sm text-label-sm text-telemetry-cadence leading-none mt-space-xs">ACQ LOCKED</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-safe bg-surface-container-lowest"><div class="flex flex-col w-full text-on-surface select-none pb-12">
+<!-- 1. SUB-STATUS TELEMETRY BAR -->
+<div class="w-full bg-surface-container-lowest px-margin py-2 flex items-center justify-between border-b border-outline-variant/30">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-sm text-label-sm tracking-wider uppercase text-on-surface-variant font-semibold">DATAR0W DECK V4.2.1</span>
+<span class="text-outline-dim text-label-sm">/</span>
+<span class="font-label-sm text-label-sm tracking-wider uppercase text-on-surface-variant">CACHE LOCAL OK</span>
+</div>
+<div class="flex items-center gap-space-xs bg-surface-container-low px-2 py-0.5 border border-outline-variant/20">
+<span class="w-1.5 h-1.5 bg-telemetry-cadence rounded-none animate-pulse"></span>
+<span class="font-label-sm text-label-sm tracking-wider uppercase text-telemetry-cadence font-bold">ACTIF</span>
+</div>
+</div>
+<div class="flex flex-col gap-margin p-margin">
+<!-- 2. SECTION: COMPTE & SYNCHRONISATION -->
+<section class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between px-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant font-semibold">// 01 . COMPTE &amp; IDENTIFICATION CLIENT</span>
+<span class="font-label-sm text-label-sm text-outline tracking-wider font-mono">NODE #ST-10</span>
+</div>
+<div class="w-full bg-surface-container-low p-space-lg flex flex-col gap-space-md border border-outline-variant/30">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm uppercase font-bold text-on-surface tracking-wide">Marc V.</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/40 font-semibold tracking-wider">#USR-8842</span>
+</div>
+<span class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant mt-0.5">Entraîneur Référent Technique</span>
+<span class="font-body-sm text-body-sm text-on-surface font-mono mt-1">marc.v@aviron-bordeaux.fr</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-sm text-label-sm px-2 py-1 bg-surface-container-high border border-outline-variant/40 text-telemetry-cadence font-bold tracking-wider">SESSION ACTIVE</span>
+<span class="font-label-sm text-label-sm text-outline mt-1 font-mono">ENB-33014</span>
+</div>
+</div>
+<div class="w-full pt-space-sm border-t border-outline-variant/20 flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Base Nautique Affiliée</span>
+<span class="font-label-md text-label-md uppercase tracking-wider text-on-surface font-semibold text-right">Émulation Nautique de Bordeaux</span>
+</div>
+</div>
+</section>
+<!-- 3. SECTION: STOCKAGE LOCAL & FICHIERS JSONL -->
+<section class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between px-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant font-semibold">// 02 . MÉMOIRE FLASH &amp; BRUTS JSONL</span>
+<span class="font-label-sm text-label-sm text-primary tracking-wider font-mono">VOL_LOCAL: 22.7%</span>
+</div>
+<div class="w-full bg-surface-container-low p-space-lg flex flex-col gap-space-md border border-outline-variant/30">
+<!-- Storage Metrics Deck -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="bg-surface-container-high p-space-sm border border-outline-variant/20 flex flex-col justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">SESSIONS SÉCURISÉES</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-headline-md text-headline-md font-bold text-on-surface font-mono">14</span>
+<span class="font-label-sm text-label-sm text-outline uppercase font-mono">RUNS</span>
+</div>
+</div>
+<div class="bg-surface-container-high p-space-sm border border-outline-variant/20 flex flex-col justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">ESPACE DÉDIÉ TÉLÉMÉTRIE</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-headline-md text-headline-md font-bold text-primary font-mono">1.82</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">/ 8.00 Go</span>
+</div>
+</div>
+</div>
+<!-- Gauge Bar Avionics -->
+<div class="w-full flex flex-col gap-1">
+<div class="flex justify-between font-label-sm text-label-sm text-outline-dim uppercase">
+<span>0.0 Go</span>
+<span>Alloué: 8.0 Go</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high border border-outline-variant/30 flex p-[1px]">
+<div class="h-full bg-primary" style="width: 22.75%;"></div>
+</div>
+</div>
+<!-- Critical Non-Destructive Banner -->
+<div class="w-full bg-surface-container-high/60 p-space-sm border-l-2 border-primary border-t border-r border-b border-outline-variant/30 flex gap-space-sm items-start">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">terminal</span>
+<div class="flex flex-col gap-0.5">
+<span class="font-label-sm text-label-sm font-bold uppercase tracking-wider text-primary">GARANTIE D'INTÉGRITÉ DES FICHIERS LOCAUX</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              La déconnexion de l'application ne supprime en aucun cas vos fichiers d'acquisition bruts <span class="text-on-surface font-semibold font-mono">.jsonl</span> stockés sur l'appareil. Ils demeurent intacts en mode hors-ligne et prêts pour la prochaine synchronisation cloud.
+            </p>
+</div>
+</div>
+<!-- Export Trigger Button -->
+<button class="w-full min-h-[48px] px-space-md py-space-sm bg-surface-container-high hover:bg-surface-bright active:bg-outline-variant text-on-surface border border-outline-variant/40 flex items-center justify-between transition-colors focus:outline-none focus:border-primary" type="button">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">download</span>
+<span class="font-label-lg text-label-lg uppercase tracking-wider font-bold">EXPORTER LES FICHIERS .JSONL (ZIP)</span>
+</div>
+<span class="font-label-sm text-label-sm font-mono text-outline uppercase px-1.5 py-0.5 bg-surface-container-lowest border border-outline-variant/20">14 BLOCS</span>
+</button>
+<!-- Data Retention Toggle -->
+<div class="w-full pt-space-xs flex items-center justify-between min-h-[48px] cursor-pointer" onclick="toggleSwitch('purge-toggle')">
+<div class="flex flex-col pr-space-md">
+<span class="font-label-md text-label-md uppercase tracking-wider text-on-surface font-semibold">Purger fichiers synchronisés (&gt; 30 jours)</span>
+<span class="font-body-sm text-body-sm text-outline-dim">Garde intacts les logs non transmis</span>
+</div>
+<button aria-checked="false" class="w-12 h-6 bg-surface-container-highest border border-outline-variant/40 relative shrink-0 transition-colors p-[2px] flex items-center" id="purge-toggle" role="switch" type="button">
+<div class="w-4 h-4 bg-outline-dim transition-transform" id="purge-toggle-thumb"></div>
+</button>
+</div>
+</div>
+</section>
+<!-- 4. SECTION: PRÉFÉRENCES D'ACQUISITION TÉLÉMÉTRIQUE -->
+<section class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between px-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant font-semibold">// 03 . PARAMÈTRES CAPTEURS &amp; FLUX DE BORD</span>
+<span class="font-label-sm text-label-sm text-outline tracking-wider font-mono">FREQ_DEV</span>
+</div>
+<div class="w-full bg-surface-container-low border border-outline-variant/30 flex flex-col divide-y divide-outline-variant/20">
+<!-- Toggle: IMU 100 Hz -->
+<div class="p-space-md flex items-center justify-between min-h-[48px] cursor-pointer" onclick="toggleSwitch('imu-toggle')">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md uppercase tracking-wider text-on-surface font-semibold">Fréquence Centrale IMU 100 Hz</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-mono">Biais dynamique accéléromètre &amp; gyro</span>
+</div>
+<button aria-checked="true" class="w-12 h-6 bg-surface-container-high border border-telemetry-cadence relative shrink-0 transition-colors p-[2px] flex items-center justify-end" id="imu-toggle" role="switch" type="button">
+<div class="w-4 h-4 bg-telemetry-cadence transition-transform" id="imu-toggle-thumb"></div>
+</button>
+</div>
+<!-- Toggle: GPS Battery Saver -->
+<div class="p-space-md flex items-center justify-between min-h-[48px] cursor-pointer" onclick="toggleSwitch('gps-toggle')">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md uppercase tracking-wider text-on-surface font-semibold">Mode économie batterie (GPS 1 Hz au repos)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-mono">Réduit la précision d'allure à l'arrêt</span>
+</div>
+<button aria-checked="false" class="w-12 h-6 bg-surface-container-highest border border-outline-variant/40 relative shrink-0 transition-colors p-[2px] flex items-center" id="gps-toggle" role="switch" type="button">
+<div class="w-4 h-4 bg-outline-dim transition-transform" id="gps-toggle-thumb"></div>
+</button>
+</div>
+<!-- Toggle: Haptic Alert -->
+<div class="p-space-md flex items-center justify-between min-h-[48px] cursor-pointer" onclick="toggleSwitch('haptic-toggle')">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md uppercase tracking-wider text-on-surface font-semibold">Retour haptique sur alerte gîte</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-mono">Vibration seuil d'inclinaison &gt; 8.5°</span>
+</div>
+<button aria-checked="true" class="w-12 h-6 bg-surface-container-high border border-telemetry-cadence relative shrink-0 transition-colors p-[2px] flex items-center justify-end" id="haptic-toggle" role="switch" type="button">
+<div class="w-4 h-4 bg-telemetry-cadence transition-transform" id="haptic-toggle-thumb"></div>
+</button>
+</div>
+<!-- Speed Unit Selector -->
+<div class="p-space-md flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md uppercase tracking-wider text-on-surface font-semibold">Format de vitesse principal</span>
+<span class="font-label-sm text-label-sm text-outline font-mono">AFFICHEUR COCKPIT</span>
+</div>
+<div class="grid grid-cols-2 gap-space-xs" id="speed-selector">
+<button class="min-h-[48px] py-space-xs px-space-md font-label-md text-label-md uppercase tracking-wider font-semibold border border-outline-variant/40 bg-surface-container-high text-on-surface-variant focus:outline-none transition-colors" onclick="selectUnit(this)" type="button">
+              M / S (VÉLOCITÉ)
+            </button>
+<button class="min-h-[48px] py-space-xs px-space-md font-label-md text-label-md uppercase tracking-wider font-bold border border-primary bg-primary text-on-primary focus:outline-none transition-colors" onclick="selectUnit(this)" type="button">
+              ALLURE / 500M (SPLIT)
+            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. SECTION: ZONE DÉCONNEXION & SÉCURITÉ -->
+<section class="flex flex-col gap-space-xs mt-space-sm">
+<div class="flex items-center justify-between px-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-error font-semibold">// 04 . DÉCONNEXION DE SESSION &amp; VERROUILLAGE</span>
+<span class="font-label-sm text-label-sm text-error/80 font-mono">DISCONNECT_SAFE</span>
+</div>
+<div class="w-full bg-surface-container-low p-space-lg flex flex-col gap-space-md border border-error/50">
+<div class="flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-error text-[20px] shrink-0 mt-0.5">warning</span>
+<div class="flex flex-col gap-0.5">
+<span class="font-label-md text-label-md uppercase tracking-wider text-error font-bold">AVERTISSEMENT CLÔTURE DE POSTE</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Vous allez mettre fin au cycle d'acquisition sous l'indicatif <span class="text-on-surface font-mono font-semibold">Marc V. (ENB)</span>. Les paramètres télémétriques seront verrouillés jusqu'à la prochaine ouverture de session.
+            </p>
+</div>
+</div>
+<!-- Prominent Logout Action -->
+<button class="w-full min-h-[52px] px-space-md bg-surface-container-low hover:bg-error/10 active:bg-error/20 border border-error text-error font-headline-sm text-headline-sm uppercase tracking-widest font-bold flex items-center justify-center gap-space-sm transition-colors focus:outline-none" onclick="handleLogout()" type="button">
+<span class="material-symbols-outlined text-[22px]">logout</span>
+<span>SE DÉCONNECTER</span>
+</button>
+<div class="flex items-center justify-center gap-1.5 pt-space-xs border-t border-outline-variant/20">
+<span class="material-symbols-outlined text-telemetry-cadence text-[16px]">lock</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline text-center">
+            Vos enregistrements locaux restent chiffrés et conservés sur ce terminal.
+          </span>
+</div>
+</div>
+</section>
+<!-- Console Audit Signature -->
+<div class="flex items-center justify-between py-space-sm px-space-xs text-outline-dim">
+<span class="font-label-sm text-label-sm font-mono uppercase tracking-widest">AEROTEL-HUD ST-10 REV 4.2</span>
+<span class="font-label-sm text-label-sm font-mono uppercase tracking-widest">SYS_UPTIME: 14H 28M</span>
+</div>
+</div>
+</div>
+<script>
+  function toggleSwitch(id) {
+    const btn = document.getElementById(id);
+    const thumb = document.getElementById(id + '-thumb');
+    const isChecked = btn.getAttribute('aria-checked') === 'true';
+
+    if (isChecked) {
+      btn.setAttribute('aria-checked', 'false');
+      btn.className = 'w-12 h-6 bg-surface-container-highest border border-outline-variant/40 relative shrink-0 transition-colors p-[2px] flex items-center justify-start';
+      thumb.className = 'w-4 h-4 bg-outline-dim transition-transform';
+    } else {
+      btn.setAttribute('aria-checked', 'true');
+      btn.className = 'w-12 h-6 bg-surface-container-high border border-telemetry-cadence relative shrink-0 transition-colors p-[2px] flex items-center justify-end';
+      thumb.className = 'w-4 h-4 bg-telemetry-cadence transition-transform';
+    }
+  }
+
+  function selectUnit(selectedBtn) {
+    const parent = document.getElementById('speed-selector');
+    const buttons = parent.querySelectorAll('button');
+    buttons.forEach(btn => {
+      btn.className = 'min-h-[48px] py-space-xs px-space-md font-label-md text-label-md uppercase tracking-wider font-semibold border border-outline-variant/40 bg-surface-container-high text-on-surface-variant focus:outline-none transition-colors';
+    });
+    selectedBtn.className = 'min-h-[48px] py-space-xs px-space-md font-label-md text-label-md uppercase tracking-wider font-bold border border-primary bg-primary text-on-primary focus:outline-none transition-colors';
+  }
+
+  function handleLogout() {
+    if (confirm("Confirmer la déconnexion de la session ST-10 ?\\nLes 14 fichiers .jsonl restent disponibles sur ce terminal.")) {
+      window.location.reload();
+    }
+  }
+</script></main></body></html>
