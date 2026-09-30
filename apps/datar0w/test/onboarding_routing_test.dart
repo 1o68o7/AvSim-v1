@@ -55,17 +55,18 @@ void main() {
     );
   });
 
-  testWidgets('/club/login distinct de /auth', (tester) async {
+  testWidgets('/club/login redirige vers /auth (plus de 2ᵉ porte)',
+      (tester) async {
     final router = GoRouter(
       initialLocation: AppRoutes.clubLogin,
       routes: [
         GoRoute(
           path: AppRoutes.clubLogin,
-          builder: (_, _) => const AuthScreen(clubDoor: true),
+          redirect: (_, __) => AppRoutes.auth,
         ),
         GoRoute(
           path: AppRoutes.auth,
-          builder: (_, _) => const AuthScreen(),
+          builder: (_, __) => const AuthScreen(),
         ),
       ],
     );
@@ -75,8 +76,10 @@ void main() {
         child: MaterialApp.router(routerConfig: router),
       ),
     );
-    await tester.pump();
-    expect(find.text('ESPACE CLUB'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.text('CONNEXION'), findsOneWidget);
+    expect(find.text('ESPACE CLUB'), findsNothing);
+    expect(find.text('Espace club'), findsNothing);
     expect(find.text('Sans compte (loisir)'), findsNothing);
     expect(find.text('CONTINUER AVEC GOOGLE'), findsOneWidget);
   });

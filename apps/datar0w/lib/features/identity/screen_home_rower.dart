@@ -14,6 +14,7 @@ import '../../theme/deck_theme.dart';
 import '../../widgets/club_banner.dart';
 import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
+import '../../widgets/sign_out_button.dart';
 
 /// Accueil rameur : affectation coach (écrans 6/7) ou vide (écran 9). Pas de parc.
 class HomeRowerScreen extends ConsumerWidget {
@@ -61,7 +62,7 @@ class HomeRowerScreen extends ConsumerWidget {
     return DeckScaffold(
       title: 'ACCUEIL RAMEUR',
       subtitle: rower?.displayName ?? 'sans profil',
-      retourFallback: AppRoutes.profile,
+      retourFallback: AppRoutes.identity,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
@@ -137,13 +138,13 @@ class HomeRowerScreen extends ConsumerWidget {
             onPressed: () => _continue(context, ref),
             child: const Text('CONTINUER VERS LA SÉANCE'),
           ),
-          if (showClub) ...[
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: () => context.go(AppRoutes.club),
-              child: const Text('VOIR MON CLUB'),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: () => context.go(
+              showClub ? AppRoutes.club : AppRoutes.clubJoin,
             ),
-          ],
+            child: Text(showClub ? 'MON CLUB' : 'REJOINDRE UN CLUB'),
+          ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: () => context.go(AppRoutes.sessions),
@@ -174,8 +175,13 @@ class HomeRowerScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => context.go(AppRoutes.profile),
+            child: const Text('Rôle bateau (rameur / coach / barreur)'),
+          ),
+          TextButton(
+            onPressed: () => context.go(AppRoutes.identity),
             child: const Text('Changer de profil'),
           ),
+          const SignOutButton(),
         ],
       ),
     );

@@ -137,19 +137,22 @@ void main() {
   });
 
   testWidgets('accueil coach : Composer Rejoindre Parc', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(home: HomeCoachScreen()),
       ),
     );
     await tester.pump();
-    expect(find.text('COMPOSER'), findsOneWidget);
-    expect(find.text('REJOINDRE'), findsOneWidget);
+    expect(find.textContaining('COMPOSER'), findsOneWidget);
+    expect(find.textContaining('REJOINDRE'), findsOneWidget);
     expect(find.text('PARC'), findsOneWidget);
     expect(find.text('SORTIR'), findsOneWidget);
     expect(find.text('RENTRER'), findsOneWidget);
     expect(find.text('DÉPART'), findsOneWidget);
     expect(find.text('MAINTENANCE'), findsOneWidget);
     expect(find.text('SPINOSCOPE'), findsOneWidget);
+    expect(find.text('MES SÉANCES'), findsOneWidget);
   });
 }

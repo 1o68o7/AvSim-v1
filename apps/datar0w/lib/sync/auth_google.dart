@@ -105,13 +105,29 @@ class AuthGoogle {
   }
 
   Future<bool> handleDeepLink(Uri uri) async {
-    if (!isAuthCallback(uri)) return false;
-    final door = uri.queryParameters['door'];
+    if (!isAuthCallback(uri) && uri.path != '/auth/callback') return false;
+    final params = <String, String>{...uri.queryParameters};
+    if (uri.fragment.isNotEmpty) {
+      params.addAll(Uri.splitQueryString(uri.fragment));
+    }
+    if ((params['error'] ?? params['error_code'] ?? '').isNotEmpty) {
+      return false;
+    }
+    final door = params['door'];
     if (door == 'club') lastDoor = OnboardingDoor.club;
     if (door == 'rower') lastDoor = OnboardingDoor.rower;
     final ok = await backend.recoverSession(uri);
     sessionUserId = backend.currentUserId();
     return ok;
+  }
+
+  /// Déconnexion cloud. Ne touche ni profils locaux ni SessionStore.
+  Future<void> signOut() async {
+    try {
+      await supabaseOrNull()?.auth.signOut();
+    } catch (_) {}
+    sessionUserId = null;
+    lastMethod = null;
   }
 }
 

@@ -10,6 +10,7 @@ import '../../theme/deck_theme.dart';
 import '../../widgets/club_banner.dart';
 import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
+import '../../widgets/sign_out_button.dart';
 
 void continueFromAssignment(
   WidgetRef ref, {
@@ -300,7 +301,7 @@ class HomeCoachScreen extends ConsumerWidget {
     return DeckScaffold(
       title: 'ACCUEIL COACH',
       subtitle: club?.name ?? 'Composition · parc · live',
-      retourFallback: AppRoutes.profile,
+      retourFallback: AppRoutes.homeCoach,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
@@ -448,10 +449,15 @@ class HomeCoachScreen extends ConsumerWidget {
               ),
             ],
           ),
+          OutlinedButton(
+            onPressed: () => context.go(AppRoutes.sessions),
+            child: const Text('MES SÉANCES'),
+          ),
           TextButton(
-            onPressed: () => context.go(AppRoutes.profile),
+            onPressed: () => context.go(AppRoutes.identity),
             child: const Text('CHANGER DE PROFIL'),
           ),
+          const SignOutButton(),
         ],
       ),
     );

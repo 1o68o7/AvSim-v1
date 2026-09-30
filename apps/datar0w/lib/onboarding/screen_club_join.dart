@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../identity/controller.dart';
 import '../identity/models.dart';
+import 'routing.dart';
 import '../router.dart';
 import '../theme/deck_theme.dart';
 import '../widgets/deck_scaffold.dart';
@@ -37,7 +38,9 @@ class _ClubJoinScreenState extends ConsumerState<ClubJoinScreen> {
           name: name,
           shortCode: _createCode.text,
         );
-    if (mounted) context.go(AppRoutes.homeCoach);
+    if (!mounted) return;
+    final snap = ref.read(identityProvider);
+    context.go(homeRouteForClubMemberRole(snap.prefs.clubRole));
   }
 
   Future<void> _join() async {
@@ -62,7 +65,7 @@ class _ClubJoinScreenState extends ConsumerState<ClubJoinScreen> {
     return DeckScaffold(
       title: 'CLUB',
       subtitle: 'Rejoindre ou créer',
-      retourFallback: AppRoutes.clubLogin,
+      retourFallback: AppRoutes.homeRower,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [

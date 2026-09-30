@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'features/calendar/screen_calendar.dart';
@@ -35,7 +36,10 @@ import 'onboarding/screen_club_home.dart';
 import 'onboarding/screen_club_join.dart';
 import 'onboarding/screen_rower.dart';
 import 'session/boat_class.dart';
+import 'sync/auth_callback_screen.dart';
+import 'sync/auth_google.dart';
 import 'sync/auth_screen.dart';
+import 'theme/deck_theme.dart';
 
 abstract final class AppRoutes {
   static const identity = '/identity';
@@ -69,6 +73,7 @@ abstract final class AppRoutes {
   static const sessions = '/sessions';
   static const quai = '/quai';
   static const auth = '/auth';
+  static const authCallback = '/auth/callback';
   static const clubLogin = '/club/login';
   static const clubJoin = '/club/join';
   static const calendar = '/calendar';
@@ -84,6 +89,32 @@ abstract final class AppRoutes {
 
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.identity,
+  errorBuilder: (context, state) {
+    final uri = state.uri;
+    if (isAuthCallback(uri) ||
+        uri.path == AppRoutes.authCallback ||
+        uri.path.endsWith('/auth/callback')) {
+      return AuthCallbackScreen(uri: uri);
+    }
+    return Scaffold(
+      backgroundColor: DeckColors.bg,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Page introuvable',
+              style: TextStyle(color: DeckColors.text),
+            ),
+            TextButton(
+              onPressed: () => appRouter.go(AppRoutes.identity),
+              child: const Text('Retour'),
+            ),
+          ],
+        ),
+      ),
+    );
+  },
   routes: [
     GoRoute(
       path: AppRoutes.identity,
@@ -264,9 +295,14 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const AuthScreen(),
     ),
     GoRoute(
+      path: AppRoutes.authCallback,
+      name: 'auth-callback',
+      builder: (context, state) => AuthCallbackScreen(uri: state.uri),
+    ),
+    GoRoute(
       path: AppRoutes.clubLogin,
       name: 'club-login',
-      builder: (context, state) => const AuthScreen(clubDoor: true),
+      redirect: (context, state) => AppRoutes.auth,
     ),
     GoRoute(
       path: AppRoutes.clubJoin,
