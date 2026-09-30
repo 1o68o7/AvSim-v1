@@ -139,7 +139,8 @@ void main() {
     expect(find.textContaining('Navigation bloquée'), findsNothing);
   });
 
-  testWidgets('go no-op → SnackBar Navigation bloquée', (tester) async {
+  testWidgets('go+push no-op → bandeau ambre au-dessus de CRÉER',
+      (tester) async {
     final router = GoRouter(
       initialLocation: AppRoutes.identity,
       routes: [
@@ -147,7 +148,7 @@ void main() {
           path: AppRoutes.identity,
           builder: (_, __) => const IdentityListScreen(),
         ),
-        // /auth volontairement absent → go peut échouer / rester
+        // /auth volontairement absent → go/push échouent
       ],
       errorBuilder: (_, state) => PageIntrouvableScreen(
         dest: state.uri.toString(),
@@ -164,13 +165,19 @@ void main() {
     await tester.tap(find.text('Connexion'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
-    // Soit errorBuilder (Page introuvable + dest), soit SnackBar si path inchangé.
+    await tester.pump(const Duration(milliseconds: 350));
+    // Bandeau dans le body OU Page introuvable (errorBuilder).
     final blocked = find.textContaining('Navigation bloquée');
     final missing = find.text('Page introuvable');
     expect(
       blocked.evaluate().isNotEmpty || missing.evaluate().isNotEmpty,
       isTrue,
     );
+    if (blocked.evaluate().isNotEmpty) {
+      // Au-dessus du CTA jaune, pas un SnackBar sous le bouton.
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.text('CRÉER UN PROFIL'), findsOneWidget);
+    }
   });
 
   testWidgets('Passer (sans profil) absent si flag release', (tester) async {

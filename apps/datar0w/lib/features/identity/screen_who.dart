@@ -17,28 +17,66 @@ bool debugHidePasserSansProfil = false;
 bool get allowPasserSansProfil =>
     kDebugMode && !debugHidePasserSansProfil;
 
-/// Log + garde : si la location n’a pas bougé après 300 ms → SnackBar visible
-/// (pas d’adb / logcat sur le terrain).
-Future<void> goFromIdentity(BuildContext context, String dest) async {
+String _routerPath(GoRouter router) {
+  try {
+    return router.state.uri.path;
+  } catch (e) {
+    return '?($e)';
+  }
+}
+
+/// Même [GoRouter] que [MaterialApp.router] via [GoRouter.of].
+/// 1) `go` 2) si path ≠ dest après 300 ms → `push` 3) sinon message d’erreur.
+Future<String?> navigateFromIdentity(
+  BuildContext context,
+  String dest,
+) async {
   final router = GoRouter.of(context);
-  final from = router.state.uri.path;
+  final from = _routerPath(router);
   Object? goError;
-  debugPrint('[identity] go BEFORE path=$from dest=$dest');
+  Object? pushError;
+
+  debugPrint('[identity] nav BEFORE path=$from dest=$dest (go)');
   try {
     router.go(dest);
   } catch (e, st) {
     goError = e;
     debugPrint('[identity] go THROW $e\n$st');
   }
+
   await Future<void>.delayed(const Duration(milliseconds: 300));
-  if (!context.mounted) return;
-  final after = router.state.uri.path;
-  debugPrint('[identity] go AFTER  path=$after (wanted $dest)');
-  if (after == dest) return;
-  final err = goError ?? 'reste sur $after';
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Navigation bloquée : $dest $err')),
+  if (!context.mounted) return null;
+
+  var after = _routerPath(router);
+  if (after == dest) {
+    debugPrint('[identity] go OK path=$after');
+    return null;
+  }
+  debugPrint(
+    '[identity] go no-op path=$after wanted=$dest — essai push',
   );
+
+  try {
+    await router.push(dest);
+  } catch (e, st) {
+    pushError = e;
+    debugPrint('[identity] push THROW $e\n$st');
+  }
+
+  await Future<void>.delayed(const Duration(milliseconds: 300));
+  if (!context.mounted) return null;
+
+  after = _routerPath(router);
+  if (after == dest) {
+    debugPrint('[identity] push OK path=$after');
+    return null;
+  }
+
+  debugPrint(
+    '[identity] push no-op path=$after wanted=$dest goErr=$goError pushErr=$pushError',
+  );
+  final detail = pushError ?? goError ?? 'reste sur $after';
+  return 'Navigation bloquée : $dest ($detail)';
 }
 
 Future<void> _confirmDeleteRower(
@@ -76,11 +114,26 @@ Future<void> _confirmDeleteRower(
   }
 }
 
-class IdentityListScreen extends ConsumerWidget {
+class IdentityListScreen extends ConsumerStatefulWidget {
   const IdentityListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<IdentityListScreen> createState() =>
+      _IdentityListScreenState();
+}
+
+class _IdentityListScreenState extends ConsumerState<IdentityListScreen> {
+  String? _lastNavError;
+
+  Future<void> _nav(String dest) async {
+    setState(() => _lastNavError = null);
+    final err = await navigateFromIdentity(context, dest);
+    if (!mounted) return;
+    if (err != null) setState(() => _lastNavError = err);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final snap = ref.watch(identityProvider);
     return DeckScaffold(
       title: 'QUI RAME ?',
@@ -124,20 +177,17 @@ class IdentityListScreen extends ConsumerWidget {
                         await ref
                             .read(identityProvider.notifier)
                             .selectRower(r.id);
-                        if (!context.mounted) return;
+                        if (!mounted) return;
                         final dest = isRowerProfilePlayable(r)
                             ? AppRoutes.homeRower
                             : AppRoutes.rowerOnboard;
-                        await goFromIdentity(context, dest);
+                        await _nav(dest);
                       } catch (e) {
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Navigation bloquée : ${AppRoutes.homeRower} $e',
-                            ),
-                          ),
-                        );
+                        if (!mounted) return;
+                        setState(() {
+                          _lastNavError =
+                              'Navigation bloquée : ${AppRoutes.homeRower} $e';
+                        });
                       }
                     },
                   ),
@@ -149,21 +199,20 @@ class IdentityListScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (_lastNavError != null) ...[
+                  Text(
+                    _lastNavError!,
+                    style: const TextStyle(
+                      color: DeckColors.amber,
+                      fontSize: 16,
+                      height: 1.35,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
                 FilledButton(
-                  onPressed: () async {
-                    try {
-                      await goFromIdentity(context, AppRoutes.identityEdit);
-                    } catch (e) {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Navigation bloquée : ${AppRoutes.identityEdit} $e',
-                          ),
-                        ),
-                      );
-                    }
-                  },
+                  onPressed: () => _nav(AppRoutes.identityEdit),
                   child: const Text('CRÉER UN PROFIL'),
                 ),
                 if (allowPasserSansProfil) ...[
@@ -174,38 +223,20 @@ class IdentityListScreen extends ConsumerWidget {
                         await ref
                             .read(identityProvider.notifier)
                             .selectRower(null);
-                        if (context.mounted) {
-                          await goFromIdentity(context, AppRoutes.profile);
-                        }
+                        if (mounted) await _nav(AppRoutes.profile);
                       } catch (e) {
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Navigation bloquée : ${AppRoutes.profile} $e',
-                            ),
-                          ),
-                        );
+                        if (!mounted) return;
+                        setState(() {
+                          _lastNavError =
+                              'Navigation bloquée : ${AppRoutes.profile} $e';
+                        });
                       }
                     },
                     child: const Text('Passer (sans profil)'),
                   ),
                 ],
                 TextButton(
-                  onPressed: () async {
-                    try {
-                      await goFromIdentity(context, AppRoutes.auth);
-                    } catch (e) {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Navigation bloquée : ${AppRoutes.auth} $e',
-                          ),
-                        ),
-                      );
-                    }
-                  },
+                  onPressed: () => _nav(AppRoutes.auth),
                   child: const Text('Connexion'),
                 ),
               ],
