@@ -14,18 +14,20 @@ HTML utile (extraits, pas labo) : `docs/stitch-mvp/gel/`.
 
 | Stitch | Route Flutter | Statut |
 |---|---|---|
-| ST-01 — /auth session ON | `/auth` | **fait** (cette PR) — CONTINUER + Rattacher + DÉCONNEXION |
-| ST-02 — /auth session OFF | `/auth` | **fait** (cette PR) — Google + email, pas « Espace club » |
-| ST-03 — Accueil staff | `/home/admin` | **absent** UI lot — PR suivante |
-| ST-04 — Accueil rameur | `/home/rower` | **absent** UI lot — PR suivante (lien réglages déjà) |
-| ST-05 — Séances du club | `/club/sessions` | **absent** — route à créer |
-| ST-06 — Fiche séance | `/club/sessions/:code` | **absent** |
-| ST-07 — Import CSV | `/club/import` | **absent** polish — PR suivante |
-| ST-08 — Licence FFA | onboard licence | **absent** |
-| ST-09 — Bandeau sync | `SessionSyncHost` | **absent** polish — PR suivante |
-| ST-10 — Réglages + déconnexion | `/settings` | **fait** (cette PR) — dialogue, JSONL intacts |
+| ST-01 — /auth session ON | `/auth` | **fait** (#81) — CONTINUER + Rattacher + DÉCONNEXION |
+| ST-02 — /auth session OFF | `/auth` | **fait** (#81) — Google + email, pas « Espace club » |
+| ST-03 — Accueil staff | `/home/admin` | **fait** — cartes Import / Demandes / Séances cloud ; déconnexion via `/settings` |
+| ST-04 — Accueil rameur | `/home/rower` | **fait** — séance / profil / club ; Réglages → `/settings` ; pas de cartes staff |
+| ST-05 — Séances du club | `/club/sessions` | **fait** — liste `session_meta` (code, date, taille, CLOUD) ; staff only |
+| ST-06 — Fiche séance | `/club/sessions/:code` | **fait** — méta + résumé ; cadence absente = « non mesurée » ; pas d’IMU |
+| ST-07 — Import CSV | `/club/import` | **absent** polish — leave (lot optionnel, PR séparée) |
+| ST-08 — Licence FFA | onboard licence | **absent** — leave (lookup local optionnel, pas scrape ; PR séparée) |
+| ST-09 — Bandeau sync | `SessionSyncHost` | **fait** — 36 px sous AppBar, LOCAL / EN FILE / CLOUD ; IgnorePointer hors chip |
+| ST-10 — Réglages + déconnexion | `/settings` | **fait** (#81) — dialogue, JSONL intacts |
 
-HTML gelés : `gel/ST-01-auth-session-on.html`, `ST-02-auth-session-off.html`, `ST-10-settings-logout.html`.  
+C1 autosync : 2ᵉ tap STOP → `/quai` puis enqueue+drain si uid + `activeClubId` ; ACK = zip Storage + `session_meta` seulement.
+
+HTML gelés : `gel/ST-01-auth-session-on.html`, `ST-02-auth-session-off.html`, `ST-10-settings-logout.html` (ST-03…09 = Flutter Deck, pas de HTML gel).  
 Navigation : swipe droite = arrière, swipe gauche = avant (`NavSwipeHost`, hors live/cox/tare).
 
 ## Mapping
