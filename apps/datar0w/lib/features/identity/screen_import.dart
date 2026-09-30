@@ -18,8 +18,7 @@ import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 
-enum _ImportKind { park, rowers }
-
+/// ST-07 — Import cabane (bateaux + rameurs).
 class ClubImportScreen extends ConsumerStatefulWidget {
   const ClubImportScreen({super.key});
 
@@ -28,38 +27,50 @@ class ClubImportScreen extends ConsumerStatefulWidget {
 }
 
 class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
-  _ImportKind _kind = _ImportKind.park;
   ImportPreview? _parkPreview;
   RowerImportPreview? _rowerPreview;
   ImportApplyResult? _parkReport;
   RowerImportApplyResult? _rowerReport;
   String? _flash;
 
-  void _setKind(_ImportKind k) {
-    setState(() {
-      _kind = k;
-      _flash = null;
-    });
+  String _errorLinesLabel(Iterable<int> lines) {
+    final sorted = lines.toList()..sort();
+    if (sorted.isEmpty) return '';
+    return sorted.join(', ');
   }
 
-  Future<void> _shareTemplate() async {
+  String _parkReportText(ImportPreview p) {
+    final errs = p.rows.where((r) => !r.ok).map((r) => r.line);
+    final n = p.errorCount;
+    if (n == 0) return '${p.validCount} bateaux OK · 0 erreur';
+    return '${p.validCount} bateaux OK · $n erreurs ligne ${_errorLinesLabel(errs)}';
+  }
+
+  String _rowerReportText(RowerImportPreview p) {
+    final errs = p.rows.where((r) => !r.ok).map((r) => r.line);
+    final n = p.errorCount;
+    if (n == 0) return '${p.validCount} rameurs OK · 0 erreur';
+    return '${p.validCount} rameurs OK · $n erreurs ligne ${_errorLinesLabel(errs)}';
+  }
+
+  Future<void> _shareTemplate({required bool park}) async {
     final dir = await getTemporaryDirectory();
-    if (_kind == _ImportKind.park) {
-      final f = File('${dir.path}/$parkCsvFilename');
+    if (park) {
+      final f = File('${dir.path}/Bateaux.csv');
       await f.writeAsString(parkCsvTemplate());
       await SharePlus.instance.share(
-        ShareParams(files: [XFile(f.path)], text: 'Modèle parc DataR0w'),
+        ShareParams(files: [XFile(f.path)], text: 'Bateaux.csv — modèle DataR0w'),
       );
       return;
     }
-    final f = File('${dir.path}/$rowerCsvFilename');
+    final f = File('${dir.path}/Rameurs.csv');
     await f.writeAsString(rowerCsvTemplate());
     await SharePlus.instance.share(
-      ShareParams(files: [XFile(f.path)], text: 'Modèle rameurs DataR0w'),
+      ShareParams(files: [XFile(f.path)], text: 'Rameurs.csv — modèle DataR0w'),
     );
   }
 
-  Future<void> _pick() async {
+  Future<void> _pick({required bool park}) async {
     final files = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['csv', 'xlsx', 'xls', 'txt'],
@@ -69,7 +80,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
     final bytes = await f.readAsBytes();
     setState(() {
       _flash = null;
-      if (_kind == _ImportKind.park) {
+      if (park) {
         _parkPreview = parseSpreadsheetBytes(bytes, filename: f.name);
         _parkReport = null;
       } else {
@@ -112,7 +123,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
     final role = ref.watch(boatConfigProvider).role;
     if (!canCheckoutOps(snap, role)) {
       return const DeckScaffold(
-        title: 'IMPORT',
+        title: 'IMPORT CABANE',
         retourToProfile: true,
         body: Center(
           child: Text(
@@ -123,46 +134,44 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
       );
     }
     return DeckScaffold(
-      title: 'IMPORT',
-      subtitle: 'Parc ou rameurs · CSV / Excel',
+      title: 'IMPORT CABANE',
+      subtitle: 'CSV yearly · cloud',
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
-          Wrap(
-            spacing: 8,
-            children: [
-              ChoiceChip(
-                label: const Text('PARC'),
-                selected: _kind == _ImportKind.park,
-                onSelected: (_) => _setKind(_ImportKind.park),
-              ),
-              ChoiceChip(
-                label: const Text('RAMEURS'),
-                selected: _kind == _ImportKind.rowers,
-                onSelected: (_) => _setKind(_ImportKind.rowers),
-              ),
-            ],
+          const Text(
+            'Données yearly · stockées cloud, pas sur le téléphone.',
+            style: TextStyle(color: DeckColors.muted, height: 1.4),
           ),
           const SizedBox(height: 16),
           if (_flash != null)
-            Text(_flash!, style: const TextStyle(color: DeckColors.amber)),
-          FilledButton(
-            onPressed: _shareTemplate,
-            child: const Text('TÉLÉCHARGER LE MODÈLE CSV'),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                _flash!,
+                style: const TextStyle(color: DeckColors.amber),
+              ),
+            ),
+          _DropZone(
+            filename: 'Bateaux.csv',
+            subtitle: 'Parc / coques',
+            onPick: () => _pick(park: true),
+            onTemplate: () => _shareTemplate(park: true),
           ),
           const SizedBox(height: 12),
-          OutlinedButton(
-            onPressed: _pick,
-            child: const Text('IMPORTER UN FICHIER'),
+          _DropZone(
+            filename: 'Rameurs.csv',
+            subtitle: 'Effectif club',
+            onPick: () => _pick(park: false),
+            onTemplate: () => _shareTemplate(park: false),
           ),
-          if (_kind == _ImportKind.rowers) ...[
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: _loadBordeaux,
-              child: const Text('CHARGER LA BASE BORDEAUX'),
-            ),
-          ],
-          if (_kind == _ImportKind.park) ..._parkSection(snap) else ..._rowerSection(snap),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: _loadBordeaux,
+            child: const Text('Charger la base Bordeaux (démo)'),
+          ),
+          ..._parkSection(snap),
+          ..._rowerSection(snap),
         ],
       ),
     );
@@ -172,12 +181,22 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
     final p = _parkPreview;
     return [
       if (p != null) ...[
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
+        const Text(
+          'BATEAUX',
+          style: TextStyle(
+            color: DeckColors.label,
+            fontSize: 11,
+            letterSpacing: 1.2,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
         if (p.fatal != null)
           Text(p.fatal!, style: const TextStyle(color: DeckColors.amber))
         else ...[
           Text(
-            '${p.validCount} lignes OK · ${p.errorCount} erreurs',
+            _parkReportText(p),
             style: const TextStyle(color: DeckColors.label),
           ),
           if (p.unknownHeaders.isNotEmpty)
@@ -190,12 +209,12 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
           const SizedBox(height: 12),
           FilledButton(
             onPressed: _confirmPark,
-            child: const Text('CONFIRMER L’IMPORT'),
+            child: const Text('ENVOYER VERS LE CLUB'),
           ),
         ],
       ],
       if (_parkReport != null) ...[
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Text(
           '${_parkReport!.created} créées · ${_parkReport!.updated} mises à jour · ${_parkReport!.ignored} ignorées',
           style: const TextStyle(color: DeckColors.amber),
@@ -223,12 +242,22 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
     final p = _rowerPreview;
     return [
       if (p != null) ...[
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
+        const Text(
+          'RAMEURS',
+          style: TextStyle(
+            color: DeckColors.label,
+            fontSize: 11,
+            letterSpacing: 1.2,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
         if (p.fatal != null)
           Text(p.fatal!, style: const TextStyle(color: DeckColors.amber))
         else ...[
           Text(
-            '${p.validCount} lignes OK · ${p.errorCount} erreurs',
+            _rowerReportText(p),
             style: const TextStyle(color: DeckColors.label),
           ),
           const SizedBox(height: 8),
@@ -236,12 +265,12 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
           const SizedBox(height: 12),
           FilledButton(
             onPressed: _confirmRowers,
-            child: const Text('CONFIRMER L’IMPORT'),
+            child: const Text('ENVOYER VERS LE CLUB'),
           ),
         ],
       ],
       if (_rowerReport != null) ...[
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Text(
           '${_rowerReport!.created} créés · ${_rowerReport!.updated} maj · ${_rowerReport!.ignored} ignorés',
           style: const TextStyle(color: DeckColors.amber),
@@ -349,6 +378,73 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
               ],
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _DropZone extends StatelessWidget {
+  const _DropZone({
+    required this.filename,
+    required this.subtitle,
+    required this.onPick,
+    required this.onTemplate,
+  });
+
+  final String filename;
+  final String subtitle;
+  final VoidCallback onPick;
+  final VoidCallback onTemplate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: DeckColors.surface,
+      child: InkWell(
+        onTap: onPick,
+        child: Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 88),
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+          decoration: BoxDecoration(
+            border: Border.all(color: DeckColors.hairline),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                filename,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: const TextStyle(color: DeckColors.muted, fontSize: 12),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Text(
+                    'Choisir un fichier',
+                    style: TextStyle(
+                      color: DeckColors.amber,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: onTemplate,
+                    child: const Text('Modèle'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

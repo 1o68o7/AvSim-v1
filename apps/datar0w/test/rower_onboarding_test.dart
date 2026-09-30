@@ -48,8 +48,7 @@ void main() {
     expect(snap.rowers.single.clubId, snap.activeClub?.id);
   });
 
-  testWidgets('écran : licence non bloquante + catégorie lecture seule',
-      (tester) async {
+  testWidgets('écran : profil puis ST-08 licence', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [identityStoreOverride()],
@@ -58,9 +57,15 @@ void main() {
     );
     await tester.pump();
     expect(find.text('TON PROFIL RAMEUR'), findsOneWidget);
-    expect(find.text('Licence FFA (optionnel)'), findsOneWidget);
-    expect(find.textContaining('Catégorie FFA'), findsOneWidget);
     expect(find.text('Je rame seul (loisir)'), findsOneWidget);
     expect(find.text('Je barre aussi'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).first, 'Ada');
+    await tester.tap(find.text('CONTINUER'));
+    await tester.pumpAndSettle();
+    expect(find.text('TA LICENCE'), findsOneWidget);
+    expect(find.text('Licence FFA (optionnel)'), findsNothing);
+    expect(find.textContaining('Loisir sans licence'), findsOneWidget);
+    expect(find.text('PASSER'), findsOneWidget);
+    expect(find.textContaining('Catégorie FFA'), findsNothing);
   });
 }

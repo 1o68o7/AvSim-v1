@@ -20,8 +20,8 @@ HTML utile (extraits, pas labo) : `docs/stitch-mvp/gel/`.
 | ST-04 — Accueil rameur | `/home/rower` | **fait** — séance / profil / club ; Réglages → `/settings` ; pas de cartes staff |
 | ST-05 — Séances du club | `/club/sessions` | **fait** — liste `session_meta` (code, date, taille, CLOUD) ; staff only |
 | ST-06 — Fiche séance | `/club/sessions/:code` | **fait** — méta + résumé ; cadence absente = « non mesurée » ; pas d’IMU |
-| ST-07 — Import CSV | `/club/import` | **absent** polish — leave (lot optionnel, PR séparée) |
-| ST-08 — Licence FFA | onboard licence | **absent** — leave (lookup local optionnel, pas scrape ; PR séparée) |
+| ST-07 — Import CSV | `/club/import` | **fait** — IMPORT CABANE, zones Bateaux.csv / Rameurs.csv, ENVOYER VERS LE CLUB |
+| ST-08 — Licence FFA | `/onboarding/rower` étape | **fait** — TA LICENCE, lookup local fixture, miss = Profil loisir, PASSER |
 | ST-09 — Bandeau sync | `SessionSyncHost` | **fait** — 36 px sous AppBar, LOCAL / EN FILE / CLOUD ; IgnorePointer hors chip |
 | ST-10 — Réglages + déconnexion | `/settings` | **fait** (#81) — dialogue, JSONL intacts |
 
