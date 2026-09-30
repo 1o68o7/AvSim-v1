@@ -40,11 +40,10 @@ import 'session/rower_orientation.dart';
 import 'sync/auth_callback_screen.dart';
 import 'sync/auth_google.dart';
 import 'sync/auth_screen.dart';
-import 'theme/deck_theme.dart';
 import 'widgets/safe_route.dart';
 
-Widget _hub(String name, Widget child) => SafeRoute(
-      name: name,
+Widget _hub(String dest, Widget child) => SafeRoute(
+      dest: dest,
       builder: (_) => PortraitLockScope(child: child),
     );
 
@@ -103,23 +102,10 @@ final GoRouter appRouter = GoRouter(
         uri.path.endsWith('/auth/callback')) {
       return AuthCallbackScreen(uri: uri);
     }
-    return Scaffold(
-      backgroundColor: DeckColors.bg,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Page introuvable',
-              style: TextStyle(color: DeckColors.text),
-            ),
-            TextButton(
-              onPressed: () => appRouter.go(AppRoutes.identity),
-              child: const Text('Retour'),
-            ),
-          ],
-        ),
-      ),
+    // Throw builder / route inconnue : visible, pas de snap-back /identity.
+    return PageIntrouvableScreen(
+      dest: uri.toString(),
+      error: state.error,
     );
   },
   routes: [
@@ -127,13 +113,13 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.identity,
       name: '0-identity',
       builder: (context, state) =>
-          _hub('identity', const IdentityListScreen()),
+          _hub(AppRoutes.identity, const IdentityListScreen()),
     ),
     GoRoute(
       path: AppRoutes.identityEdit,
       name: '0-identity-edit',
       builder: (context, state) => _hub(
-            'identity-edit',
+            AppRoutes.identityEdit,
             RowerEditScreen(
               rowerId: state.uri.queryParameters['id'],
             ),
@@ -143,31 +129,31 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.rowerOnboard,
       name: 'onboarding-rower',
       builder: (context, state) =>
-          _hub('rower-onboard', const RowerOnboardingScreen()),
+          _hub(AppRoutes.rowerOnboard, const RowerOnboardingScreen()),
     ),
     GoRoute(
       path: AppRoutes.homeRower,
       name: 'home-rower',
       builder: (context, state) =>
-          _hub('home-rower', const HomeRowerScreen()),
+          _hub(AppRoutes.homeRower, const HomeRowerScreen()),
     ),
     GoRoute(
       path: AppRoutes.homeCox,
       name: 'home-cox',
       builder: (context, state) =>
-          _hub('home-cox', const HomeCoxScreen()),
+          _hub(AppRoutes.homeCox, const HomeCoxScreen()),
     ),
     GoRoute(
       path: AppRoutes.homeCoach,
       name: 'home-coach',
       builder: (context, state) =>
-          _hub('home-coach', const HomeCoachScreen()),
+          _hub(AppRoutes.homeCoach, const HomeCoachScreen()),
     ),
     GoRoute(
       path: AppRoutes.homeIntendant,
       name: 'home-intendant',
       builder: (context, state) => _hub(
-            'home-intendant',
+            AppRoutes.homeIntendant,
             const ClubRoleHomeScreen(role: ClubMemberRole.intendant),
           ),
     ),
@@ -175,7 +161,7 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.homeDirector,
       name: 'home-director',
       builder: (context, state) => _hub(
-            'home-director',
+            AppRoutes.homeDirector,
             const ClubRoleHomeScreen(role: ClubMemberRole.director),
           ),
     ),
@@ -183,7 +169,7 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.homeTreasurer,
       name: 'home-treasurer',
       builder: (context, state) => _hub(
-            'home-treasurer',
+            AppRoutes.homeTreasurer,
             const ClubRoleHomeScreen(role: ClubMemberRole.treasurer),
           ),
     ),
@@ -191,7 +177,7 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.homeAdmin,
       name: 'home-admin',
       builder: (context, state) => _hub(
-            'home-admin',
+            AppRoutes.homeAdmin,
             const ClubRoleHomeScreen(role: ClubMemberRole.admin),
           ),
     ),
@@ -315,7 +301,8 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.auth,
       name: 'auth',
-      builder: (context, state) => _hub('auth', const AuthScreen()),
+      builder: (context, state) =>
+          _hub(AppRoutes.auth, const AuthScreen()),
     ),
     GoRoute(
       path: AppRoutes.authCallback,
