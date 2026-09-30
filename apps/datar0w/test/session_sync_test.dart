@@ -51,7 +51,7 @@ void main() {
 
   test('ACK absent → fichiers intacts', () async {
     await sync.enqueueAfterStop('s1', dir: dir);
-    await sync.drain();
+    await sync.drain(enqueueExisting: false);
     expect(File('${dir.path}/meta.json').existsSync(), isTrue);
     expect(File('${dir.path}/samples.jsonl').existsSync(), isTrue);
     expect(sync.db.all().single.acked, isFalse);
@@ -59,22 +59,22 @@ void main() {
 
   test('3 échecs → bandeau', () async {
     await sync.enqueueAfterStop('s1', dir: dir);
-    await sync.drain();
+    await sync.drain(enqueueExisting: false);
     t = t.add(const Duration(minutes: 2));
-    await sync.drain();
+    await sync.drain(enqueueExisting: false);
     t = t.add(const Duration(minutes: 6));
-    await sync.drain();
+    await sync.drain(enqueueExisting: false);
     expect(sync.unsyncedBannerCount, 1);
     expect(sync.db.all().single.attempts, 3);
   });
 
   testWidgets('bandeau 1 séance non synchronisée — renvoyer', (tester) async {
     await sync.enqueueAfterStop('s1', dir: dir);
-    await sync.drain();
+    await sync.drain(enqueueExisting: false);
     t = t.add(const Duration(minutes: 2));
-    await sync.drain();
+    await sync.drain(enqueueExisting: false);
     t = t.add(const Duration(minutes: 6));
-    await sync.drain();
+    await sync.drain(enqueueExisting: false);
     await tester.pumpWidget(
       MaterialApp(
         home: SessionSyncHost(

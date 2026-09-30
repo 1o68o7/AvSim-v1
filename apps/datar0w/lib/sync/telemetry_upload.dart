@@ -1,6 +1,7 @@
 import 'dart:math';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../session/session_pack.dart';
@@ -8,6 +9,7 @@ import '../session/session_sync.dart';
 import 'config.dart';
 import 'outbox_db.dart';
 import 'supabase_boot.dart';
+import 'sync_identity.dart';
 
 const kResumableMinBytes = 10 * 1024 * 1024;
 
@@ -17,6 +19,25 @@ String sessionStoragePath({
   required String syncId,
 }) =>
     '$clubId/$syncId.zip';
+
+/// Code séance = basename du dossier `sessions/{CODE}`, jamais le path Android.
+String localSessionIdFor(OutboxRow row, Map<String, dynamic> meta) {
+  final fromPath = p.basename(row.path);
+  if (fromPath.isNotEmpty &&
+      fromPath != '.' &&
+      fromPath != '..' &&
+      !fromPath.contains(r'\') &&
+      fromPath != 'sessions') {
+    return fromPath;
+  }
+  final code = meta['code'] as String?;
+  if (code != null && code.trim().isNotEmpty) return code.trim();
+  final id = meta['id'] as String?;
+  if (id != null && id.trim().isNotEmpty && !id.contains('/')) {
+    return id.trim();
+  }
+  return fromPath;
+}
 
 abstract class BlobSink {
   Future<void> put({
@@ -30,7 +51,10 @@ abstract class BlobSink {
 class MemoryBlobSink implements BlobSink {
   final Map<String, Uint8List> blobs = {};
   final Map<String, Map<String, dynamic>> metas = {};
+  /// Index `club_id|local_session_id` (onConflict).
+  final Map<String, Map<String, dynamic>> metasByLocal = {};
   bool fail = false;
+  bool failMetaOnly = false;
 
   @override
   Future<void> put({
@@ -49,9 +73,15 @@ class MemoryBlobSink implements BlobSink {
 
   @override
   Future<void> upsertMeta(Map<String, dynamic> row) async {
-    if (fail) throw StateError('upsert KO');
-    final id = row['sync_id'] as String;
-    metas[id] = Map<String, dynamic>.from(row);
+    if (fail || failMetaOnly) throw StateError('upsert KO');
+    final syncId = row['sync_id'] as String;
+    final club = row['club_id'] as String?;
+    final local = row['local_session_id'] as String?;
+    final copy = Map<String, dynamic>.from(row);
+    metas[syncId] = copy;
+    if (club != null && local != null) {
+      metasByLocal['$club|$local'] = copy;
+    }
   }
 }
 
@@ -60,11 +90,40 @@ class TelemetryUploadEngine implements TelemetryGateway {
     required this.sink,
     this.resumableAfter = kResumableMinBytes,
     this.chunkSize = 5 * 1024 * 1024,
+    this.resolveOwnerUserId,
+    this.resolveClubId,
   });
 
   final BlobSink sink;
   final int resumableAfter;
   final int chunkSize;
+
+  /// Injecté en tests. Prod : [defaultOwnerUserId] = auth.uid().
+  final String? Function()? resolveOwnerUserId;
+
+  /// Injecté en tests. Prod : prefs.activeClubId puis meta.json.
+  final String? Function()? resolveClubId;
+
+  String? _ownerUserId() =>
+      resolveOwnerUserId?.call() ?? defaultOwnerUserId();
+
+  String? _clubId(Map<String, dynamic> meta) {
+    final fromResolver = resolveClubId?.call();
+    if (fromResolver != null && fromResolver.trim().isNotEmpty) {
+      return fromResolver.trim();
+    }
+    final fromPrefs = defaultActiveClubId();
+    if (fromPrefs != null && fromPrefs.trim().isNotEmpty) {
+      return fromPrefs.trim();
+    }
+    final fromMeta = (meta['clubId'] as String?) ?? (meta['club_id'] as String?);
+    if (fromMeta != null &&
+        fromMeta.trim().isNotEmpty &&
+        fromMeta.trim() != 'unknown') {
+      return fromMeta.trim();
+    }
+    return null;
+  }
 
   @override
   Future<UploadResult> uploadAndUpsert({
@@ -72,12 +131,28 @@ class TelemetryUploadEngine implements TelemetryGateway {
     required SessionPack pack,
     required Map<String, dynamic> meta,
   }) async {
+    final owner = _ownerUserId();
+    if (owner == null || owner.isEmpty) {
+      debugPrint('session_meta skip: pas d’auth.uid() — pas d’ACK');
+      return const UploadResult(
+        ok: false,
+        acked: false,
+        error: 'owner_user_id manquant (auth.uid())',
+      );
+    }
+    final clubId = _clubId(meta);
+    if (clubId == null || clubId.isEmpty) {
+      debugPrint('session_meta skip: pas de club_id — pas d’upload');
+      return const UploadResult(
+        ok: false,
+        acked: false,
+        error: 'club_id manquant (activeClubId / meta)',
+      );
+    }
+    final localId = localSessionIdFor(row, meta);
+    final path = sessionStoragePath(clubId: clubId, syncId: row.syncId);
+    final bytes = pack.bytes;
     try {
-      final clubId = (meta['clubId'] as String?) ??
-          (meta['club_id'] as String?) ??
-          'unknown';
-      final path = sessionStoragePath(clubId: clubId, syncId: row.syncId);
-      final bytes = pack.bytes;
       var offset = row.uploadOffset;
       if (bytes.length > resumableAfter) {
         if (offset > bytes.length) offset = 0;
@@ -93,26 +168,40 @@ class TelemetryUploadEngine implements TelemetryGateway {
       } else {
         await sink.put(storagePath: path, bytes: bytes, offset: 0);
       }
-      final now = DateTime.now().toUtc().toIso8601String();
-      await sink.upsertMeta({
-        'sync_id': row.syncId,
-        'club_id': clubId,
-        'local_session_id': meta['id'] ?? row.path,
-        'code': meta['code'],
-        'class': meta['class'] ?? meta['classe'],
-        'payload_sha256': pack.sha256hex,
-        'byte_size': bytes.length,
-        'storage_path': path,
-        'synced_at': now,
-        'started_at': meta['started_at'],
-        'ended_at': meta['ended_at'],
-        'owner_user_id': meta['owner_user_id'],
-        'rower_id': meta['rowerId'] ?? meta['rower_id'],
-      });
-      return const UploadResult(ok: true, acked: true);
     } catch (e) {
-      return UploadResult(ok: false, error: '$e');
+      debugPrint('session-telemetry put FAIL: $e');
+      return UploadResult(ok: false, acked: false, error: 'storage: $e');
     }
+
+    final now = DateTime.now().toUtc().toIso8601String();
+    final payload = <String, dynamic>{
+      'sync_id': row.syncId,
+      'club_id': clubId,
+      'local_session_id': localId,
+      'code': meta['code'] ?? localId,
+      'class': meta['class'] ?? meta['classe'],
+      'payload_sha256': pack.sha256hex,
+      'byte_size': bytes.length,
+      'storage_path': path,
+      'synced_at': now,
+      'started_at': meta['started_at'],
+      'ended_at': meta['ended_at'],
+      // Toujours auth.uid() — jamais meta.json / jamais id rameur local.
+      'owner_user_id': owner,
+      'rower_id': meta['rowerId'] ?? meta['rower_id'],
+    };
+    try {
+      await sink.upsertMeta(payload);
+    } catch (e) {
+      // Zip peut déjà être là : retry meta, même sync_id, pas d’ACK.
+      debugPrint('session_meta upsert FAIL status/body: $e');
+      return UploadResult(
+        ok: false,
+        acked: false,
+        error: 'session_meta: $e',
+      );
+    }
+    return const UploadResult(ok: true, acked: true);
   }
 }
 
@@ -137,7 +226,22 @@ class SupabaseBlobSink implements BlobSink {
   Future<void> upsertMeta(Map<String, dynamic> row) async {
     final client = supabaseOrNull();
     if (client == null) throw StateError('supabase off');
-    await client.from('session_meta').upsert(row);
+    try {
+      await client.from('session_meta').upsert(
+            row,
+            onConflict: 'club_id,local_session_id',
+          );
+    } on PostgrestException catch (e) {
+      debugPrint(
+        'session_meta upsert PostgrestException '
+        'code=${e.code} message=${e.message} details=${e.details} '
+        'hint=${e.hint}',
+      );
+      rethrow;
+    } catch (e) {
+      debugPrint('session_meta upsert FAIL: $e');
+      rethrow;
+    }
   }
 }
 
