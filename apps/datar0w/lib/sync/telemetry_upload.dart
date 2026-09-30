@@ -13,6 +13,19 @@ import 'sync_identity.dart';
 
 const kResumableMinBytes = 10 * 1024 * 1024;
 
+/// Colonnes INSERT minimales (0005) — pas de champs optionnels / inconnus.
+const kSessionMetaInsertKeys = <String>{
+  'sync_id',
+  'club_id',
+  'local_session_id',
+  'code',
+  'owner_user_id',
+  'storage_path',
+  'payload_sha256',
+  'byte_size',
+  'synced_at',
+};
+
 /// Chemin Storage privé : `{club_id}/{sync_id}.zip`.
 String sessionStoragePath({
   required String clubId,
@@ -39,11 +52,30 @@ String localSessionIdFor(OutboxRow row, Map<String, dynamic> meta) {
   return fromPath;
 }
 
+/// Payload INSERT minimal — drop nulls et colonnes hors [kSessionMetaInsertKeys].
+Map<String, dynamic> minimalSessionMetaPayload(Map<String, dynamic> raw) {
+  final out = <String, dynamic>{};
+  for (final k in kSessionMetaInsertKeys) {
+    final v = raw[k];
+    if (v != null) out[k] = v;
+  }
+  return out;
+}
+
+/// Extrait un code PostgREST court pour le bandeau (`42501`, `23505`, `409`).
+String? postgrestErrorCode(Object e) {
+  if (e is PostgrestException) {
+    final c = e.code;
+    if (c != null && c.isNotEmpty) return c;
+  }
+  final m = RegExp(r'\b(42501|23505|409|PGRST\d+)\b').firstMatch('$e');
+  return m?.group(1);
+}
+
 /// Schéma `0005_session_meta.sql` :
 /// - PK : `sync_id`
 /// - UNIQUE : `(club_id, local_session_id)`
-/// Upsert PostgREST sur la unique seule ne couvre pas un 23505 PK
-/// (re-push même sync_id). Voir [SupabaseBlobSink.upsertMeta].
+/// - `code` text (peut différer de local_session_id en prod / rattrapage)
 
 abstract class BlobSink {
   Future<void> put({
@@ -51,19 +83,44 @@ abstract class BlobSink {
     required Uint8List bytes,
     required int offset,
   });
+
+  /// Upsert méta. Match club+local **ou** club+code.
   Future<void> upsertMeta(Map<String, dynamic> row);
+
+  /// Zip déjà présent (Storage) pour ce path.
+  Future<bool> objectExists(String storagePath);
 }
 
 class MemoryBlobSink implements BlobSink {
   final Map<String, Uint8List> blobs = {};
   final Map<String, Map<String, dynamic>> metas = {};
-  /// Index `club_id|local_session_id` (unique).
+  /// Index `club_id|local_session_id`.
   final Map<String, Map<String, dynamic>> metasByLocal = {};
+  /// Index `club_id|code` (rattrapage : local_session_id ≠ code).
+  final Map<String, Map<String, dynamic>> metasByCode = {};
   bool fail = false;
   bool failMetaOnly = false;
 
-  /// Simule 23505 PK si insert aveugle avec sync_id déjà pris par *autre* local.
+  /// Simule échec méta pour un local_session_id (ex. QEPSSL) avec code PG.
+  String? failMetaForLocal;
+  String failMetaPgCode = '42501';
+
   bool simulatePkConflict = false;
+
+  void seedMeta(Map<String, dynamic> row) {
+    final copy = Map<String, dynamic>.from(row);
+    final syncId = copy['sync_id'] as String;
+    final club = copy['club_id'] as String?;
+    final local = copy['local_session_id'] as String?;
+    final code = copy['code'] as String?;
+    metas[syncId] = copy;
+    if (club != null && local != null) {
+      metasByLocal['$club|$local'] = copy;
+    }
+    if (club != null && code != null && code.isNotEmpty) {
+      metasByCode['$club|$code'] = copy;
+    }
+  }
 
   @override
   Future<void> put({
@@ -81,38 +138,77 @@ class MemoryBlobSink implements BlobSink {
   }
 
   @override
+  Future<bool> objectExists(String storagePath) async =>
+      blobs.containsKey(storagePath) && blobs[storagePath]!.isNotEmpty;
+
+  Map<String, dynamic>? _findExisting({
+    required String? club,
+    required String? local,
+    required String? code,
+    required String syncId,
+  }) {
+    if (club != null && local != null) {
+      final byLocal = metasByLocal['$club|$local'];
+      if (byLocal != null) return byLocal;
+    }
+    if (club != null && code != null && code.isNotEmpty) {
+      final byCode = metasByCode['$club|$code'];
+      if (byCode != null) return byCode;
+    }
+    return metas[syncId];
+  }
+
+  void _index(Map<String, dynamic> copy) {
+    final syncId = copy['sync_id'] as String;
+    final club = copy['club_id'] as String?;
+    final local = copy['local_session_id'] as String?;
+    final code = copy['code'] as String?;
+    metas[syncId] = copy;
+    if (club != null && local != null) {
+      metasByLocal['$club|$local'] = copy;
+    }
+    if (club != null && code != null && code.isNotEmpty) {
+      metasByCode['$club|$code'] = copy;
+    }
+  }
+
+  @override
   Future<void> upsertMeta(Map<String, dynamic> row) async {
     if (fail || failMetaOnly) throw StateError('upsert KO');
     final syncId = row['sync_id'] as String;
     final club = row['club_id'] as String?;
     final local = row['local_session_id'] as String?;
-    final copy = Map<String, dynamic>.from(row);
+    final code = (row['code'] as String?) ?? local;
 
-    // 1) Déjà une row club+code → UPDATE (garde le sync_id cloud).
-    if (club != null && local != null) {
-      final key = '$club|$local';
-      final existing = metasByLocal[key];
-      if (existing != null) {
-        final keepSync = existing['sync_id'] as String;
-        copy['sync_id'] = keepSync;
-        metas[keepSync] = copy;
-        metasByLocal[key] = copy;
-        if (keepSync != syncId) metas.remove(syncId);
-        return;
-      }
+    if (failMetaForLocal != null &&
+        (local == failMetaForLocal || code == failMetaForLocal)) {
+      throw PostgrestException(
+        message: 'RLS/policy denied for $failMetaForLocal',
+        code: failMetaPgCode,
+        details: null,
+        hint: null,
+      );
     }
 
-    // 2) Même sync_id déjà en base → UPDATE.
-    final bySync = metas[syncId];
-    if (bySync != null) {
-      metas[syncId] = copy;
-      if (club != null && local != null) {
-        metasByLocal['$club|$local'] = copy;
+    final existing = _findExisting(
+      club: club,
+      local: local,
+      code: code,
+      syncId: syncId,
+    );
+    if (existing != null) {
+      final keepSync = existing['sync_id'] as String;
+      final copy = Map<String, dynamic>.from(row);
+      copy['sync_id'] = keepSync;
+      // Conserve local_session_id cloud (peut être un uuid de rattrapage).
+      if (existing['local_session_id'] != null) {
+        copy['local_session_id'] = existing['local_session_id'];
       }
+      if (keepSync != syncId) metas.remove(syncId);
+      _index(copy);
       return;
     }
 
-    // 3) INSERT (GT9JDK / GCZEKF).
     if (simulatePkConflict && metas.containsKey(syncId)) {
       throw PostgrestException(
         message: 'duplicate key value violates unique constraint '
@@ -122,10 +218,9 @@ class MemoryBlobSink implements BlobSink {
         hint: null,
       );
     }
-    metas[syncId] = copy;
-    if (club != null && local != null) {
-      metasByLocal['$club|$local'] = copy;
-    }
+
+    final copy = minimalSessionMetaPayload(row);
+    _index(copy);
   }
 }
 
@@ -142,16 +237,12 @@ class TelemetryUploadEngine implements TelemetryGateway {
   final int resumableAfter;
   final int chunkSize;
 
-  /// Injecté en tests. Prod : [defaultOwnerUserId] = auth.uid().
   final String? Function()? resolveOwnerUserId;
-
-  /// Injecté en tests. Prod : prefs.activeClubId (membership via ensure).
   final String? Function()? resolveClubId;
 
   String? _ownerUserId() =>
       resolveOwnerUserId?.call() ?? defaultOwnerUserId();
 
-  /// Club = prefs / mémoire hydrate — **pas** meta.json (JSONL sans club_id).
   String? _clubId(Map<String, dynamic> meta) {
     final fromResolver = resolveClubId?.call();
     if (fromResolver != null && fromResolver.trim().isNotEmpty) {
@@ -189,8 +280,12 @@ class TelemetryUploadEngine implements TelemetryGateway {
       );
     }
     final localId = localSessionIdFor(row, meta);
+    final code = (meta['code'] as String?)?.trim().isNotEmpty == true
+        ? (meta['code'] as String).trim()
+        : localId;
     final path = sessionStoragePath(clubId: clubId, syncId: row.syncId);
     final bytes = pack.bytes;
+    var zipOk = false;
     try {
       var offset = row.uploadOffset;
       if (bytes.length > resumableAfter) {
@@ -207,48 +302,49 @@ class TelemetryUploadEngine implements TelemetryGateway {
       } else {
         await sink.put(storagePath: path, bytes: bytes, offset: 0);
       }
+      zipOk = true;
     } catch (e) {
       debugPrint('session-telemetry put FAIL: $e');
-      return UploadResult(ok: false, acked: false, error: 'storage: $e');
+      return UploadResult(ok: false, acked: false, error: 'storage');
     }
 
     final now = DateTime.now().toUtc().toIso8601String();
-    final payload = <String, dynamic>{
+    final payload = minimalSessionMetaPayload({
       'sync_id': row.syncId,
       'club_id': clubId,
       'local_session_id': localId,
-      'code': meta['code'] ?? localId,
-      'class': meta['class'] ?? meta['classe'],
+      'code': code,
+      'owner_user_id': owner,
+      'storage_path': path,
       'payload_sha256': pack.sha256hex,
       'byte_size': bytes.length,
-      'storage_path': path,
       'synced_at': now,
-      'started_at': meta['started_at'],
-      'ended_at': meta['ended_at'],
-      // Toujours auth.uid() — jamais meta.json / jamais id rameur local.
-      'owner_user_id': owner,
-      'rower_id': meta['rowerId'] ?? meta['rower_id'],
-    };
+    });
     try {
       await sink.upsertMeta(payload);
     } on PostgrestException catch (e) {
-      // 23505 doit être absorbé dans SupabaseBlobSink (ACK via update).
+      final pg = e.code ?? postgrestErrorCode(e) ?? 'session_meta';
       debugPrint(
         'session_meta upsert PostgrestException '
-        'code=${e.code} message=${e.message}',
+        'code=$pg message=${e.message}',
       );
-      return const UploadResult(
-        ok: false,
-        acked: false,
-        error: 'session_meta',
-      );
+      // 23505 = déjà la même séance ; zip poussé → ACK.
+      if (pg == '23505' && (zipOk || await sink.objectExists(path))) {
+        debugPrint('session_meta 23505 + zip → ACK code=$code');
+        return const UploadResult(ok: true, acked: true);
+      }
+      // Bandeau : sync: 42501 / 409 — pas le pavé PostgREST.
+      return UploadResult(ok: false, acked: false, error: pg);
     } catch (e) {
-      debugPrint('session_meta upsert FAIL status/body: $e');
-      final msg = '$e';
+      debugPrint('session_meta upsert FAIL: $e');
+      final pg = postgrestErrorCode(e);
+      if (pg == '23505' && (zipOk || await sink.objectExists(path))) {
+        return const UploadResult(ok: true, acked: true);
+      }
       return UploadResult(
         ok: false,
         acked: false,
-        error: msg.contains('upsert KO') ? 'session_meta: $e' : 'session_meta',
+        error: pg ?? 'session_meta',
       );
     }
     return const UploadResult(ok: true, acked: true);
@@ -264,12 +360,68 @@ class SupabaseBlobSink implements BlobSink {
   }) async {
     final client = supabaseOrNull();
     if (client == null) throw StateError('supabase off');
-    // Reprise offset : TUS si > 10 Mo (chunk déjà tranché par l’engine).
     await client.storage.from('session-telemetry').uploadBinary(
           storagePath,
           bytes,
           fileOptions: const FileOptions(upsert: true),
         );
+  }
+
+  @override
+  Future<bool> objectExists(String storagePath) async {
+    final client = supabaseOrNull();
+    if (client == null) return false;
+    try {
+      final slash = storagePath.lastIndexOf('/');
+      final folder = slash >= 0 ? storagePath.substring(0, slash) : '';
+      final name = slash >= 0 ? storagePath.substring(slash + 1) : storagePath;
+      final listed = await client.storage.from('session-telemetry').list(folder);
+      for (final f in listed) {
+        if (f.name == name) return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('session-telemetry exists? $storagePath → $e');
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _findRow({
+    required SupabaseClient client,
+    required String clubId,
+    required String localId,
+    required String code,
+    required String syncId,
+  }) async {
+    // 1) club + local_session_id
+    final byLocal = await client
+        .from('session_meta')
+        .select('sync_id, club_id, local_session_id, code, storage_path')
+        .eq('club_id', clubId)
+        .eq('local_session_id', localId)
+        .maybeSingle();
+    if (byLocal != null) return Map<String, dynamic>.from(byLocal);
+
+    // 2) club + code (rattrapage : local_session_id = uuid ≠ QEPSSL)
+    if (code.isNotEmpty) {
+      final byCode = await client
+          .from('session_meta')
+          .select('sync_id, club_id, local_session_id, code, storage_path')
+          .eq('club_id', clubId)
+          .eq('code', code)
+          .limit(1)
+          .maybeSingle();
+      if (byCode != null) return Map<String, dynamic>.from(byCode);
+    }
+
+    // 3) sync_id
+    final bySync = await client
+        .from('session_meta')
+        .select('sync_id, club_id, local_session_id, code, storage_path')
+        .eq('sync_id', syncId)
+        .maybeSingle();
+    if (bySync != null) return Map<String, dynamic>.from(bySync);
+    return null;
   }
 
   @override
@@ -280,51 +432,67 @@ class SupabaseBlobSink implements BlobSink {
     final clubId = row['club_id'] as String;
     final localId = row['local_session_id'] as String;
     final syncId = row['sync_id'] as String;
-    final updateFields = Map<String, dynamic>.from(row)..remove('sync_id');
+    final code = (row['code'] as String?) ?? localId;
+    final minimal = minimalSessionMetaPayload(row);
+    final updateFields = Map<String, dynamic>.from(minimal)..remove('sync_id');
+    // Ne pas écraser un local_session_id cloud uuid avec le basename.
 
     try {
-      // 1) Row déjà là pour club+code → UPDATE (ne pas renvoyer un sync_id
-      //    qui créerait un 2e INSERT / changerait la PK d’une autre ligne).
-      final byLocal = await client
-          .from('session_meta')
-          .select('sync_id, club_id, local_session_id, storage_path')
-          .eq('club_id', clubId)
-          .eq('local_session_id', localId)
-          .maybeSingle();
-      if (byLocal != null) {
-        await client
-            .from('session_meta')
-            .update(updateFields)
-            .eq('club_id', clubId)
-            .eq('local_session_id', localId);
-        debugPrint(
-          'session_meta UPDATE club+local '
-          'kept_sync=${byLocal['sync_id']} local=$localId',
-        );
+      final existing = await _findRow(
+        client: client,
+        clubId: clubId,
+        localId: localId,
+        code: code,
+        syncId: syncId,
+      );
+      if (existing != null) {
+        final cloudSync = existing['sync_id'] as String;
+        final cloudLocal = existing['local_session_id'] as String?;
+        final patch = Map<String, dynamic>.from(updateFields);
+        if (cloudLocal != null && cloudLocal.isNotEmpty) {
+          patch.remove('local_session_id');
+        }
+        try {
+          await client
+              .from('session_meta')
+              .update(patch)
+              .eq('sync_id', cloudSync);
+          debugPrint(
+            'session_meta UPDATE by match '
+            'sync=$cloudSync code=$code local_cloud=$cloudLocal',
+          );
+        } on PostgrestException catch (e) {
+          // UPDATE no-op / RLS : zip peut déjà être là → laisser remonter
+          // seulement si ce n’est pas un « déjà synchro ».
+          debugPrint(
+            'session_meta UPDATE fail code=${e.code} msg=${e.message}',
+          );
+          if (e.code == '42501' || e.code == '409') {
+            // Séance trouvée : considérer méta OK si Storage a l’objet
+            // (cloud path ou path courant). Appelant (engine) ACK si zip.
+            final cloudPath = existing['storage_path'] as String?;
+            final zipThere = (cloudPath != null &&
+                    await objectExists(cloudPath)) ||
+                await objectExists(minimal['storage_path'] as String);
+            if (zipThere) {
+              debugPrint(
+                'session_meta UPDATE ${e.code} + zip → treat OK code=$code',
+              );
+              return;
+            }
+          }
+          rethrow;
+        }
         return;
       }
 
-      // 2) Même sync_id déjà en base (re-push outbox) → UPDATE.
-      final bySync = await client
-          .from('session_meta')
-          .select('sync_id, club_id, local_session_id')
-          .eq('sync_id', syncId)
-          .maybeSingle();
-      if (bySync != null) {
-        await client
-            .from('session_meta')
-            .update(updateFields)
-            .eq('sync_id', syncId);
-        debugPrint('session_meta UPDATE by sync_id=$syncId');
-        return;
-      }
-
-      // 3) Vrai INSERT (GT9JDK / GCZEKF) — onConflict unique métier.
+      // Vrai INSERT (GT9JDK / GCZEKF) — payload minimal.
       await client.from('session_meta').upsert(
-            row,
+            minimal,
             onConflict: 'club_id,local_session_id',
             ignoreDuplicates: false,
           );
+      debugPrint('session_meta INSERT code=$code sync=$syncId');
     } on PostgrestException catch (e) {
       debugPrint(
         'session_meta upsert PostgrestException '
@@ -336,6 +504,7 @@ class SupabaseBlobSink implements BlobSink {
           client: client,
           clubId: clubId,
           localId: localId,
+          code: code,
           syncId: syncId,
           updateFields: updateFields,
         );
@@ -348,58 +517,44 @@ class SupabaseBlobSink implements BlobSink {
     }
   }
 
-  /// 23505 session_meta_pkey ou unique (club, local) :
-  /// si la séance est déjà là → update + OK (ACK) ; sinon update by sync_id.
   Future<void> _recover23505({
     required SupabaseClient client,
     required String clubId,
     required String localId,
+    required String code,
     required String syncId,
     required Map<String, dynamic> updateFields,
   }) async {
-    final byLocal = await client
-        .from('session_meta')
-        .select('sync_id, club_id, local_session_id')
-        .eq('club_id', clubId)
-        .eq('local_session_id', localId)
-        .maybeSingle();
-    if (byLocal != null) {
-      // Déjà la même séance (ex. QEPSSL) — zip déjà poussé.
-      await client
-          .from('session_meta')
-          .update(updateFields)
-          .eq('club_id', clubId)
-          .eq('local_session_id', localId);
+    final existing = await _findRow(
+      client: client,
+      clubId: clubId,
+      localId: localId,
+      code: code,
+      syncId: syncId,
+    );
+    if (existing != null) {
+      final cloudSync = existing['sync_id'] as String;
+      final patch = Map<String, dynamic>.from(updateFields)
+        ..remove('local_session_id');
+      try {
+        await client
+            .from('session_meta')
+            .update(patch)
+            .eq('sync_id', cloudSync);
+      } catch (e) {
+        debugPrint('session_meta 23505 UPDATE soft-fail: $e');
+      }
       debugPrint(
-        'session_meta 23505 → déjà synchro local=$localId '
-        'cloud_sync=${byLocal['sync_id']}',
+        'session_meta 23505 → déjà synchro code=$code '
+        'cloud_sync=$cloudSync',
       );
       return;
     }
 
-    final bySync = await client
-        .from('session_meta')
-        .select('sync_id, storage_path')
-        .eq('sync_id', syncId)
-        .maybeSingle();
-    if (bySync != null) {
-      await client
-          .from('session_meta')
-          .update({
-            'storage_path': updateFields['storage_path'],
-            'payload_sha256': updateFields['payload_sha256'],
-            'byte_size': updateFields['byte_size'],
-            'synced_at': updateFields['synced_at'],
-          })
-          .eq('sync_id', syncId);
-      debugPrint('session_meta 23505 → UPDATE storage_path sync_id=$syncId');
-      return;
-    }
-
     throw PostgrestException(
-      message: '23505 sans row club+local ni sync_id',
+      message: '23505 sans row club+local/code ni sync_id',
       code: '23505',
-      details: 'local=$localId sync=$syncId',
+      details: 'code=$code local=$localId sync=$syncId',
       hint: null,
     );
   }
