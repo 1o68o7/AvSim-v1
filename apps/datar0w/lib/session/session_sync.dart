@@ -13,6 +13,7 @@ import '../theme/deck_theme.dart';
 import 'session_pack.dart';
 import 'store.dart';
 import '../sync/outbox_db.dart';
+import '../sync/sync_identity.dart';
 
 const kLocalRetentionFifo = 30;
 const kSoftDeleteDays = 30;
@@ -134,7 +135,43 @@ class SessionSync {
     return db.bySyncId(syncId);
   }
 
-  Future<void> drain() async {
+  bool get hasAuthAndClub {
+    final uid = defaultOwnerUserId();
+    final club = defaultActiveClubId();
+    return uid != null &&
+        uid.isNotEmpty &&
+        club != null &&
+        club.isNotEmpty;
+  }
+
+  /// Chaque dossier `sessions/{CODE}` non ACK → [enqueueAfterStop].
+  /// Conserve le sync_id existant (idempotent par path).
+  Future<int> enqueueExistingLocalSessions({Directory? root}) async {
+    final base = root ?? await SessionStore.sessionsRootIfPresent();
+    if (base == null || !base.existsSync()) return 0;
+    var n = 0;
+    await for (final entity in base.list()) {
+      if (entity is! Directory) continue;
+      final code = p.basename(entity.path);
+      if (code.isEmpty || code.startsWith('.')) continue;
+      final metaFile = File(p.join(entity.path, 'meta.json'));
+      if (!metaFile.existsSync()) continue;
+      final existing = db.byPath(entity.path);
+      if (existing != null && existing.acked) continue;
+      await enqueueAfterStop(code, dir: entity);
+      n++;
+    }
+    return n;
+  }
+
+  Future<void> drain({bool enqueueExisting = true}) async {
+    if (enqueueExisting && hasAuthAndClub) {
+      try {
+        await enqueueExistingLocalSessions();
+      } catch (e) {
+        debugPrint('enqueueExistingLocalSessions: $e');
+      }
+    }
     final due = db.due(_now());
     for (final row in due) {
       await _push(row, manual: false);
@@ -257,12 +294,14 @@ class _SessionSyncHostState extends State<SessionSyncHost>
   Future<void> _boot() async {
     try {
       _sync = widget.sync ?? await SessionSync.openLocal();
-      await _sync!.drain();
+      await _sync!.drain(enqueueExisting: true);
       if (mounted) setState(() {});
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('SessionSyncHost boot: $e');
+    }
     try {
       _net = Connectivity().onConnectivityChanged.listen((_) {
-        unawaited(_sync?.drain());
+        unawaited(_sync?.drain(enqueueExisting: true));
       });
     } catch (_) {}
   }
@@ -270,7 +309,7 @@ class _SessionSyncHostState extends State<SessionSyncHost>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      unawaited(_sync?.drain());
+      unawaited(_sync?.drain(enqueueExisting: true));
     }
   }
 
