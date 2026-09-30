@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _Gw implements TelemetryGateway {
-  _Gw({this.ack = false});
-  bool ack;
+  _Gw();
+  bool ack = false;
   int calls = 0;
 
   @override
