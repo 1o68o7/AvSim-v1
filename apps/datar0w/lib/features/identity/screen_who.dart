@@ -1,12 +1,21 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../identity/controller.dart';
 import '../../identity/models.dart';
+import '../../onboarding/routing.dart';
 import '../../router.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+
+/// Tests : forcer le masquage « Passer » (simule release).
+@visibleForTesting
+bool debugHidePasserSansProfil = false;
+
+bool get allowPasserSansProfil =>
+    kDebugMode && !debugHidePasserSansProfil;
 
 Future<void> _confirmDeleteRower(
   BuildContext context,
@@ -70,7 +79,7 @@ class IdentityListScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 if (snap.rowers.isEmpty)
                   const Text(
-                    'Aucun profil. Crée-en un ou passe (mode loisir).',
+                    'Aucun profil. Crée-en un ou connecte-toi.',
                     style: TextStyle(color: DeckColors.muted),
                   ),
                 for (final r in snap.rowers)
@@ -87,8 +96,14 @@ class IdentityListScreen extends ConsumerWidget {
                       onPressed: () => _confirmDeleteRower(context, ref, r),
                     ),
                     onTap: () async {
-                      await ref.read(identityProvider.notifier).selectRower(r.id);
-                      if (context.mounted) context.go(AppRoutes.profile);
+                      await ref
+                          .read(identityProvider.notifier)
+                          .selectRower(r.id);
+                      if (!context.mounted) return;
+                      final dest = isRowerProfilePlayable(r)
+                          ? AppRoutes.homeRower
+                          : AppRoutes.rowerOnboard;
+                      context.go(dest);
                     },
                   ),
               ],
@@ -103,21 +118,23 @@ class IdentityListScreen extends ConsumerWidget {
                   onPressed: () => context.go(AppRoutes.identityEdit),
                   child: const Text('CRÉER UN PROFIL'),
                 ),
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed: () async {
-                    await ref.read(identityProvider.notifier).selectRower(null);
-                    if (context.mounted) context.go(AppRoutes.profile);
-                  },
-                  child: const Text('Passer (sans profil)'),
-                ),
+                if (allowPasserSansProfil) ...[
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: () async {
+                      await ref
+                          .read(identityProvider.notifier)
+                          .selectRower(null);
+                      if (context.mounted) {
+                        context.go(AppRoutes.profile);
+                      }
+                    },
+                    child: const Text('Passer (sans profil)'),
+                  ),
+                ],
                 TextButton(
                   onPressed: () => context.go(AppRoutes.auth),
                   child: const Text('Connexion'),
-                ),
-                TextButton(
-                  onPressed: () => context.go(AppRoutes.clubLogin),
-                  child: const Text('Espace club'),
                 ),
               ],
             ),

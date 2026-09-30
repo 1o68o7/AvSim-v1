@@ -18,8 +18,11 @@ bool canRedirectAfterAuth(String path) =>
     path != AppRoutes.coachLive;
 
 OnboardingDoor doorFromPath(String path, OnboardingDoor fallback) {
-  if (path == AppRoutes.clubLogin) return OnboardingDoor.club;
-  if (path == AppRoutes.auth) return OnboardingDoor.rower;
+  if (path == AppRoutes.auth || path == AppRoutes.authCallback) {
+    return OnboardingDoor.rower;
+  }
+  // Ancienne porte club : plus de branchement spécial.
+  if (path == AppRoutes.clubLogin) return OnboardingDoor.rower;
   return fallback;
 }
 

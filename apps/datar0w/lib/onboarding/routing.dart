@@ -1,3 +1,4 @@
+import '../identity/models.dart';
 import '../router.dart';
 
 enum OnboardingDoor { rower, club }
@@ -13,7 +14,11 @@ const clubStaffRoles = {
 bool isClubStaffRole(String? role) =>
     role != null && clubStaffRoles.contains(role);
 
-/// Après login : staff → `/home/{rôle}` ; rameur/cox → branche A ; skip → `/`.
+/// Profil local jouable (nom non vide). Sinon → onboarding.
+bool isRowerProfilePlayable(Rower r) => r.displayName.trim().isNotEmpty;
+
+/// Après login : staff → `/home/{rôle}` ; sinon rameur home / onboard.
+/// Porte club anonyme n’envoie plus vers `/club/join`.
 String resolvePostLogin({
   required OnboardingDoor door,
   String? clubMemberRole,
@@ -30,7 +35,6 @@ String resolvePostLogin({
     return hasRowerProfile ? AppRoutes.homeRower : AppRoutes.rowerOnboard;
   }
 
-  if (door == OnboardingDoor.club) return AppRoutes.clubJoin;
   return hasRowerProfile ? AppRoutes.homeRower : AppRoutes.rowerOnboard;
 }
 
@@ -54,3 +58,6 @@ String homeRouteForClubRole(String role) {
       return AppRoutes.homeRower;
   }
 }
+
+String homeRouteForClubMemberRole(ClubMemberRole role) =>
+    homeRouteForClubRole(role.wire);

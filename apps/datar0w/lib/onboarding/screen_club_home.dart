@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../identity/models.dart';
+import '../onboarding/routing.dart';
 import '../router.dart';
 import '../theme/deck_theme.dart';
 import '../widgets/deck_scaffold.dart';
+import '../widgets/sign_out_button.dart';
 
 /// Accueil squelette par rôle club (pas de refonte Stitch).
 class ClubRoleHomeScreen extends ConsumerWidget {
@@ -22,10 +24,11 @@ class ClubRoleHomeScreen extends ConsumerWidget {
       ClubMemberRole.admin => 'ACCUEIL ADMIN',
       _ => 'ACCUEIL CLUB',
     };
+    final home = homeRouteForClubMemberRole(role);
     return DeckScaffold(
       title: title,
       subtitle: role.wire,
-      retourFallback: AppRoutes.profile,
+      retourFallback: home,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
@@ -90,6 +93,12 @@ class ClubRoleHomeScreen extends ConsumerWidget {
             onPressed: () => context.go(AppRoutes.club),
             child: const Text('CLUB'),
           ),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: () => context.go(AppRoutes.sessions),
+            child: const Text('MES SÉANCES'),
+          ),
+          const SignOutButton(),
         ],
       ),
     );

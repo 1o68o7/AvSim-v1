@@ -120,13 +120,14 @@ void main() {
       ),
       AppRoutes.rowerOnboard,
     );
+    // Porte club anonyme : plus de /club/join — même branche rameur.
     expect(
       destinationAfterAuth(
         door: OnboardingDoor.club,
         snap: empty,
         sessionUserId: 'u1',
       ),
-      AppRoutes.clubJoin,
+      AppRoutes.rowerOnboard,
     );
   });
 
@@ -175,8 +176,8 @@ void main() {
     addTearDown(links.controller.close);
   });
 
-  testWidgets('callback depuis /club/login → rejoindre club', (tester) async {
-    final router = _router(AppRoutes.clubLogin);
+  testWidgets('callback door=club sans staff → onboard rameur', (tester) async {
+    final router = _router(AppRoutes.auth);
     final links = _MemLinks();
     await _pump(
       tester: tester,
@@ -188,7 +189,8 @@ void main() {
       Uri.parse('datarow://auth/callback?code=pkce&door=club'),
     );
     await tester.pumpAndSettle();
-    expect(find.text('CLUB-JOIN'), findsOneWidget);
+    expect(find.text('ONBOARD'), findsOneWidget);
+    expect(find.text('CLUB-JOIN'), findsNothing);
     addTearDown(links.controller.close);
   });
 
