@@ -21,6 +21,7 @@ Une planche = un état. **Pas de Flutter.**
 | DR-20 | sans affectation | `0cded8b518f2455eb259d8a85ba69902` | portrait |
 | DR-21 | barreur affecté 8+ | `eeba19d108f94b929d09c5368589581a` | portrait |
 | DR-30 | accueil coach | `1d55126036ea49438a160b62b24eb9d8` | portrait |
+| DR-31 | composition 8+ semi | `7c07a177f03541f2ac61a72dc7297659` | portrait |
 | DR-32 | join code | `f542211afbb44b4e9318abbae8e25d60` | portrait |
 | DR-33 | coach live (pilier) | `e08d021b58c74847946c9e712f6502ee` | paysage |
 | DR-34 | séances liste | `a62c7168aa22497b98cfebfbd17881e6` | portrait |
