@@ -39,6 +39,12 @@ String localSessionIdFor(OutboxRow row, Map<String, dynamic> meta) {
   return fromPath;
 }
 
+/// Schéma `0005_session_meta.sql` :
+/// - PK : `sync_id`
+/// - UNIQUE : `(club_id, local_session_id)`
+/// Upsert PostgREST sur la unique seule ne couvre pas un 23505 PK
+/// (re-push même sync_id). Voir [SupabaseBlobSink.upsertMeta].
+
 abstract class BlobSink {
   Future<void> put({
     required String storagePath,
@@ -51,10 +57,13 @@ abstract class BlobSink {
 class MemoryBlobSink implements BlobSink {
   final Map<String, Uint8List> blobs = {};
   final Map<String, Map<String, dynamic>> metas = {};
-  /// Index `club_id|local_session_id` (onConflict).
+  /// Index `club_id|local_session_id` (unique).
   final Map<String, Map<String, dynamic>> metasByLocal = {};
   bool fail = false;
   bool failMetaOnly = false;
+
+  /// Simule 23505 PK si insert aveugle avec sync_id déjà pris par *autre* local.
+  bool simulatePkConflict = false;
 
   @override
   Future<void> put({
@@ -78,6 +87,41 @@ class MemoryBlobSink implements BlobSink {
     final club = row['club_id'] as String?;
     final local = row['local_session_id'] as String?;
     final copy = Map<String, dynamic>.from(row);
+
+    // 1) Déjà une row club+code → UPDATE (garde le sync_id cloud).
+    if (club != null && local != null) {
+      final key = '$club|$local';
+      final existing = metasByLocal[key];
+      if (existing != null) {
+        final keepSync = existing['sync_id'] as String;
+        copy['sync_id'] = keepSync;
+        metas[keepSync] = copy;
+        metasByLocal[key] = copy;
+        if (keepSync != syncId) metas.remove(syncId);
+        return;
+      }
+    }
+
+    // 2) Même sync_id déjà en base → UPDATE.
+    final bySync = metas[syncId];
+    if (bySync != null) {
+      metas[syncId] = copy;
+      if (club != null && local != null) {
+        metasByLocal['$club|$local'] = copy;
+      }
+      return;
+    }
+
+    // 3) INSERT (GT9JDK / GCZEKF).
+    if (simulatePkConflict && metas.containsKey(syncId)) {
+      throw PostgrestException(
+        message: 'duplicate key value violates unique constraint '
+            '"session_meta_pkey"',
+        code: '23505',
+        details: 'Key (sync_id)=($syncId) already exists.',
+        hint: null,
+      );
+    }
     metas[syncId] = copy;
     if (club != null && local != null) {
       metasByLocal['$club|$local'] = copy;
@@ -187,13 +231,24 @@ class TelemetryUploadEngine implements TelemetryGateway {
     };
     try {
       await sink.upsertMeta(payload);
+    } on PostgrestException catch (e) {
+      // 23505 doit être absorbé dans SupabaseBlobSink (ACK via update).
+      debugPrint(
+        'session_meta upsert PostgrestException '
+        'code=${e.code} message=${e.message}',
+      );
+      return const UploadResult(
+        ok: false,
+        acked: false,
+        error: 'session_meta',
+      );
     } catch (e) {
-      // Zip peut déjà être là : retry meta, même sync_id, pas d’ACK.
       debugPrint('session_meta upsert FAIL status/body: $e');
+      final msg = '$e';
       return UploadResult(
         ok: false,
         acked: false,
-        error: 'session_meta: $e',
+        error: msg.contains('upsert KO') ? 'session_meta: $e' : 'session_meta',
       );
     }
     return const UploadResult(ok: true, acked: true);
@@ -221,10 +276,54 @@ class SupabaseBlobSink implements BlobSink {
   Future<void> upsertMeta(Map<String, dynamic> row) async {
     final client = supabaseOrNull();
     if (client == null) throw StateError('supabase off');
+
+    final clubId = row['club_id'] as String;
+    final localId = row['local_session_id'] as String;
+    final syncId = row['sync_id'] as String;
+    final updateFields = Map<String, dynamic>.from(row)..remove('sync_id');
+
     try {
+      // 1) Row déjà là pour club+code → UPDATE (ne pas renvoyer un sync_id
+      //    qui créerait un 2e INSERT / changerait la PK d’une autre ligne).
+      final byLocal = await client
+          .from('session_meta')
+          .select('sync_id, club_id, local_session_id, storage_path')
+          .eq('club_id', clubId)
+          .eq('local_session_id', localId)
+          .maybeSingle();
+      if (byLocal != null) {
+        await client
+            .from('session_meta')
+            .update(updateFields)
+            .eq('club_id', clubId)
+            .eq('local_session_id', localId);
+        debugPrint(
+          'session_meta UPDATE club+local '
+          'kept_sync=${byLocal['sync_id']} local=$localId',
+        );
+        return;
+      }
+
+      // 2) Même sync_id déjà en base (re-push outbox) → UPDATE.
+      final bySync = await client
+          .from('session_meta')
+          .select('sync_id, club_id, local_session_id')
+          .eq('sync_id', syncId)
+          .maybeSingle();
+      if (bySync != null) {
+        await client
+            .from('session_meta')
+            .update(updateFields)
+            .eq('sync_id', syncId);
+        debugPrint('session_meta UPDATE by sync_id=$syncId');
+        return;
+      }
+
+      // 3) Vrai INSERT (GT9JDK / GCZEKF) — onConflict unique métier.
       await client.from('session_meta').upsert(
             row,
             onConflict: 'club_id,local_session_id',
+            ignoreDuplicates: false,
           );
     } on PostgrestException catch (e) {
       debugPrint(
@@ -232,11 +331,77 @@ class SupabaseBlobSink implements BlobSink {
         'code=${e.code} message=${e.message} details=${e.details} '
         'hint=${e.hint}',
       );
+      if (e.code == '23505') {
+        await _recover23505(
+          client: client,
+          clubId: clubId,
+          localId: localId,
+          syncId: syncId,
+          updateFields: updateFields,
+        );
+        return;
+      }
       rethrow;
     } catch (e) {
       debugPrint('session_meta upsert FAIL: $e');
       rethrow;
     }
+  }
+
+  /// 23505 session_meta_pkey ou unique (club, local) :
+  /// si la séance est déjà là → update + OK (ACK) ; sinon update by sync_id.
+  Future<void> _recover23505({
+    required SupabaseClient client,
+    required String clubId,
+    required String localId,
+    required String syncId,
+    required Map<String, dynamic> updateFields,
+  }) async {
+    final byLocal = await client
+        .from('session_meta')
+        .select('sync_id, club_id, local_session_id')
+        .eq('club_id', clubId)
+        .eq('local_session_id', localId)
+        .maybeSingle();
+    if (byLocal != null) {
+      // Déjà la même séance (ex. QEPSSL) — zip déjà poussé.
+      await client
+          .from('session_meta')
+          .update(updateFields)
+          .eq('club_id', clubId)
+          .eq('local_session_id', localId);
+      debugPrint(
+        'session_meta 23505 → déjà synchro local=$localId '
+        'cloud_sync=${byLocal['sync_id']}',
+      );
+      return;
+    }
+
+    final bySync = await client
+        .from('session_meta')
+        .select('sync_id, storage_path')
+        .eq('sync_id', syncId)
+        .maybeSingle();
+    if (bySync != null) {
+      await client
+          .from('session_meta')
+          .update({
+            'storage_path': updateFields['storage_path'],
+            'payload_sha256': updateFields['payload_sha256'],
+            'byte_size': updateFields['byte_size'],
+            'synced_at': updateFields['synced_at'],
+          })
+          .eq('sync_id', syncId);
+      debugPrint('session_meta 23505 → UPDATE storage_path sync_id=$syncId');
+      return;
+    }
+
+    throw PostgrestException(
+      message: '23505 sans row club+local ni sync_id',
+      code: '23505',
+      details: 'local=$localId sync=$syncId',
+      hint: null,
+    );
   }
 }
 
