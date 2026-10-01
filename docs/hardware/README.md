@@ -1,7 +1,7 @@
-# Hardware — Documentation des capteurs externes DataR0w
+# Hardware — Capteurs externes DataR0w
 
-> Organisation : un sous-répertoire par capteur, avec les briefs techniques, design et variantes dedans.
-> Version : 1.0 — 1er octobre 2026
+> Source de vérité hardware : **ce répertoire uniquement**.
+> Les briefs du 1er octobre 2026 prévalent sur les anciens `docs/CADRAGE-CAPTEUR-*`.
 
 ---
 
@@ -9,32 +9,30 @@
 
 ```
 docs/hardware/
-├── README.md                 ← ce fichier
-├── stroke-sensor/            ← capteur de coup d'aviron (clip sur la rame)
-│   ├── brief.md              ← électronique (PCB, BOM, BLE, firmware)
-│   ├── design-brief.md       ← mécanique (clip TPU, boîtier, étanchéité)
-│   └── latex-clip-brief.md   ← variante clip latex (moule maison)
-├── ppg-armband/              ← capteur PPG brassard (FC + SpO2)
-├── dorsal-patch/             ← patch dorsal ouvert (PPG + IMU)
-└── hull-patch/               ← patch coque autonome (IMU + baro + stockage local)
+├── README.md
+├── ARCHIVE.md                 ← cadrages historiques (dépréciés)
+├── stroke-sensor/             ← capteur de coup (clip rame)
+│   ├── README.md
+│   ├── brief.md                ← électronique (prévaut)
+│   ├── design-brief.md         ← mécanique TPU (prévaut)
+│   └── latex-clip-brief.md     ← variante latex (prévaut)
+├── ppg-armband/
+├── dorsal-patch/
+└── hull-patch/
 ```
 
 ## Capteurs
 
-| Capteur | Répertoire | Statut |
-|---|---|---|
-| Stroke sensor | `stroke-sensor/` | Briefs validés, fichiers de conception à produire |
-| PPG brassard | `ppg-armband/` | À documenter |
-| Patch dorsal | `dorsal-patch/` | À documenter |
-| Patch coque | `hull-patch/` | À documenter |
+| Capteur | Répertoire | Source de vérité | Statut |
+|---|---|---|---|
+| Stroke sensor | `stroke-sensor/` | `brief.md` + `design-brief.md` + `latex-clip-brief.md` | Briefs validés 2026-10-01 |
+| PPG brassard | `ppg-armband/` | README + archive cadrage PPG | À documenter |
+| Patch dorsal | `dorsal-patch/` | README + archive cadrages patch | À documenter |
+| Patch coque | `hull-patch/` | README + archive cadrage coque | À documenter |
 
 ## Règles
 
-- Chaque capteur a son sous-répertoire, nommé en kebab-case
-- Les briefs portent des noms génériques (`brief.md`, `design-brief.md`) pour rester cohérents entre capteurs
-- Les variantes (ex : clip latex) ont un nom explicite
-- Un README par sous-répertoire quand le capteur a plus de 2 documents
-
----
-
-*Document généré le 1er octobre 2026.*
+1. Un capteur = un sous-répertoire kebab-case.
+2. Les briefs du 1er octobre 2026 **prévalent** (LiPo + USB-C, PCB 25×30, protection NTC, clip latex/TPU).
+3. Les anciens fichiers `docs/CADRAGE-STROKE-SENSOR-DIY.md`, `docs/CADRAGE-CAPTEUR-*`, `docs/CADRAGE-PATCH-COQUE-AUTONOME.md` et `docs/BRIEF-GOODWAY-PATCH-DORSAL.md` sont déplacés dans `docs/hardware/archive/` — historique seulement.
+4. Pas de doublon à la racine de `docs/` ni de `docs/hardware/`.
