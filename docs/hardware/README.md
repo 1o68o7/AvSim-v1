@@ -11,10 +11,9 @@
 docs/hardware/
 ├── README.md
 ├── ARCHIVE.md
-├── firmware-stroke-sensor.md   ← guideline build / flash / MAJ BLE
-├── bench-wearables.md          ← ceinture H9Z + bracelet 2208A (banc)
+├── firmware-stroke-sensor.md
+├── bench-wearables.md          ← ceinture H9Z + bracelet 2208A
 ├── stroke-sensor/
-├── dorsal-patch/
 └── hull-patch/
 ```
 
@@ -23,20 +22,19 @@ docs/hardware/
 | Capteur | Répertoire | Source de vérité | Statut |
 |---|---|---|---|
 | Stroke sensor | `stroke-sensor/` | briefs + [`firmware-stroke-sensor.md`](firmware-stroke-sensor.md) | Briefs validés 2026-10-01 |
-| Ceinture FC | [`bench-wearables.md`](bench-wearables.md) | Coospo H9Z | Achetée pour le banc, pas fabriquée |
-| Bracelet souple | [`bench-wearables.md`](bench-wearables.md) | J-Style 2208A | Banc confort. FC optique + SpO2 tendance |
-| Patch dorsal | `dorsal-patch/` | README | Remplacé au banc par la H9Z |
-| Patch coque | `hull-patch/` | README | À documenter |
+| Ceinture FC | [`bench-wearables.md`](bench-wearables.md) | Coospo H9Z | Achat banc |
+| Bracelet souple | [`bench-wearables.md`](bench-wearables.md) | J-Style 2208A | Achat banc |
+| Patch coque | `hull-patch/` | README | À cadrer |
 
 ## Abandonné
 
-- **Brassard PPG** : retiré le 1er octobre 2026.
-- **Sudation** : hors MVP. Pas de référence.
+- Brassard PPG.
+- Patch dorsal.
+- Sudation.
 
 ## Règles
 
 1. Un capteur fabriqué = un sous-répertoire kebab-case.
-2. Les briefs du 1er octobre 2026 **prévalent** pour le stroke sensor.
+2. Les briefs du 1er octobre 2026 prévalent pour le stroke sensor.
 3. Les anciens cadrages sont dans `docs/hardware/archive/`.
-4. Pas de doublon à la racine de `docs/`.
-5. La FC de référence du banc est la ceinture H9Z, pas un brassard ni le patch dorsal.
+4. La FC de référence du banc est la ceinture H9Z.
