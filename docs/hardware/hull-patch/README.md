@@ -1,22 +1,20 @@
 # Hull Patch
 
-> Patch coque autonome : BMI323, BMP390, SHT40, stockage local USB ou NFC, zéro radio en course — pour respecter les règles FFA.
+> Logger coque. Entraînement en BLE, course muette (mémoire, vidange USB).
+> Vitesse eau et vent : voir [water-speed.md](water-speed.md).
 >
-> Version : 1.0 — 1er octobre 2026
-> Statut : à documenter
-
----
+> Version : 1.1 — 1er octobre 2026
 
 ## Documents
 
-Aucun brief pour l'instant. À rédiger : électronique, mécanique (coque, fixation), firmware.
+| Fichier | Contenu |
+|---|---|
+| [water-speed.md](water-speed.md) | Loch, anémomètre, NK, Coxmate, brevets, ce qu'on ne copie pas |
 
-## Points clés (rappel)
+## Points clés
 
-- Zéro radio en course (règles FFA)
-- Stockage local : USB ou NFC
-- Capteurs : IMU + baro + humidité/température
-
----
-
-*Document généré le 1er octobre 2026.*
+- IMU BMI323, baro BMP390, SHT40 dans le boîtier.
+- Vitesse fond = GNSS téléphone. Vitesse eau = option rivière.
+- Vent : entraînement seulement, BLE.
+- Pas de propulseur SUP. Pas de passe-coque voilier.
+- Pas de clone Coxmate : principe public, pièce à nous.
