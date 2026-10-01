@@ -1,0 +1,6 @@
+{
+  "board": { "design_settings": { "defaults": { "board_outline_line_width": 0.1 } } },
+  "meta": { "filename": "stroke-sensor.kicad_pro", "version": 1 },
+  "sheets": [["stroke-sensor.kicad_sch", ""]],
+  "text_variables": {}
+}
