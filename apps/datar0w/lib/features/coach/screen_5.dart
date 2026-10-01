@@ -196,7 +196,7 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                                   if (seg.length >= 2)
                                     Polyline(
                                       points: seg,
-                                      color: DeckColors.amber,
+                                      color: DeckColors.volt,
                                       strokeWidth: 3,
                                     ),
                               ],
@@ -210,7 +210,7 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                                     height: 14,
                                     child: Container(
                                       decoration: const BoxDecoration(
-                                        color: DeckColors.amber,
+                                        color: DeckColors.volt,
                                         shape: BoxShape.circle,
                                       ),
                                     ),
@@ -234,7 +234,7 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                             child: const Text(
                               '▲ N   NORD EN HAUT',
                               style: TextStyle(
-                                color: DeckColors.amber,
+                                color: DeckColors.volt,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                               ),

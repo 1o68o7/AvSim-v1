@@ -72,7 +72,7 @@ class ClubRoleHomeScreen extends ConsumerWidget {
           if (role == ClubMemberRole.treasurer)
             const Text(
               'Cotisations / budget : plus tard.',
-              style: TextStyle(color: DeckColors.amber),
+              style: TextStyle(color: DeckColors.volt),
             ),
           if (role == ClubMemberRole.intendant) ...[
             OutlinedButton(

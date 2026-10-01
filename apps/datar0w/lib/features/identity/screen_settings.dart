@@ -58,8 +58,8 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const Divider(height: 1, color: DeckColors.hairline),
           _SettingsTile(
-            label: 'Objets connectés',
-            value: 'Sangle, patch…',
+            label: 'Capteurs',
+            value: 'Bientôt',
             onTap: () => context.go(AppRoutes.devices),
           ),
           const Divider(height: 1, color: DeckColors.hairline),

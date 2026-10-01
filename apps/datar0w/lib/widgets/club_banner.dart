@@ -28,7 +28,7 @@ class ClubBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = clubColor(club.primaryColor) ?? DeckColors.amber;
+    final primary = clubColor(club.primaryColor) ?? DeckColors.volt;
     final path = club.crestPath;
     return Container(
       padding: const EdgeInsets.all(12),
@@ -70,7 +70,7 @@ class ClubBanner extends StatelessWidget {
                       child: Text(
                         '~${club.licenceCountApprox} licenciés',
                         style: const TextStyle(
-                          color: DeckColors.amber,
+                          color: DeckColors.volt,
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                         ),

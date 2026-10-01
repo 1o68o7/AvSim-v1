@@ -164,7 +164,7 @@ class _ClubJoinScreenState extends ConsumerState<ClubJoinScreen> {
             child: const Text('DEMANDER À REJOINDRE'),
           ),
           if (_msg != null)
-            Text(_msg!, style: const TextStyle(color: DeckColors.amber)),
+            Text(_msg!, style: const TextStyle(color: DeckColors.volt)),
           if (canDecide) ...[
             const SizedBox(height: 24),
             const Text(

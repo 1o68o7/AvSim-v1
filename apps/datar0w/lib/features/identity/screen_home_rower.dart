@@ -92,7 +92,7 @@ class HomeRowerScreen extends ConsumerWidget {
               trailing: Text(
                 boat.classe.toUpperCase(),
                 style: const TextStyle(
-                  color: DeckColors.amber,
+                  color: DeckColors.volt,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                 ),
@@ -111,7 +111,7 @@ class HomeRowerScreen extends ConsumerWidget {
               padding: EdgeInsets.only(top: 12),
               child: Text(
                 'Ta coque est en maintenance.',
-                style: TextStyle(color: DeckColors.amber),
+                style: TextStyle(color: DeckColors.volt),
               ),
             ),
           if (showClub) ...[
@@ -331,7 +331,7 @@ class _SessionCard extends StatelessWidget {
                   label: 'Poste',
                   value: seat == null ? '—' : 'Siège $seat',
                   hint: seat == 1 ? 'nage' : null,
-                  accent: DeckColors.amber,
+                  accent: DeckColors.volt,
                 ),
               ),
               Expanded(

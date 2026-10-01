@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import '../router.dart';
 import '../theme/deck_theme.dart';
 import '../widgets/deck_scaffold.dart';
+import '../widgets/deck_widgets.dart';
 
 import 'session_pack.dart';
 import 'store.dart';
@@ -548,19 +549,12 @@ class _SessionSyncHostState extends State<SessionSyncHost>
 
     Widget? strip;
     if (showStrip) {
-      final chipLabel = _offerClubCta
-          ? 'CLUB'
+      final honestKind = _offerClubCta
+          ? DeckHonestKind.club
           : switch (kind) {
-              SyncBannerKind.local => 'LOCAL',
-              SyncBannerKind.enFile => 'EN FILE',
-              SyncBannerKind.cloud => 'CLOUD',
-            };
-      final chipColor = _offerClubCta
-          ? DeckColors.amber
-          : switch (kind) {
-              SyncBannerKind.local => DeckColors.label,
-              SyncBannerKind.enFile => DeckColors.amber,
-              SyncBannerKind.cloud => DeckColors.tribord,
+              SyncBannerKind.local => DeckHonestKind.local,
+              SyncBannerKind.enFile => DeckHonestKind.enFile,
+              SyncBannerKind.cloud => DeckHonestKind.cloud,
             };
       final right = status ??
           (_offerClubCta
@@ -580,7 +574,7 @@ class _SessionSyncHostState extends State<SessionSyncHost>
             IgnorePointer(
               child: DecoratedBox(
                 decoration: const BoxDecoration(
-                  color: DeckColors.surface,
+                  color: DeckColors.bgTactical,
                   border: Border(
                     bottom: BorderSide(color: DeckColors.hairline),
                   ),
@@ -596,23 +590,8 @@ class _SessionSyncHostState extends State<SessionSyncHost>
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: _onBannerTap,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: chipColor),
-                      color: chipColor.withValues(alpha: 0.12),
-                    ),
-                    child: Text(
-                      chipLabel,
-                      style: TextStyle(
-                        color: chipColor,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 11,
-                        letterSpacing: 1.1,
-                      ),
-                    ),
-                  ),
+                  borderRadius: DeckRadii.chipAll,
+                  child: DeckHonestChip(kind: honestKind),
                 ),
               ),
             ),
@@ -626,9 +605,10 @@ class _SessionSyncHostState extends State<SessionSyncHost>
                     child: Text(
                       right,
                       style: const TextStyle(
+                        fontFamily: DeckType.ui,
                         color: DeckColors.label,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),

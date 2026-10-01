@@ -52,7 +52,7 @@ Ce n’est **pas** une mesure AvSim. Watts / η / slip / RTK : hors contrat club
 - `/devices` : sangle + `DeviceType.patchDorsal` + toggles feedback (persistés)
 - `/quai` : CTA « Importer patch » = **jsonl mock**
 
-Mapping Stitch → routes : `docs/stitch-mvp/GEL.md`. Une planche = une route. Pas de 2e `/live` labo.
+Mapping Stitch → routes : `docs/stitch-redesign/GEL.md` (Volt / Technical Nautical Deck). Une planche = une route. Pas de 2e `/live` labo. Hangar (`docs/stitch-mvp/`) obsolète.
 
 ### 2.2 DA et conventions (ne pas rouvrir)
 

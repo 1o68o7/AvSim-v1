@@ -37,7 +37,7 @@ class PageIntrouvableScreen extends StatelessWidget {
               Text(
                 dest,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: DeckColors.amber, fontSize: 13),
+                style: const TextStyle(color: DeckColors.volt, fontSize: 13),
               ),
               if (error != null) ...[
                 const SizedBox(height: 8),

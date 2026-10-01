@@ -203,7 +203,7 @@ class _IdentityListScreenState extends ConsumerState<IdentityListScreen> {
                   Text(
                     _lastNavError!,
                     style: const TextStyle(
-                      color: DeckColors.amber,
+                      color: DeckColors.volt,
                       fontSize: 16,
                       height: 1.35,
                       fontWeight: FontWeight.w600,

@@ -69,7 +69,7 @@ class HomeCoxScreen extends ConsumerWidget {
               trailing: Text(
                 boat.classe.toUpperCase(),
                 style: const TextStyle(
-                  color: DeckColors.amber,
+                  color: DeckColors.volt,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                 ),
@@ -118,12 +118,12 @@ class HomeCoxScreen extends ConsumerWidget {
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(10),
-                      color: DeckColors.amber.withValues(alpha: 0.12),
+                      color: DeckColors.volt.withValues(alpha: 0.12),
                       child: const Text(
                         'Poste barreur obligatoire sur cette classe. '
                         'Lecture seule — composition coach.',
                         style: TextStyle(
-                          color: DeckColors.amber,
+                          color: DeckColors.volt,
                           fontSize: 11,
                           height: 1.35,
                         ),
@@ -211,16 +211,16 @@ class _CoxPosChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: selected ? DeckColors.amber : DeckColors.bg,
+        color: selected ? DeckColors.volt : DeckColors.bg,
         border: Border.all(
-          color: selected ? DeckColors.amber : DeckColors.hairline,
+          color: selected ? DeckColors.volt : DeckColors.hairline,
         ),
       ),
       child: Text(
         label,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: selected ? DeckColors.onAlert : DeckColors.label,
+          color: selected ? DeckColors.onVolt : DeckColors.label,
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.6,
@@ -249,9 +249,9 @@ class _CrewRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: you ? DeckColors.amber.withValues(alpha: 0.1) : DeckColors.bg,
+        color: you ? DeckColors.volt.withValues(alpha: 0.1) : DeckColors.bg,
         border: Border.all(
-          color: you ? DeckColors.amber : DeckColors.hairline,
+          color: you ? DeckColors.volt : DeckColors.hairline,
         ),
       ),
       child: Row(
@@ -328,7 +328,7 @@ class HomeCoachScreen extends ConsumerWidget {
             trailing: Text(
               '${rowers.length}',
               style: const TextStyle(
-                color: DeckColors.amber,
+                color: DeckColors.volt,
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
               ),
@@ -492,14 +492,14 @@ class _CoachAction extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Material(
-        color: primary ? DeckColors.amber : DeckColors.surfaceHigh,
+        color: primary ? DeckColors.volt : DeckColors.surfaceHigh,
         child: InkWell(
           onTap: onTap,
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               border: Border.all(
-                color: primary ? DeckColors.amber : DeckColors.hairline,
+                color: primary ? DeckColors.volt : DeckColors.hairline,
               ),
             ),
             child: Row(
@@ -514,7 +514,7 @@ class _CoachAction extends StatelessWidget {
                         title,
                         style: TextStyle(
                           color: primary
-                              ? DeckColors.onAlert
+                              ? DeckColors.onVolt
                               : DeckColors.text,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.8,
@@ -526,7 +526,7 @@ class _CoachAction extends StatelessWidget {
                         subtitle,
                         style: TextStyle(
                           color: primary
-                              ? DeckColors.onAlert.withValues(alpha: 0.7)
+                              ? DeckColors.onVolt.withValues(alpha: 0.7)
                               : DeckColors.muted,
                           fontSize: 11,
                           height: 1.3,
@@ -537,7 +537,7 @@ class _CoachAction extends StatelessWidget {
                 ),
                 Icon(
                   Icons.arrow_forward,
-                  color: primary ? DeckColors.onAlert : DeckColors.label,
+                  color: primary ? DeckColors.onVolt : DeckColors.label,
                   size: 18,
                 ),
               ],

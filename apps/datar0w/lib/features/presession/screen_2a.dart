@@ -109,7 +109,7 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                   'SÉLECTIONNÉ : ${info.code.toUpperCase()}  ·  ${info.seats} SIÈGE(S)'
                   '${info.coxed ? '  ·  BARRÉ' : ''}',
                   style: const TextStyle(
-                    color: DeckColors.amber,
+                    color: DeckColors.volt,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.2,
@@ -247,7 +247,7 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                     padding: EdgeInsets.only(top: 12),
                     child: Text(
                       'Profil BARREUR : choisir 4+ ou 8+.',
-                      style: TextStyle(color: DeckColors.amber, fontSize: 12),
+                      style: TextStyle(color: DeckColors.volt, fontSize: 12),
                     ),
                   ),
                 const SizedBox(height: 20),
@@ -349,7 +349,7 @@ class _ClassChip extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            border: Border.all(color: on ? DeckColors.amber : DeckColors.hairline),
+            border: Border.all(color: on ? DeckColors.volt : DeckColors.hairline),
           ),
           child: Column(
             children: [
@@ -357,7 +357,7 @@ class _ClassChip extends StatelessWidget {
                 code,
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
-                  color: on ? DeckColors.amber : DeckColors.label,
+                  color: on ? DeckColors.volt : DeckColors.label,
                 ),
               ),
               Text(

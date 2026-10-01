@@ -107,7 +107,7 @@ class _ClubSessionsScreenState extends ConsumerState<ClubSessionsScreen> {
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Text(
                         _error!,
-                        style: const TextStyle(color: DeckColors.amber),
+                        style: const TextStyle(color: DeckColors.volt),
                       ),
                     ),
                   if (_error == null && (rows == null || rows.isEmpty))
@@ -223,7 +223,7 @@ class _ClubSessionDetailScreenState
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     _error!,
-                    style: const TextStyle(color: DeckColors.amber),
+                    style: const TextStyle(color: DeckColors.volt),
                   ),
                 )
               : r == null

@@ -111,7 +111,7 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
                   Text(
                     _error ?? 'Connexion impossible.',
                     style: const TextStyle(
-                      color: DeckColors.amber,
+                      color: DeckColors.volt,
                       height: 1.4,
                       fontWeight: FontWeight.w600,
                     ),

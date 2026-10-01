@@ -6,6 +6,7 @@ import 'package:datar0w/features/identity/screen_spinoscope.dart';
 import 'package:datar0w/features/identity/screen_who.dart';
 import 'package:datar0w/identity/controller.dart';
 import 'package:datar0w/identity/models.dart';
+import 'package:datar0w/identity/store.dart';
 import 'package:datar0w/session/boat_config.dart';
 import 'package:datar0w/widgets/club_banner.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,14 @@ class _SeededIdentity extends IdentityController {
       ],
     );
   }
+}
+
+/// clubRole coach — requis par [canCheckoutOps] (session coach seule ne suffit pas).
+class _CoachClubIdentity extends IdentityController {
+  @override
+  IdentitySnapshot build() => IdentitySnapshot(
+        prefs: const IdentityPrefs(clubRole: ClubMemberRole.coach),
+      );
 }
 
 void main() {
@@ -70,7 +79,10 @@ void main() {
 
   testWidgets('import coach ST-07 : zones Bateaux / Rameurs', (tester) async {
     final container = ProviderContainer(
-      overrides: [identityStoreOverride()],
+      overrides: [
+        identityStoreOverride(),
+        identityProvider.overrideWith(_CoachClubIdentity.new),
+      ],
     );
     addTearDown(container.dispose);
     container.read(boatConfigProvider.notifier).setRole(CrewRole.coach);
