@@ -11,6 +11,7 @@
 docs/hardware/
 ├── README.md
 ├── ARCHIVE.md                 ← cadrages historiques (dépréciés)
+├── firmware-stroke-sensor.md   ← guideline build / flash / MAJ BLE
 ├── stroke-sensor/             ← capteur de coup (clip rame)
 │   ├── README.md
 │   ├── brief.md                ← électronique (prévaut)
@@ -25,7 +26,7 @@ docs/hardware/
 
 | Capteur | Répertoire | Source de vérité | Statut |
 |---|---|---|---|
-| Stroke sensor | `stroke-sensor/` | `brief.md` + `design-brief.md` + `latex-clip-brief.md` | Briefs validés 2026-10-01 |
+| Stroke sensor | `stroke-sensor/` | `brief.md` + `design-brief.md` + `latex-clip-brief.md` + [`firmware-stroke-sensor.md`](firmware-stroke-sensor.md) | Briefs validés 2026-10-01 |
 | PPG brassard | `ppg-armband/` | README + archive cadrage PPG | À documenter |
 | Patch dorsal | `dorsal-patch/` | README + archive cadrages patch | À documenter |
 | Patch coque | `hull-patch/` | README + archive cadrage coque | À documenter |
