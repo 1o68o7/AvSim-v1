@@ -1,9 +1,11 @@
 # Inventaire Stitch Bassin (direction retenue)
 
 Projet : [`1254927388471488287`](https://stitch.withgoogle.com/projects/1254927388471488287)  
-DS : `assets/8677461250639537695` · Tokens : [`DA.md`](./DA.md) · Challenge : [`DA-CHALLENGE-2026.md`](./DA-CHALLENGE-2026.md)
+DS : `assets/8677461250639537695` · Tokens : [`DA.md`](./DA.md) · Challenge : [`DA-CHALLENGE-2026.md`](./DA-CHALLENGE-2026.md)  
+Patches 1er oct : [`DA-AUDIT-PATCH-2026-10-01.md`](./DA-AUDIT-PATCH-2026-10-01.md)
 
-Une planche = un état. **Pas de Flutter.**
+Une planche = un état. **Pas de Flutter.**  
+Les ids listés sont les **versions canoniques** (après patches honnêteté).
 
 ## Posées
 
@@ -17,19 +19,22 @@ Une planche = un état. **Pas de Flutter.**
 | DR-10 | Connexion OFF (pilier) | `de251f1a5e214d47b1fa6a5b343e2176` | portrait |
 | DR-11 | Connexion ON | `391e417bdd634702869d058cb1482fd3` | portrait |
 | DR-12 | Réglages connecté | `96232dced0824ec4951f5105c4f95de0` | portrait |
-| DR-20 | affecté (pilier) | `453bd9855d6745fd9f75bd48c9b10e01` | portrait |
+| DR-20 | affecté **patch** (− Capteurs prêts) | `dbf9866bdde5475288f73a63e39e2c33` | portrait |
 | DR-20 | sans affectation | `0cded8b518f2455eb259d8a85ba69902` | portrait |
-| DR-21 | barreur affecté 8+ | `eeba19d108f94b929d09c5368589581a` | portrait |
+| DR-21 | barreur affecté **patch** (− Capteurs prêts) | `7061c3b0bb3d4bf5aaca350802f8152d` | portrait |
 | DR-30 | accueil coach | `1d55126036ea49438a160b62b24eb9d8` | portrait |
 | DR-31 | composition 8+ semi | `7c07a177f03541f2ac61a72dc7297659` | portrait |
-| DR-32 | join code | `f542211afbb44b4e9318abbae8e25d60` | portrait |
+| DR-32 | join code **patch** (− UDP) | `da5e66b230654e7a921828347d44d124` | portrait |
 | DR-33 | coach live (pilier) | `e08d021b58c74847946c9e712f6502ee` | paysage |
 | DR-34 | séances liste | `a62c7168aa22497b98cfebfbd17881e6` | portrait |
 | DR-34 | séances vide | `d8ff79e9906d4a64a03663f7dd92cbe1` | portrait |
 | DR-35 | fiche séance cloud | `87afc9475fbb4557924e09e9b12e31db` | portrait |
 | DR-40 | accueil admin | `86a2341dbcb14ba0b6e4ec147f90c6cf` | portrait |
 | DR-40b | accueil intendant | `7f010e03e04d476dbcc01da67ca5931b` | portrait |
+| DR-41 | fiche club **patch** (− faux capteurs) | `ec1f6b8b285748a2b66e1417dababde6` | portrait |
 | DR-42 | import cabane | `98282dea12044f0db9ac14e9e4315ddf` | portrait |
+| DR-43 | calendrier catalogue | `5d55059a685946deac7f837fa4df4443` | portrait |
+| DR-44 | fiche événement | `3fa94b873da64cad86e0ae848357977d` | portrait |
 | DR-50 | pré-séance 4x (pilier) | `9b65f164e6c042ec8753384198211e16` | portrait |
 | DR-51 | tare idle | `9e72f192d065423492f34d0c359aaf42` | portrait |
 | DR-51 | tare running | `52a3c131c9514628891bbd6e9b3200eb` | portrait |
@@ -56,12 +61,8 @@ Une planche = un état. **Pas de Flutter.**
 | DR-13 | callback erreur auth |
 | DR-20 | loisir solo |
 | DR-21 | vide |
-| DR-31 | semi-rempli / vide *(génération timeout — à reposer)* |
-| DR-34 | — (liste + vide OK) |
-| DR-41 | fiche club |
-| DR-43 | calendrier catalogue |
-| DR-44 | fiche événement |
-| DR-45 | plans d’eau |
+| DR-31 | vide |
+| DR-45 | plans d’eau *(timeout Stitch répétés — à reposer)* |
 | DR-50 | 1x / 8+ barreur / compétition |
 | DR-51 | ready / orientation refusée |
 | DR-52 | alerte tribords |
@@ -75,8 +76,7 @@ Une planche = un état. **Pas de Flutter.**
 | DR-80 | spinoscope |
 | DR-90 | bandeau sync 36 px (composant) |
 
-## Notes honnêteté (à corriger en edit Stitch)
+## Honnêteté
 
-- DR-32 a inventé « balises UDP » — hors brief, à retirer.
-- DR-20/21 Hangar inventaient « Capteurs prêts » ; Bassin à vérifier à l’œil.
-- Cadence absente = texte « cadence non mesurée » (OK sur DR-54, DR-35, DR-55).
+- Cadence absente = « cadence non mesurée » (DR-54, DR-35, DR-55).
+- Patches UDP / Capteurs prêts / Capteurs bassin : voir [`DA-AUDIT-PATCH-2026-10-01.md`](./DA-AUDIT-PATCH-2026-10-01.md).
