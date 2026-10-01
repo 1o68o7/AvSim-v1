@@ -46,9 +46,10 @@ void main() {
     );
     await tester.pump();
     await tester.pump();
-    expect(find.textContaining('CONTINUER'), findsOneWidget);
+    expect(find.textContaining('Continuer'), findsOneWidget);
     expect(find.textContaining('Pas d’affectation'), findsOneWidget);
-    expect(find.text('MES SÉANCES'), findsOneWidget);
+    expect(find.text("Aujourd'hui"), findsWidgets);
+    expect(find.text('Séances'), findsOneWidget);
     expect(find.text('Ajouter'), findsNothing);
   });
 }

@@ -56,8 +56,17 @@ Rayons : chip 6 · bouton 12 · carte 14. Pas de coins carrés Hangar.
 | DR-72 Alignement | `/ops/departure` | |
 | Live rameur | `/live` | nav bar dismissée |
 
-Shell standard : 3 onglets `Aujourd’hui` · `Séances` · `Plus` (indicateur Volt 2px).  
+Shell standard : 3 onglets `Aujourd’hui` · `Séances` · `Plus` (indicateur Volt 2px) —  
+`DeckTabScaffold` (`lib/widgets/deck_shell.dart`) + route `/plus`.  
 Mode eau : plein pont telemetry, pas de bottom nav.
+
+| Stitch hub | Route Flutter | Layout |
+|---|---|---|
+| DR-20 Aujourd’hui rameur | `/home/rower` | `HomeRowerScreen` + shell |
+| DR-30 Aujourd’hui coach | `/home/coach` | `HomeCoachScreen` + shell |
+| DR-60 Séances | `/sessions` | `SessionHistoryScreen` + shell |
+| Plus (grille) | `/plus` | `PlusScreen` + shell |
+| DR-10 Connexion | `/auth` | layout redesign (sans bottom nav) |
 
 ## Obsolète
 

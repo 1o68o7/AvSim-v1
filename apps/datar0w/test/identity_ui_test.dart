@@ -158,14 +158,14 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.textContaining('COMPOSER'), findsOneWidget);
-    expect(find.textContaining('REJOINDRE'), findsOneWidget);
+    expect(find.textContaining('Composer'), findsOneWidget);
+    expect(find.textContaining('Rejoindre'), findsWidgets);
     expect(find.text('PARC'), findsOneWidget);
-    expect(find.text('SORTIR'), findsOneWidget);
-    expect(find.text('RENTRER'), findsOneWidget);
+    expect(find.textContaining('Sortir'), findsOneWidget);
+    expect(find.textContaining('Rentrer'), findsOneWidget);
     expect(find.text('DÉPART'), findsOneWidget);
     expect(find.text('MAINTENANCE'), findsOneWidget);
     expect(find.text('SPINOSCOPE'), findsOneWidget);
-    expect(find.text('MES SÉANCES'), findsOneWidget);
+    expect(find.textContaining('Mes séances'), findsOneWidget);
   });
 }
