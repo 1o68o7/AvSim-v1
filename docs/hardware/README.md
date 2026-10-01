@@ -10,14 +10,11 @@
 ```
 docs/hardware/
 ├── README.md
-├── ARCHIVE.md                 ← cadrages historiques (dépréciés)
+├── ARCHIVE.md
 ├── firmware-stroke-sensor.md   ← guideline build / flash / MAJ BLE
-├── stroke-sensor/             ← capteur de coup (clip rame)
-│   ├── README.md
-│   ├── brief.md                ← électronique (prévaut)
-│   ├── design-brief.md         ← mécanique TPU (prévaut)
-│   └── latex-clip-brief.md     ← variante latex (prévaut)
-├── dorsal-patch/              ← FC / PPG (sternum ou haut du dos)
+├── bench-wearables.md          ← ceinture H9Z + bracelet 2208A (banc)
+├── stroke-sensor/
+├── dorsal-patch/
 └── hull-patch/
 ```
 
@@ -25,18 +22,21 @@ docs/hardware/
 
 | Capteur | Répertoire | Source de vérité | Statut |
 |---|---|---|---|
-| Stroke sensor | `stroke-sensor/` | `brief.md` + `design-brief.md` + `latex-clip-brief.md` + [`firmware-stroke-sensor.md`](firmware-stroke-sensor.md) | Briefs validés 2026-10-01 |
-| Patch dorsal | `dorsal-patch/` | README | Seul capteur FC. Brassard abandonné. |
-| Patch coque | `hull-patch/` | README + archive cadrage coque | À documenter |
+| Stroke sensor | `stroke-sensor/` | briefs + [`firmware-stroke-sensor.md`](firmware-stroke-sensor.md) | Briefs validés 2026-10-01 |
+| Ceinture FC | [`bench-wearables.md`](bench-wearables.md) | Coospo H9Z | Achetée pour le banc, pas fabriquée |
+| Bracelet souple | [`bench-wearables.md`](bench-wearables.md) | J-Style 2208A | Banc confort. FC optique + SpO2 tendance |
+| Patch dorsal | `dorsal-patch/` | README | Remplacé au banc par la H9Z |
+| Patch coque | `hull-patch/` | README | À documenter |
 
 ## Abandonné
 
-- **Brassard PPG** (`ppg-armband/`) : retiré le 1er octobre 2026. Même métrique que le patch dorsal (FC), plus intrusif au manche. Ne pas le réintroduire.
+- **Brassard PPG** : retiré le 1er octobre 2026.
+- **Sudation** : hors MVP. Pas de référence.
 
 ## Règles
 
-1. Un capteur = un sous-répertoire kebab-case.
-2. Les briefs du 1er octobre 2026 **prévalent** (LiPo + USB-C, PCB 25×30, protection NTC, clip latex/TPU).
-3. Les anciens fichiers `docs/CADRAGE-STROKE-SENSOR-DIY.md`, `docs/CADRAGE-CAPTEUR-*`, `docs/CADRAGE-PATCH-COQUE-AUTONOME.md` et `docs/BRIEF-GOODWAY-PATCH-DORSAL.md` sont dans `docs/hardware/archive/` — historique seulement.
-4. Pas de doublon à la racine de `docs/` ni de `docs/hardware/`.
-5. La fréquence cardiaque ne se fait pas sur un brassard.
+1. Un capteur fabriqué = un sous-répertoire kebab-case.
+2. Les briefs du 1er octobre 2026 **prévalent** pour le stroke sensor.
+3. Les anciens cadrages sont dans `docs/hardware/archive/`.
+4. Pas de doublon à la racine de `docs/`.
+5. La FC de référence du banc est la ceinture H9Z, pas un brassard ni le patch dorsal.
