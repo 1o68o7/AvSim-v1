@@ -1,5 +1,6 @@
 import 'package:datar0w/identity/controller.dart';
 import 'package:datar0w/identity/models.dart';
+import 'package:datar0w/identity/store.dart';
 import 'package:datar0w/onboarding/routing.dart';
 import 'package:datar0w/onboarding/screen_club_home.dart';
 import 'package:datar0w/onboarding/screen_club_join.dart';
@@ -12,9 +13,13 @@ import 'identity_test_helpers.dart';
 
 void main() {
   test('rôles étendus + homes', () {
+    expect(ClubMemberRoleX.parse('admin'), ClubMemberRole.admin);
     expect(ClubMemberRoleX.parse('treasurer'), ClubMemberRole.treasurer);
     expect(ClubMemberRoleX.parse('intendant'), ClubMemberRole.intendant);
     expect(ClubMemberRoleX.parse('director'), ClubMemberRole.director);
+    expect(ClubMemberRoleX.parse(null), ClubMemberRole.rower);
+    expect(ClubMemberRoleX.parse('inconnu'), ClubMemberRole.rower);
+    expect(const IdentityPrefs().clubRole, ClubMemberRole.rower);
     expect(homeRouteForClubRole('intendant'), AppRoutes.homeIntendant);
     expect(homeRouteForClubRole('director'), AppRoutes.homeDirector);
     expect(
@@ -104,7 +109,7 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('IMPORT'), findsOneWidget);
+    expect(find.text('IMPORT CABANE'), findsOneWidget);
     expect(find.text('COMPOSITION'), findsOneWidget);
   });
 }

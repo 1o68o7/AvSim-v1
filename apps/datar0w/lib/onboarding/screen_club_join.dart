@@ -4,10 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../identity/controller.dart';
 import '../identity/models.dart';
-import 'routing.dart';
 import '../router.dart';
 import '../theme/deck_theme.dart';
 import '../widgets/deck_scaffold.dart';
+import 'routing.dart';
 
 class ClubJoinScreen extends ConsumerStatefulWidget {
   const ClubJoinScreen({super.key});
@@ -20,7 +20,7 @@ class _ClubJoinScreenState extends ConsumerState<ClubJoinScreen> {
   final _name = TextEditingController();
   final _createCode = TextEditingController();
   final _joinCode = TextEditingController();
-  ClubMemberRole _want = ClubMemberRole.coach;
+  ClubMemberRole _want = ClubMemberRole.rower;
   String? _msg;
 
   @override
@@ -33,7 +33,10 @@ class _ClubJoinScreenState extends ConsumerState<ClubJoinScreen> {
 
   Future<void> _create() async {
     final name = _name.text.trim();
-    if (name.isEmpty) return;
+    if (name.isEmpty) {
+      setState(() => _msg = 'Indique un nom de club.');
+      return;
+    }
     await ref.read(identityProvider.notifier).createClubAsAdmin(
           name: name,
           shortCode: _createCode.text,
@@ -50,9 +53,44 @@ class _ClubJoinScreenState extends ConsumerState<ClubJoinScreen> {
         );
     setState(() {
       _msg = r == null
-          ? 'Code inconnu (en local, crée le club d’abord).'
-          : 'Demande ${_want.wire} envoyée — validation admin.';
+          ? 'Code club introuvable. Vérifie le code ou crée le club.'
+          : 'Demande « ${_want.labelFr} » envoyée — en attente de validation.';
     });
+  }
+
+  String _requesterLabel(IdentitySnapshot snap, ClubJoinRequest r) {
+    for (final rower in snap.rowers) {
+      if (rower.userId == r.userId && rower.displayName.trim().isNotEmpty) {
+        return rower.displayName.trim();
+      }
+    }
+    final short = r.userId.length <= 8 ? r.userId : '${r.userId.substring(0, 8)}…';
+    return 'Compte $short';
+  }
+
+  Future<void> _decide(ClubJoinRequest r, {required bool accept}) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: DeckColors.surface,
+        title: Text(accept ? 'Accepter la demande ?' : 'Refuser la demande ?'),
+        content: Text(
+          '${_requesterLabel(ref.read(identityProvider), r)} — ${r.requestedRole.labelFr}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(accept ? 'Accepter' : 'Refuser'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    await ref.read(identityProvider.notifier).decideJoinRequest(r, accept: accept);
   }
 
   @override
@@ -65,7 +103,7 @@ class _ClubJoinScreenState extends ConsumerState<ClubJoinScreen> {
     return DeckScaffold(
       title: 'CLUB',
       subtitle: 'Rejoindre ou créer',
-      retourFallback: AppRoutes.homeRower,
+      retourFallback: homeRouteForClubMemberRole(snap.prefs.clubRole),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
@@ -107,13 +145,15 @@ class _ClubJoinScreenState extends ConsumerState<ClubJoinScreen> {
             spacing: 8,
             children: [
               for (final r in const [
+                ClubMemberRole.rower,
+                ClubMemberRole.cox,
                 ClubMemberRole.coach,
                 ClubMemberRole.intendant,
                 ClubMemberRole.director,
                 ClubMemberRole.treasurer,
               ])
                 ChoiceChip(
-                  label: Text(r.wire),
+                  label: Text(r.labelFr),
                   selected: _want == r,
                   onSelected: (_) => setState(() => _want = r),
                 ),
@@ -128,7 +168,7 @@ class _ClubJoinScreenState extends ConsumerState<ClubJoinScreen> {
           if (canDecide) ...[
             const SizedBox(height: 24),
             const Text(
-              'VALIDATION ADMIN',
+              'DEMANDES À VALIDER',
               style: TextStyle(
                 color: DeckColors.label,
                 fontSize: 11,
@@ -143,22 +183,18 @@ class _ClubJoinScreenState extends ConsumerState<ClubJoinScreen> {
             for (final r in pending)
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(r.requestedRole.wire),
-                subtitle: Text(r.userId),
+                title: Text(_requesterLabel(snap, r)),
+                subtitle: Text('Rôle demandé : ${r.requestedRole.labelFr}'),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextButton(
-                      onPressed: () => ref
-                          .read(identityProvider.notifier)
-                          .decideJoinRequest(r, accept: true),
-                      child: const Text('OK'),
+                      onPressed: () => _decide(r, accept: true),
+                      child: const Text('Accepter'),
                     ),
                     TextButton(
-                      onPressed: () => ref
-                          .read(identityProvider.notifier)
-                          .decideJoinRequest(r, accept: false),
-                      child: const Text('NON'),
+                      onPressed: () => _decide(r, accept: false),
+                      child: const Text('Refuser'),
                     ),
                   ],
                 ),

@@ -23,7 +23,7 @@ class ProfileScreen extends ConsumerWidget {
     final ident = ref.watch(identityProvider);
     final rower = ident.activeRower;
     return DeckScaffold(
-      title: 'SÉLECTION PROFIL',
+      title: 'Rôle bateau',
       subtitle: rower == null ? 'sans profil (loisir)' : rower.displayName,
       showRetour: false,
       centerBrandOnly: true,
@@ -51,7 +51,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
           const SizedBox(height: 8),
           const Text(
-            'SÉLECTION PROFIL',
+            'Rôle pour cette sortie',
             style: TextStyle(
               color: DeckColors.label,
               fontSize: 11,

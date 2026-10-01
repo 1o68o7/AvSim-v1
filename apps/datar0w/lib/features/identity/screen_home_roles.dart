@@ -301,7 +301,7 @@ class HomeCoachScreen extends ConsumerWidget {
     return DeckScaffold(
       title: 'ACCUEIL COACH',
       subtitle: club?.name ?? 'Composition · parc · live',
-      retourFallback: AppRoutes.homeCoach,
+      retourFallback: AppRoutes.identity,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [

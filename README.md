@@ -1,20 +1,26 @@
 # AvSim-v1 — DataR0w
 
-Simulateur physique local d'aviron (multi-classes), pour choisir quels
-capteurs de télémétrie acheter avant de câbler un bateau réel.
+Deux produits dans ce dépôt :
 
-**Avant tout** : lire `STATE.md`, qui décrit l'état exact du code et les
-trois chantiers en cours, dans l'ordre. Puis `docs/brief-simulateur-v2.md`
-pour la spécification physique complète.
+1. **Simulateur physique** (Python + React) — choisir quels capteurs
+   acheter avant de câbler un bateau réel. Sorties = **Simulé**, jamais
+   des mesures.
+2. **App club / télémétrie** Flutter `apps/datar0w` — produit actif
+   (identité, parc, séances, sync Supabase). Pas de moteur AvSim dedans.
 
+**Avant tout** : lire `STATE.md` (physique) et `apps/datar0w/README.md`
+(app téléphone). Puis `docs/brief-simulateur-v2.md` pour la spec physique.
+
+- `apps/datar0w/` — application Flutter DataR0w (téléphone)
+- `supabase/` — migrations RLS / identité / sessions
 - `docs/` — briefs, état des lieux, questions ouvertes
-- `docs/brief-interface-utilisateur.md` — Phase 7 UI (deux surfaces)
+- `docs/brief-interface-utilisateur.md` — Phase 7 UI simulateur (deux surfaces)
 - `src/avsim/core/` — noyau physique
-- `src/avsim/api/` — FastAPI (rôles Analyste / Produit)
-- `web/` — React + Vite + Plotly
+- `src/avsim/api/` — FastAPI (rôles Analyste / Produit + `/datarow`)
+- `web/` — React + Vite + Plotly (surface simulateur)
 - `params/` — paramètres gelés et sourcés, par classe de bateau
 - `data/` — données de référence (coques, anthropométrie, hydrodynamique de palette)
-- `tests/` — critère d'arrêt du chantier en cours
+- `tests/` — critère d'arrêt du chantier physique
 
 ### Interface locale (Phase 7)
 

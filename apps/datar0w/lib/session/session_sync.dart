@@ -497,24 +497,24 @@ class _SessionSyncHostState extends State<SessionSyncHost>
       _offerClubCta = false;
       _bannerStatus = status;
     });
-    _statusTimer = Timer(const Duration(seconds: 2), () {
+    _statusTimer = Timer(const Duration(seconds: 6), () {
       if (!mounted) return;
       setState(() => _bannerStatus = null);
     });
   }
 
-  /// Bandeau : `sync: 42501` / `23505` / `409` — pas le pavé PostgREST.
+  /// Bandeau : messages lisibles (pas de codes Postgres bruts).
   static String _shortSyncError(String raw) {
-    if (raw == 'pas de club' || raw == 'pas d\'uid') return raw;
-    final pg = RegExp(r'^(42501|23505|409|PGRST\d+)$').firstMatch(raw.trim());
-    if (pg != null) return pg.group(1)!;
-    final embedded =
-        RegExp(r'\b(42501|23505|409|PGRST\d+)\b').firstMatch(raw);
-    if (embedded != null) return embedded.group(1)!;
+    if (raw == 'pas de club') return 'Aucun club';
+    if (raw == 'pas d\'uid') return 'Compte requis';
+    if (raw.contains('42501')) return 'Accès refusé';
+    if (raw.contains('23505')) return 'Déjà synchronisé';
+    if (raw.contains('409')) return 'Conflit sync';
+    if (RegExp(r'PGRST\d+').hasMatch(raw)) return 'Erreur serveur';
     if (raw.startsWith('pas de ')) return raw;
-    if (raw.startsWith('storage')) return 'storage';
-    if (raw.contains('session_meta')) return 'session_meta';
-    if (raw.length > 32) return raw.substring(0, 32);
+    if (raw.startsWith('storage')) return 'Échec stockage';
+    if (raw.contains('session_meta')) return 'Échec envoi séance';
+    if (raw.length > 40) return '${raw.substring(0, 40)}…';
     return raw;
   }
 
@@ -541,9 +541,9 @@ class _SessionSyncHostState extends State<SessionSyncHost>
     final pending = sync?.pendingCount ?? 0;
     final kind = sync?.bannerKind ?? SyncBannerKind.local;
     final status = _bannerStatus;
-    final showStrip =
-        sync != null && (pending > 0 || status != null || _offerClubCta);
-    // ST-09 : 36 px sous AppBar (pas overlay sur la barre titre).
+    // Bandeau durable dès qu'un sync hub existe (LOCAL inclus).
+    final showStrip = sync != null || _offerClubCta;
+    // ST-09 : 36 px sous AppBar — réserve l'espace pour ne pas recouvrir.
     final top = MediaQuery.paddingOf(context).top + DeckAppBar.kToolbar;
 
     Widget? strip;
@@ -565,7 +565,13 @@ class _SessionSyncHostState extends State<SessionSyncHost>
       final right = status ??
           (_offerClubCta
               ? 'Choisir un club'
-              : (pending > 0 ? '$pending en file' : ''));
+              : (pending > 0
+                  ? '$pending en file'
+                  : switch (kind) {
+                      SyncBannerKind.local => 'Sur cet appareil',
+                      SyncBannerKind.enFile => 'Envoi en cours',
+                      SyncBannerKind.cloud => 'À jour',
+                    }));
       // Fond + texte ignorés ; seul le chip reçoit les taps (ST-09).
       strip = SizedBox(
         height: 36,
@@ -634,6 +640,7 @@ class _SessionSyncHostState extends State<SessionSyncHost>
     }
 
     // Toujours Stack : basculer child↔Stack remontait MaterialApp.router.
+    // Bandeau en overlay sous AppBar (36 px) — vérifié sur appareil (audit U3).
     return Stack(
       fit: StackFit.expand,
       children: [

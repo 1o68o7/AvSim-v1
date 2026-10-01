@@ -128,7 +128,7 @@ class _PhysioScreenState extends ConsumerState<PhysioScreen> {
                   title: const Text('Consentement santé (FC / constantes)'),
                   subtitle: const Text(
                     'Données de santé, usage informatif, pas médical. '
-                    'Aucun diagnostic. Opt-in R6.',
+                    'Aucun diagnostic. Partage uniquement si tu l’actives.',
                     style: TextStyle(color: DeckColors.muted, fontSize: 12),
                   ),
                 ),
@@ -142,7 +142,7 @@ class _PhysioScreenState extends ConsumerState<PhysioScreen> {
                 ),
                 Text(
                   _r.shareWithCoach
-                      ? 'Partage coach : activé (opt-in). Sync rower_physio si clés.'
+                      ? 'Partage coach : activé (envoyé au cloud si configuré).'
                       : 'Partage coach : privé par défaut.',
                   style: const TextStyle(color: DeckColors.muted, fontSize: 11),
                 ),

@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import copy
 import json
+import os
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -46,13 +47,22 @@ app = FastAPI(
 
 app.include_router(datarow_router)
 
+
+def _cors_origins() -> list[str]:
+    """AVSIM_CORS_ORIGINS=url1,url2 — défaut local + Render web."""
+    raw = (os.environ.get("AVSIM_CORS_ORIGINS") or "").strip()
+    if raw:
+        return [o.strip() for o in raw.split(",") if o.strip()]
+    return [
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+        "https://avsim-web.onrender.com",
+    ]
+
+
 app.add_middleware(
     CORSMiddleware,
-    # Usage restreint / interne pour l'instant. Avant toute exposition publique
-    # durable, resserrer à l'URL réelle du frontend (ex. https://avsim-web.onrender.com)
-    # — même caveat que le contrôle de rôle par en-tête X-DataR0w-Role
-    # (convention d'interface, pas une auth forte ; voir roles.py).
-    allow_origins=["*"],
+    allow_origins=_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

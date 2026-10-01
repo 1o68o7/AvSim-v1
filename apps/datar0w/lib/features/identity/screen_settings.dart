@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../identity/controller.dart';
+import '../../onboarding/routing.dart';
 import '../../router.dart';
 import '../../sync/auth_google.dart';
 import '../../sync/supabase_boot.dart';
@@ -34,7 +35,7 @@ class SettingsScreen extends ConsumerWidget {
     return DeckScaffold(
       title: 'RÉGLAGES',
       subtitle: 'compte · téléphone',
-      retourFallback: AppRoutes.homeRower,
+      retourFallback: homeRouteForClubMemberRole(snap.prefs.clubRole),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
@@ -56,10 +57,16 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => context.go(AppRoutes.auth),
           ),
           const Divider(height: 1, color: DeckColors.hairline),
-          const _SettingsTile(
-            label: 'Capteurs',
-            value: 'Bientôt',
-            enabled: false,
+          _SettingsTile(
+            label: 'Objets connectés',
+            value: 'Sangle, patch…',
+            onTap: () => context.go(AppRoutes.devices),
+          ),
+          const Divider(height: 1, color: DeckColors.hairline),
+          _SettingsTile(
+            label: 'Données de santé',
+            value: 'Consentement et constantes',
+            onTap: () => context.go(AppRoutes.consent),
           ),
           const Divider(height: 1, color: DeckColors.hairline),
           const SizedBox(height: 24),

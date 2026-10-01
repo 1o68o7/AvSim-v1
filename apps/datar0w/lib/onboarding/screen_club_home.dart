@@ -64,7 +64,7 @@ class ClubRoleHomeScreen extends ConsumerWidget {
             const SizedBox(height: 10),
             _StaffCard(
               title: 'Séances cloud',
-              subtitle: 'session_meta du club',
+              subtitle: 'Séances synchronisées du club',
               onTap: () => context.go(AppRoutes.clubSessions),
             ),
             const SizedBox(height: 16),

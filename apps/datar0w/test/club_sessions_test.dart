@@ -65,7 +65,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('SÉANCES DU CLUB'), findsOneWidget);
+    expect(find.text('Séances du club'), findsOneWidget);
     expect(
       find.textContaining('Aucune séance cloud'),
       findsOneWidget,

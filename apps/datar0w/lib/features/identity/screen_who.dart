@@ -136,7 +136,7 @@ class _IdentityListScreenState extends ConsumerState<IdentityListScreen> {
   Widget build(BuildContext context) {
     final snap = ref.watch(identityProvider);
     return DeckScaffold(
-      title: 'QUI RAME ?',
+      title: 'Profils',
       subtitle: 'Profil local · pas de mot de passe',
       showRetour: false,
       body: Column(

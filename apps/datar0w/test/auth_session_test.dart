@@ -122,9 +122,9 @@ Future<void> _emitAuthLink(WidgetTester tester, _MemLinks links, Uri uri) async 
 }
 
 void main() {
-  test('destinationAfterAuth ignore le rôle admin par défaut', () {
+  test('destinationAfterAuth avec rôle rameur par défaut', () {
     const empty = IdentitySnapshot();
-    expect(empty.prefs.clubRole, ClubMemberRole.admin);
+    expect(empty.prefs.clubRole, ClubMemberRole.rower);
     expect(
       destinationAfterAuth(
         door: OnboardingDoor.rower,
