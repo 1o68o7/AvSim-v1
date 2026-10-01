@@ -137,7 +137,7 @@ class _RowerEditScreenState extends ConsumerState<RowerEditScreen> {
           ),
           Text(
             'Catégorie : ${preview.category()} (lecture seule)',
-            style: const TextStyle(color: DeckColors.amber, fontSize: 12),
+            style: const TextStyle(color: DeckColors.volt, fontSize: 12),
           ),
           const SizedBox(height: 8),
           Wrap(

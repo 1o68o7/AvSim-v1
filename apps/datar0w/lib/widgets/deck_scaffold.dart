@@ -40,8 +40,7 @@ void performDeckRetour(
   Navigator.maybeOf(context)?.maybePop();
 }
 
-/// Header Stitch Marine Avionics : `DATAR0W / TITRE` (pas de jargon STAGE/SYS).
-/// Lot A : titres humains, pas de préfixe « DATAR0W / » dans le Text du titre.
+/// Header Technical Nautical Deck : marque + titre sentence-case.
 class DeckAppBar extends StatelessWidget implements PreferredSizeWidget {
   const DeckAppBar({
     super.key,
@@ -56,7 +55,7 @@ class DeckAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? subtitle;
   final Widget? leading;
   final List<Widget>? actions;
-  /// Écran profils Stitch : marque centrée seule (pas de slash-titre).
+  /// Écran profils : marque centrée seule.
   final bool centerBrandOnly;
 
   static const double kToolbar = 56;
@@ -77,10 +76,11 @@ class DeckAppBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           const DataR0wMark(compact: true),
           const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 6),
+            padding: EdgeInsets.symmetric(horizontal: 8),
             child: Text(
               '/',
               style: TextStyle(
+                fontFamily: DeckType.ui,
                 color: DeckColors.hairline,
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
@@ -97,9 +97,9 @@ class DeckAppBar extends StatelessWidget implements PreferredSizeWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
+                    fontFamily: DeckType.ui,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
                     color: DeckColors.text,
                   ),
                 ),
@@ -109,9 +109,9 @@ class DeckAppBar extends StatelessWidget implements PreferredSizeWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 11,
+                      fontFamily: DeckType.ui,
+                      fontSize: 12,
                       color: DeckColors.label,
-                      letterSpacing: 0.8,
                     ),
                   ),
               ],
@@ -144,7 +144,7 @@ class DeckAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// Bandeau paysage live/cox/coach : même `DATAR0W / TITRE`, sans Retour (GEL).
+/// Bandeau paysage live/cox/coach : marque + titre, sans Retour.
 class DeckSessionHeader extends StatelessWidget {
   const DeckSessionHeader({
     super.key,
@@ -172,6 +172,7 @@ class DeckSessionHeader extends StatelessWidget {
                   child: Text(
                     '/',
                     style: TextStyle(
+                      fontFamily: DeckType.ui,
                       color: DeckColors.hairline,
                       fontSize: 12,
                     ),
@@ -183,9 +184,9 @@ class DeckSessionHeader extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.1,
+                      fontFamily: DeckType.ui,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
                       color: DeckColors.text,
                     ),
                   ),
@@ -232,7 +233,7 @@ class DeckScaffold extends StatelessWidget {
   /// Si pas de pop : cette route plutôt que le hub rôle (homes → `/`).
   final String? retourFallback;
   final List<Widget>? actions;
-  /// Profils Stitch : marque seule centrée.
+  /// Profils : marque seule centrée.
   final bool centerBrandOnly;
 
   @override
@@ -260,8 +261,12 @@ class DeckScaffold extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: Text(
-                'Cale-pied · paysage 844×390 (lock après Démarrer, lot D)',
-                style: TextStyle(color: DeckColors.label, fontSize: 11),
+                'Cale-pied · paysage 844×390 (lock après Démarrer)',
+                style: TextStyle(
+                  fontFamily: DeckType.ui,
+                  color: DeckColors.label,
+                  fontSize: 12,
+                ),
               ),
             ),
           Expanded(child: body),
@@ -301,7 +306,11 @@ class DeckRetour extends ConsumerWidget {
       child: Text(
         'Retour',
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontSize: compact ? 10 : 12),
+        style: TextStyle(
+          fontFamily: DeckType.ui,
+          fontSize: compact ? 11 : 13,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }

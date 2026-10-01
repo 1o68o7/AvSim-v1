@@ -24,14 +24,14 @@ class StopArmedBanner extends StatelessWidget {
       bottom: 0,
       child: IgnorePointer(
         child: ColoredBox(
-          color: DeckColors.amber.withValues(alpha: 0.92),
+          color: DeckColors.volt.withValues(alpha: 0.92),
           child: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Text(
               kStopArmedMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: DeckColors.onAlert,
+                color: DeckColors.onVolt,
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
                 letterSpacing: 0.6,
@@ -65,12 +65,12 @@ class LiveLayoutButton extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.grid_view, size: 18, color: DeckColors.amber),
+                Icon(Icons.grid_view, size: 18, color: DeckColors.volt),
                 SizedBox(height: 2),
                 Text(
                   'Layout',
                   style: TextStyle(
-                    color: DeckColors.amber,
+                    color: DeckColors.volt,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.8,

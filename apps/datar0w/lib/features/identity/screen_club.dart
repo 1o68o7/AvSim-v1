@@ -267,7 +267,7 @@ class _ClubScreenState extends ConsumerState<ClubScreen> {
                         ),
                         width: 28,
                         height: 28,
-                        child: const Icon(Icons.place, color: DeckColors.amber),
+                        child: const Icon(Icons.place, color: DeckColors.volt),
                       ),
                     ],
                   ),

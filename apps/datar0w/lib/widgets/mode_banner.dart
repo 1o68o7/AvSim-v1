@@ -10,14 +10,21 @@ class CompetitionBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
+        color: DeckColors.amberWash,
+        borderRadius: DeckRadii.cardAll,
         border: Border.all(color: DeckColors.amber),
       ),
       child: const Text(
-        'MODE COMPÉTITION — tel au quai. Patch autonome + log flash. '
+        'Mode compétition — téléphone au quai. Patch autonome + log flash. '
         'Pas de 4G en course. Sync après amarrage.',
-        style: TextStyle(color: DeckColors.amber, fontSize: 12, height: 1.35),
+        style: TextStyle(
+          fontFamily: DeckType.ui,
+          color: DeckColors.amber,
+          fontSize: 13,
+          height: 1.35,
+        ),
       ),
     );
   }

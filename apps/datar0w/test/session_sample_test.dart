@@ -20,8 +20,10 @@ void main() {
     expect(m, closeTo(111194, 200));
   });
 
-  test('alerte gîte : ambre statut, pas cyan High-Vis', () {
+  test('alerte gîte : ambre warning, CTA = Volt, pas cyan High-Vis', () {
     expect(DeckColors.alert, const Color(0xFFE8C547));
+    expect(DeckColors.volt, const Color(0xFFD6FF3C));
+    expect(DeckColors.volt, isNot(DeckColors.alert));
     expect(DeckColors.alert.toARGB32(), isNot(0xFF00E676));
   });
 

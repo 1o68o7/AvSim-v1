@@ -126,7 +126,7 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
             const Text(
               'RÉSUMÉ D\'ACTIVITÉ',
               style: TextStyle(
-                color: DeckColors.amber,
+                color: DeckColors.volt,
                 letterSpacing: 1.4,
                 fontSize: 11,
                 fontWeight: FontWeight.w700,

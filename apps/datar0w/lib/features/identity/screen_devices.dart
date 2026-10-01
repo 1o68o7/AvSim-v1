@@ -204,7 +204,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
               child: Text(
                 'Bluetooth refusé. En entraînement le GPS téléphone continue. '
                 'FC / patch indisponibles.',
-                style: TextStyle(color: DeckColors.amber, height: 1.4),
+                style: TextStyle(color: DeckColors.volt, height: 1.4),
               ),
             ),
           const SizedBox(height: 16),
@@ -308,7 +308,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
                                 '${d.lastBattery} %',
                                 style: TextStyle(
                                   color: (d.lastBattery ?? 100) < 20
-                                      ? DeckColors.amber
+                                      ? DeckColors.volt
                                       : DeckColors.tribord,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -331,7 +331,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
                               minHeight: 4,
                               backgroundColor: DeckColors.hairline,
                               color: (d.lastBattery ?? 100) < 20
-                                  ? DeckColors.amber
+                                  ? DeckColors.volt
                                   : DeckColors.tribord,
                             ),
                           ),
@@ -357,7 +357,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
                 contentPadding: EdgeInsets.zero,
                 title: Text(h.name),
                 subtitle: Text('Signal ${h.rssi} · tap pour appairer'),
-                trailing: const Icon(Icons.add_link, color: DeckColors.amber),
+                trailing: const Icon(Icons.add_link, color: DeckColors.volt),
                 onTap: rower == null ? null : () => _pair(h),
               ),
           ],

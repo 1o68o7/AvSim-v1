@@ -93,7 +93,7 @@ class _CoachJoinScreenState extends ConsumerState<CoachJoinScreen> {
               ),
             ),
             if (_error != null)
-              Text(_error!, style: const TextStyle(color: DeckColors.amber)),
+              Text(_error!, style: const TextStyle(color: DeckColors.volt)),
             if (_last != null) ...[
               const SizedBox(height: 16),
               Text(

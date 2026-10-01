@@ -132,7 +132,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                         child: Text(
                           'MODE COMPÉTITION — tel au quai',
                           style: TextStyle(
-                            color: DeckColors.amber,
+                            color: DeckColors.volt,
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
@@ -202,7 +202,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
           mode.label,
           style: TextStyle(
             color: mode == SessionMode.competition
-                ? DeckColors.amber
+                ? DeckColors.volt
                 : DeckColors.label,
             fontSize: 10,
             fontWeight: FontWeight.w700,
@@ -303,7 +303,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
           if (pts.length >= 2)
             PolylineLayer(
               polylines: [
-                Polyline(points: pts, color: DeckColors.amber, strokeWidth: 2),
+                Polyline(points: pts, color: DeckColors.volt, strokeWidth: 2),
               ],
             ),
           MarkerLayer(
@@ -312,7 +312,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                 point: center,
                 width: 16,
                 height: 16,
-                child: const Icon(Icons.circle, size: 10, color: DeckColors.amber),
+                child: const Icon(Icons.circle, size: 10, color: DeckColors.volt),
               ),
             ],
           ),

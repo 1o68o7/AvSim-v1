@@ -167,7 +167,7 @@ class _RowerOnboardingScreenState extends ConsumerState<RowerOnboardingScreen> {
             onChanged: (v) => setState(() => _coxToo = v),
           ),
           if (_err != null)
-            Text(_err!, style: const TextStyle(color: DeckColors.amber)),
+            Text(_err!, style: const TextStyle(color: DeckColors.volt)),
           const SizedBox(height: 16),
           FilledButton(
             onPressed: _goLicenceStep,
@@ -231,7 +231,7 @@ class _RowerOnboardingScreenState extends ConsumerState<RowerOnboardingScreen> {
             const SizedBox(height: 12),
           ],
           if (_err != null)
-            Text(_err!, style: const TextStyle(color: DeckColors.amber)),
+            Text(_err!, style: const TextStyle(color: DeckColors.volt)),
           FilledButton(
             onPressed: () => _finish(skipLicence: false),
             child: const Text('CONTINUER'),

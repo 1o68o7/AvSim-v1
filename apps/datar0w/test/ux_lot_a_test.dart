@@ -27,11 +27,12 @@ class _DeleteProbe extends IdentityController {
 }
 
 void main() {
-  test('ColorScheme.error distinct de l’ambre CTA', () {
+  test('ColorScheme.error distinct du Volt CTA', () {
     final t = buildDeckTheme();
     expect(t.colorScheme.error, DeckColors.error);
-    expect(t.colorScheme.error, isNot(DeckColors.amber));
-    expect(t.colorScheme.primary, DeckColors.amber);
+    expect(t.colorScheme.error, isNot(DeckColors.volt));
+    expect(t.colorScheme.primary, DeckColors.volt);
+    expect(t.colorScheme.primary, isNot(DeckColors.amber));
   });
 
   testWidgets('AppBar titre 14–16 px', (tester) async {

@@ -182,7 +182,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             ),
           if (_msg != null) ...[
             const SizedBox(height: 16),
-            Text(_msg!, style: const TextStyle(color: DeckColors.amber)),
+            Text(_msg!, style: const TextStyle(color: DeckColors.volt)),
           ],
         ],
       ),
