@@ -1,8 +1,8 @@
 # DataR0w — DA gelée (direction Bassin)
 
 *Gel après challenge Hangar vs Bassin — 30 sept 2026.*  
-Projet Stitch : `1254927388471488287` · DS : `assets/8677461250639537695`.  
-**Pas de Flutter tant que les planches §D restantes ne sont pas posées.**
+Projet Stitch : `1254927388471488287` · satellite manques : `1929126081667026582` · DS : `assets/8677461250639537695`.  
+**Pas de Flutter** — manques principaux §D du patch 1er oct posés ; restent des états secondaires (voir inventaire).
 
 IA : `COMPTE → MOI → (CLUB) → SÉANCE`.
 
