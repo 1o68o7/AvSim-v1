@@ -1,22 +1,30 @@
 # Dorsal Patch
 
-> Patch dorsal ouvert : MAX86141 + XIAO nRF52840, flex PCB, adhésif médical 3M. Placement sternum ou haut du dos. ~29 € le BOM.
+> Seul capteur de fréquence cardiaque. PPG + IMU anti-mouvement, adhésif médical, sous le maillot.
+> Le brassard PPG est abandonné (intrusif au manche, même métrique).
 >
-> Version : 1.0 — 1er octobre 2026
-> Statut : à documenter
+> Version : 1.1 — 1er octobre 2026
+> Statut : retenu, brief pas encore rédigé
 
 ---
+
+## Rôle
+
+- FC pendant la séance, dérive d'effort, HRV grossière entre les intervalles.
+- Pas de lactate, pas de puissance.
+- Pas bloquant pour le MVP skiff (stroke sensor + GNSS téléphone suffisent).
+
+## Points clés
+
+- PPG MAX86141 + IMU anti-mouvement
+- XIAO nRF52840, flex PCB
+- Adhésif médical 3M
+- Placement : sternum ou haut du dos, pas le bras, pas le poignet
 
 ## Documents
 
-Aucun brief pour l'instant. À rédiger : électronique (flex PCB), mécanique (adhésif, placement), firmware.
-
-## Points clés (rappel)
-
-- PPG + IMU anti-mouvement
-- Adhésif médical 3M, usage unique ou réutilisable
-- Placement : sternum ou haut du dos
+Aucun brief détaillé pour l'instant. À rédiger seulement si la FC entre dans le MVP.
 
 ---
 
-*Document généré le 1er octobre 2026.*
+*Mis à jour le 1er octobre 2026. Brassard retiré.*
