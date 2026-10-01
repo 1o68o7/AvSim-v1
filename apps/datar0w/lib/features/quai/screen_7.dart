@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../identity/controller.dart';
 import '../../identity/format.dart';
 import '../../identity/models.dart';
+import '../../onboarding/routing.dart';
 import '../../ops/controller.dart';
 import '../../router.dart';
 import '../../session/boat_config.dart';
@@ -241,17 +242,45 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
               const SizedBox(height: 8),
               OutlinedButton(
                 onPressed: () async {
+                  final choice = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      backgroundColor: DeckColors.surface,
+                      title: const Text('Rentrer la coque ?'),
+                      content: const Text(
+                        'Les pelles sont-elles toutes rentrées ?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('Annuler'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text('Pelles manquantes'),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: const Text('Pelles OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (choice == null || !mounted) return;
                   await ref.read(opsProvider.notifier).checkIn(
                         outId: activeOut.id,
-                        oarsOk: true,
+                        oarsOk: choice,
                       );
                 },
-                child: const Text('RENTRER LA COQUE ?'),
+                child: const Text('RENTRER LA COQUE'),
               ),
             ],
             const SizedBox(height: 8),
             TextButton(
-              onPressed: () => context.go(AppRoutes.profile),
+              onPressed: () {
+                final role = ref.read(identityProvider).prefs.clubRole;
+                context.go(homeRouteForClubMemberRole(role));
+              },
               child: const Text('RETOUR ACCUEIL'),
             ),
           ],

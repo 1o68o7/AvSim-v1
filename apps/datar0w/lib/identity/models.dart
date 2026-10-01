@@ -71,8 +71,22 @@ enum ClubMemberRole { rower, cox, coach, admin, treasurer, intendant, director }
 extension ClubMemberRoleX on ClubMemberRole {
   String get wire => name;
 
+  /// Libellé UI (sentence case). Jamais le wire technique seul.
+  String get labelFr => switch (this) {
+        ClubMemberRole.rower => 'Rameur',
+        ClubMemberRole.cox => 'Barreur',
+        ClubMemberRole.coach => 'Coach',
+        ClubMemberRole.admin => 'Admin',
+        ClubMemberRole.treasurer => 'Trésorier',
+        ClubMemberRole.intendant => 'Intendant',
+        ClubMemberRole.director => 'Directeur',
+      };
+
+  /// Inconnu / null → [rower] (jamais élévation silencieuse à admin).
   static ClubMemberRole parse(String? raw) {
     switch (raw) {
+      case 'admin':
+        return ClubMemberRole.admin;
       case 'coach':
         return ClubMemberRole.coach;
       case 'rower':
@@ -86,7 +100,7 @@ extension ClubMemberRoleX on ClubMemberRole {
       case 'director':
         return ClubMemberRole.director;
       default:
-        return ClubMemberRole.admin;
+        return ClubMemberRole.rower;
     }
   }
 }

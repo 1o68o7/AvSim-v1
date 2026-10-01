@@ -144,7 +144,7 @@ class HomeRowerScreen extends ConsumerWidget {
           // ST-04 — cartes rameur (pas de cartes staff).
           FilledButton(
             onPressed: () => _continue(context, ref),
-            child: const Text('NOUVELLE SÉANCE'),
+            child: const Text('CONTINUER LA SÉANCE'),
           ),
           const SizedBox(height: 8),
           OutlinedButton(

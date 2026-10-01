@@ -158,7 +158,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             const Padding(
               padding: EdgeInsets.only(bottom: 12),
               child: Text(
-                'Pas de clés cloud. Mode local inchangé. Rien n’est envoyé.',
+                'Cloud non configuré. Tout reste sur cet appareil.',
                 style: TextStyle(color: DeckColors.muted, height: 1.4),
               ),
             ),
