@@ -153,9 +153,10 @@ class InstrumentPod extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Padding compact : grille live paysage 844×390.
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
       decoration: BoxDecoration(
         color: DeckColors.surface,
         borderRadius: DeckRadii.cardAll,
@@ -169,37 +170,53 @@ class InstrumentPod extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: DeckType.uiLabel(size: 12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: DeckType.uiLabel(size: 11),
                 ),
               ),
-              if (unit != null)
-                Text(
-                  unit!,
-                  style: DeckType.labelMono(
-                    color: DeckColors.label.withValues(alpha: 0.6),
+              if (unit != null) ...[
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    unit!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.right,
+                    style: DeckType.labelMono(
+                      color: DeckColors.label.withValues(alpha: 0.6),
+                      size: 10,
+                    ),
                   ),
                 ),
+              ],
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           if (child != null)
             child!
           else
-            Text(
-              value,
-              style: DeckType.metric(size: 28, weight: FontWeight.w700),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                style: DeckType.metric(size: 28, weight: FontWeight.w700),
+              ),
             ),
           if (delta != null) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               delta!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: DeckType.labelMono(
                 color: deltaPositive == true
                     ? DeckColors.tribord
                     : deltaPositive == false
                         ? DeckColors.babord
                         : DeckColors.label,
-                size: 12,
+                size: 11,
               ),
             ),
           ],

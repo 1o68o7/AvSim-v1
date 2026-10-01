@@ -17,7 +17,7 @@ class CompetitionBanner extends StatelessWidget {
         border: Border.all(color: DeckColors.amber),
       ),
       child: const Text(
-        'Mode compétition — téléphone au quai. Patch autonome + log flash. '
+        'Mode compétition — tel au quai. Patch autonome + log flash. '
         'Pas de 4G en course. Sync après amarrage.',
         style: TextStyle(
           fontFamily: DeckType.ui,
