@@ -28,6 +28,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   String? _msg;
   bool _busy = false;
   bool _linkOpen = false;
+  /// Formulaire magic link replié (DR-10 / auth_google).
+  bool _emailOpen = false;
 
   @override
   void dispose() {
@@ -158,7 +160,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             const Padding(
               padding: EdgeInsets.only(bottom: 12),
               child: Text(
-                'Cloud non configuré. Tout reste sur cet appareil.',
+                'Pas de clés cloud. Tout reste sur cet appareil.',
                 style: TextStyle(color: DeckColors.muted, height: 1.4),
               ),
             ),
@@ -177,7 +179,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             _SessionOffBody(
               email: _email,
               busy: _busy,
+              emailOpen: _emailOpen,
               onGoogle: _busy ? null : _google,
+              onToggleEmail: () => setState(() => _emailOpen = !_emailOpen),
               onMagic: _busy ? null : _magic,
             ),
           if (_msg != null) ...[
@@ -273,17 +277,22 @@ class _SessionOnBody extends StatelessWidget {
 }
 
 /// ST-02 — pas de session. Pas d’« Espace club ».
+/// Magic link derrière « par email » (replié) — sync_config : pas d’ENVOYER tant que fermé.
 class _SessionOffBody extends StatelessWidget {
   const _SessionOffBody({
     required this.email,
     required this.busy,
+    required this.emailOpen,
     required this.onGoogle,
+    required this.onToggleEmail,
     required this.onMagic,
   });
 
   final TextEditingController email;
   final bool busy;
+  final bool emailOpen;
   final VoidCallback? onGoogle;
+  final VoidCallback onToggleEmail;
   final VoidCallback? onMagic;
 
   @override
@@ -295,40 +304,28 @@ class _SessionOffBody extends StatelessWidget {
           onPressed: onGoogle,
           child: const Text('CONTINUER AVEC GOOGLE'),
         ),
-        const SizedBox(height: 20),
-        const Row(
-          children: [
-            Expanded(child: Divider(color: DeckColors.hairline)),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Text(
-                'OU PAR EMAIL',
-                style: TextStyle(
-                  color: DeckColors.label,
-                  fontSize: 11,
-                  letterSpacing: 1.2,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            Expanded(child: Divider(color: DeckColors.hairline)),
-          ],
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: email,
-          keyboardType: TextInputType.emailAddress,
-          autocorrect: false,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            hintText: 'toi@club.fr',
-          ),
-        ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         OutlinedButton(
-          onPressed: onMagic,
-          child: const Text('ENVOYER LE LIEN'),
+          onPressed: busy ? null : onToggleEmail,
+          child: const Text('par email'),
         ),
+        if (emailOpen) ...[
+          const SizedBox(height: 12),
+          TextField(
+            controller: email,
+            keyboardType: TextInputType.emailAddress,
+            autocorrect: false,
+            decoration: const InputDecoration(
+              labelText: 'Email',
+              hintText: 'toi@club.fr',
+            ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: onMagic,
+            child: const Text('ENVOYER LE LIEN'),
+          ),
+        ],
         if (kDebugMode) ...[
           const SizedBox(height: 28),
           TextButton(

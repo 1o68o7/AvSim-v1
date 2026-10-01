@@ -42,9 +42,13 @@ void main() {
         child: const MaterialApp(home: AuthScreen()),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('CONNEXION'), findsOneWidget);
     expect(find.text('CONTINUER AVEC GOOGLE'), findsOneWidget);
+    expect(find.text('par email'), findsOneWidget);
+    expect(find.text('ENVOYER LE LIEN'), findsNothing);
+    await tester.tap(find.text('par email'));
+    await tester.pump();
     expect(find.text('ENVOYER LE LIEN'), findsOneWidget);
     expect(find.textContaining('Espace club'), findsNothing);
     expect(find.text('CONTINUER'), findsNothing);

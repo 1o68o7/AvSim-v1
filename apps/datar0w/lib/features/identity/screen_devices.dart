@@ -356,7 +356,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(h.name),
-                subtitle: Text('Signal ${h.rssi} · tap pour appairer'),
+                subtitle: Text('RSSI ${h.rssi} · tap pour appairer'),
                 trailing: const Icon(Icons.add_link, color: DeckColors.volt),
                 onTap: rower == null ? null : () => _pair(h),
               ),

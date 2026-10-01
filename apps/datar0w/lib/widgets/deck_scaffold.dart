@@ -161,7 +161,8 @@ class DeckSessionHeader extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          height: 36,
+          // ≥ 48 : hit target Layout / chips trailing (DA Volt + lot C).
+          height: 48,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(

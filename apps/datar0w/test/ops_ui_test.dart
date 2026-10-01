@@ -48,7 +48,11 @@ void main() {
     expect(find.text('SORTIR'), findsOneWidget);
     expect(find.text('RENTRER'), findsOneWidget);
     expect(find.text('DÉPART'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('MAINTENANCE'), 120);
+    await tester.pump();
     expect(find.text('MAINTENANCE'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('SPINOSCOPE'), 80);
+    await tester.pump();
     expect(find.text('SPINOSCOPE'), findsOneWidget);
   });
 
