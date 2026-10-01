@@ -1,0 +1,18 @@
+(kicad_sch
+  (version 20231120)
+  (generator "datar0w")
+  (uuid 11111111-1111-1111-1111-111111111111)
+  (paper "A3")
+  (title_block
+    (title "DataR0w stroke sensor")
+    (date "2026-10-01")
+    (rev "0.1")
+    (comment 1 "Ouvrir dans KiCad 8. Routage et DRC a finir avant Gerber.")
+  )
+  (text "U1 nRF52840-QFAA VDD=LiPo 1.7-3.6V. Pas de boost." (at 30 30 0) (effects (font (size 2 2))))
+  (text "U2 BMI323 I2C SDA/SCL + 4k7 vers VDD. INT1 vers P0.04" (at 30 40 0) (effects (font (size 2 2))))
+  (text "U3 MCP73831 USB-C VBUS vers VIN. PROG 2k = 500 mA. THERM = NTC 10k." (at 30 50 0) (effects (font (size 2 2))))
+  (text "U4 DW01A + Q1 FS8205A entre LiPo et VDD." (at 30 60 0) (effects (font (size 2 2))))
+  (text "J3 SWD: SWDIO P0.27 SWCLK P0.26 GND VDD. AE1 Johanson 2450AT18A100E, garde 5 mm." (at 30 70 0) (effects (font (size 2 2))))
+  (text "LED1 verte P0.13. LED2 rouge STAT MCP73831. SW1 P0.11 pull-up." (at 30 80 0) (effects (font (size 2 2))))
+)
