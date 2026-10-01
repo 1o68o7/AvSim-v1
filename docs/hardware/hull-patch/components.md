@@ -31,12 +31,19 @@ Pas de deuxième radio. Pas de propulseur. Le loch, s'il arrive, entre en impuls
 
 ## Anémomètre
 
-Achat, pas une carte à router.
+Achat, pas une carte à router. Il ne fait que le vent.
 
-- Référence : **Calypso CMI1022**, ultrason, sans pièce mobile, BLE 5.1, IPX8, 43 mm, filetage 1/4", environ 290 £.
-- Il monte sur un petit mât d'entraînement. En course il reste au ponton.
-- L'app lit son vent apparent. Le vent vrai se calcule avec la vitesse fond du GNSS et le cap.
-- Un anémomètre à coupelles est moins cher et s'herbe / se désaligne. Pas pour le banc.
+- Référence : **Calypso CMI1022** (ou Mini AB CMI1061). Ultrason, sans pièce mobile, BLE 5.1, IPX8, 43 mm, filetage 1/4".
+- Batterie intégrée, recharge Qi, environ 150 h de mesure. Pas de fil, pas d'alim externe.
+- Prix constaté : environ 290 £ (CMI1022), 349 $ (Mini chez Vakaros).
+- Entraînement seulement, petit mât. En course il reste au ponton.
+- L'app lit le vent apparent. Le vent vrai se calcule avec la vitesse fond et le cap du logger. Le Calypso ne fait ni GPS, ni gîte, ni coups/min.
+
+Pas d'équivalent chinois à fonctions égales (octobre 2026) :
+
+- Alibaba CMI1037 (Mianyang Xiangshu) : revendeur, 436 $ / 2 pièces, origine Espagne. Plus cher que le détail.
+- Sentec WS3032 (~140 $) et Rika RK120-03 (459–585 $) : ultrasons filaires RS485, pas de batterie poche, pas de BLE, pas de 1/4".
+- ISO 9001 vendeur ≠ étalonnage vent.
 
 ## Ce qu'on ne met pas sur ce PCB
 
