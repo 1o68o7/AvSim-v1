@@ -227,7 +227,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   }
 }
 
-// —— Bandeau alerte Volt (Stitch header h-9) ——
+// —— Bandeau alerte gîte ambre (GEL) / Stitch header h-9 ——
 
 class _Dr52AlertBar extends StatelessWidget {
   const _Dr52AlertBar({
@@ -254,12 +254,15 @@ class _Dr52AlertBar extends StatelessWidget {
     final gStr = g == null
         ? '—'
         : '${g >= 0 ? '+' : ''}${g.toStringAsFixed(1)}°';
+    // Une seule ligne courte — pas de //, pas de SEUIL EXCÉDÉ (GEL / audit UX).
     final msg = hot
         ? 'Gîte trop $side ($gStr)'
         : 'Live';
     final id = sessionId == null || sessionId!.isEmpty
         ? 'HUD'
         : 'ID: ${sessionId!}';
+    final alertBg = hot ? DeckColors.amber : DeckColors.surface;
+    final alertFg = hot ? DeckColors.onAlert : DeckColors.text;
 
     return SizedBox(
       height: 48,
@@ -268,16 +271,20 @@ class _Dr52AlertBar extends StatelessWidget {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: hot ? DeckColors.volt : DeckColors.surface,
-                border: const Border(
-                  bottom: BorderSide(color: Color(0xFF454934)),
+                color: alertBg,
+                border: Border(
+                  bottom: BorderSide(
+                    color: hot
+                        ? DeckColors.amberWash
+                        : const Color(0xFF454934),
+                  ),
                 ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Row(
                 children: [
                   if (hot)
-                    const Icon(Icons.warning, size: 18, color: DeckColors.onVolt),
+                    const Icon(Icons.warning, size: 18, color: DeckColors.onAlert),
                   if (hot) const SizedBox(width: 6),
                   Expanded(
                     child: Text(
@@ -288,7 +295,7 @@ class _Dr52AlertBar extends StatelessWidget {
                         fontFamily: DeckType.mono,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: hot ? DeckColors.onVolt : DeckColors.text,
+                        color: alertFg,
                         letterSpacing: 0.2,
                       ),
                     ),
@@ -297,7 +304,7 @@ class _Dr52AlertBar extends StatelessWidget {
                     id,
                     style: DeckType.labelMono(
                       color: hot
-                          ? DeckColors.onVolt.withValues(alpha: 0.9)
+                          ? DeckColors.onAlert.withValues(alpha: 0.85)
                           : DeckColors.label,
                       size: 10,
                     ),
@@ -307,7 +314,7 @@ class _Dr52AlertBar extends StatelessWidget {
             ),
           ),
           ColoredBox(
-            color: hot ? DeckColors.volt : DeckColors.surface,
+            color: alertBg,
             child: layoutButton,
           ),
         ],
@@ -684,14 +691,14 @@ class _CenterColumn extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: driftHot
-                            ? DeckColors.onVolt
+                            ? DeckColors.amber
                             : DeckColors.surfaceHighest,
                         borderRadius: DeckRadii.chipAll,
                       ),
                       child: Text(
                         drift,
                         style: DeckType.labelMono(
-                          color: driftHot ? DeckColors.volt : DeckColors.text,
+                          color: driftHot ? DeckColors.onAlert : DeckColors.text,
                           size: 10,
                           weight: FontWeight.w700,
                         ),
