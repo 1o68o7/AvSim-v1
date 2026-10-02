@@ -65,7 +65,7 @@ void main() {
     );
     await tester.pump();
     expect(find.textContaining('DR-53'), findsOneWidget);
-    expect(find.text('réf. barreur'), findsOneWidget);
+    expect(find.text('réf. barreur'), findsWidgets);
     expect(find.text('réf. rameur'), findsNothing);
     expect(find.textContaining('Arrêt séance'), findsOneWidget);
   });

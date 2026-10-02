@@ -236,58 +236,65 @@ class _CoxHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: DeckColors.surfaceHighest,
-              borderRadius: DeckRadii.chipAll,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+          Flexible(
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Container(
-                  width: 8,
-                  height: 8,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: gpsOk ? DeckColors.tribord : DeckColors.amber,
-                    shape: BoxShape.circle,
+                    color: DeckColors.surfaceHighest,
+                    borderRadius: DeckRadii.chipAll,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: gpsOk ? DeckColors.tribord : DeckColors.amber,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'DR-53',
+                        style: DeckType.labelMono(
+                          color: DeckColors.tribord,
+                          size: 10,
+                          weight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(boatCode, style: DeckType.labelMono(size: 10)),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  'DR-53',
-                  style: DeckType.labelMono(
-                    color: DeckColors.tribord,
-                    size: 10,
-                    weight: FontWeight.w700,
+                const DeckHonestChip(kind: DeckHonestKind.local, label: 'REC LOCAL'),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: DeckColors.babordWash,
+                    borderRadius: DeckRadii.chipAll,
+                    border: Border.all(color: DeckColors.babord.withValues(alpha: 0.4)),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Text(boatCode, style: DeckType.labelMono(size: 10)),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          const DeckHonestChip(kind: DeckHonestKind.local, label: 'REC LOCAL'),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: DeckColors.babordWash,
-              borderRadius: DeckRadii.chipAll,
-              border: Border.all(color: DeckColors.babord.withValues(alpha: 0.4)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.lock, size: 14, color: DeckColors.babord),
-                const SizedBox(width: 4),
-                Text(
-                  'Verrouillé',
-                  style: DeckType.labelMono(
-                    color: DeckColors.babord,
-                    size: 10,
-                    weight: FontWeight.w700,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.lock, size: 14, color: DeckColors.babord),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Verrouillé',
+                        style: DeckType.labelMono(
+                          color: DeckColors.babord,
+                          size: 10,
+                          weight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -390,26 +397,14 @@ class _HeelCard extends StatelessWidget {
             children: [
               const Icon(Icons.balance, size: 16, color: DeckColors.volt),
               const SizedBox(width: 6),
-              Text(
-                'Gîte coque / assiette',
-                style: DeckType.uiLabel(
-                  color: DeckColors.text,
-                  weight: FontWeight.w600,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: DeckColors.surfaceHighest,
-                  borderRadius: BorderRadius.circular(999),
-                ),
+              Expanded(
                 child: Text(
-                  'réf. barreur',
-                  style: DeckType.labelMono(
-                    color: DeckColors.volt,
-                    size: 9,
-                    weight: FontWeight.w700,
+                  'Gîte coque / assiette',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: DeckType.uiLabel(
+                    color: DeckColors.text,
+                    weight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -426,7 +421,11 @@ class _HeelCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Row(
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
             children: [
               Text(
                 'Gauche = bâbord',
@@ -436,11 +435,14 @@ class _HeelCard extends StatelessWidget {
                   weight: FontWeight.w700,
                 ),
               ),
-              const Spacer(),
-              Text(giteSigned, style: DeckType.metric(size: 20, color: giteColor)),
-              const SizedBox(width: 6),
-              Text(giteSide, style: DeckType.labelMono(color: giteColor, size: 10)),
-              const Spacer(),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(giteSigned, style: DeckType.metric(size: 20, color: giteColor)),
+                  const SizedBox(width: 6),
+                  Text(giteSide, style: DeckType.labelMono(color: giteColor, size: 10)),
+                ],
+              ),
               Text(
                 'Tribord = droite',
                 style: DeckType.labelMono(

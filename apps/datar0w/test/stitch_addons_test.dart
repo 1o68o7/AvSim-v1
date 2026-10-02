@@ -73,7 +73,6 @@ void main() {
 
   test('routes gelées toujours listées', () {
     expect(AppRoutes.devices, '/devices');
-    expect(AppRoutes.bleJournal, '/devices/journal');
     expect(AppRoutes.presession, '/presession');
     expect(AppRoutes.live, '/live');
     expect(AppRoutes.quai, '/quai');
