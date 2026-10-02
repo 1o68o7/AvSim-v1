@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('TARE GÎTE lance l’étalonnage adaptatif', (tester) async {
+  testWidgets('Tare gîte lance l’étalonnage adaptatif', (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -15,12 +15,12 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.textContaining('POSITION DE SÉANCE'), findsOneWidget);
-    expect(find.text('TOURNER EN PAYSAGE POUR TARER'), findsOneWidget);
-    await tester.tap(find.text('TOURNER EN PAYSAGE POUR TARER'));
+    expect(find.textContaining('Position de séance'), findsOneWidget);
+    expect(find.text('Tourner en paysage pour tarer'), findsOneWidget);
+    await tester.tap(find.text('Tourner en paysage pour tarer'));
     await tester.pump();
 
-    expect(find.textContaining('EN COURS'), findsNothing);
+    expect(find.textContaining('En cours'), findsNothing);
   });
 
   testWidgets('2B paysage : TRIBORD à gauche, lacet —', (tester) async {
@@ -36,9 +36,9 @@ void main() {
 
     expect(find.text('TRIBORD'), findsWidgets);
     expect(find.text('BÂBORD'), findsWidgets);
-    expect(find.text('LACET (YAW)'), findsOneWidget);
-    expect(find.text('TARE GÎTE'), findsOneWidget);
-    expect(find.textContaining('POSITION DE SÉANCE'), findsOneWidget);
+    expect(find.text('Lacet (yaw)'), findsOneWidget);
+    expect(find.text('Tare gîte'), findsOneWidget);
+    expect(find.textContaining('Position de séance'), findsOneWidget);
     final tri = tester.getTopLeft(find.text('TRIBORD').first).dx;
     final ba = tester.getTopLeft(find.text('BÂBORD').first).dx;
     expect(tri < ba, isTrue);

@@ -15,6 +15,7 @@ import '../../widgets/deck_widgets.dart';
 import '../../widgets/heel_gauge.dart';
 import '../../widgets/tare_ring.dart';
 
+/// DR-51 — Tare (Stitch).
 class TareScreen extends ConsumerStatefulWidget {
   const TareScreen({super.key});
 
@@ -78,56 +79,221 @@ class _PortraitTare extends ConsumerWidget {
     final running = state.tareStatus == TareStatus.running;
     final persp =
         boat.isCox ? HeelPerspective.cox : HeelPerspective.rower;
+    final pitch = state.pitchDeg;
     return DeckScaffold(
-      title: 'ÉTALONNAGE / TARE',
+      title: 'Tare',
       subtitle: boat.isCox
-          ? 'Tare gîte · ${boat.info.code.toUpperCase()} barreur ${boat.coxPosition.wire} · réf. barreur'
-          : 'Tare gîte · ${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats} · réf. rameur',
+          ? '${boat.info.code} barreur ${boat.coxPosition.wire} · réf. barreur'
+          : '${boat.info.code} siège ${boat.clampedSeat}/${boat.seats} · réf. rameur',
       showRetour: !running,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Column(
                 children: [
+                  Row(
+                    children: [
+                      DeckStatusChip(
+                        label: 'Portrait · Capteurs IMU',
+                        ok: state.imuOk,
+                        alert: !state.imuOk,
+                      ),
+                      const Spacer(),
+                      Text(
+                        '12 Hz',
+                        style: DeckType.labelMono(size: 11),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.sensors,
+                        size: 14,
+                        color: DeckColors.label,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: DeckColors.surface,
+                      borderRadius: DeckRadii.cardAll,
+                      border: Border.all(color: DeckColors.hairline),
+                    ),
+                    child: const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        DeckIconBox(
+                          icon: Icons.screen_rotation_alt,
+                          accent: true,
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Mise à zéro du pont',
+                                style: TextStyle(
+                                  fontFamily: DeckType.ui,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: DeckColors.text,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Pose le téléphone à plat, dans l’axe du bateau. '
+                                'Ne le touche plus.',
+                                style: TextStyle(
+                                  fontFamily: DeckType.ui,
+                                  fontSize: 14,
+                                  height: 1.35,
+                                  color: DeckColors.label,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const _TareMountWarning(),
+                  const SizedBox(height: 8),
                   Text(
                     state.imuHint,
                     textAlign: TextAlign.center,
                     style: TextStyle(
+                      fontFamily: DeckType.ui,
                       color: state.imuOk ? DeckColors.tribord : DeckColors.volt,
                       fontSize: 12,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  const _TareMountWarning(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Bateau à quai, coque calée. Penchez le téléphone : le chiffre doit bouger. Puis tare = ce niveau devient 0°.',
-                    style: TextStyle(color: DeckColors.label),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  HeelLabels(perspective: persp),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${shown.toStringAsFixed(1)}°',
-                    style: const TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.w700,
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: DeckColors.surface,
+                      borderRadius: DeckRadii.cardAll,
+                      border: Border.all(color: DeckColors.hairline),
+                    ),
+                    child: Column(
+                      children: [
+                        HeelLabels(perspective: persp),
+                        const SizedBox(height: 8),
+                        Text(
+                          '${shown.toStringAsFixed(1)}°',
+                          style: DeckType.metric(size: 48, weight: FontWeight.w700),
+                        ),
+                        Text(
+                          'Gîte transversale · lissée 12 Hz',
+                          style: DeckType.labelMono(size: 10),
+                        ),
+                        const SizedBox(height: 12),
+                        HeelGauge(giteDeg: shown, perspective: persp),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _MetricPod(
+                                label: 'Assiette longitudinale',
+                                value: pitch == null
+                                    ? '—'
+                                    : pitch.toStringAsFixed(1),
+                                unit: '°',
+                                status: pitch != null && pitch.abs() < 2
+                                    ? 'Dans la cible'
+                                    : 'À stabiliser',
+                                ok: pitch != null && pitch.abs() < 2,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: _MetricPod(
+                                label: 'Gîte transversale',
+                                value: shown.toStringAsFixed(1),
+                                unit: '°',
+                                status: state.tareOk
+                                    ? 'Stable'
+                                    : running
+                                        ? 'Étalonnage…'
+                                        : 'En attente',
+                                ok: state.tareOk,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  const Text(
-                    'NIVEAU TÉLÉPHONE  ·  lissé 12 Hz',
-                    style: TextStyle(color: DeckColors.label, fontSize: 11),
-                  ),
                   const SizedBox(height: 12),
-                  HeelGauge(giteDeg: shown, perspective: persp),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'TOLÉRANCE  σ < 0,2°  ·  3–30 s  ·  clamp ±15° après tare',
-                    style: TextStyle(color: DeckColors.label, fontSize: 11),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: DeckColors.surface,
+                      borderRadius: DeckRadii.buttonAll,
+                      border: Border.all(color: DeckColors.hairline),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: state.tareOk
+                                ? DeckColors.tribord
+                                : running
+                                    ? DeckColors.volt
+                                    : DeckColors.label,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _readyBanner(state),
+                            style: DeckType.labelMono(
+                              color: state.tareOk
+                                  ? DeckColors.tribord
+                                  : DeckColors.label,
+                              size: 11,
+                              weight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          _statusLine(state),
+                          style: DeckType.labelMono(size: 10),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Row(
+                    children: [
+                      Icon(Icons.info_outline, size: 16, color: DeckColors.label),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Toute rotation ou bascule du téléphone annulera la tare.',
+                          style: TextStyle(
+                            fontFamily: DeckType.ui,
+                            color: DeckColors.label,
+                            fontSize: 12,
+                            height: 1.3,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -151,18 +317,41 @@ class _PortraitTare extends ConsumerWidget {
                   ),
                 _TareCta(state: state, landscape: false),
                 const SizedBox(height: 8),
-                Text(
-                  'STATUT ÉTALONNAGE : ${_statusLine(state)}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: DeckColors.label,
-                    fontSize: 12,
+                FilledButton(
+                  onPressed: state.tareOk ? onStart : null,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          'Démarrer l’enregistrement',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: DeckType.ui,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Icon(Icons.arrow_forward, size: 20),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                FilledButton(
-                  onPressed: null,
-                  child: const Text('DÉMARRER LA SESSION'),
+                TextButton(
+                  onPressed: running
+                      ? null
+                      : () => performDeckRetour(
+                            context,
+                            ref,
+                            alwaysGo: AppRoutes.presession,
+                          ),
+                  child: const Text('Annuler et revenir à la préparation'),
                 ),
               ],
             ),
@@ -186,11 +375,11 @@ class _LandscapeHud extends ConsumerWidget {
     final shown = state.displayGiteDeg ?? 0;
     final running = state.tareStatus == TareStatus.running;
     final chip = switch (state.tareStatus) {
-      TareStatus.running => 'ÉTALONNAGE ACTIF',
-      TareStatus.ok => 'TARE OK',
-      TareStatus.approx => 'TARE FAIBLE',
-      TareStatus.failed => 'RECOMMENCER',
-      TareStatus.none => 'TARE NON FAITE',
+      TareStatus.running => 'Étalonnage actif',
+      TareStatus.ok => 'Tare OK',
+      TareStatus.approx => 'Tare faible',
+      TareStatus.failed => 'Recommencer',
+      TareStatus.none => 'Tare non faite',
     };
     return Scaffold(
       backgroundColor: DeckColors.bg,
@@ -198,7 +387,7 @@ class _LandscapeHud extends ConsumerWidget {
         child: Column(
           children: [
             SizedBox(
-              height: 40,
+              height: 48,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
@@ -210,21 +399,24 @@ class _LandscapeHud extends ConsumerWidget {
                     Container(
                       width: 8,
                       height: 8,
-                      color: DeckColors.volt,
+                      decoration: BoxDecoration(
+                        color: DeckColors.volt,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         boat.isCox
-                            ? 'TARE GÎTE · ${boat.info.code.toUpperCase()} barreur ${boat.coxPosition.wire} · Bateau à quai, coque calée.'
-                            : 'TARE GÎTE · ${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats} · Bateau à quai, coque calée.',
+                            ? 'Tare · ${boat.info.code} barreur ${boat.coxPosition.wire} · bateau à quai'
+                            : 'Tare · ${boat.info.code} siège ${boat.clampedSeat}/${boat.seats} · bateau à quai',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: DeckColors.volt,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
-                          letterSpacing: 1.2,
+                          fontFamily: DeckType.ui,
+                          color: DeckColors.text,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
                         ),
                       ),
                     ),
@@ -250,22 +442,15 @@ class _LandscapeHud extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const Text(
-                            'LECTURE ASSIETTE LIVE',
-                            style: TextStyle(
-                              color: DeckColors.label,
-                              fontSize: 10,
-                              letterSpacing: 1.4,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+                          const DeckSectionLabel('Lecture assiette live'),
                           Text(
                             state.imuHint,
                             style: TextStyle(
+                              fontFamily: DeckType.ui,
                               color: state.imuOk
                                   ? DeckColors.tribord
                                   : DeckColors.volt,
-                              fontSize: 10,
+                              fontSize: 11,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -280,13 +465,11 @@ class _LandscapeHud extends ConsumerWidget {
                               Expanded(
                                 child: Column(
                                   children: [
-                                    const Text(
-                                      'GÎTE INSTANTANÉE',
-                                      style: TextStyle(
+                                    Text(
+                                      'Gîte instantanée',
+                                      style: DeckType.uiLabel(
                                         color: DeckColors.volt,
-                                        fontSize: 9,
-                                        letterSpacing: 1.4,
-                                        fontWeight: FontWeight.w600,
+                                        size: 11,
                                       ),
                                     ),
                                     Text.rich(
@@ -294,32 +477,30 @@ class _LandscapeHud extends ConsumerWidget {
                                         children: [
                                           TextSpan(
                                             text: shown.toStringAsFixed(1),
-                                            style: const TextStyle(
-                                              fontSize: 52,
-                                              fontWeight: FontWeight.w800,
+                                            style: DeckType.metric(
+                                              size: 48,
+                                              weight: FontWeight.w800,
                                               height: 1,
-                                              fontFeatures: [
-                                                FontFeature.tabularFigures(),
-                                              ],
                                             ),
                                           ),
                                           const TextSpan(
                                             text: ' °',
                                             style: TextStyle(
+                                              fontFamily: DeckType.mono,
                                               color: DeckColors.volt,
-                                              fontSize: 28,
+                                              fontSize: 24,
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
                                     Text(
-                                      'NIVEAU TÉLÉPHONE  ·  12 Hz',
-                                      style: TextStyle(
+                                      'Niveau téléphone · 12 Hz',
+                                      style: DeckType.labelMono(
                                         color: state.imuOk
                                             ? DeckColors.tribord
                                             : DeckColors.label,
-                                        fontSize: 9,
+                                        size: 10,
                                       ),
                                     ),
                                   ],
@@ -344,19 +525,16 @@ class _LandscapeHud extends ConsumerWidget {
                           ),
                           Text(
                             cox
-                                ? 'BÂBORD gauche écran  ·  σ < 0,2°  ·  3–30 s'
-                                : 'TRIBORD gauche écran  ·  σ < 0,2°  ·  3–30 s',
-                            style: const TextStyle(
-                              color: DeckColors.label,
-                              fontSize: 9,
-                            ),
+                                ? 'Bâbord gauche écran · σ < 0,2° · 3–30 s'
+                                : 'Tribord gauche écran · σ < 0,2° · 3–30 s',
+                            style: DeckType.labelMono(size: 10),
                           ),
                           const SizedBox(height: 8),
                           Row(
                             children: [
                               Expanded(
                                 child: _MiniTelemetry(
-                                  label: 'TANGAGE (PITCH)',
+                                  label: 'Tangage (pitch)',
                                   value: state.pitchDeg == null
                                       ? '—'
                                       : '${state.pitchDeg!.toStringAsFixed(1)}°',
@@ -365,7 +543,7 @@ class _LandscapeHud extends ConsumerWidget {
                               const SizedBox(width: 8),
                               const Expanded(
                                 child: _MiniTelemetry(
-                                  label: 'LACET (YAW)',
+                                  label: 'Lacet (yaw)',
                                   value: '—',
                                 ),
                               ),
@@ -382,113 +560,107 @@ class _LandscapeHud extends ConsumerWidget {
                       padding: const EdgeInsets.all(12),
                       child: SingleChildScrollView(
                         child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Text(
-                            'SÉQUENCE D\'ÉTALONNAGE',
-                            style: TextStyle(
-                              color: DeckColors.volt,
-                              fontSize: 10,
-                              letterSpacing: 1.4,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const _TareMountWarning(),
-                          const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: DeckColors.hairline),
-                            ),
-                            child: Row(
-                              children: [
-                                TareRing(
-                                  progress: _tareProgress(state),
-                                  caption: _tareRingCaption(state),
-                                  done: state.tareOk,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      Text(
-                                        running
-                                            ? '${(_tareProgress(state) * 100).round()}%'
-                                            : state.tareOk
-                                                ? '100%'
-                                                : '0%',
-                                        textAlign: TextAlign.right,
-                                        style: const TextStyle(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const DeckSectionLabel('Séquence d’étalonnage'),
+                            const SizedBox(height: 8),
+                            const _TareMountWarning(),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: DeckColors.surface,
+                                borderRadius: DeckRadii.cardAll,
+                                border: Border.all(color: DeckColors.hairline),
+                              ),
+                              child: Row(
+                                children: [
+                                  TareRing(
+                                    progress: _tareProgress(state),
+                                    caption: _tareRingCaption(state),
+                                    done: state.tareOk,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Text(
+                                          running
+                                              ? '${(_tareProgress(state) * 100).round()}%'
+                                              : state.tareOk
+                                                  ? '100%'
+                                                  : '0%',
+                                          textAlign: TextAlign.right,
+                                          style: DeckType.labelMono(
+                                            color: DeckColors.volt,
+                                            size: 11,
+                                            weight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        LinearProgressIndicator(
+                                          value: _tareProgress(state),
                                           color: DeckColors.volt,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
+                                          backgroundColor: DeckColors.hairline,
+                                          minHeight: 6,
+                                          borderRadius: DeckRadii.chipAll,
                                         ),
-                                      ),
-                                      LinearProgressIndicator(
-                                        value: _tareProgress(state),
-                                        color: DeckColors.volt,
-                                        backgroundColor: DeckColors.hairline,
-                                        minHeight: 6,
-                                      ),
-                                      const SizedBox(height: 6),
-                                      const Text(
-                                        'Acquisition IMU filtrée 12 Hz (pas 100 Hz brut)',
-                                        style: TextStyle(
-                                          color: DeckColors.label,
-                                          fontSize: 9,
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          'Acquisition IMU filtrée 12 Hz',
+                                          style: DeckType.labelMono(size: 10),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          _TareCta(state: state, landscape: true),
-                          const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: DeckColors.hairline),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'STATUT ÉTALONNAGE',
-                                  style: TextStyle(
-                                    color: DeckColors.label,
-                                    fontSize: 9,
-                                    letterSpacing: 1.2,
-                                    fontWeight: FontWeight.w700,
+                            const SizedBox(height: 8),
+                            _TareCta(state: state, landscape: true),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: DeckColors.surface,
+                                borderRadius: DeckRadii.cardAll,
+                                border: Border.all(color: DeckColors.hairline),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Statut étalonnage',
+                                    style: DeckType.uiLabel(size: 11),
                                   ),
-                                ),
-                                Text(
-                                  _statusLine(state),
-                                  style: TextStyle(
-                                    color: state.tareStatus == TareStatus.ok
-                                        ? DeckColors.tribord
-                                        : state.tareStatus == TareStatus.approx
-                                            ? DeckColors.volt
-                                            : DeckColors.label,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 16,
+                                  Text(
+                                    _statusLine(state),
+                                    style: TextStyle(
+                                      fontFamily: DeckType.ui,
+                                      color: state.tareStatus == TareStatus.ok
+                                          ? DeckColors.tribord
+                                          : state.tareStatus ==
+                                                  TareStatus.approx
+                                              ? DeckColors.volt
+                                              : DeckColors.label,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          FilledButton(
-                            onPressed: state.tareOk ? onStart : null,
-                            child: const Text('DÉMARRER LA SESSION'),
-                          ),
-                        ],
-                      ),
+                            const SizedBox(height: 12),
+                            FilledButton(
+                              onPressed: state.tareOk ? onStart : null,
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size.fromHeight(48),
+                              ),
+                              child: const Text('Démarrer l’enregistrement'),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -515,14 +687,17 @@ class _TareCta extends ConsumerWidget {
       onPressed: running || !landscape
           ? null
           : () => ref.read(liveHubProvider.notifier).beginTare(),
+      style: FilledButton.styleFrom(
+        minimumSize: const Size.fromHeight(48),
+      ),
       child: Text(
         !landscape
-            ? 'TOURNER EN PAYSAGE POUR TARER'
+            ? 'Tourner en paysage pour tarer'
             : state.tareStatus == TareStatus.failed
-                ? 'RECOMMENCER TARE'
+                ? 'Recommencer la tare'
                 : running
-                    ? 'TARE EN COURS… ${state.tareElapsedS} s'
-                    : 'TARE GÎTE',
+                    ? 'Tare en cours… ${state.tareElapsedS} s'
+                    : 'Tare gîte',
       ),
     );
   }
@@ -535,19 +710,85 @@ class _TareMountWarning extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
+        color: DeckColors.amberWash,
+        borderRadius: DeckRadii.cardAll,
         border: Border.all(color: DeckColors.volt),
       ),
       child: const Text(
-        'POSITION DE SÉANCE — La tare mémorise le niveau actuel du téléphone. '
+        'Position de séance — La tare mémorise le niveau actuel du téléphone. '
         'Fixez-le d’abord comme en live (cale-pied, écran paysage, haut du tel à gauche). '
         'Ne pas tarer à la verticale à la main : le zéro resterait celui du portrait.',
         style: TextStyle(
+          fontFamily: DeckType.ui,
           color: DeckColors.volt,
-          fontSize: 11,
+          fontSize: 12,
           height: 1.35,
         ),
+      ),
+    );
+  }
+}
+
+class _MetricPod extends StatelessWidget {
+  const _MetricPod({
+    required this.label,
+    required this.value,
+    required this.unit,
+    required this.status,
+    required this.ok,
+  });
+
+  final String label;
+  final String value;
+  final String unit;
+  final String status;
+  final bool ok;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: DeckColors.surfaceHigh,
+        borderRadius: DeckRadii.buttonAll,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: DeckType.uiLabel(size: 11)),
+          const SizedBox(height: 4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(value, style: DeckType.metric(size: 28)),
+              const SizedBox(width: 2),
+              Text(unit, style: DeckType.labelMono(size: 12)),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(
+                ok ? Icons.check_circle : Icons.lock_outline,
+                size: 14,
+                color: ok ? DeckColors.tribord : DeckColors.label,
+              ),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  status,
+                  style: DeckType.labelMono(
+                    color: ok ? DeckColors.tribord : DeckColors.label,
+                    size: 10,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -572,20 +813,27 @@ class _SideBadge extends StatelessWidget {
       width: 84,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
+        borderRadius: DeckRadii.buttonAll,
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Column(
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: DeckType.labelMono(
               color: color,
-              fontWeight: FontWeight.w700,
-              fontSize: 10,
-              letterSpacing: 1.1,
+              size: 10,
+              weight: FontWeight.w700,
             ),
           ),
-          Text(sub, style: TextStyle(color: color.withValues(alpha: 0.8), fontSize: 9)),
+          Text(
+            sub,
+            style: TextStyle(
+              fontFamily: DeckType.mono,
+              color: color.withValues(alpha: 0.8),
+              fontSize: 9,
+            ),
+          ),
           Icon(
             left ? Icons.arrow_back : Icons.arrow_forward,
             color: color,
@@ -609,6 +857,7 @@ class _MiniTelemetry extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: DeckColors.surface,
+        borderRadius: DeckRadii.buttonAll,
         border: Border.all(color: DeckColors.hairline),
       ),
       child: Row(
@@ -616,17 +865,16 @@ class _MiniTelemetry extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
-                color: DeckColors.label,
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.1,
-              ),
+              style: DeckType.uiLabel(size: 11),
             ),
           ),
           Text(
             value,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+            style: const TextStyle(
+              fontFamily: DeckType.mono,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
           ),
         ],
       ),
@@ -649,15 +897,24 @@ String _tareRingCaption(LiveHubState s) {
   };
 }
 
+String _readyBanner(LiveHubState s) {
+  return switch (s.tareStatus) {
+    TareStatus.ok || TareStatus.approx => 'Stabilisé · prêt pour le départ',
+    TareStatus.running => 'Étalonnage en cours',
+    TareStatus.failed => 'Échec · recommencer',
+    TareStatus.none => 'En attente de tare paysage',
+  };
+}
+
 String _statusLine(LiveHubState s) {
   return switch (s.tareStatus) {
-    TareStatus.none => 'NON FAITE',
+    TareStatus.none => 'Non faite',
     TareStatus.running =>
-      'EN COURS  ${s.tareElapsedS} s  ·  ${s.tareSampleCount} éch. IMU  ·  σ < 0,2° sur 3 s',
+      'En cours  ${s.tareElapsedS} s  ·  ${s.tareSampleCount} éch. IMU  ·  σ < 0,2° sur 3 s',
     TareStatus.ok =>
       'OK  offset ${s.tareOffset!.toStringAsFixed(2)}°  σ ${s.tareSigma?.toStringAsFixed(3)}°  ·  ${s.tareDurationS?.toStringAsFixed(1) ?? s.tareElapsedS} s',
     TareStatus.approx =>
-      'TARE APPROXIMATIVE  offset ${s.tareOffset?.toStringAsFixed(2)}°  σ ${s.tareSigma?.toStringAsFixed(2)}°  ·  Démarrer autorisé',
-    TareStatus.failed => 'RECOMMENCER  ${s.imuHint}',
+      'Tare approximative  offset ${s.tareOffset?.toStringAsFixed(2)}°  σ ${s.tareSigma?.toStringAsFixed(2)}°  ·  Démarrer autorisé',
+    TareStatus.failed => 'Recommencer  ${s.imuHint}',
   };
 }

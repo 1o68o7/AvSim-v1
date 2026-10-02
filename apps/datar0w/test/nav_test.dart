@@ -26,7 +26,7 @@ void main() {
         child: MaterialApp(home: PresessionScreen()),
       ),
     );
-    expect(find.text('Retour'), findsWidgets);
+    expect(find.text('Annuler'), findsWidgets);
     expect(find.text('2 000 m'), findsNothing);
   });
 
@@ -40,7 +40,9 @@ void main() {
     );
     await tester.pump();
     expect(find.text('Retour'), findsWidgets);
-    await tester.tap(find.text('TARE GÎTE'));
+    await tester.ensureVisible(find.text('Tare gîte'));
+    await tester.pump();
+    await tester.tap(find.text('Tare gîte'));
     await tester.pump();
     expect(find.text('Retour'), findsNothing);
   });

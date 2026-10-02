@@ -98,9 +98,9 @@ void main() {
     await tester.pumpWidget(
       const ProviderScope(child: MaterialApp(home: PresessionScreen())),
     );
-    expect(find.text('ENTRAÎNEMENT'), findsOneWidget);
-    expect(find.text('COMPÉTITION'), findsOneWidget);
-    await tester.tap(find.text('COMPÉTITION'));
+    expect(find.text('Entraînement'), findsOneWidget);
+    expect(find.text('Compétition'), findsOneWidget);
+    await tester.tap(find.text('Compétition'));
     await tester.pump();
     expect(find.textContaining('tel au quai'), findsOneWidget);
   });
