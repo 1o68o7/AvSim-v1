@@ -148,10 +148,11 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
                     gpsOk: !s.gpsLost && s.locationOk,
                   ),
                   Expanded(
-                    child: ListView(
-                      cacheExtent: 2400,
+                    child: SingleChildScrollView(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      children: [
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
                         _VoxBar(
                           boatCode: tag,
                           position: pos,
@@ -208,7 +209,8 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
                             ),
                           ],
                         ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],

@@ -258,10 +258,11 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ListView(
-              cacheExtent: 3200,
+            child: SingleChildScrollView(
               padding: const EdgeInsets.only(bottom: 8),
-              children: [
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                 if (boat.sessionMode == SessionMode.competition)
                   const Padding(
                     padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -367,7 +368,8 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
                   ),
                 ],
                 const SizedBox(height: 8),
-              ],
+                ],
+              ),
             ),
           ),
           _QuaiFooter(
@@ -676,9 +678,24 @@ class _TelemetryGrid extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text('Télémétrie de bord', style: DeckType.uiLabel(size: 13)),
-            const Spacer(),
-            Text('$sensorCount capteurs synchronisés', style: DeckType.labelMono(size: 10)),
+            Expanded(
+              child: Text(
+                'Télémétrie de bord',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: DeckType.uiLabel(size: 13),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                '$sensorCount capteurs synchronisés',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.right,
+                style: DeckType.labelMono(size: 10),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -745,11 +762,23 @@ class _TelemetryGrid extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text('Gîte maximale observée', style: DeckType.uiLabel(color: DeckColors.label)),
-                  const Spacer(),
-                  Text(
-                    peakLabel,
-                    style: DeckType.labelMono(color: DeckColors.tribord, size: 11, weight: FontWeight.w700),
+                  Expanded(
+                    child: Text(
+                      'Gîte maximale observée',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: DeckType.uiLabel(color: DeckColors.label),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      peakLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                      style: DeckType.labelMono(color: DeckColors.tribord, size: 11, weight: FontWeight.w700),
+                    ),
                   ),
                 ],
               ),
