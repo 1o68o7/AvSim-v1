@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#131313;color:#e5e2e1;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface-variant": "#353534", "tertiary-container": "#ffdad7", "primary": "#ffffff", "primary-container": "#caf22e", "error-container": "#93000a", "surface-container-low": "#1c1b1b", "surface-tint": "#afd500", "on-error-container": "#ffdad6", "secondary-fixed-dim": "#64de8d", "surface-container": "#201f1f", "tertiary": "#ffffff", "on-error": "#690005", "secondary-container": "#20a55c", "surface": "#131313", "surface-container-high": "#2a2a2a", "on-primary-fixed-variant": "#3d4c00", "on-background": "#e5e2e1", "primary-fixed": "#caf22e", "on-secondary-fixed": "#00210d", "on-secondary-container": "#003116", "on-tertiary-container": "#b63538", "tertiary-fixed": "#ffdad7", "on-surface": "#e5e2e1", "on-tertiary-fixed": "#410005", "on-tertiary": "#68000e", "on-tertiary-fixed-variant": "#8d141e", "tertiary-fixed-dim": "#ffb3af", "inverse-surface": "#e5e2e1", "surface-dim": "#131313", "surface-container-highest": "#353534", "secondary-fixed": "#81fba7", "error": "#ffb4ab", "on-secondary-fixed-variant": "#005229", "on-primary": "#293500", "surface-bright": "#3a3939", "surface-container-lowest": "#0e0e0e", "outline-variant": "#454934", "secondary": "#64de8d", "primary-fixed-dim": "#afd500", "on-primary-container": "#586c00", "inverse-primary": "#526600", "on-surface-variant": "#c5c9ae", "outline": "#8f937a", "inverse-on-surface": "#313030", "on-primary-fixed": "#171e00", "on-secondary": "#00391a", "background": "#131313" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-xl": "2rem", "space-md": "1rem", "space-lg": "1.5rem", "space-sm": "0.5rem", "gutter": "1rem", "margin": "1rem", "space-xs": "0.25rem" }, fontFamily: { "metric-hero": ["JetBrains Mono"], "headline-md": ["Inter"], "body-sm": ["Inter"], "label-ui": ["Inter"], "headline-sm": ["Inter"], "metric-lg": ["JetBrains Mono"], "metric-md": ["JetBrains Mono"], "headline-lg": ["Inter"], "metric-sm": ["JetBrains Mono"], "body-lg": ["Inter"], "label-mono": ["JetBrains Mono"], "body-md": ["Inter"] }, fontSize: { "metric-hero": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.04em", "fontWeight": "700" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "label-ui": ["13px", { "lineHeight": "16px", "fontWeight": "500" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "metric-lg": ["32px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "metric-md": ["20px", { "lineHeight": "24px", "fontWeight": "600" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "metric-sm": ["14px", { "lineHeight": "18px", "fontWeight": "500" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "label-mono": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.3)]"><div class="h-16 px-margin flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-secondary-fixed-dim animate-pulse"></span><span class="font-label-mono text-label-mono text-secondary-fixed-dim uppercase tracking-wider">AC Lacanau Staff</span></div><h1 class="font-headline-sm text-headline-sm text-on-surface tracking-tight leading-none pt-0.5">Aujourd'Hui</h1></div></div><div class="flex items-center gap-space-sm"><div class="px-2 py-1 rounded bg-surface-container-high flex items-center"><span class="font-label-mono text-label-mono text-primary-fixed">HUB-01</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 w-full bg-surface pt-16 pb-24 px-margin flex flex-col"><div class="flex flex-col w-full gap-space-md">
+<!-- Staff Identity & Hub Status Card -->
+<section class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-space-sm shadow-sm">
+<div class="flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary-fixed text-[24px]">engineering</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Pierre G.</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Staff AC Lacanau • Matériel &amp; Hangars</span>
+</div>
+</div>
+<span class="font-label-mono text-label-mono px-2 py-1 rounded bg-surface-container text-secondary-fixed uppercase shrink-0">
+        CLOUD AC-33
+      </span>
+</div>
+<!-- Live Sync Status Deck -->
+<div class="flex items-center justify-between px-space-sm py-1.5 rounded-lg bg-surface-container text-on-surface-variant font-label-mono text-label-mono">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container animate-ping"></span>
+<span class="text-on-surface">Club Cloud AC-33 synchronisé</span>
+</div>
+<span class="text-on-surface-variant">Base locale 11:00</span>
+</div>
+<!-- Role Filter Segmented Control -->
+<div class="pt-space-xs">
+<div class="text-on-surface-variant font-body-sm text-body-sm mb-1.5">Vue opérationnelle filtrée :</div>
+<div class="grid grid-cols-3 gap-1 p-1 rounded-lg bg-surface-container-lowest" id="role-selector">
+<button class="role-btn py-2 px-1 rounded flex flex-col items-center justify-center gap-0.5 bg-primary-fixed text-on-primary-fixed transition-all text-center" id="btn-role-intendant" onclick="switchRole('intendant')">
+<span class="font-label-ui text-label-ui font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-lowest"></span>
+            Matériel
+          </span>
+<span class="font-label-mono text-[10px] opacity-80 uppercase leading-none">Intendant</span>
+</button>
+<button class="role-btn py-2 px-1 rounded flex flex-col items-center justify-center gap-0.5 text-on-surface-variant hover:text-on-surface transition-all text-center" id="btn-role-sportif" onclick="switchRole('sportif')">
+<span class="font-label-ui text-label-ui font-medium">Sportif</span>
+<span class="font-label-mono text-[10px] opacity-70 uppercase leading-none">Dir. Perf</span>
+</button>
+<button class="role-btn py-2 px-1 rounded flex flex-col items-center justify-center gap-0.5 text-on-surface-variant hover:text-on-surface transition-all text-center" id="btn-role-admin" onclick="switchRole('admin')">
+<span class="font-label-ui text-label-ui font-medium">Trésorerie</span>
+<span class="font-label-mono text-[10px] opacity-70 uppercase leading-none">FFA &amp; Caisses</span>
+</button>
+</div>
+</div>
+</section>
+<!-- VUE 1 : INTENDANT & MATÉRIEL (VUE ACTIVE PAR DÉFAUT) -->
+<div class="flex flex-col gap-space-md" id="view-intendant">
+<!-- Quick Alert Banner -->
+<div class="bg-error-container text-on-error-container p-space-md rounded-xl flex items-center justify-between gap-space-sm shadow-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[24px] text-tertiary-fixed-dim shrink-0">build_circle</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-ui text-label-ui font-bold truncate">2 avaries actives au ponton</span>
+<span class="font-body-sm text-body-sm opacity-90 truncate">Interventions prioritaires avant sortie 14h00</span>
+</div>
+</div>
+<span class="font-label-mono text-label-mono px-2 py-0.5 rounded bg-surface-container-lowest text-tertiary-fixed-dim uppercase shrink-0">
+        Critique
+      </span>
+</div>
+<!-- Fleet Status HUD Grid -->
+<section class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-space-md shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary-fixed text-[20px]">kayaking</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">État du Parc &amp; Flotte</h2>
+</div>
+<span class="font-label-mono text-label-mono text-on-surface-variant">Total : 18 Coques</span>
+</div>
+<!-- Telemetry Metric Quad -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="bg-surface-container p-space-md rounded-lg flex flex-col">
+<div class="flex items-center justify-between">
+<span class="font-label-ui text-label-ui text-on-surface-variant">Prêtes à l'eau</span>
+<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>
+</div>
+<span class="font-metric-lg text-metric-lg text-secondary-fixed mt-1">14</span>
+<span class="font-label-mono text-label-mono text-on-surface-variant mt-0.5">78% de la flotte</span>
+</div>
+<div class="bg-surface-container p-space-md rounded-lg flex flex-col">
+<div class="flex items-center justify-between">
+<span class="font-label-ui text-label-ui text-on-surface-variant">Sur le lac</span>
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></span>
+</div>
+<span class="font-metric-lg text-metric-lg text-primary-fixed mt-1">02</span>
+<span class="font-label-mono text-label-mono text-on-surface-variant mt-0.5">8+ SH &amp; Skiff F14</span>
+</div>
+<div class="bg-surface-container p-space-md rounded-lg flex flex-col">
+<div class="flex items-center justify-between">
+<span class="font-label-ui text-label-ui text-on-surface-variant">Atelier / Bloqué</span>
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+</div>
+<span class="font-metric-lg text-metric-lg text-tertiary-fixed-dim mt-1">02</span>
+<span class="font-label-mono text-label-mono text-on-surface-variant mt-0.5">Empacher 4+ / Skiff #01</span>
+</div>
+<div class="bg-surface-container p-space-md rounded-lg flex flex-col">
+<div class="flex items-center justify-between">
+<span class="font-label-ui text-label-ui text-on-surface-variant">Sécurité Moteur</span>
+<span class="material-symbols-outlined text-[16px] text-secondary-fixed">verified</span>
+</div>
+<span class="font-metric-lg text-metric-lg text-on-surface mt-1">02/02</span>
+<span class="font-label-mono text-label-mono text-on-surface-variant mt-0.5">Canots OP 40L</span>
+</div>
+</div>
+<!-- Quick Action Deck Buttons -->
+<div class="flex flex-col gap-space-xs pt-space-xs">
+<button class="w-full h-12 bg-primary-fixed text-on-primary-fixed rounded-lg font-headline-sm text-body-lg font-bold flex items-center justify-center gap-space-xs shadow-sm active:scale-[0.98] transition-transform" onclick="triggerFeedback(this, 'Ouverture du formulaire avarie')">
+<span class="material-symbols-outlined text-[20px]">warning</span>
+<span>Déclarer une avarie atelier</span>
+</button>
+<button class="w-full h-10 bg-surface-container text-on-surface rounded-lg font-label-ui text-label-ui font-medium flex items-center justify-center gap-space-xs hover:bg-surface-container-high transition-colors" onclick="triggerFeedback(this, 'Scan inventaire lancé')">
+<span class="material-symbols-outlined text-[18px]">qr_code_scanner</span>
+<span>Inventaire flash par QR Code</span>
+</button>
+</div>
+</section>
+<!-- Priority Maintenance List -->
+<section class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-space-md shadow-sm">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Maintenances Prioritaires</h2>
+<span class="font-label-mono text-label-mono text-on-surface-variant">Lacanau Shed 1</span>
+</div>
+<!-- Incident 1: Urgent -->
+<div class="bg-surface-container p-space-md rounded-lg flex flex-col gap-space-sm" id="card-avarie-1">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="font-label-mono text-label-mono px-1.5 py-0.5 rounded bg-surface-container-highest text-tertiary-fixed-dim uppercase">#03 Bâbord</span>
+<span class="font-label-ui text-label-ui font-semibold text-on-surface">Empacher 4+ (Pointe)</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Cale-pieds siège 3 desserré avec jeu axial de 15mm. Écrou papillon tribord manquant.</p>
+</div>
+<span class="font-label-mono text-[10px] text-tertiary-fixed-dim bg-surface-container-lowest px-1.5 py-0.5 rounded shrink-0">09:15</span>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Signalé par : <strong class="text-on-surface font-medium">Équipage 8+ SH</strong></span>
+<button class="h-9 px-3 bg-primary-fixed text-on-primary-fixed rounded font-label-ui text-label-ui font-semibold flex items-center gap-1 active:scale-95 transition-transform" id="btn-fix-1" onclick="resolveTicket(this, 'card-avarie-1')">
+<span class="material-symbols-outlined text-[16px]">handyman</span>
+<span>Prendre en charge</span>
+</button>
+</div>
+</div>
+<!-- Incident 2: Scheduled -->
+<div class="bg-surface-container p-space-md rounded-lg flex flex-col gap-space-sm">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="font-label-mono text-label-mono px-1.5 py-0.5 rounded bg-surface-container-highest text-secondary-fixed uppercase">#01 Skiff</span>
+<span class="font-label-ui text-label-ui font-semibold text-on-surface">Filippi F14 Skiff Carbone</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Vérification annuelle de la portée, axe de dame de nage &amp; inclinaison 4° bâbord/tribord.</p>
+</div>
+<span class="font-label-mono text-[10px] text-secondary-fixed bg-surface-container-lowest px-1.5 py-0.5 rounded shrink-0">Aujourd'hui</span>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="font-label-mono text-label-mono text-secondary-fixed flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed animate-pulse"></span>
+            En cours par Jean-Marc T.
+          </span>
+<span class="font-label-mono text-label-mono text-on-surface-variant bg-surface-container-high px-2 py-1 rounded">Étape 2/3</span>
+</div>
+</div>
+</section>
+</div>
+<!-- SECTION COMMUNE : TÉLÉMÉTRIE DIRECTE & FLOTTE ACTIVE SUR LE LAC -->
+<section class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-space-md shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-fixed animate-ping"></span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">En Direct sur le Lac</h2>
+</div>
+<span class="font-label-mono text-label-mono px-2 py-0.5 rounded bg-surface-container text-primary-fixed uppercase">
+        Live VHF 09
+      </span>
+</div>
+<!-- Active Session Snapshot -->
+<div class="bg-surface-container rounded-lg p-space-md flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-ui text-label-ui font-bold text-on-surface">Séance #704-LK • 8+ SH &amp; 1x Camille</span>
+<span class="font-label-mono text-label-mono text-primary-fixed">Lac Nord (5.4 km)</span>
+</div>
+<!-- Water telemetry telemetry micro-grid -->
+<div class="grid grid-cols-3 gap-2 py-1">
+<div class="flex flex-col bg-surface-container-high p-2 rounded">
+<span class="font-label-mono text-[10px] text-on-surface-variant uppercase">Cadence</span>
+<span class="font-metric-md text-metric-md text-on-surface">32.4</span>
+<span class="font-label-mono text-[10px] text-secondary-fixed">SPM stable</span>
+</div>
+<div class="flex flex-col bg-surface-container-high p-2 rounded">
+<span class="font-label-mono text-[10px] text-on-surface-variant uppercase">Split Moy.</span>
+<span class="font-metric-md text-metric-md text-primary-fixed">1:34.2</span>
+<span class="font-label-mono text-[10px] text-on-surface-variant">/500m</span>
+</div>
+<div class="flex flex-col bg-surface-container-high p-2 rounded">
+<span class="font-label-mono text-[10px] text-on-surface-variant uppercase">Gîte Coque</span>
+<span class="font-metric-md text-metric-md text-secondary-fixed">+0.4°</span>
+<span class="font-label-mono text-[10px] text-secondary-fixed uppercase">Tribord</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary-fixed">directions_boat</span>
+<span>Sécurité : Canot Thomas B. en vigie</span>
+</div>
+<button class="h-8 px-2.5 rounded bg-surface-container-highest text-on-surface font-label-ui text-label-ui hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors flex items-center gap-1" onclick="triggerFeedback(this, 'Flux télémétrie ouvert')">
+<span>Télémétrie</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</section>
+<!-- VUES COMPLÉMENTAIRES (RÔLES DIRECTION SPORTIVE & TRÉSORERIE) -->
+<section class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-space-md shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">dashboard_customize</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Vues Club Transverses</h2>
+</div>
+<span class="font-label-mono text-label-mono text-on-surface-variant">Synthèse Rôles</span>
+</div>
+<!-- Direction Sportive Card -->
+<div class="bg-surface-container p-space-md rounded-lg flex flex-col gap-space-sm" id="view-sportif-card">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary-fixed"></span>
+<h3 class="font-label-ui text-label-ui font-semibold text-on-surface">Direction Sportive &amp; Présences</h3>
+</div>
+<span class="font-label-mono text-label-mono text-secondary-fixed">Journée J</span>
+</div>
+<div class="grid grid-cols-2 gap-space-sm pt-1">
+<div class="flex flex-col">
+<span class="font-metric-lg text-metric-lg text-on-surface">32</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Rameurs passés ce matin</span>
+</div>
+<div class="flex flex-col">
+<span class="font-metric-lg text-metric-lg text-primary-fixed">84%</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Licences FFA validées</span>
+</div>
+</div>
+<div class="p-2 rounded bg-surface-container-high flex items-center justify-between font-body-sm text-body-sm">
+<span class="text-on-surface">Créneaux : 3 terminés • 1 restant</span>
+<span class="font-label-mono text-label-mono text-primary-fixed">14:00 Jeunes J14-J16</span>
+</div>
+</div>
+<!-- Trésorerie & Admin Card -->
+<div class="bg-surface-container p-space-md rounded-lg flex flex-col gap-space-sm" id="view-admin-card">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>
+<h3 class="font-label-ui text-label-ui font-semibold text-on-surface">Trésorerie &amp; Licences FFA</h3>
+</div>
+<span class="font-label-mono text-label-mono text-on-surface-variant">Saison 24-25</span>
+</div>
+<div class="flex items-center justify-between py-1">
+<div class="flex flex-col">
+<div class="flex items-baseline gap-1.5">
+<span class="font-metric-md text-metric-md text-on-surface">124</span>
+<span class="font-body-sm text-body-sm text-secondary-fixed font-medium">Cotisations réglées</span>
+</div>
+<span class="font-label-mono text-[11px] text-tertiary-fixed-dim">4 relances en attente</span>
+</div>
+<button class="h-9 px-3 rounded bg-surface-container-highest text-on-surface font-label-ui text-label-ui font-medium flex items-center gap-1 active:scale-95 transition-transform hover:bg-surface-bright" onclick="triggerFeedback(this, 'Bordereau FFA généré (PDF/CSV)')">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed">download</span>
+<span>Bordereau FFA</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Cross-Role Bridge Safety Banner -->
+<footer class="bg-surface-container-low rounded-xl p-space-md flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">swap_horiz</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-ui text-label-ui font-medium text-on-surface truncate">Tu rames ou entraînes aujourd'hui ?</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Bascule vers ton profil Rameur ou Coach dans le menu Plus.</span>
+</div>
+</div>
+<a class="px-3 py-1.5 rounded-lg bg-surface-container-high text-primary-fixed font-label-ui text-label-ui font-semibold shrink-0 active:scale-95 transition-transform" data-path="plus-club" href="#">
+      Changer
+    </a>
+</footer>
+<!-- Micro-notification Toast -->
+<div class="fixed top-20 left-4 right-4 bg-surface-bright text-on-surface px-4 py-2.5 rounded-lg shadow-xl font-label-ui text-label-ui flex items-center gap-2 transform translate-y-[-100px] opacity-0 transition-all duration-300 z-50 pointer-events-none" id="deck-toast">
+<span class="material-symbols-outlined text-primary-fixed text-[18px]">info</span>
+<span id="deck-toast-text">Action enregistrée</span>
+</div>
+</div>
+<script>
+  function switchRole(roleKey) {
+    const roles = ['intendant', 'sportif', 'admin'];
+    roles.forEach(function(r) {
+      const btn = document.getElementById('btn-role-' + r);
+      if (r === roleKey) {
+        btn.className = 'role-btn py-2 px-1 rounded flex flex-col items-center justify-center gap-0.5 bg-primary-fixed text-on-primary-fixed transition-all text-center';
+      } else {
+        btn.className = 'role-btn py-2 px-1 rounded flex flex-col items-center justify-center gap-0.5 text-on-surface-variant hover:text-on-surface transition-all text-center';
+      }
+    });
+
+    const intendantView = document.getElementById('view-intendant');
+    const sportifCard = document.getElementById('view-sportif-card');
+    const adminCard = document.getElementById('view-admin-card');
+
+    if (roleKey === 'intendant') {
+      intendantView.style.display = 'flex';
+      sportifCard.style.opacity = '0.85';
+      adminCard.style.opacity = '0.85';
+      showToast('Filtre actif : Vue Intendance & Atelier');
+    } else if (roleKey === 'sportif') {
+      intendantView.style.display = 'none';
+      sportifCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      sportifCard.style.opacity = '1';
+      showToast('Filtre actif : Vue Direction Sportive');
+    } else if (roleKey === 'admin') {
+      intendantView.style.display = 'none';
+      adminCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      adminCard.style.opacity = '1';
+      showToast('Filtre actif : Vue Trésorerie & FFA');
+    }
+  }
+
+  function resolveTicket(btnElement, cardId) {
+    btnElement.innerHTML = '<span class="material-symbols-outlined text-[16px] text-secondary-fixed">check</span> Pris en charge';
+    btnElement.className = 'h-9 px-3 bg-surface-container-high text-secondary-fixed rounded font-label-ui text-label-ui font-semibold flex items-center gap-1';
+    btnElement.disabled = true;
+    showToast('Avarie assignée à votre atelier');
+  }
+
+  function triggerFeedback(element, message) {
+    showToast(message);
+  }
+
+  function showToast(text) {
+    const toast = document.getElementById('deck-toast');
+    const toastText = document.getElementById('deck-toast-text');
+    toastText.innerText = text;
+    toast.classList.remove('translate-y-[-100px]', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+    setTimeout(function() {
+      toast.classList.add('translate-y-[-100px]', 'opacity-0');
+      toast.classList.remove('translate-y-0', 'opacity-100');
+    }, 2400);
+  }
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_-1px_12px_rgba(0,0,0,0.4)]" data-active-classes="text-primary-fixed bg-surface-container-high"><div class="flex items-center justify-around h-16 px-space-xs"><a class="flex-1 h-12 flex flex-col items-center justify-center gap-0.5 rounded-lg text-on-surface-variant hover:text-on-surface transition-colors" data-path="aujourdhui" href="#"><span class="material-symbols-outlined text-[22px]">water_lux</span><span class="font-label-ui text-label-ui">Aujourd'hui</span></a><a class="flex-1 h-12 flex flex-col items-center justify-center gap-0.5 rounded-lg text-on-surface-variant hover:text-on-surface transition-colors" data-path="parc-flotte" href="#"><span class="material-symbols-outlined text-[22px]">sailing</span><span class="font-label-ui text-label-ui">Flotte</span></a><a class="flex-1 h-12 flex flex-col items-center justify-center gap-0.5 rounded-lg text-on-surface-variant hover:text-on-surface transition-colors" data-path="plus-club" href="#"><span class="material-symbols-outlined text-[22px]">tune</span><span class="font-label-ui text-label-ui">Plus</span></a></div></nav></body></html>
