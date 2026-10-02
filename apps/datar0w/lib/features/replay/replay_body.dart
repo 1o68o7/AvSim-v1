@@ -21,6 +21,7 @@ class ReplayBody extends StatefulWidget {
     this.title = 'Replay',
     this.showEval = true,
     this.sourceLabel,
+    this.onShare,
   });
 
   final List<SessionSample> samples;
@@ -29,6 +30,8 @@ class ReplayBody extends StatefulWidget {
   final String title;
   final bool showEval;
   final String? sourceLabel;
+  /// Partage fichiers locaux — pas de données inventées.
+  final VoidCallback? onShare;
 
   @override
   State<ReplayBody> createState() => _ReplayBodyState();
@@ -119,296 +122,692 @@ class _ReplayBodyState extends State<ReplayBody> {
     final giteSide = cur.giteDeg == null
         ? ''
         : (cur.giteDeg! >= 0 ? 'Tribord' : 'Bâbord');
+    final summary = SessionSummary.fromSamples(_samples);
+    final sessionLabel = widget.meta?.code == null
+        ? 'Séance'
+        : '${widget.meta!.code} · ${widget.meta!.classe}';
 
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
-          child: Row(
+    final map = ClipRRect(
+      borderRadius: DeckRadii.cardAll,
+      child: FlutterMap(
+        mapController: _map,
+        options: MapOptions(
+          initialCenter: center,
+          initialZoom: 15,
+          backgroundColor: DeckColors.bg,
+        ),
+        children: [
+          TileLayer(
+            urlTemplate: DeckMapTiles.urlTemplate,
+            userAgentPackageName: DeckMapTiles.userAgentPackageName,
+          ),
+          PolylineLayer(
+            polylines: [
+              for (final seg in segs)
+                if (seg.length >= 2)
+                  Polyline(
+                    points: seg,
+                    color: DeckColors.volt,
+                    strokeWidth: 3,
+                  ),
+            ],
+          ),
+          if (hasFix)
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: LatLng(cur.lat!, cur.lon!),
+                  width: 16,
+                  height: 16,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: DeckColors.volt,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+
+    final curves = Container(
+      decoration: BoxDecoration(
+        color: DeckColors.surface,
+        borderRadius: DeckRadii.cardAll,
+        border: Border.all(color: DeckColors.hairline),
+      ),
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.show_chart, size: 18, color: DeckColors.volt),
+              const SizedBox(width: 6),
+              const Expanded(
+                child: Text(
+                  'Graphiques synchronisés',
+                  style: TextStyle(
+                    fontFamily: DeckType.ui,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: DeckColors.text,
+                  ),
+                ),
+              ),
+              Container(width: 10, height: 2, color: DeckColors.tribord),
+              const SizedBox(width: 4),
+              Text(
+                'Cadence',
+                style: DeckType.labelMono(size: 9),
+              ),
+              const SizedBox(width: 8),
+              Container(width: 10, height: 2, color: DeckColors.volt),
+              const SizedBox(width: 4),
+              Text(
+                'Vitesse',
+                style: DeckType.labelMono(size: 9),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: DeckRadii.buttonAll,
+              child: CustomPaint(
+                painter: _CurvesPainter(
+                  samples: _samples,
+                  index: i,
+                  notes: widget.notes,
+                ),
+                child: const SizedBox.expand(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    final metrics = _CursorMetrics(
+      cur: cur,
+      dCad: dCad,
+      giteSide: giteSide,
+      elapsed: elapsed,
+    );
+
+    final scrubber = Container(
+      decoration: BoxDecoration(
+        color: DeckColors.surface,
+        borderRadius: DeckRadii.cardAll,
+        border: Border.all(color: DeckColors.hairline),
+      ),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+      child: Column(
+        children: [
+          Row(
             children: [
               Text(
-                widget.meta?.code == null
-                    ? 'Séance'
-                    : '${widget.meta!.code} · ${widget.meta!.classe}',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                formatDuration(elapsed),
+                style: DeckType.metric(size: 18, weight: FontWeight.w600),
+              ),
+              Text(
+                ' / ${formatDuration(total)}',
+                style: DeckType.labelMono(size: 11),
               ),
               const Spacer(),
+              Text(
+                '${(cur.distM).round()} m',
+                style: DeckType.metric(
+                  size: 14,
+                  weight: FontWeight.w600,
+                  color: DeckColors.volt,
+                ),
+              ),
+            ],
+          ),
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              trackHeight: 4,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+            ),
+            child: Slider(
+              value: i.toDouble(),
+              min: 0,
+              max: (_samples.length - 1).toDouble(),
+              divisions: _samples.length > 1 ? _samples.length - 1 : 1,
+              activeColor: DeckColors.volt,
+              inactiveColor: DeckColors.surfaceHighest,
+              onChanged: (v) {
+                setState(() => _index = v.round());
+                _moveMap();
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+
+    final header = Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  sessionLabel,
+                  style: const TextStyle(
+                    fontFamily: DeckType.ui,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: DeckColors.text,
+                  ),
+                ),
+              ),
               DeckStatusChip(
                 label: widget.sourceLabel ?? 'Fichier chargé',
                 ok: true,
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Séance replay',
+                      style: DeckType.uiLabel(size: 11),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      summary.distM <= 0
+                          ? '—'
+                          : '${summary.distM.round()} m',
+                      style: DeckType.metric(
+                        size: 28,
+                        weight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Temps global',
+                    style: DeckType.uiLabel(size: 11),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    formatDuration(summary.duration),
+                    style: DeckType.metric(
+                      size: 16,
+                      weight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    final evalBlock = widget.showEval && widget.notes.isNotEmpty
+        ? _EvalFleetSection(
+            notes: widget.notes,
+            noteIdx: noteIdx,
+            dCad: dCad,
+            onJump: _jumpToNote,
+            t0: t0,
+          )
+        : (widget.showEval
+            ? Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                child: Text(
+                  dCad == null
+                      ? 'Δ cadence  —'
+                      : 'Δ cadence  ${dCad >= 0 ? '+' : ''}${dCad.toStringAsFixed(0)}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: DeckType.ui,
+                    color: DeckColors.volt,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              )
+            : const SizedBox.shrink());
+
+    final export = _ExportShareCard(onShare: widget.onShare);
+
+    final disclaimer = Container(
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: DeckColors.surface,
+        borderRadius: DeckRadii.buttonAll,
+        border: Border.all(color: DeckColors.hairline),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.info_outline, size: 16, color: DeckColors.label),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Mode replay · Vitesse sol GPS — pas vitesse eau · '
+              'Cadence « — » si absente · Stockage local',
+              style: DeckType.uiLabel(size: 11),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return Column(
+      children: [
+        header,
         Expanded(
           child: LayoutBuilder(
             builder: (context, c) {
               final landscape = c.maxWidth > 640;
-              final map = FlutterMap(
-                mapController: _map,
-                options: MapOptions(
-                  initialCenter: center,
-                  initialZoom: 15,
-                  backgroundColor: DeckColors.bg,
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate: DeckMapTiles.urlTemplate,
-                    userAgentPackageName: DeckMapTiles.userAgentPackageName,
-                  ),
-                  PolylineLayer(
-                    polylines: [
-                      for (final seg in segs)
-                        if (seg.length >= 2)
-                          Polyline(
-                            points: seg,
-                            color: DeckColors.volt,
-                            strokeWidth: 3,
-                          ),
+              if (landscape) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 7,
+                        child: Column(
+                          children: [
+                            Expanded(
+                              flex: 4,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: DeckRadii.cardAll,
+                                  border:
+                                      Border.all(color: DeckColors.hairline),
+                                ),
+                                child: map,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Expanded(flex: 5, child: curves),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      SizedBox(
+                        width: 260,
+                        child: ListView(
+                          children: [
+                            metrics,
+                            evalBlock,
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                  if (hasFix)
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: LatLng(cur.lat!, cur.lon!),
-                          width: 16,
-                          height: 16,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: DeckColors.volt,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                ],
-              );
-              final curves = Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      children: [
-                        Container(width: 12, height: 2, color: DeckColors.volt),
-                        const SizedBox(width: 6),
-                        const Text(
-                          'Cadence (spm)',
-                          style: TextStyle(
-                            color: DeckColors.volt,
-                            fontSize: 10,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Container(width: 12, height: 2, color: Colors.white),
-                        const SizedBox(width: 6),
-                        const Text(
-                          'Vitesse sol (m/s)',
-                          style: TextStyle(fontSize: 10),
-                        ),
-                        const Spacer(),
-                        Text(
-                          '${formatDuration(elapsed)} / ${formatDuration(total)}',
-                          style: const TextStyle(
-                            color: DeckColors.volt,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: CustomPaint(
-                      painter: _CurvesPainter(
-                        samples: _samples,
-                        index: i,
-                        notes: widget.notes,
-                      ),
-                      child: const SizedBox.expand(),
-                    ),
-                  ),
-                ],
-              );
-              final values = _CursorPanel(
-                cur: cur,
-                dCad: dCad,
-                giteSide: giteSide,
-                notes: widget.notes,
-                noteIdx: noteIdx,
-                onJump: _jumpToNote,
-                elapsed: elapsed,
-                showEval: widget.showEval,
-              );
-              if (landscape) {
-                return Row(
-                  children: [
-                    Expanded(
-                      flex: 7,
-                      child: Column(
-                        children: [
-                          Expanded(flex: 4, child: map),
-                          Expanded(flex: 5, child: curves),
-                        ],
-                      ),
-                    ),
-                    Container(width: 1, color: DeckColors.hairline),
-                    SizedBox(width: 236, child: values),
-                  ],
                 );
               }
-              return Column(
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
                 children: [
-                  Expanded(flex: 3, child: map),
-                  Expanded(flex: 2, child: curves),
-                  SizedBox(height: 168, child: values),
+                  SizedBox(
+                    height: 200,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: DeckRadii.cardAll,
+                        border: Border.all(color: DeckColors.hairline),
+                      ),
+                      child: map,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  scrubber,
+                  const SizedBox(height: 10),
+                  metrics,
+                  evalBlock,
+                  const SizedBox(height: 10),
+                  SizedBox(height: 160, child: curves),
+                  const SizedBox(height: 10),
+                  disclaimer,
+                  export,
                 ],
               );
             },
           ),
         ),
-        Slider(
-          value: i.toDouble(),
-          min: 0,
-          max: (_samples.length - 1).toDouble(),
-          divisions: _samples.length > 1 ? _samples.length - 1 : 1,
-          activeColor: DeckColors.volt,
-          onChanged: (v) {
-            setState(() => _index = v.round());
-            _moveMap();
-          },
-        ),
-        const Padding(
-          padding: EdgeInsets.only(bottom: 6),
-          child: Text(
-            'Mode replay · Vitesse sol GPS — pas vitesse eau · cadence « — » si absente · Stockage local',
-            style: TextStyle(color: DeckColors.label, fontSize: 10),
+        if (MediaQuery.sizeOf(context).width > 640) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+            child: scrubber,
           ),
-        ),
+          disclaimer,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            child: export,
+          ),
+        ],
       ],
     );
   }
 }
 
-class _CursorPanel extends StatelessWidget {
-  const _CursorPanel({
+class _CursorMetrics extends StatelessWidget {
+  const _CursorMetrics({
     required this.cur,
     required this.dCad,
     required this.giteSide,
-    required this.notes,
-    required this.noteIdx,
-    required this.onJump,
     required this.elapsed,
-    this.showEval = true,
   });
 
   final SessionSample cur;
   final double? dCad;
   final String giteSide;
-  final List<SessionNote> notes;
-  final int noteIdx;
-  final void Function(int) onJump;
   final Duration elapsed;
-  final bool showEval;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+    final cad = cur.cadenceSpm;
+    final sog = cur.sog;
+    final gite = cur.giteDeg;
+    final giteColor = (gite ?? 0) >= 0 ? DeckColors.tribord : DeckColors.babord;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: DeckColors.surface,
+        borderRadius: DeckRadii.cardAll,
+        border: Border.all(color: DeckColors.hairline),
+      ),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          InstrumentPod(
-            label: 'Valeurs au curseur  (${formatDuration(elapsed)})',
-            value: '',
-            child: Column(
-              children: [
-                _kv(
-                  'Cadence',
-                  cur.cadenceSpm == null
+          Row(
+            children: [
+              const Icon(Icons.speed, size: 18, color: DeckColors.volt),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'Valeurs au curseur (${formatDuration(elapsed)})',
+                  style: const TextStyle(
+                    fontFamily: DeckType.ui,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: DeckColors.text,
+                  ),
+                ),
+              ),
+              DeckStatusChip(label: 'instantané', ok: true),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _MetricTile(
+                  label: 'Cadence',
+                  unit: 'spm',
+                  value: cad == null ? '—' : cad.toStringAsFixed(0),
+                  accent: DeckColors.tribord,
+                  footnote: dCad == null
+                      ? null
+                      : 'Δ ${dCad! >= 0 ? '+' : ''}${dCad!.toStringAsFixed(0)}',
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _MetricTile(
+                  label: 'Vitesse sol GPS',
+                  unit: 'm/s',
+                  value: sog == null ? '—' : sog.toStringAsFixed(2),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _MetricTile(
+                  label: 'Distance cumulée',
+                  unit: 'm',
+                  value: cur.distM.round().toString(),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _MetricTile(
+                  label: 'Gîte de coque',
+                  unit: giteSide.isEmpty ? '°' : giteSide,
+                  value: gite == null
                       ? '—'
-                      : '${cur.cadenceSpm!.toStringAsFixed(0)} spm',
-                  DeckColors.volt,
+                      : '${gite >= 0 ? '+' : ''}${gite.toStringAsFixed(1)}°',
+                  accent: gite == null ? null : giteColor,
                 ),
-                _kv(
-                  'Vitesse sol GPS',
-                  cur.sog == null
-                      ? '—'
-                      : '${cur.sog!.toStringAsFixed(2)} m/s',
-                  DeckColors.text,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetricTile extends StatelessWidget {
+  const _MetricTile({
+    required this.label,
+    required this.value,
+    this.unit,
+    this.accent,
+    this.footnote,
+  });
+
+  final String label;
+  final String value;
+  final String? unit;
+  final Color? accent;
+  final String? footnote;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: DeckColors.surfaceHigh,
+        borderRadius: DeckRadii.buttonAll,
+        border: Border.all(color: DeckColors.hairline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: DeckType.uiLabel(size: 11),
                 ),
-                _kv(
-                  'Distance cumulée',
-                  '${(cur.distM / 1000).toStringAsFixed(3)} km',
-                  DeckColors.text,
+              ),
+              if (unit != null)
+                Text(
+                  unit!,
+                  style: DeckType.labelMono(size: 9),
                 ),
-                _kv(
-                  'Gîte de coque',
-                  cur.giteDeg == null
-                      ? '—'
-                      : '${cur.giteDeg!.toStringAsFixed(1)}° $giteSide',
-                  (cur.giteDeg ?? 0) >= 0
-                      ? DeckColors.tribord
-                      : DeckColors.babord,
-                ),
-              ],
-            ),
+            ],
           ),
           const SizedBox(height: 6),
-          if (showEval)
+          Text(
+            value,
+            style: DeckType.metric(
+              size: 22,
+              weight: FontWeight.w700,
+              color: accent ?? DeckColors.text,
+            ),
+          ),
+          if (footnote != null) ...[
+            const SizedBox(height: 2),
             Text(
+              footnote!,
+              style: DeckType.labelMono(
+                color: DeckColors.volt,
+                size: 10,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _EvalFleetSection extends StatelessWidget {
+  const _EvalFleetSection({
+    required this.notes,
+    required this.noteIdx,
+    required this.dCad,
+    required this.onJump,
+    required this.t0,
+  });
+
+  final List<SessionNote> notes;
+  final int noteIdx;
+  final double? dCad;
+  final void Function(int) onJump;
+  final int t0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: DeckColors.surface,
+        borderRadius: DeckRadii.cardAll,
+        border: Border.all(color: DeckColors.hairline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.hub_outlined, size: 18, color: DeckColors.volt),
+              const SizedBox(width: 6),
+              const Expanded(
+                child: Text(
+                  'Éval / repères flotte',
+                  style: TextStyle(
+                    fontFamily: DeckType.ui,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: DeckColors.text,
+                  ),
+                ),
+              ),
+              Text(
+                '${notes.length} note${notes.length > 1 ? 's' : ''}',
+                style: DeckType.labelMono(size: 10),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
             dCad == null
                 ? 'Δ cadence  —'
                 : 'Δ cadence  ${dCad! >= 0 ? '+' : ''}${dCad!.toStringAsFixed(0)}',
-            textAlign: TextAlign.center,
             style: const TextStyle(
+              fontFamily: DeckType.ui,
               color: DeckColors.volt,
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),
           ),
-          if (showEval && notes.isNotEmpty)
-            Wrap(
-              spacing: 6,
-              children: [
-                for (var n = 0; n < notes.length; n++)
-                  OutlinedButton(
-                    onPressed: () => onJump(n),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(0, 32),
-                      foregroundColor: n == noteIdx
-                          ? DeckColors.onVolt
-                          : DeckColors.volt,
-                      backgroundColor:
-                          n == noteIdx ? DeckColors.volt : Colors.transparent,
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (var n = 0; n < notes.length; n++)
+                OutlinedButton(
+                  onPressed: () => onJump(n),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 32),
+                    foregroundColor: n == noteIdx
+                        ? DeckColors.onVolt
+                        : DeckColors.volt,
+                    backgroundColor:
+                        n == noteIdx ? DeckColors.volt : Colors.transparent,
+                    side: BorderSide(
+                      color: n == noteIdx
+                          ? DeckColors.volt
+                          : DeckColors.hairline,
                     ),
-                    child: Text('Note ${n + 1}'),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: DeckRadii.buttonAll,
+                    ),
                   ),
-              ],
-            ),
+                  child: Text(
+                    't=${formatDuration(Duration(milliseconds: math.max(0, notes[n].t - t0)))}',
+                    style: const TextStyle(fontSize: 11),
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _kv(String k, String v, Color c) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
+class _ExportShareCard extends StatelessWidget {
+  const _ExportShareCard({this.onShare});
+
+  final VoidCallback? onShare;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: DeckColors.surface,
+        borderRadius: DeckRadii.cardAll,
+        border: Border.all(color: DeckColors.hairline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            k,
-            style: const TextStyle(color: DeckColors.label, fontSize: 10),
+            'Exporter / partager',
+            style: DeckType.uiLabel(
+              color: DeckColors.label,
+              weight: FontWeight.w600,
+            ),
           ),
-          const Spacer(),
+          const SizedBox(height: 4),
           Text(
-            v,
-            style: TextStyle(
-              color: c,
-              fontWeight: FontWeight.w700,
-              fontSize: 11,
+            'Fichiers locaux de la séance (samples + meta) — aucune donnée inventée.',
+            style: DeckType.uiLabel(size: 11),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 44,
+            child: FilledButton.icon(
+              onPressed: onShare,
+              icon: const Icon(Icons.download_outlined, size: 18),
+              label: const Text('Partager les données'),
             ),
           ),
         ],
@@ -431,18 +830,21 @@ class _CurvesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (samples.length < 2) return;
-    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFF090C10));
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = const Color(0xFF090C10),
+    );
     _line(
       canvas,
       size,
       samples.map((s) => s.cadenceSpm).toList(),
-      DeckColors.volt,
+      DeckColors.tribord,
     );
     _line(
       canvas,
       size,
       samples.map((s) => s.sog).toList(),
-      Colors.white70,
+      DeckColors.volt,
     );
     if (samples.any((s) => s.hrBpm != null)) {
       _line(

@@ -8,7 +8,6 @@ import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/club_banner.dart';
-import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_shell.dart';
 import '../../widgets/deck_widgets.dart';
 
@@ -33,6 +32,7 @@ void continueFromAssignment(
   }
 }
 
+/// DR-53 — Aujourd'hui barreur (shell 3 onglets, comme rameur / coach).
 class HomeCoxScreen extends ConsumerWidget {
   const HomeCoxScreen({super.key});
 
@@ -45,152 +45,212 @@ class HomeCoxScreen extends ConsumerWidget {
     final crew =
         boat == null ? const <Assignment>[] : snap.assignmentsForBoat(boat.id);
     final coxRear = asg?.coxPosition != 'front';
+    final mode = ref.watch(boatConfigProvider).sessionMode;
 
-    return DeckScaffold(
-      title: 'Accueil barreur',
-      subtitle: boat?.name ?? 'sans affectation',
-      retourFallback: AppRoutes.homeCox,
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        children: [
-          if (asg == null || boat == null)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 32),
-              child: Text(
-                'Pas d’affectation barreur.\n'
-                'Continuer : classe barrée + rôle (pré-session).',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: DeckColors.muted, height: 1.4),
-              ),
-            )
-          else ...[
-            DeckSectionLabel(
-              'Affectation coque',
-              trailing: Text(
-                boat.classe.toUpperCase(),
-                style: const TextStyle(
-                  color: DeckColors.volt,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                ),
+    return DeckTabScaffold(
+      tab: DeckTab.today,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            backgroundColor: DeckColors.bg.withValues(alpha: 0.92),
+            surfaceTintColor: Colors.transparent,
+            toolbarHeight: 56,
+            titleSpacing: 16,
+            title: const Text(
+              "Aujourd'hui",
+              style: TextStyle(
+                fontFamily: DeckType.ui,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: DeckColors.text,
+                letterSpacing: -0.2,
               ),
             ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: DeckColors.surfaceHigh,
-                border: Border.all(color: DeckColors.hairline),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  DeckFactCell(label: 'Bâtiment', value: boat.name),
-                  const SizedBox(height: 14),
-                  const Text(
-                    'Poste barreur',
-                    style: TextStyle(
-                      color: DeckColors.label,
-                      fontSize: 9,
-                      letterSpacing: 1.1,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _CoxPosChip(
-                          label: 'Avant',
-                          selected: !coxRear,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _CoxPosChip(
-                          label: 'Arrière',
-                          selected: coxRear,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (boat.cox) ...[
-                    const SizedBox(height: 12),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(10),
-                      color: DeckColors.volt.withValues(alpha: 0.12),
-                      child: const Text(
-                        'Lecture seule — composition coach.',
-                        style: TextStyle(
-                          color: DeckColors.volt,
-                          fontSize: 11,
-                          height: 1.35,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            const DeckSectionLabel('Composition équipage (lecture seule)'),
-            const SizedBox(height: 8),
-            for (final a in crew.where((x) => x.role != 'cox'))
-              _CrewRow(
-                title: snap.rowerById(a.rowerId)?.displayName ?? a.rowerId,
-                subtitle: [
-                  if (a.seatIndex != null) 'S${a.seatIndex}',
-                  if (a.oars.isNotEmpty) a.oars.join('/'),
-                ].join(' · '),
-                side: a.side,
-              ),
-            if (rower != null)
-              _CrewRow(
-                title: rower.displayName,
-                subtitle: 'Poste actif (vous)',
-                side: SidePref.none,
-                you: true,
-              ),
-          ],
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            children: [
-              ChoiceChip(
-                label: const Text('Entraînement'),
-                selected: ref.watch(boatConfigProvider).sessionMode ==
-                    SessionMode.training,
-                onSelected: (_) => ref
-                    .read(boatConfigProvider.notifier)
-                    .setSessionMode(SessionMode.training),
-              ),
-              ChoiceChip(
-                label: const Text('Compétition'),
-                selected: ref.watch(boatConfigProvider).sessionMode ==
-                    SessionMode.competition,
-                onSelected: (_) => ref
-                    .read(boatConfigProvider.notifier)
-                    .setSessionMode(SessionMode.competition),
+            actions: [
+              IconButton(
+                tooltip: 'Profil',
+                onPressed: () => context.go(AppRoutes.settings),
+                icon: const Icon(Icons.person_outline, color: DeckColors.text),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          FilledButton(
-            onPressed: () {
-              continueFromAssignment(
-                ref,
-                role: CrewRole.cox,
-                assignment: asg,
-                boat: boat,
-              );
-              context.go(AppRoutes.presession);
-            },
-            child: const Text('Continuer'),
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () => context.go(AppRoutes.club),
-            child: const Text('Parc'),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                Text(
+                  rower?.displayName ?? 'Accueil barreur',
+                  style: const TextStyle(
+                    fontFamily: DeckType.ui,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.24,
+                    color: DeckColors.text,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  boat?.name ?? 'Sans affectation barreur',
+                  style: const TextStyle(
+                    fontFamily: DeckType.ui,
+                    fontSize: 14,
+                    color: DeckColors.label,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    const DeckStatusChip(label: 'barreur', ok: true),
+                    DeckSessionModeSwitch(
+                      mode: mode,
+                      onChanged: (m) => ref
+                          .read(boatConfigProvider.notifier)
+                          .setSessionMode(m),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (asg == null || boat == null)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: DeckColors.surface,
+                      borderRadius: DeckRadii.cardAll,
+                      border: Border.all(color: DeckColors.hairline),
+                    ),
+                    child: const Text(
+                      'Pas d’affectation barreur.\n'
+                      'Continuer : classe barrée + rôle (pré-session).',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: DeckType.ui,
+                        color: DeckColors.muted,
+                        height: 1.4,
+                        fontSize: 14,
+                      ),
+                    ),
+                  )
+                else ...[
+                  DeckSectionLabel(
+                    'Affectation coque',
+                    trailing: Text(
+                      boat.classe.toUpperCase(),
+                      style: const TextStyle(
+                        color: DeckColors.volt,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: DeckColors.surface,
+                      borderRadius: DeckRadii.cardAll,
+                      border: Border.all(color: DeckColors.hairline),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        DeckFactCell(label: 'Bâtiment', value: boat.name),
+                        const SizedBox(height: 14),
+                        Text(
+                          'Poste barreur',
+                          style: DeckType.uiLabel(size: 11),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _CoxPosChip(
+                                label: 'Avant',
+                                selected: !coxRear,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: _CoxPosChip(
+                                label: 'Arrière',
+                                selected: coxRear,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (boat.cox) ...[
+                          const SizedBox(height: 12),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: DeckColors.volt.withValues(alpha: 0.12),
+                              borderRadius: DeckRadii.buttonAll,
+                            ),
+                            child: const Text(
+                              'Lecture seule — composition coach.',
+                              style: TextStyle(
+                                fontFamily: DeckType.ui,
+                                color: DeckColors.volt,
+                                fontSize: 11,
+                                height: 1.35,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const DeckSectionLabel(
+                    'Composition équipage (lecture seule)',
+                  ),
+                  const SizedBox(height: 8),
+                  for (final a in crew.where((x) => x.role != 'cox'))
+                    _CrewRow(
+                      title:
+                          snap.rowerById(a.rowerId)?.displayName ?? a.rowerId,
+                      subtitle: [
+                        if (a.seatIndex != null) 'S${a.seatIndex}',
+                        if (a.oars.isNotEmpty) a.oars.join('/'),
+                      ].join(' · '),
+                      side: a.side,
+                    ),
+                  if (rower != null)
+                    _CrewRow(
+                      title: rower.displayName,
+                      subtitle: 'Poste actif (vous)',
+                      side: SidePref.none,
+                      you: true,
+                    ),
+                ],
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 48,
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: () {
+                      continueFromAssignment(
+                        ref,
+                        role: CrewRole.cox,
+                        assignment: asg,
+                        boat: boat,
+                      );
+                      context.go(AppRoutes.presession);
+                    },
+                    child: const Text('Continuer'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => context.go(AppRoutes.club),
+                  child: const Text('Parc'),
+                ),
+              ]),
+            ),
           ),
         ],
       ),
@@ -211,6 +271,7 @@ class _CoxPosChip extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: selected ? DeckColors.volt : DeckColors.bg,
+        borderRadius: DeckRadii.buttonAll,
         border: Border.all(
           color: selected ? DeckColors.volt : DeckColors.hairline,
         ),
@@ -219,10 +280,11 @@ class _CoxPosChip extends StatelessWidget {
         label,
         textAlign: TextAlign.center,
         style: TextStyle(
+          fontFamily: DeckType.ui,
           color: selected ? DeckColors.onVolt : DeckColors.label,
-          fontSize: 10,
+          fontSize: 12,
           fontWeight: FontWeight.w700,
-          letterSpacing: 0.6,
+          letterSpacing: 0.2,
         ),
       ),
     );
@@ -248,7 +310,10 @@ class _CrewRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: you ? DeckColors.volt.withValues(alpha: 0.1) : DeckColors.bg,
+        color: you
+            ? DeckColors.volt.withValues(alpha: 0.1)
+            : DeckColors.surface,
+        borderRadius: DeckRadii.cardAll,
         border: Border.all(
           color: you ? DeckColors.volt : DeckColors.hairline,
         ),
@@ -261,12 +326,16 @@ class _CrewRow extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                    fontFamily: DeckType.ui,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 if (subtitle.isNotEmpty)
                   Text(
                     subtitle,
                     style: const TextStyle(
+                      fontFamily: DeckType.ui,
                       color: DeckColors.muted,
                       fontSize: 11,
                     ),
