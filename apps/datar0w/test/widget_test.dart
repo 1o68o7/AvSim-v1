@@ -33,7 +33,8 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(find.text('Passer (sans profil)'), findsOneWidget);
-    expect(find.text('CRÉER UN PROFIL'), findsOneWidget);
+    expect(find.text('Créer un profil'), findsOneWidget);
+    expect(find.text('Qui est là'), findsWidgets);
   });
 
   testWidgets('accueil rameur : état vide, pas de parc', (tester) async {

@@ -63,9 +63,9 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
       expect(appRouter.state.uri.path, AppRoutes.identity);
-      expect(find.text('Profils'), findsOneWidget);
+      expect(find.text('Qui est là'), findsWidgets);
 
-      await tester.tap(find.text('Connexion'));
+      await tester.tap(find.textContaining('Connexion'));
       // go 300 ms (+ éventuel push 300 ms)
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 350));

@@ -58,7 +58,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 80));
 
-      await tester.tap(find.text('Connexion'));
+      await tester.tap(find.textContaining('Connexion'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 350));
       await tester.pump(const Duration(milliseconds: 350));
