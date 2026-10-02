@@ -22,6 +22,8 @@ void main() {
 
   test('alerte gîte : ambre warning, CTA = Volt, pas cyan High-Vis', () {
     expect(DeckColors.alert, const Color(0xFFE8C547));
+    expect(DeckColors.amber, DeckColors.alert);
+    expect(DeckColors.onAlert, const Color(0xFF0A0A0A));
     expect(DeckColors.volt, const Color(0xFFD6FF3C));
     expect(DeckColors.volt, isNot(DeckColors.alert));
     expect(DeckColors.alert.toARGB32(), isNot(0xFF00E676));

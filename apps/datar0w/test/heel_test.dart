@@ -44,23 +44,24 @@ void main() {
     );
   });
 
-  test('couleurs bâbord rouge / tribord vert, alerte semi-transparente', () {
+  test('couleurs côtés + alerte gîte ambre (GEL), pas Volt', () {
     expect(DeckColors.babord, const Color(0xFFE05353));
     expect(DeckColors.tribord, const Color(0xFF46C275));
-    expect(DeckColors.tribordAlert, const Color(0xFF0F5C32));
+    expect(DeckColors.amber, const Color(0xFFE8C547));
+    expect(DeckColors.alert, DeckColors.amber);
     expect(DeckColors.tribord.toARGB32(), isNot(0xFF00E676));
-    expect(
-      HeelBanner.backgroundFor(HeelAlert.tribord).a,
-      closeTo(0.92, 0.02),
-    );
+    expect(HeelBanner.backgroundFor(HeelAlert.tribord), isNot(DeckColors.volt));
+    expect(HeelBanner.backgroundFor(HeelAlert.babord), isNot(DeckColors.volt));
     expect(
       HeelBanner.backgroundFor(HeelAlert.tribord),
-      DeckColors.tribordAlert.withValues(alpha: 0.92),
+      DeckColors.amber.withValues(alpha: 0.90),
     );
     expect(
-      HeelBanner.backgroundFor(HeelAlert.babord).a,
-      closeTo(0.80, 0.02),
+      HeelBanner.backgroundFor(HeelAlert.babord),
+      DeckColors.amber.withValues(alpha: 0.90),
     );
+    expect(HeelBanner.foregroundFor(HeelAlert.tribord), DeckColors.onAlert);
+    expect(HeelBanner.foregroundFor(HeelAlert.babord), DeckColors.onAlert);
   });
 
   test('filtre suit une marche sans rester collé au brut', () {
@@ -82,13 +83,13 @@ void main() {
       const MaterialApp(home: HeelBanner(alert: HeelAlert.tribord)),
     );
     await tester.pump();
-    expect(find.text('GÎTE — trop tribord'), findsOneWidget);
+    expect(find.text('Gîte trop TRIBORD'), findsOneWidget);
 
     await tester.pumpWidget(
       const MaterialApp(home: HeelBanner(alert: HeelAlert.babord)),
     );
     await tester.pump();
-    expect(find.text('GÎTE — trop bâbord'), findsOneWidget);
+    expect(find.text('Gîte trop BÂBORD'), findsOneWidget);
   });
 
   testWidgets('bandeau overlay ne pousse pas le layout', (tester) async {
@@ -117,11 +118,11 @@ void main() {
     await tester.pumpAndSettle();
     final y1 = tester.getTopLeft(find.byKey(bodyKey)).dy;
     expect(y1, y0);
-    expect(find.text('GÎTE — trop bâbord'), findsOneWidget);
+    expect(find.text('Gîte trop BÂBORD'), findsOneWidget);
 
     await pumpAlert(HeelAlert.tribord);
     await tester.pumpAndSettle();
-    expect(find.text('GÎTE — trop tribord'), findsOneWidget);
+    expect(find.text('Gîte trop TRIBORD'), findsOneWidget);
     expect(tester.getTopLeft(find.byKey(bodyKey)).dy, y0);
   });
 

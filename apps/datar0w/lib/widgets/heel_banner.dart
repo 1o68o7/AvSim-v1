@@ -9,18 +9,19 @@ class HeelBanner extends StatefulWidget {
 
   final HeelAlert alert;
 
+  /// GEL : alerte gîte = ambre (pas Volt). Côtés BÂBORD/TRIBORD restent dans le libellé.
   static Color backgroundFor(HeelAlert alert) => switch (alert) {
-        HeelAlert.babord => DeckColors.babord.withValues(alpha: 0.80),
-        // Vert foncé d’alerte (≠ vert « OK » tribord côté).
-        HeelAlert.tribord => DeckColors.tribordAlert.withValues(alpha: 0.92),
+        HeelAlert.babord => DeckColors.amber.withValues(alpha: 0.90),
+        HeelAlert.tribord => DeckColors.amber.withValues(alpha: 0.90),
         HeelAlert.none => Colors.transparent,
       };
 
-  static Color foregroundFor(HeelAlert alert) => Colors.white;
+  static Color foregroundFor(HeelAlert alert) =>
+      alert == HeelAlert.none ? Colors.transparent : DeckColors.onAlert;
 
   static String messageFor(HeelAlert alert) => switch (alert) {
-        HeelAlert.babord => 'GÎTE — trop bâbord',
-        HeelAlert.tribord => 'GÎTE — trop tribord',
+        HeelAlert.babord => 'Gîte trop BÂBORD',
+        HeelAlert.tribord => 'Gîte trop TRIBORD',
         HeelAlert.none => '',
       };
 
@@ -96,17 +97,15 @@ class _HeelBannerState extends State<HeelBanner>
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
                   HeelBanner.messageFor(_paint),
-                  maxLines: 2,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: HeelBanner.foregroundFor(_paint),
                     fontWeight: FontWeight.w800,
-                    letterSpacing: 1.4,
+                    letterSpacing: 0.6,
                     fontSize: 13,
                     height: 1.2,
-                    shadows: const [
-                      Shadow(color: Color(0xCC000000), blurRadius: 4),
-                    ],
                   ),
                 ),
               ),
