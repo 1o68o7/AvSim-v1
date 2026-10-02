@@ -177,8 +177,8 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
             ? 'patch ${patches.first.patchLink?.label ?? 'pairé'}'
             : 'patch $patchBat %');
     return DeckScaffold(
-      title: 'MES OBJETS',
-      subtitle: 'Sangle cardio · patch dorsal · pas de montre',
+      title: 'Mes objets',
+      subtitle: 'Sangle cardio · patch',
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
@@ -202,8 +202,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
             const Padding(
               padding: EdgeInsets.only(top: 8),
               child: Text(
-                'Bluetooth refusé. En entraînement le GPS téléphone continue. '
-                'FC / patch indisponibles.',
+                'Bluetooth refusé. GPS téléphone uniquement.',
                 style: TextStyle(color: DeckColors.volt, height: 1.4),
               ),
             ),
@@ -228,8 +227,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
                 border: Border.all(color: DeckColors.hairline),
               ),
               child: const Text(
-                'Aucun objet connecté.\n'
-                'Scanner une sangle (0x180D) ou apparier un patch dorsal (mock).',
+                'Aucun objet. Scanne une sangle cardio.',
                 style: TextStyle(color: DeckColors.muted, height: 1.4),
               ),
             ),
@@ -340,7 +338,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: () => _forget(d),
-                            child: Text(d.isPatch ? 'OUBLIER' : 'DÉCONNECTER'),
+                            child: Text(d.isPatch ? 'Oublier' : 'Déconnecter'),
                           ),
                         ),
                       ],
@@ -356,7 +354,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(h.name),
-                subtitle: Text('RSSI ${h.rssi} · tap pour appairer'),
+                subtitle: Text('Proche · appuyer pour lier'),
                 trailing: const Icon(Icons.add_link, color: DeckColors.volt),
                 onTap: rower == null ? null : () => _pair(h),
               ),
@@ -364,11 +362,6 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
           if (patches.isNotEmpty) ...[
             const SizedBox(height: 16),
             const DeckSectionLabel('Feedback patch'),
-            const Text(
-              'Personnel onboard (vibration / petit OLED). '
-              'Pas de liaison coach pendant une course. Pas de firmware ici.',
-              style: TextStyle(color: DeckColors.muted, fontSize: 12, height: 1.35),
-            ),
             for (final p in patches) ...[
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
@@ -378,7 +371,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Gîte (bande)'),
+                title: const Text('Gîte'),
                 value: p.feedbackGite,
                 onChanged: (v) => _savePatch(p.copyWith(feedbackGite: v)),
               ),
@@ -389,29 +382,16 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
                 onChanged: (v) => _savePatch(p.copyWith(feedbackHr: v)),
               ),
             ],
-            const Text(
-              'F estimée — non dispo',
-              style: TextStyle(color: DeckColors.label, fontSize: 12),
-            ),
           ],
           const SizedBox(height: 16),
           FilledButton(
             onPressed: rower == null || _scanning ? null : _scan,
-            child: Text(
-              _scanning ? 'SCAN…' : '+ AJOUTER UN OBJET (SCAN BLE)',
-            ),
+            child: Text(_scanning ? 'Scan…' : 'Ajouter un objet'),
           ),
           const SizedBox(height: 8),
           OutlinedButton(
             onPressed: rower == null ? null : _mockPatch,
-            child: const Text('SIMULER UN PATCH'),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Le patch dorsal mesure FC, SpO2 (au repos), température de peau '
-            'et orientation du torse. La sangle améliore la fidélité FC. '
-            'États patch = mock jusqu’au firmware.',
-            style: TextStyle(color: DeckColors.muted, fontSize: 11, height: 1.4),
+            child: const Text('Simuler un patch'),
           ),
           TextButton(
             onPressed: () => context.go(AppRoutes.consent),

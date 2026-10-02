@@ -55,7 +55,7 @@ void main() {
     expect(container.read(identityProvider).rowers.single.ffaLicence, isNull);
   });
 
-  testWidgets('ST-08 étape TA LICENCE : helper + PASSER + CONTINUER',
+  testWidgets('ST-08 étape licence : helper + Passer + Continuer',
       (tester) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -65,12 +65,12 @@ void main() {
     );
     await tester.pump();
     await tester.enterText(find.byType(TextField).first, 'Ada');
-    await tester.tap(find.text('CONTINUER'));
+    await tester.tap(find.text('Continuer'));
     await tester.pump();
-    expect(find.text('TA LICENCE'), findsOneWidget);
-    expect(find.textContaining('Loisir sans licence'), findsOneWidget);
-    expect(find.text('PASSER'), findsOneWidget);
-    expect(find.text('CONTINUER'), findsOneWidget);
+    expect(find.text('Ta licence'), findsOneWidget);
+    expect(find.textContaining('Sans licence'), findsOneWidget);
+    expect(find.text('Passer'), findsOneWidget);
+    expect(find.text('Continuer'), findsOneWidget);
   });
 
   test('miss → Profil loisir (pas erreur)', () {

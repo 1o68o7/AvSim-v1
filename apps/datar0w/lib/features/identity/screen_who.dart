@@ -98,12 +98,12 @@ Future<void> _confirmDeleteRower(
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('ANNULER'),
+            child: const Text('Annuler'),
           ),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: err),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('SUPPRIMER'),
+            child: const Text('Supprimer'),
           ),
         ],
       );
@@ -137,7 +137,7 @@ class _IdentityListScreenState extends ConsumerState<IdentityListScreen> {
     final snap = ref.watch(identityProvider);
     return DeckScaffold(
       title: 'Profils',
-      subtitle: 'Profil local · pas de mot de passe',
+      subtitle: 'Sur ce téléphone',
       showRetour: false,
       body: Column(
         children: [
@@ -145,15 +145,6 @@ class _IdentityListScreenState extends ConsumerState<IdentityListScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               children: [
-                const Text(
-                  'IDENTITÉ SUR CE TÉLÉPHONE',
-                  style: TextStyle(
-                    color: DeckColors.label,
-                    fontSize: 11,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 12),
                 if (snap.rowers.isEmpty)
                   const Text(
                     'Aucun profil. Crée-en un ou connecte-toi.',
@@ -216,7 +207,7 @@ class _IdentityListScreenState extends ConsumerState<IdentityListScreen> {
                 ],
                 FilledButton(
                   onPressed: () => _nav(AppRoutes.identityEdit),
-                  child: const Text('CRÉER UN PROFIL'),
+                  child: const Text('Créer un profil'),
                 ),
                 if (allowPasserSansProfil) ...[
                   const SizedBox(height: 8),

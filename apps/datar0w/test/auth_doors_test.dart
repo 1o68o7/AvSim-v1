@@ -176,7 +176,7 @@ void main() {
     if (blocked.evaluate().isNotEmpty) {
       // Au-dessus du CTA jaune, pas un SnackBar sous le bouton.
       expect(find.byType(SnackBar), findsNothing);
-      expect(find.text('CRÉER UN PROFIL'), findsOneWidget);
+      expect(find.text('Créer un profil'), findsOneWidget);
     }
   });
 

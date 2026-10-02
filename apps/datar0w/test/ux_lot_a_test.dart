@@ -92,27 +92,27 @@ void main() {
     expect(probe.deleteCalls, 0);
   });
 
-  testWidgets('delete : ANNULER conserve le profil', (tester) async {
+  testWidgets('delete : Annuler conserve le profil', (tester) async {
     final probe = _DeleteProbe(
       Rower.create(displayName: 'Camille Test', birthDate: DateTime(1998, 5, 10)),
     );
     await pumpWho(tester, probe);
     await tester.tap(find.byIcon(Icons.delete_outline));
     await tester.pump();
-    await tester.tap(find.text('ANNULER'));
+    await tester.tap(find.text('Annuler'));
     await tester.pump();
     expect(find.text('Camille Test'), findsOneWidget);
     expect(probe.deleteCalls, 0);
   });
 
-  testWidgets('delete : SUPPRIMER retire le profil', (tester) async {
+  testWidgets('delete : Supprimer retire le profil', (tester) async {
     final probe = _DeleteProbe(
       Rower.create(displayName: 'Camille Test', birthDate: DateTime(1998, 5, 10)),
     );
     await pumpWho(tester, probe);
     await tester.tap(find.byIcon(Icons.delete_outline));
     await tester.pump();
-    await tester.tap(find.text('SUPPRIMER'));
+    await tester.tap(find.text('Supprimer'));
     await tester.pump();
     expect(find.text('Camille Test'), findsNothing);
     expect(probe.deleteCalls, 1);

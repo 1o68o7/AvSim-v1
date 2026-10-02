@@ -114,8 +114,8 @@ class _RowerEditScreenState extends ConsumerState<RowerEditScreen> {
       updatedAt: DateTime.now(),
     );
     return DeckScaffold(
-      title: 'PROFIL RAMEUR',
-      subtitle: 'Catégorie calculée · jamais saisie',
+      title: 'Profil rameur',
+      subtitle: 'Catégorie calculée',
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
@@ -136,7 +136,7 @@ class _RowerEditScreenState extends ConsumerState<RowerEditScreen> {
             onTap: _pickDate,
           ),
           Text(
-            'Catégorie : ${preview.category()} (lecture seule)',
+            'Catégorie : ${preview.category()}',
             style: const TextStyle(color: DeckColors.volt, fontSize: 12),
           ),
           const SizedBox(height: 8),
@@ -172,7 +172,7 @@ class _RowerEditScreenState extends ConsumerState<RowerEditScreen> {
             decoration: const InputDecoration(labelText: 'Taille (cm)'),
           ),
           const SizedBox(height: 8),
-          const Text('Côté préféré (pas une contrainte)'),
+          const Text('Côté préféré'),
           Wrap(
             spacing: 8,
             children: [
@@ -187,7 +187,7 @@ class _RowerEditScreenState extends ConsumerState<RowerEditScreen> {
           TextField(
             controller: _oars,
             decoration: const InputDecoration(
-              labelText: 'Pelles (ex. P1/P2/P4)',
+              labelText: 'Pelles',
             ),
           ),
           const SizedBox(height: 8),
@@ -205,7 +205,7 @@ class _RowerEditScreenState extends ConsumerState<RowerEditScreen> {
           const SizedBox(height: 20),
           FilledButton(
             onPressed: _save,
-            child: const Text('ENREGISTRER'),
+            child: const Text('Enregistrer'),
           ),
         ],
       ),

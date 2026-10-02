@@ -33,8 +33,8 @@ class SettingsScreen extends ConsumerWidget {
     final rower = snap.activeRower;
 
     return DeckScaffold(
-      title: 'RÉGLAGES',
-      subtitle: 'compte · téléphone',
+      title: 'Réglages',
+      subtitle: 'Compte et téléphone',
       retourFallback: homeRouteForClubMemberRole(snap.prefs.clubRole),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -50,47 +50,37 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const Divider(height: 1, color: DeckColors.hairline),
           _SettingsTile(
-            label: 'Compte cloud',
+            label: 'Compte',
             value: uid == null
                 ? 'Non connecté'
-                : (email ?? 'Session active'),
+                : (email ?? 'Connecté'),
             onTap: () => context.go(AppRoutes.auth),
           ),
           const Divider(height: 1, color: DeckColors.hairline),
           _SettingsTile(
             label: 'Capteurs',
-            value: 'Bientôt',
+            value: 'Objets connectés',
             onTap: () => context.go(AppRoutes.devices),
           ),
           const Divider(height: 1, color: DeckColors.hairline),
           _SettingsTile(
-            label: 'Données de santé',
-            value: 'Consentement et constantes',
+            label: 'Données santé',
+            value: 'Consentement',
             onTap: () => context.go(AppRoutes.consent),
           ),
           const Divider(height: 1, color: DeckColors.hairline),
           const SizedBox(height: 24),
           if (uid != null) ...[
             const Text(
-              'Déconnexion',
-              style: TextStyle(
-                color: DeckColors.label,
-                fontSize: 12,
-                letterSpacing: 1.1,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
               'Tes séances restent sur ce téléphone.',
               style: TextStyle(color: DeckColors.muted, height: 1.35),
             ),
             const SizedBox(height: 12),
-            const SignOutButton(outlined: true, label: 'DÉCONNEXION'),
+            const SignOutButton(outlined: true, label: 'Déconnexion'),
           ] else ...[
             FilledButton(
               onPressed: () => context.go(AppRoutes.auth),
-              child: const Text('CONNEXION'),
+              child: const Text('Connexion'),
             ),
           ],
         ],

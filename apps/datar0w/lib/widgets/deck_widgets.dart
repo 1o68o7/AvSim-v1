@@ -589,7 +589,7 @@ class _DiamondPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// Pilule LOCAL · EN FILE · CLOUD (DR-20).
+/// Pilule sync — affiche uniquement l’état actif (DR-20).
 class DeckSyncPill extends StatelessWidget {
   const DeckSyncPill({
     super.key,
@@ -600,22 +600,11 @@ class DeckSyncPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget seg(String label, DeckHonestKind kind) {
-      final on = kind == highlight;
-      final color = switch (kind) {
-        DeckHonestKind.cloud => DeckColors.tribord,
-        DeckHonestKind.enFile => DeckColors.amber,
-        _ => on ? DeckColors.text : DeckColors.label,
-      };
-      return Text(
-        label,
-        style: DeckType.labelMono(
-          color: color,
-          size: 10,
-          weight: on ? FontWeight.w600 : FontWeight.w500,
-        ),
-      );
-    }
+    final (label, color) = switch (highlight) {
+      DeckHonestKind.cloud => ('CLOUD', DeckColors.tribord),
+      DeckHonestKind.enFile => ('EN FILE', DeckColors.amber),
+      _ => ('LOCAL', DeckColors.label),
+    };
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -631,20 +620,19 @@ class DeckSyncPill extends StatelessWidget {
             width: 6,
             height: 6,
             decoration: BoxDecoration(
-              color: highlight == DeckHonestKind.cloud
-                  ? DeckColors.tribord
-                  : highlight == DeckHonestKind.enFile
-                      ? DeckColors.amber
-                      : DeckColors.label,
+              color: color,
               shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: 6),
-          seg('LOCAL', DeckHonestKind.local),
-          Text(' · ', style: DeckType.labelMono(size: 10)),
-          seg('EN FILE', DeckHonestKind.enFile),
-          Text(' · ', style: DeckType.labelMono(size: 10)),
-          seg('CLOUD', DeckHonestKind.cloud),
+          Text(
+            label,
+            style: DeckType.labelMono(
+              color: color,
+              size: 10,
+              weight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );

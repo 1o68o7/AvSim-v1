@@ -58,18 +58,10 @@ class ProfileScreen extends ConsumerWidget {
               letterSpacing: 1.6,
             ),
           ),
-          const SizedBox(height: 4),
-          const Text(
-            'Poste de contrôle télémétrique',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
           const SizedBox(height: 16),
           _RoleCard(
             title: 'RAMEUR',
-            subtitle: 'Instrument embarqué · Vue cale-pied',
+            subtitle: 'Vue embarquée',
             icon: Icons.speed,
             highlighted: true,
             onTap: () {
@@ -80,7 +72,7 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           _RoleCard(
             title: 'COACH',
-            subtitle: 'Suivi direct bord de bassin',
+            subtitle: 'Bord de bassin',
             icon: Icons.sports,
             onTap: () {
               ref.read(boatConfigProvider.notifier).setRole(CrewRole.coach);
@@ -90,9 +82,8 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           _RoleCard(
             title: 'BARREUR',
-            subtitle: 'V sol, distance, gîte bateau (4+ / 8+)',
+            subtitle: 'Vitesse, distance, gîte',
             icon: Icons.directions_boat,
-            footnote: 'un tél. = hub bateau, pas 8 IMU',
             onTap: () {
               ref.read(boatConfigProvider.notifier).setRole(CrewRole.cox);
               if (!cfg.coxed) {

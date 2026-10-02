@@ -215,8 +215,7 @@ class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
         child: Padding(
           padding: EdgeInsets.all(24),
           child: Text(
-            'Aucune séance locale.\n'
-            'Les fichiers restent dans Documents/sessions/.',
+            'Aucune séance sur ce téléphone.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: DeckType.ui,
@@ -231,69 +230,16 @@ class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: DeckColors.surface,
-            borderRadius: DeckRadii.cardAll,
-            border: Border.all(color: DeckColors.hairline),
+        if (_selected.isNotEmpty) ...[
+          FilledButton(
+            onPressed: _shareSelected,
+            child: Text('Envoyer la sélection (${_selected.length})'),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.smartphone, size: 20, color: DeckColors.text),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'STOCKAGE FLASH APPAREIL',
-                      style: DeckType.labelMono(
-                        color: DeckColors.label,
-                        size: 10,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '${_rows.length} séances',
-                    style: DeckType.labelMono(color: DeckColors.text, size: 10),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Fichiers bruts enregistrés en mémoire flash du téléphone '
-                '(JSONL, GPS, IMU). Consultables même sans réseau.',
-                style: TextStyle(
-                  fontFamily: DeckType.ui,
-                  fontSize: 12,
-                  color: DeckColors.label,
-                  height: 1.35,
-                ),
-              ),
-              if (_selected.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                FilledButton(
-                  onPressed: _shareSelected,
-                  child: Text('Envoyer la sélection (${_selected.length})'),
-                ),
-              ],
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Text(
-              'Fichiers locaux récents',
-              style: DeckType.uiLabel(weight: FontWeight.w600),
-            ),
-            const Spacer(),
-            Text(
-              'ORDRE : DATE DESC',
-              style: DeckType.labelMono(color: DeckColors.muted, size: 10),
-            ),
-          ],
+          const SizedBox(height: 12),
+        ],
+        Text(
+          '${_rows.length} séances',
+          style: DeckType.uiLabel(weight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         for (var i = 0; i < _rows.length; i++) ...[
