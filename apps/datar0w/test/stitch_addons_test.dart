@@ -157,8 +157,6 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(find.text('Au quai'), findsOneWidget);
-    await tester.ensureVisible(find.textContaining('Importer patch'));
-    await tester.pump();
     expect(find.textContaining('Importer patch'), findsOneWidget);
     expect(find.textContaining('Partager l’export local'), findsOneWidget);
     expect(dir.path, isNotEmpty);
