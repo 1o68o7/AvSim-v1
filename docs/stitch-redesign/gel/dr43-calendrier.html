@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "primary-container": "#caf22e", "surface": "#131313", "surface-container": "#201f1f", "surface-container-highest": "#353534", "on-secondary-fixed-variant": "#005229", "surface-container-low": "#1c1b1b", "tertiary-fixed-dim": "#ffb3af", "on-error": "#690005", "on-primary-fixed-variant": "#3d4c00", "primary": "#ffffff", "inverse-surface": "#e5e2e1", "error": "#ffb4ab", "tertiary-container": "#ffdad7", "on-tertiary": "#68000e", "surface-container-high": "#2a2a2a", "primary-fixed-dim": "#afd500", "secondary": "#64de8d", "on-surface": "#e5e2e1", "on-primary-container": "#586c00", "on-tertiary-fixed-variant": "#8d141e", "tertiary": "#ffffff", "outline": "#8f937a", "on-error-container": "#ffdad6", "on-tertiary-fixed": "#410005", "surface-dim": "#131313", "on-secondary-container": "#003116", "on-secondary-fixed": "#00210d", "primary-fixed": "#caf22e", "outline-variant": "#454934", "tertiary-fixed": "#ffdad7", "on-tertiary-container": "#b63538", "surface-bright": "#3a3939", "surface-tint": "#afd500", "on-primary": "#293500", "background": "#131313", "inverse-on-surface": "#313030", "secondary-fixed": "#81fba7", "on-primary-fixed": "#171e00", "on-secondary": "#00391a", "secondary-fixed-dim": "#64de8d", "surface-container-lowest": "#0e0e0e", "on-surface-variant": "#c5c9ae", "on-background": "#e5e2e1", "surface-variant": "#353534", "error-container": "#93000a", "inverse-primary": "#526600", "secondary-container": "#20a55c" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "margin": "1rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-xl": "2rem", "space-lg": "1.5rem", "space-md": "1rem", "gutter": "1rem" }, "fontFamily": { "body-sm": ["Inter"], "body-md": ["Inter"], "label-mono": ["JetBrains Mono"], "headline-sm": ["Inter"], "headline-lg": ["Inter"], "metric-hero": ["JetBrains Mono"], "body-lg": ["Inter"], "metric-md": ["JetBrains Mono"], "metric-sm": ["JetBrains Mono"], "headline-md": ["Inter"], "label-ui": ["Inter"], "metric-lg": ["JetBrains Mono"] }, "fontSize": { "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "label-mono": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "500" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "metric-hero": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.04em", "fontWeight": "700" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "metric-md": ["20px", { "lineHeight": "24px", "fontWeight": "600" }], "metric-sm": ["14px", { "lineHeight": "18px", "fontWeight": "500" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "label-ui": ["13px", { "lineHeight": "16px", "fontWeight": "500" }], "metric-lg": ["32px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#131313;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.35)]"><div class="h-16 px-margin flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0"><button aria-label="Retour" class="w-12 h-12 -ml-2 rounded-xl flex items-center justify-center text-on-surface hover:text-primary-fixed hover:bg-surface-container transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><div class="flex flex-col min-w-0"><h1 class="text-label-ui font-label-ui text-on-surface tracking-tight truncate">Dr 42 Trésorerie &amp; Licences</h1><div class="flex items-center gap-space-xs mt-0.5"><span class="inline-flex items-center px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono text-label-mono">AC LACANAU</span><span class="inline-flex items-center px-1.5 py-0.5 rounded bg-secondary-container/20 text-secondary font-label-mono text-label-mono">FFA</span></div></div></div><div class="flex items-center shrink-0"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-16 bg-surface px-margin pb-safe"><div class="flex flex-col w-full pb-8">
+<!-- Top Technical Subheader / Protocol Badge -->
+<section class="flex flex-col gap-space-xs mt-2 mb-4">
+<div class="flex items-center justify-between gap-space-xs flex-wrap">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-high text-primary-fixed font-label-mono text-label-mono">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed animate-ping"></span>
+        DR-43 • CALENDRIER &amp; RÉGATES
+      </div>
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-secondary-container/20 text-secondary font-label-mono text-label-mono">
+<span class="material-symbols-outlined text-[14px]">sync</span>
+        FLUX JSON CLUB SYNCHRO OK
+      </div>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant">
+      Échéances officielles FFA, régates régionales, stages et vie du club
+    </p>
+<!-- Sync info banner -->
+<div class="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-surface-container-lowest mt-1">
+<div class="flex items-center gap-2 min-w-0">
+<span class="material-symbols-outlined text-secondary text-[16px] shrink-0">cloud_done</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant truncate">
+          Synchronisé serveur club &amp; FFA (il y a 12 min)
+        </span>
+</div>
+<div class="flex items-center gap-1 shrink-0">
+<button aria-label="Actualiser" class="p-1.5 rounded bg-surface-container hover:bg-surface-bright active:scale-95 transition-all text-on-surface" id="btn-manual-sync">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+</button>
+<button aria-label="Exporter vers calendrier" class="p-1.5 rounded bg-surface-container hover:bg-surface-bright active:scale-95 transition-all text-on-surface flex items-center gap-1 text-label-mono font-label-mono" id="btn-export-quick">
+<span class="material-symbols-outlined text-[16px]">calendar_add_on</span>
+<span>.ICS</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Quick Filter Chips: Event Types -->
+<section class="flex flex-col gap-2 mb-3">
+<div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none -mx-margin px-margin">
+<button class="filter-chip shrink-0 h-8 px-3 rounded-full bg-primary-fixed text-on-primary-fixed font-label-ui text-label-ui flex items-center gap-1.5 font-semibold">
+<span>Tous</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface/20 text-label-mono font-label-mono text-[10px]">14</span>
+</button>
+<button class="filter-chip shrink-0 h-8 px-3 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-ui text-label-ui flex items-center gap-1.5">
+<span>Régates FFA</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface-container-highest text-secondary text-label-mono font-label-mono text-[10px]">5</span>
+</button>
+<button class="filter-chip shrink-0 h-8 px-3 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-ui text-label-ui flex items-center gap-1.5">
+<span>Stages Eau</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface-container-highest text-on-surface-variant text-label-mono font-label-mono text-[10px]">3</span>
+</button>
+<button class="filter-chip shrink-0 h-8 px-3 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-ui text-label-ui flex items-center gap-1.5">
+<span>Vie du Club</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface-container-highest text-on-surface-variant text-label-mono font-label-mono text-[10px]">4</span>
+</button>
+<button class="filter-chip shrink-0 h-8 px-3 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-ui text-label-ui flex items-center gap-1.5">
+<span>Championnats</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface-container-highest text-primary-fixed text-label-mono font-label-mono text-[10px]">2</span>
+</button>
+</div>
+<!-- Category selector -->
+<div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none -mx-margin px-margin">
+<span class="text-label-mono font-label-mono text-on-surface-variant uppercase text-[10px] pl-1 shrink-0">Catégorie:</span>
+<button class="shrink-0 h-7 px-2.5 rounded bg-surface-container text-on-surface-variant font-label-mono text-label-mono hover:text-on-surface">Toutes</button>
+<button class="shrink-0 h-7 px-2.5 rounded bg-secondary-container/20 text-secondary font-label-mono text-label-mono flex items-center gap-1 font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+        SH (Senior Homme)
+      </button>
+<button class="shrink-0 h-7 px-2.5 rounded bg-surface-container text-on-surface-variant font-label-mono text-label-mono hover:text-on-surface">J18</button>
+<button class="shrink-0 h-7 px-2.5 rounded bg-surface-container text-on-surface-variant font-label-mono text-label-mono hover:text-on-surface">Master</button>
+<button class="shrink-0 h-7 px-2.5 rounded bg-surface-container text-on-surface-variant font-label-mono text-label-mono hover:text-on-surface">Loisir / Rando</button>
+</div>
+</section>
+<!-- Featured Banner Card: Next Imminent Competition -->
+<section class="relative w-full rounded-xl bg-surface-container-low p-4 mb-5 overflow-hidden shadow-lg">
+<!-- Technical Volt Accent Strip on Top -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-primary-fixed"></div>
+<div class="flex items-center justify-between gap-2 mb-2.5">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-error-container text-on-error-container font-label-mono text-label-mono font-semibold">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+        J - 6 • INSCRIPTIONS CLOSES LE 14/04
+      </span>
+<span class="text-label-mono font-label-mono text-secondary text-right">2000 MÈTRES</span>
+</div>
+<!-- Title and Venue -->
+<h2 class="text-headline-sm font-headline-sm text-on-surface leading-tight mb-1">
+      Championnat de Ligue Nouvelle-Aquitaine
+    </h2>
+<div class="flex items-center gap-1.5 text-body-sm font-body-sm text-on-surface-variant mb-3">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed shrink-0">location_on</span>
+<span>Bassin nautique de Sainte-Foy-la-Grande • 20 &amp; 21 Avril 2024</span>
+</div>
+<!-- Telemetry grid: Club boat assignments -->
+<div class="grid grid-cols-2 gap-2 p-3 rounded-lg bg-surface-container-lowest mb-3">
+<div class="flex flex-col min-w-0">
+<span class="text-label-mono font-label-mono text-on-surface-variant text-[10px]">ENGAGEMENTS CLUB</span>
+<span class="text-metric-sm font-metric-sm text-primary">3 coques inscrites</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant truncate">4x SH, 2- SF, 1x JH18</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="text-label-mono font-label-mono text-on-surface-variant text-[10px]">COQUE RATACHÉE</span>
+<span class="text-metric-sm font-metric-sm text-secondary truncate">Empacher 4x/- (B-04)</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Série Sam. 09:30</span>
+</div>
+</div>
+<!-- User Athlete Slot Status -->
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container mb-3">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-lg bg-secondary-container/20 text-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">rowing</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="text-label-ui font-label-ui text-on-surface font-semibold truncate">Alexandre Martin — Nage (S4)</span>
+<span class="text-label-mono font-label-mono text-on-surface-variant text-[11px]">Dossard #104 • Licence A-584930</span>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-secondary/10 text-secondary font-label-mono text-label-mono shrink-0">
+        TITULAIRE ✓
+      </span>
+</div>
+<!-- Interactive mini CTAs -->
+<div class="grid grid-cols-2 gap-2">
+<button class="h-10 px-2 rounded-lg bg-surface-container-high hover:bg-surface-bright active:scale-95 text-on-surface font-label-ui text-label-ui flex items-center justify-center gap-1.5 transition-all text-center">
+<span class="material-symbols-outlined text-[18px] text-primary-fixed">format_list_numbered</span>
+<span class="truncate">Tirage &amp; Couloirs (DR-72)</span>
+</button>
+<button class="h-10 px-2 rounded-lg bg-surface-container-high hover:bg-surface-bright active:scale-95 text-on-surface font-label-ui text-label-ui flex items-center justify-center gap-1.5 transition-all text-center">
+<span class="material-symbols-outlined text-[18px] text-secondary">local_shipping</span>
+<span class="truncate">Feuille remorque</span>
+</button>
+</div>
+</section>
+<!-- Timeline Section -->
+<section class="flex flex-col gap-3 mb-6">
+<!-- Month Separator: AVRIL 2024 -->
+<div class="flex items-center gap-2 pt-1 pb-1">
+<span class="text-metric-sm font-metric-sm text-primary-fixed tracking-wider">AVRIL 2024</span>
+<div class="flex-1 h-px bg-surface-container-highest"></div>
+<span class="text-label-mono font-label-mono text-on-surface-variant">2 ÉVÉNEMENTS</span>
+</div>
+<!-- Item 1: Régate Fédérale Sainte Foy -->
+<div class="flex flex-col rounded-xl bg-surface-container p-3.5 gap-2.5 shadow-sm">
+<div class="flex items-start justify-between gap-3">
+<div class="flex flex-col items-center justify-center min-w-[54px] py-1.5 px-2 rounded-lg bg-surface-container-lowest text-center shrink-0">
+<span class="text-label-mono font-label-mono text-primary-fixed text-[11px] leading-tight">20-21</span>
+<span class="text-metric-sm font-metric-sm text-primary uppercase font-bold">AVR</span>
+<span class="text-label-mono font-label-mono text-on-surface-variant text-[10px]">SAM-DIM</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-secondary-container/20 text-secondary font-label-mono text-[10px] font-semibold">
+              RÉGATE OFFICIELLE FFA
+            </span>
+<span class="text-label-mono font-label-mono text-on-surface-variant text-[11px]">2000m • 6 Couloirs</span>
+</div>
+<h3 class="text-body-lg font-body-lg font-semibold text-on-surface leading-snug">
+            Régate de Ligue #2 — Sainte-Foy
+          </h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">
+            Bassin en ligne rivière Dordogne, Sainte-Foy-la-Grande
+          </p>
+</div>
+</div>
+<!-- Detail chips -->
+<div class="flex flex-col gap-1.5 p-2 rounded-lg bg-surface-container-low text-body-sm font-body-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-secondary">rv_hookup</span>
+<span>Départ remorque : 19/04 à 17h00</span>
+</span>
+<span class="text-label-mono font-label-mono text-on-surface">Coach Marc</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-on-surface-variant">Bateau attribué :</span>
+<span class="font-label-mono text-label-mono text-primary-fixed">Empacher 4x/- (Engagé)</span>
+</div>
+</div>
+</div>
+<!-- Item 2: Stage Club Pâques -->
+<div class="flex flex-col rounded-xl bg-surface-container p-3.5 gap-2.5 shadow-sm">
+<div class="flex items-start justify-between gap-3">
+<div class="flex flex-col items-center justify-center min-w-[54px] py-1.5 px-2 rounded-lg bg-surface-container-lowest text-center shrink-0">
+<span class="text-label-mono font-label-mono text-on-surface-variant text-[11px] leading-tight">27-28</span>
+<span class="text-metric-sm font-metric-sm text-primary uppercase font-bold">AVR</span>
+<span class="text-label-mono font-label-mono text-on-surface-variant text-[10px]">SAM-DIM</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface font-label-mono text-[10px] font-semibold">
+              STAGE CLUB &amp; BASSIN
+            </span>
+<span class="text-label-mono font-label-mono text-error text-[11px]">Complet (16/16)</span>
+</div>
+<h3 class="text-body-lg font-body-lg font-semibold text-on-surface leading-snug">
+            Stage de Pâques Pôle Performance &amp; Cadence
+          </h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">
+            Base nautique Lacanau • 3 séances/jour + analyse vidéo
+          </p>
+</div>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low text-body-sm font-body-sm text-on-surface-variant">
+<span>Public : Seniors &amp; J18 compétiteurs</span>
+<span class="font-label-mono text-label-mono text-on-surface">Coach H. Vasseur</span>
+</div>
+</div>
+<!-- Month Separator: MAI 2024 -->
+<div class="flex items-center gap-2 pt-3 pb-1">
+<span class="text-metric-sm font-metric-sm text-primary-fixed tracking-wider">MAI 2024</span>
+<div class="flex-1 h-px bg-surface-container-highest"></div>
+<span class="text-label-mono font-label-mono text-on-surface-variant">2 ÉVÉNEMENTS</span>
+</div>
+<!-- Item 3: Championnats de France Bateaux Longs -->
+<div class="flex flex-col rounded-xl bg-surface-container p-3.5 gap-2.5 shadow-sm">
+<div class="flex items-start justify-between gap-3">
+<div class="flex flex-col items-center justify-center min-w-[54px] py-1.5 px-2 rounded-lg bg-surface-container-lowest text-center shrink-0">
+<span class="text-label-mono font-label-mono text-primary-fixed text-[11px] leading-tight">18-20</span>
+<span class="text-metric-sm font-metric-sm text-primary uppercase font-bold">MAI</span>
+<span class="text-label-mono font-label-mono text-on-surface-variant text-[10px]">SAM-LUN</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-primary-fixed/20 text-primary-fixed font-label-mono text-[10px] font-semibold">
+              CHAMPIONNAT DE FRANCE FFA
+            </span>
+<span class="text-label-mono font-label-mono text-secondary text-[11px]">Stade Nautique</span>
+</div>
+<h3 class="text-body-lg font-body-lg font-semibold text-on-surface leading-snug">
+            Championnats de France Bateaux Longs
+          </h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">
+            Mantes-la-Jolie • 2000m olympique • Quotas régionaux
+          </p>
+</div>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low text-body-sm font-body-sm">
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-error">event_busy</span>
+<span>Clôture staff club :</span>
+</span>
+<span class="font-label-mono text-label-mono text-error font-semibold">02 Mai à 23:59 (DR-40)</span>
+</div>
+</div>
+<!-- Item 4: Randonnée Dordogne -->
+<div class="flex flex-col rounded-xl bg-surface-container p-3.5 gap-2.5 shadow-sm">
+<div class="flex items-start justify-between gap-3">
+<div class="flex flex-col items-center justify-center min-w-[54px] py-1.5 px-2 rounded-lg bg-surface-container-lowest text-center shrink-0">
+<span class="text-label-mono font-label-mono text-on-surface-variant text-[11px] leading-tight">26</span>
+<span class="text-metric-sm font-metric-sm text-primary uppercase font-bold">MAI</span>
+<span class="text-label-mono font-label-mono text-on-surface-variant text-[10px]">DIM</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-label-mono text-[10px] font-semibold">
+              RANDONNÉE FFA LOISIR
+            </span>
+<span class="text-label-mono font-label-mono text-on-surface-variant text-[11px]">32 km en rivière</span>
+</div>
+<h3 class="text-body-lg font-body-lg font-semibold text-on-surface leading-snug">
+            Descente de la Dordogne en Yolette &amp; 4x Rando
+          </h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">
+            Parcours découverte loisir, ponton arrivée &amp; pique-nique club
+          </p>
+</div>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-surface-container-low text-body-sm font-body-sm text-on-surface-variant">
+<span>Ouvert à tous rameurs brevetés</span>
+<span class="font-label-mono text-label-mono text-secondary">Inscriptions ouvertes</span>
+</div>
+</div>
+</section>
+<!-- Logistic & Trailer Section Card -->
+<section class="rounded-xl bg-surface-container-low p-4 mb-6 shadow-md">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed text-[20px]">rv_hookup</span>
+<h3 class="text-headline-sm font-headline-sm text-on-surface">
+          Logistique remorque (DR-41)
+        </h3>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-secondary-container/20 text-secondary font-label-mono text-label-mono">
+        OPÉRATIONNEL
+      </span>
+</div>
+<div class="grid grid-cols-1 gap-2 mt-3">
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container text-body-sm font-body-sm">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-on-surface">handyman</span>
+<span>Démontage &amp; sangle au hangar :</span>
+</div>
+<span class="font-label-mono text-label-mono text-primary font-semibold">Ven. 19/04 à 18h30</span>
+</div>
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container text-body-sm font-body-sm">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-on-surface">assignment_ind</span>
+<span>Responsables parc :</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface text-right truncate">Marc D. &amp; Alexandre M.</span>
+</div>
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container text-body-sm font-body-sm">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-on-surface">directions_boat</span>
+<span>Coques remorque (4/6) :</span>
+</div>
+<span class="font-label-mono text-label-mono text-secondary text-right truncate">Empacher 4x/-, Filippi 2-, 2x Hudson</span>
+</div>
+</div>
+</section>
+<!-- Bottom Actions & System CTA -->
+<section class="flex flex-col gap-3">
+<!-- Primary Volt Button: ICS Sync -->
+<button class="w-full min-h-[52px] py-3.5 px-4 rounded-xl bg-primary-fixed hover:bg-primary-fixed-dim text-on-primary-fixed font-headline-sm font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-md" id="btn-sync-calendar">
+<span class="material-symbols-outlined text-[22px]">calendar_month</span>
+<span class="tracking-tight text-center">SYNCHRONISER AVEC MON CALENDRIER (.ICS)</span>
+</button>
+<!-- Secondary Ghost Button: Modify availability -->
+<button class="w-full min-h-[48px] py-2.5 px-4 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-body-md font-body-md flex items-center justify-center gap-2 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">edit_calendar</span>
+<span>Proposer une sortie ou modifier mes disponibilités</span>
+</button>
+<!-- Quick Navigation to Rower/Coach modules -->
+<div class="grid grid-cols-2 gap-2 mt-1">
+<button class="h-11 px-3 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface font-label-mono text-label-mono flex items-center justify-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed">sailing</span>
+<span>Aujourd'hui Rameur</span>
+</button>
+<button class="h-11 px-3 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface font-label-mono text-label-mono flex items-center justify-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[16px] text-secondary">sports</span>
+<span>Aujourd'hui Coach</span>
+</button>
+</div>
+</section>
+<!-- Interactive Feedback Toast Placeholder (Client micro-interaction) -->
+<div class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-lg bg-surface-bright text-primary font-label-ui text-label-ui shadow-2xl flex items-center gap-2" id="sync-toast">
+<span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>
+<span>Calendrier synchronisé au format iCalendar (.ics) !</span>
+</div>
+</div>
+<script>
+  // Simple micro-interactions for calendar sync feedback
+  const syncBtn = document.getElementById('btn-sync-calendar');
+  const exportBtn = document.getElementById('btn-export-quick');
+  const manualSync = document.getElementById('btn-manual-sync');
+  const toast = document.getElementById('sync-toast');
+
+  function showToast(message) {
+    if (!toast) return;
+    if (message) {
+      toast.querySelector('span:last-child').textContent = message;
+    }
+    toast.classList.remove('hidden');
+    setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 2800);
+  }
+
+  if (syncBtn) {
+    syncBtn.addEventListener('click', () => {
+      showToast('Export du calendrier FFA club réussi (.ics généré)');
+    });
+  }
+
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      showToast('Fichier .ics téléchargé pour votre appareil');
+    });
+  }
+
+  if (manualSync) {
+    manualSync.addEventListener('click', () => {
+      manualSync.classList.add('animate-spin');
+      setTimeout(() => {
+        manualSync.classList.remove('animate-spin');
+        showToast('Flux JSON club actualisé : à jour (0 min)');
+      }, 700);
+    });
+  }
+</script></main></body></html>
