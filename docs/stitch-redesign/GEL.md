@@ -33,45 +33,43 @@ les headers / pilules des écrans hub — pas de strip permanent sous AppBar.
 
 ## Mapping DR → routes Flutter
 
-| Stitch | Route | Notes |
+| Stitch | Route | Layout / notes |
 |---|---|---|
-| DR-10 Connexion | `/auth` | Volt CTA |
+| DR-01 Qui rame | `/identity` | `IdentityListScreen` |
 | DR-02 Fiche rameur | `/identity/edit` | |
 | DR-03 Licence & club | `/onboarding/rower`, `/club` | |
-| DR-30 Aujourd’hui Coach | `/home/coach` | |
+| DR-10 Connexion | `/auth` | Volt CTA · sans bottom nav |
+| DR-20 Aujourd’hui rameur | `/home/rower` | `HomeRowerScreen` + shell |
+| DR-30 Aujourd’hui Coach | `/home/coach` | `HomeCoachScreen` + shell |
 | DR-31 Composer équipage | `/crew` | |
 | DR-32 Rejoindre par code | `/join` | |
 | DR-33 Live Coach | `/coach` | |
 | DR-34 Séances du club | `/club/sessions` | |
 | DR-40 Aujourd’hui Staff | `/home/admin` | |
 | DR-41 Fiche bateau | `/club/boat` | |
-| DR-42 Trésorerie | — | hors MVP téléphone |
+| DR-42 Trésorerie | — | **hors scope** téléphone / MVP |
 | DR-43 Calendrier | `/calendar` | |
 | DR-45 Plans d’eau | `/waters` | |
-| DR-52 Gîte paysage | `/live` | Cockpit 3 col. + cadran avionique (`HeelGauge`) |
+| DR-50 Préparer séance | `/presession` | |
+| DR-51 Tare | `/tare` | |
+| DR-52 Gîte paysage | `/live` | Cockpit 3 col. + `HeelGauge` |
 | DR-53 Live barreur | `/cox` | |
-| DR-55 Replay rameur | `/replay` | |
-| DR-56 Replay flotte | `/replay-coach` | |
-| DR-60 Mes séances | `/sessions` | |
+| DR-54 Quai | `/quai` | |
+| DR-55 Replay rameur | `/replay` | `RowerReplayScreen` + `ReplayBody` |
+| DR-56 Replay flotte | `/replay-coach` | `CoachReplayScreen` |
+| DR-60 Mes séances | `/sessions` | shell |
 | DR-61 Objets BLE | `/devices` | |
 | DR-62 Santé / consentement | `/consent` | |
-| DR-63 Journal BLE | `/devices` (diag) | |
+| DR-63 Journal BLE | `/devices/journal` | `BleJournalScreen` · diag local |
+| DR-64 Réglages | `/settings` | lien journal + objets |
 | DR-70 Sortir coque | `/ops/out` | |
 | DR-71 Rentrer coque | `/ops/in` | |
 | DR-72 Alignement | `/ops/departure` | |
-| Live rameur | `/live` | nav bar dismissée |
+| Plus (grille) | `/plus` | shell |
 
 Shell standard : 3 onglets `Aujourd’hui` · `Séances` · `Plus` (indicateur Volt 2px) —  
 `DeckTabScaffold` (`lib/widgets/deck_shell.dart`) + route `/plus`.  
 Mode eau : plein pont telemetry, pas de bottom nav.
-
-| Stitch hub | Route Flutter | Layout |
-|---|---|---|
-| DR-20 Aujourd’hui rameur | `/home/rower` | `HomeRowerScreen` + shell |
-| DR-30 Aujourd’hui coach | `/home/coach` | `HomeCoachScreen` + shell |
-| DR-60 Séances | `/sessions` | `SessionHistoryScreen` + shell |
-| Plus (grille) | `/plus` | `PlusScreen` + shell |
-| DR-10 Connexion | `/auth` | layout redesign (sans bottom nav) |
 
 ## Obsolète
 

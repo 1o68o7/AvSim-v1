@@ -74,8 +74,14 @@ class PlusScreen extends ConsumerWidget {
             _PlusTile(
               icon: Icons.sensors,
               title: 'Mes objets',
-              subtitle: 'Capteurs BLE',
+              subtitle: 'Capteurs BLE · journal technique',
               onTap: () => context.go(AppRoutes.devices),
+            ),
+            _PlusTile(
+              icon: Icons.terminal,
+              title: 'Journal BLE',
+              subtitle: 'Diagnostics bas-niveau',
+              onTap: () => context.go(AppRoutes.bleJournal),
             ),
             _PlusTile(
               icon: Icons.favorite_border,

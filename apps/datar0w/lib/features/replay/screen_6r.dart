@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../router.dart';
 import 'replay_load.dart';
 
+/// DR-55 — Replay rameur (Stitch).
 class RowerReplayScreen extends StatelessWidget {
   const RowerReplayScreen({super.key, this.sessionId});
 
@@ -14,7 +15,7 @@ class RowerReplayScreen extends StatelessWidget {
     final id = sessionId?.trim();
     final hasId = id != null && id.isNotEmpty;
     return ReplayLoadScreen(
-      title: 'REPLAY RAMEUR',
+      title: 'Replay rameur',
       sessionId: hasId ? id : null,
       onBack: () => context.go(hasId ? AppRoutes.sessions : AppRoutes.quai),
       showEval: false,

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../health/consent_store.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import '../../widgets/deck_widgets.dart';
 
 final consentStoreProvider = Provider<ConsentStore>((ref) => ConsentStore());
 
@@ -37,21 +38,32 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   @override
   Widget build(BuildContext context) {
     return DeckScaffold(
-      title: 'DONNÉES SANTÉ',
-      subtitle: 'informatif, pas médical',
+      title: 'Santé & consentement',
+      subtitle: 'RGPD Art. 9 · informatif, pas médical',
       body: !_loaded
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
               children: [
+                const Wrap(
+                  spacing: 8,
+                  children: [
+                    DeckHonestChip(kind: DeckHonestKind.local),
+                    DeckStatusChip(label: 'Chiffré local', ok: true),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 const Text(
                   'La fréquence cardiaque et la saturation sont des '
-                  'indications d’entraînement, pas un diagnostic.',
+                  'indications d’entraînement, pas un diagnostic. '
+                  'Stockage local-first.',
                   style: TextStyle(color: DeckColors.muted, height: 1.4),
                 ),
+                const SizedBox(height: 8),
+                const DeckSectionLabel('Consentement actif'),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Enregistrer FC / SpO2'),
+                  title: const Text('Collecte biométrique en séance'),
                   value: _c.accepted,
                   onChanged: (v) async {
                     final n = HealthConsent(
@@ -65,7 +77,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Partager avec le coach'),
+                  title: const Text('Cockpit coach live & débrief'),
                   subtitle: const Text('Désactivé par défaut'),
                   value: _c.shareWithCoach,
                   onChanged: !_c.accepted

@@ -9,6 +9,7 @@ import '../../sync/auth_google.dart';
 import '../../sync/supabase_boot.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import '../../widgets/deck_widgets.dart';
 import '../../widgets/sign_out_button.dart';
 
 /// ST-10 — Réglages + déconnexion (tokens only, JSONL intacts).
@@ -33,8 +34,8 @@ class SettingsScreen extends ConsumerWidget {
     final rower = snap.activeRower;
 
     return DeckScaffold(
-      title: 'RÉGLAGES',
-      subtitle: 'compte · téléphone',
+      title: 'Réglages',
+      subtitle: 'Compte · téléphone · capteurs',
       retourFallback: homeRouteForClubMemberRole(snap.prefs.clubRole),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -58,9 +59,15 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const Divider(height: 1, color: DeckColors.hairline),
           _SettingsTile(
-            label: 'Capteurs',
-            value: 'Bientôt',
+            label: 'Mes objets',
+            value: 'Sangle · patch · scan BLE',
             onTap: () => context.go(AppRoutes.devices),
+          ),
+          const Divider(height: 1, color: DeckColors.hairline),
+          _SettingsTile(
+            label: 'Journal technique BLE',
+            value: 'Diagnostics bas-niveau locaux',
+            onTap: () => context.go(AppRoutes.bleJournal),
           ),
           const Divider(height: 1, color: DeckColors.hairline),
           _SettingsTile(
@@ -86,11 +93,11 @@ class SettingsScreen extends ConsumerWidget {
               style: TextStyle(color: DeckColors.muted, height: 1.35),
             ),
             const SizedBox(height: 12),
-            const SignOutButton(outlined: true, label: 'DÉCONNEXION'),
+            const SignOutButton(outlined: true, label: 'Déconnexion'),
           ] else ...[
             FilledButton(
               onPressed: () => context.go(AppRoutes.auth),
-              child: const Text('CONNEXION'),
+              child: const Text('Connexion'),
             ),
           ],
         ],

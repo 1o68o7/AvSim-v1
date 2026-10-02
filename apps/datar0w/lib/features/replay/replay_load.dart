@@ -149,12 +149,12 @@ class _ReplayLoadScreenState extends ConsumerState<ReplayLoadScreen> {
           if (_loadedId != null)
             TextButton(
               onPressed: () => shareLocalSession(_loadedId!),
-              child: const Text('PARTAGER'),
+              child: const Text('Partager'),
             ),
           if (widget.allowImport)
             TextButton(
               onPressed: _import,
-              child: const Text('IMPORTER'),
+              child: const Text('Importer'),
             ),
         ],
       ),

@@ -24,7 +24,7 @@ class ProfileScreen extends ConsumerWidget {
     final rower = ident.activeRower;
     return DeckScaffold(
       title: 'Rôle bateau',
-      subtitle: rower == null ? 'sans profil (loisir)' : rower.displayName,
+      subtitle: rower == null ? 'Sans profil (loisir)' : rower.displayName,
       showRetour: false,
       centerBrandOnly: true,
       body: ListView(
@@ -68,7 +68,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           _RoleCard(
-            title: 'RAMEUR',
+            title: 'Rameur',
             subtitle: 'Instrument embarqué · Vue cale-pied',
             icon: Icons.speed,
             highlighted: true,
@@ -79,7 +79,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           _RoleCard(
-            title: 'COACH',
+            title: 'Coach',
             subtitle: 'Suivi direct bord de bassin',
             icon: Icons.sports,
             onTap: () {
@@ -89,10 +89,10 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           _RoleCard(
-            title: 'BARREUR',
+            title: 'Barreur',
             subtitle: 'V sol, distance, gîte bateau (4+ / 8+)',
             icon: Icons.directions_boat,
-            footnote: 'un tél. = hub bateau, pas 8 IMU',
+            footnote: 'Un tél. = hub bateau, pas 8 IMU',
             onTap: () {
               ref.read(boatConfigProvider.notifier).setRole(CrewRole.cox);
               if (!cfg.coxed) {
@@ -194,7 +194,7 @@ class _RoleCard extends StatelessWidget {
                           if (footnote != null) ...[
                             const SizedBox(height: 8),
                             Text(
-                              footnote!.toUpperCase(),
+                              footnote!,
                               style: const TextStyle(
                                 color: DeckColors.label,
                                 fontSize: 10,
