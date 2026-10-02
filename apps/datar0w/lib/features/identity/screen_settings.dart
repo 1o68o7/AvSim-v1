@@ -78,15 +78,7 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(height: 1, color: DeckColors.hairline),
           const SizedBox(height: 24),
           if (uid != null) ...[
-            const Text(
-              'Déconnexion',
-              style: TextStyle(
-                color: DeckColors.label,
-                fontSize: 12,
-                letterSpacing: 1.1,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            const DeckSectionLabel('04. Session'),
             const SizedBox(height: 8),
             const Text(
               'Tes séances restent sur ce téléphone.',
