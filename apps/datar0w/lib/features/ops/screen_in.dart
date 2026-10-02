@@ -34,7 +34,7 @@ class _OpsInScreenState extends ConsumerState<OpsInScreen> {
     final ops = ref.watch(opsProvider);
     if (role != CrewRole.coach || !canCheckoutOps(ident, role)) {
       return const DeckScaffold(
-        title: 'RETOUR',
+        title: 'Retour',
         retourToProfile: true,
         body: Center(
           child: Text(
@@ -47,7 +47,7 @@ class _OpsInScreenState extends ConsumerState<OpsInScreen> {
     final active = ops.activeOuts;
 
     return DeckScaffold(
-      title: 'RETOUR DE PARC',
+      title: 'Retour de parc',
       subtitle: 'Check-in',
       body: active.isEmpty
           ? const Center(
@@ -140,7 +140,7 @@ class _OutTile extends StatelessWidget {
             const SizedBox(height: 8),
             FilledButton(
               onPressed: onIn,
-              child: const Text('RENTRER'),
+              child: const Text('Rentrer'),
             ),
             const SizedBox(height: 8),
             SignalImpactButton(boatId: boatId),

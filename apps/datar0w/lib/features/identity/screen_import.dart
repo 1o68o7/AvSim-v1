@@ -123,7 +123,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
     final role = ref.watch(boatConfigProvider).role;
     if (!canCheckoutOps(snap, role)) {
       return const DeckScaffold(
-        title: 'IMPORT CABANE',
+        title: 'Import cabane',
         retourToProfile: true,
         body: Center(
           child: Text(
@@ -134,16 +134,11 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
       );
     }
     return DeckScaffold(
-      title: 'IMPORT CABANE',
-      subtitle: 'CSV yearly · cloud',
+      title: 'Import cabane',
+      subtitle: 'CSV · cloud',
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
-          const Text(
-            'Données yearly · stockées cloud, pas sur le téléphone.',
-            style: TextStyle(color: DeckColors.muted, height: 1.4),
-          ),
-          const SizedBox(height: 16),
           if (_flash != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -168,7 +163,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
           const SizedBox(height: 8),
           TextButton(
             onPressed: _loadBordeaux,
-            child: const Text('Charger la base Bordeaux (démo)'),
+            child: const Text('Base Bordeaux (démo)'),
           ),
           ..._parkSection(snap),
           ..._rowerSection(snap),
@@ -183,7 +178,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
       if (p != null) ...[
         const SizedBox(height: 20),
         const Text(
-          'BATEAUX',
+          'Bateaux',
           style: TextStyle(
             color: DeckColors.label,
             fontSize: 11,
@@ -209,14 +204,14 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
           const SizedBox(height: 12),
           FilledButton(
             onPressed: _confirmPark,
-            child: const Text('ENVOYER VERS LE CLUB'),
+            child: const Text('Envoyer'),
           ),
         ],
       ],
       if (_parkReport != null) ...[
         const SizedBox(height: 12),
         Text(
-          '${_parkReport!.created} créées · ${_parkReport!.updated} mises à jour · ${_parkReport!.ignored} ignorées',
+          '${_parkReport!.created} créées · ${_parkReport!.updated} maj · ${_parkReport!.ignored} ignorées',
           style: const TextStyle(color: DeckColors.volt),
         ),
       ],
@@ -228,11 +223,11 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
             if (mounted) {
               setState(() {
                 _parkReport = null;
-                _flash = 'Import annulé (coques créées retirées).';
+                _flash = 'Import annulé.';
               });
             }
           },
-          child: const Text('ANNULER CET IMPORT'),
+          child: const Text('Annuler'),
         ),
       ],
     ];
@@ -244,7 +239,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
       if (p != null) ...[
         const SizedBox(height: 20),
         const Text(
-          'RAMEURS',
+          'Rameurs',
           style: TextStyle(
             color: DeckColors.label,
             fontSize: 11,
@@ -265,7 +260,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
           const SizedBox(height: 12),
           FilledButton(
             onPressed: _confirmRowers,
-            child: const Text('ENVOYER VERS LE CLUB'),
+            child: const Text('Envoyer'),
           ),
         ],
       ],
@@ -284,11 +279,11 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
             if (mounted) {
               setState(() {
                 _rowerReport = null;
-                _flash = 'Import annulé (rameurs créés retirés).';
+                _flash = 'Import annulé.';
               });
             }
           },
-          child: const Text('ANNULER CET IMPORT'),
+          child: const Text('Annuler'),
         ),
       ],
     ];

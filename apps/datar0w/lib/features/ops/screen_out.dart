@@ -79,7 +79,7 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
     final snap = ref.watch(identityProvider);
     if (role != CrewRole.coach || !canCheckoutOps(snap, role)) {
       return const DeckScaffold(
-        title: 'SORTIE',
+        title: 'Sortie',
         retourToProfile: true,
         body: Center(
           child: Text(
@@ -97,8 +97,8 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
     final boat = snap.boatById(_boatId);
 
     return DeckScaffold(
-      title: 'SORTIE DE PARC',
-      subtitle: 'Check-out explicite',
+      title: 'Sortie de parc',
+      subtitle: 'Check-out',
       body: ready.isEmpty
           ? const Center(
               child: Text(
@@ -141,7 +141,7 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
                 if (boat != null) ...[
                   const SizedBox(height: 16),
                   const Text(
-                    'JEU DE PELLES',
+                    'Jeu de pelles',
                     style: TextStyle(
                       color: DeckColors.label,
                       fontSize: 11,
@@ -209,7 +209,7 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
                   const SizedBox(height: 20),
                   FilledButton(
                     onPressed: () => _sortir(boat),
-                    child: const Text('SORTIR'),
+                    child: const Text('Sortir'),
                   ),
                 ],
               ],

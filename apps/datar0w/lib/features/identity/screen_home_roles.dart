@@ -88,7 +88,7 @@ class HomeCoxScreen extends ConsumerWidget {
                   DeckFactCell(label: 'Bâtiment', value: boat.name),
                   const SizedBox(height: 14),
                   const Text(
-                    'POSTE DU BARREUR',
+                    'Poste barreur',
                     style: TextStyle(
                       color: DeckColors.label,
                       fontSize: 9,
@@ -100,14 +100,14 @@ class HomeCoxScreen extends ConsumerWidget {
                     children: [
                       Expanded(
                         child: _CoxPosChip(
-                          label: 'AVANT (PROUE)',
+                          label: 'Avant',
                           selected: !coxRear,
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: _CoxPosChip(
-                          label: 'ARRIÈRE (POUPE)',
+                          label: 'Arrière',
                           selected: coxRear,
                         ),
                       ),
@@ -120,7 +120,6 @@ class HomeCoxScreen extends ConsumerWidget {
                       padding: const EdgeInsets.all(10),
                       color: DeckColors.volt.withValues(alpha: 0.12),
                       child: const Text(
-                        'Poste barreur obligatoire sur cette classe. '
                         'Lecture seule — composition coach.',
                         style: TextStyle(
                           color: DeckColors.volt,
@@ -158,7 +157,7 @@ class HomeCoxScreen extends ConsumerWidget {
             spacing: 8,
             children: [
               ChoiceChip(
-                label: const Text('ENTRAÎNEMENT'),
+                label: const Text('Entraînement'),
                 selected: ref.watch(boatConfigProvider).sessionMode ==
                     SessionMode.training,
                 onSelected: (_) => ref
@@ -166,7 +165,7 @@ class HomeCoxScreen extends ConsumerWidget {
                     .setSessionMode(SessionMode.training),
               ),
               ChoiceChip(
-                label: const Text('COMPÉTITION'),
+                label: const Text('Compétition'),
                 selected: ref.watch(boatConfigProvider).sessionMode ==
                     SessionMode.competition,
                 onSelected: (_) => ref
@@ -186,12 +185,12 @@ class HomeCoxScreen extends ConsumerWidget {
               );
               context.go(AppRoutes.presession);
             },
-            child: const Text('CONTINUER VERS LA SÉANCE'),
+            child: const Text('Continuer'),
           ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: () => context.go(AppRoutes.club),
-            child: const Text('REVOIR LE PARC COQUES'),
+            child: const Text('Parc'),
           ),
         ],
       ),
@@ -356,8 +355,10 @@ class HomeCoachScreen extends ConsumerWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    const DeckHonestChip(kind: DeckHonestKind.cloud, label: 'CLUB CLOUD ACTIF'),
-                    const DeckHonestChip(kind: DeckHonestKind.local, label: 'LOCAL SYNC'),
+                    const DeckHonestChip(
+                      kind: DeckHonestKind.cloud,
+                      label: 'Club cloud',
+                    ),
                     DeckSessionModeSwitch(
                       mode: ref.watch(boatConfigProvider).sessionMode,
                       onChanged: (m) => ref
@@ -377,25 +378,16 @@ class HomeCoachScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Rejoindre une séance sur l\'eau',
-                        style: TextStyle(
-                          fontFamily: DeckType.ui,
-                          fontSize: 14,
-                          color: DeckColors.text,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
                       SizedBox(
                         height: 48,
                         child: FilledButton(
                           onPressed: () => context.go(AppRoutes.coachJoin),
-                          child: const Text('Rejoindre le direct'),
+                          child: const Text('Rejoindre'),
                         ),
                       ),
                       TextButton(
                         onPressed: () => context.go(AppRoutes.coachJoin),
-                        child: const Text('Saisir un autre code de séance'),
+                        child: const Text('Autre code'),
                       ),
                     ],
                   ),
@@ -404,12 +396,11 @@ class HomeCoachScreen extends ConsumerWidget {
                 _CoachCard(
                   icon: Icons.group_add,
                   title: 'Équipages du jour',
-                  badge: 'DR-31',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        '${rowers.length} rameurs · affecter bateaux et bordées',
+                        '${rowers.length} rameurs',
                         style: const TextStyle(
                           fontFamily: DeckType.ui,
                           fontSize: 13,
@@ -423,7 +414,7 @@ class HomeCoachScreen extends ConsumerWidget {
                         child: FilledButton.icon(
                           onPressed: () => context.go(AppRoutes.crew),
                           icon: const Icon(Icons.rule),
-                          label: const Text('Composer un équipage'),
+                          label: const Text('Composer'),
                         ),
                       ),
                     ],
@@ -432,7 +423,7 @@ class HomeCoachScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 _CoachCard(
                   icon: Icons.directions_boat,
-                  title: 'Parc & Flotte au ponton',
+                  title: 'Parc & ponton',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -452,32 +443,32 @@ class HomeCoachScreen extends ConsumerWidget {
                         children: [
                           OutlinedButton(
                             onPressed: () => context.go(AppRoutes.opsOut),
-                            child: const Text('Sortir une coque'),
+                            child: const Text('Sortir'),
                           ),
                           OutlinedButton(
                             onPressed: () => context.go(AppRoutes.opsIn),
-                            child: const Text('Rentrer une coque'),
+                            child: const Text('Rentrer'),
                           ),
                           OutlinedButton(
                             onPressed: () => context.go(AppRoutes.club),
-                            child: const Text('PARC'),
+                            child: const Text('Parc'),
                           ),
                           OutlinedButton(
                             onPressed: () => context.go(AppRoutes.opsDeparture),
-                            child: const Text('DÉPART'),
+                            child: const Text('Départ'),
                           ),
                           OutlinedButton(
                             onPressed: () =>
                                 context.go(AppRoutes.opsMaintenance),
-                            child: const Text('MAINTENANCE'),
+                            child: const Text('Maintenance'),
                           ),
                           OutlinedButton(
                             onPressed: () => context.go(AppRoutes.spinoscope),
-                            child: const Text('SPINOSCOPE'),
+                            child: const Text('Spinoscope'),
                           ),
                           OutlinedButton(
                             onPressed: () => context.go(AppRoutes.calendar),
-                            child: const Text('CALENDRIER'),
+                            child: const Text('Calendrier'),
                           ),
                         ],
                       ),
@@ -487,20 +478,10 @@ class HomeCoachScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 _CoachCard(
                   icon: Icons.history_edu,
-                  title: 'Dernier débriefing',
-                  badge: 'DR-56',
+                  title: 'Débrief',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Consulter le replay chronologique',
-                        style: TextStyle(
-                          fontFamily: DeckType.ui,
-                          fontSize: 14,
-                          color: DeckColors.text,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
                       TextButton(
                         onPressed: () => context.go(
                           '${AppRoutes.sessions}?from=coach',
@@ -529,7 +510,7 @@ class HomeCoachScreen extends ConsumerWidget {
                       color: DeckColors.label,
                     ),
                     children: [
-                      const TextSpan(text: 'Tu rames aussi ? Retrouve ton profil dans '),
+                      const TextSpan(text: 'Profil rameur dans '),
                       WidgetSpan(
                         alignment: PlaceholderAlignment.baseline,
                         baseline: TextBaseline.alphabetic,
