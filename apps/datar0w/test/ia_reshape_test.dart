@@ -233,7 +233,8 @@ void main() {
       router.routerDelegate.currentConfiguration.uri.path,
       AppRoutes.homeAdmin,
     );
-    expect(find.text('ACCUEIL CLUB'), findsOneWidget);
+    // Stitch DR-40 : hub staff « Aujourd'hui » (shell + AppBar).
+    expect(find.text("Aujourd'hui"), findsWidgets);
   });
 
   testWidgets('5. quai Retour accueil selon rôle séance', (tester) async {
