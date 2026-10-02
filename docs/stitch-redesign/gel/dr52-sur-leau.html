@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface-container": "#201f1f", "secondary-fixed": "#81fba7", "surface-tint": "#afd500", "surface-variant": "#353534", "surface-container-low": "#1c1b1b", "on-primary-container": "#586c00", "surface-container-lowest": "#0e0e0e", "on-tertiary-fixed": "#410005", "on-primary-fixed-variant": "#3d4c00", "on-secondary": "#00391a", "on-error-container": "#ffdad6", "primary": "#ffffff", "secondary": "#64de8d", "on-surface": "#e5e2e1", "outline": "#8f937a", "on-secondary-fixed": "#00210d", "on-tertiary": "#68000e", "inverse-surface": "#e5e2e1", "inverse-primary": "#526600", "secondary-container": "#20a55c", "secondary-fixed-dim": "#64de8d", "on-secondary-fixed-variant": "#005229", "error-container": "#93000a", "primary-container": "#caf22e", "on-secondary-container": "#003116", "on-tertiary-fixed-variant": "#8d141e", "on-primary": "#293500", "tertiary": "#ffffff", "primary-fixed": "#caf22e", "on-tertiary-container": "#b63538", "on-background": "#e5e2e1", "on-primary-fixed": "#171e00", "surface-bright": "#3a3939", "surface-container-high": "#2a2a2a", "tertiary-container": "#ffdad7", "outline-variant": "#454934", "inverse-on-surface": "#313030", "on-surface-variant": "#c5c9ae", "surface-container-highest": "#353534", "surface": "#131313", "tertiary-fixed-dim": "#ffb3af", "primary-fixed-dim": "#afd500", "surface-dim": "#131313", "tertiary-fixed": "#ffdad7", "on-error": "#690005", "error": "#ffb4ab", "background": "#131313" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-xs": "0.25rem", "space-md": "1rem", "space-lg": "1.5rem", "space-xl": "2rem", "margin": "1rem", "gutter": "1rem", "space-sm": "0.5rem" }, fontFamily: { "label-ui": ["Inter"], "metric-hero": ["JetBrains Mono"], "body-lg": ["Inter"], "metric-md": ["JetBrains Mono"], "body-md": ["Inter"], "headline-lg": ["Inter"], "metric-lg": ["JetBrains Mono"], "label-mono": ["JetBrains Mono"], "metric-sm": ["JetBrains Mono"], "body-sm": ["Inter"], "headline-md": ["Inter"], "headline-sm": ["Inter"] }, fontSize: { "label-ui": ["13px", { "lineHeight": "16px", "fontWeight": "500" }], "metric-hero": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.04em", "fontWeight": "700" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "metric-md": ["20px", { "lineHeight": "24px", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "metric-lg": ["32px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-mono": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "500" }], "metric-sm": ["14px", { "lineHeight": "18px", "fontWeight": "500" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }] } } } };</script><style>@layer base { html, body { width: 100vw; min-height: 100vh; margin: 0; padding: 0; } body { overscroll-behavior-y: none; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-background text-on-surface antialiased flex flex-col min-h-screen selection:bg-primary-container selection:text-on-primary-container"><header class="fixed top-0 inset-x-0 z-50 bg-surface/85 backdrop-blur-xl pt-safe"><div class="h-16 px-margin flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-xs"><button aria-label="Retour" class="w-11 h-11 -ml-2 flex items-center justify-center text-on-surface hover:text-primary transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><h1 class="font-headline-sm text-headline-sm text-primary tracking-tight truncate">Detail Seance</h1></div><div class="flex items-center gap-space-sm flex-shrink-0"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full px-margin pt-16 bg-surface"><div class="flex flex-col w-full pb-safe space-y-space-md select-none">
+<!-- Status Chip Top Bar (Water telemetry lock) -->
+<div class="flex items-center justify-between px-space-xs pt-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-surface-container-highest text-secondary text-label-mono font-label-mono tracking-wider">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+        LIVE MER
+      </span>
+<span class="px-2 py-1 rounded bg-surface-container-lowest text-on-surface-variant text-label-mono font-label-mono tracking-wider">
+        REC LOCAL
+      </span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-mono text-label-mono">
+<span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span>ÉCRAN VERROUILLÉ</span>
+</div>
+</div>
+<!-- Bandeau Supérieur d'Alerte de Gîte (Lisible à 80 cm) -->
+<section aria-label="Jauge d'assiette latérale" class="bg-surface-container-lowest p-space-md rounded-xl flex flex-col gap-space-sm">
+<div class="flex items-baseline justify-between">
+<div class="flex items-center gap-2">
+<span class="text-secondary font-headline-sm text-headline-sm uppercase tracking-wider font-bold">Tribord</span>
+<span class="text-on-surface-variant text-body-sm font-body-sm">(gauche)</span>
+</div>
+<div class="text-center">
+<div class="font-metric-lg text-metric-lg text-primary tracking-tight" id="gite-live-val">-0.4°</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant -mt-1 lowercase">réf. rameur</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-on-surface-variant text-body-sm font-body-sm">(droite)</span>
+<span class="text-error font-headline-sm text-headline-sm uppercase tracking-wider font-bold">Bâbord</span>
+</div>
+</div>
+<!-- Gauge Bar: STRICT RÉFÉRENTIEL RAMEUR (Gauche = Tribord / Droite = Bâbord) -->
+<div class="relative w-full h-7 bg-surface-container-high rounded-full overflow-hidden flex items-center">
+<!-- Sector Tribord (Left / Green) -->
+<div class="w-1/2 h-full bg-surface-container-low flex justify-start items-center pl-2">
+<div class="h-2 w-12 rounded-full bg-secondary opacity-60"></div>
+</div>
+<!-- Center Zero Tick -->
+<div class="absolute left-1/2 top-0 bottom-0 w-1.5 bg-primary -translate-x-1/2 z-20 rounded-full"></div>
+<!-- Sector Bâbord (Right / Red) -->
+<div class="w-1/2 h-full bg-surface-container-low flex justify-end items-center pr-2">
+<div class="h-2 w-12 rounded-full bg-error opacity-60"></div>
+</div>
+<!-- Dynamic Bubble Cursor -->
+<div class="absolute left-[47%] top-1 bottom-1 w-5 rounded-full bg-primary-container shadow-md -translate-x-1/2 z-30 transition-all duration-150" id="gite-pin"></div>
+</div>
+</section>
+<!-- Grille Télémétrique Haute Visibilité (4 Blocs) -->
+<section aria-label="Télémétrie principale" class="grid grid-cols-2 gap-space-sm">
+<!-- 1. Allure / 500m (Volt #D6FF3C / primary-container) -->
+<div class="col-span-2 bg-surface-container-lowest p-space-md rounded-xl flex flex-col justify-between min-h-[140px]">
+<div class="flex items-center justify-between">
+<span class="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">Allure /500m</span>
+<span class="font-metric-sm text-metric-sm text-primary-container bg-surface-container-low px-2 py-0.5 rounded">3.9 m/s</span>
+</div>
+<div class="my-space-xs">
+<div class="font-metric-hero text-metric-hero text-primary-container tracking-tight leading-none">
+          2:08.4
+        </div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-mono text-label-mono">
+<span>CIBLE PACING 2:10.0</span>
+<span class="text-secondary font-metric-sm text-metric-sm">-1.6s</span>
+</div>
+</div>
+<!-- 2. Cadence (Blanc pur) -->
+<div class="col-span-1 bg-surface-container-lowest p-space-md rounded-xl flex flex-col justify-between min-h-[128px]">
+<span class="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">Cadence (SPM)</span>
+<div class="my-space-xs">
+<div class="font-metric-hero text-metric-hero text-primary tracking-tight leading-none">
+          26
+        </div>
+</div>
+<div class="font-label-mono text-label-mono text-secondary">
+        STABLE ±0
+      </div>
+</div>
+<!-- 3. Distance (Blanc pur) -->
+<div class="col-span-1 bg-surface-container-lowest p-space-md rounded-xl flex flex-col justify-between min-h-[128px]">
+<span class="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">Distance</span>
+<div class="my-space-xs">
+<div class="font-metric-hero text-metric-hero text-primary tracking-tight leading-none truncate">
+          4 180<span class="text-metric-sm text-on-surface-variant ml-1 font-normal">m</span>
+</div>
+</div>
+<div class="font-label-mono text-label-mono text-on-surface-variant">
+        EAU CALME
+      </div>
+</div>
+<!-- 4. Gîte Lissée -->
+<div class="col-span-2 bg-surface-container-lowest p-space-md rounded-xl flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">Gîte Lissée</span>
+<div class="flex items-center gap-space-sm mt-1">
+<span class="w-3.5 h-3.5 rounded-full bg-secondary inline-block"></span>
+<span class="font-headline-sm text-headline-sm text-secondary font-bold">TRIBORD</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">légère gîte</span>
+</div>
+</div>
+<div class="text-right">
+<div class="font-metric-lg text-metric-lg text-primary tracking-tight font-bold">+1.2°</div>
+<div class="font-label-mono text-label-mono text-on-surface-variant">filtre 3 coups</div>
+</div>
+</div>
+</section>
+<!-- Barre État Capteurs & Précision -->
+<footer class="bg-surface-container-lowest px-space-md py-space-sm rounded-lg flex items-center justify-between text-on-surface-variant font-label-mono text-label-mono">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-secondary" style="font-variation-settings: 'FILL' 1;">gps_fixed</span>
+<span>GPS 3.2m</span>
+</div>
+<div class="w-1 h-1 rounded-full bg-surface-container-highest"></div>
+<div class="flex items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-[15px] text-error" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="font-metric-sm text-metric-sm">152 <span class="font-label-mono text-label-mono text-on-surface-variant">BPM</span></span>
+</div>
+<div class="w-1 h-1 rounded-full bg-surface-container-highest"></div>
+<div class="flex items-center gap-1 text-on-surface">
+<span class="material-symbols-outlined text-[15px] text-primary-container">bluetooth_connected</span>
+<span>BLE OK</span>
+</div>
+</footer>
+<!-- Zone de Sécurité Inférieure (Double Appui STOP) -->
+<div class="pt-space-xs flex flex-col items-center gap-space-xs">
+<button class="w-full h-16 rounded-xl bg-error-container active:scale-[0.98] transition-transform duration-100 flex items-center justify-center gap-3 px-space-md shadow-lg" id="stop-button" onclick="handleStopPress()" type="button">
+<span class="material-symbols-outlined text-primary text-[28px]" style="font-variation-settings: 'FILL' 1;">stop_circle</span>
+<div class="flex flex-col text-left">
+<span class="text-primary font-headline-sm text-headline-sm uppercase tracking-tight font-bold leading-none" id="stop-text">
+          STOP (Appuyer 2 fois)
+        </span>
+<span class="text-on-error-container text-body-sm font-body-sm leading-tight mt-0.5" id="stop-subtext">
+          Deuxième appui nécessaire pour valider le quai
+        </span>
+</div>
+</button>
+<div class="w-full h-1 bg-surface-container-lowest rounded-full overflow-hidden opacity-0 transition-opacity" id="stop-timer-bar">
+<div class="h-full bg-error w-0 transition-all duration-75" id="stop-timer-fill"></div>
+</div>
+</div>
+</div>
+<script>
+  let stopConfirmationActive = false;
+  let stopTimeout = null;
+
+  function handleStopPress() {
+    const btnText = document.getElementById('stop-text');
+    const btnSub = document.getElementById('stop-subtext');
+    const timerBar = document.getElementById('stop-timer-bar');
+    const timerFill = document.getElementById('stop-timer-fill');
+
+    if (!stopConfirmationActive) {
+      // First tap
+      stopConfirmationActive = true;
+      btnText.innerText = "CONFIRMER L'ARRÊT MAINTENANT";
+      btnSub.innerText = "Appui 2/2 : Fin de sortie & retour au ponton";
+      timerBar.classList.remove('opacity-0');
+      timerFill.style.width = '100%';
+
+      // 4-second timeout to disarm
+      stopTimeout = setTimeout(() => {
+        resetStopButton();
+      }, 4000);
+    } else {
+      // Second tap: Confirmed exit
+      clearTimeout(stopTimeout);
+      btnText.innerText = "SESSION ENREGISTRÉE";
+      btnSub.innerText = "Synchronisation au quai...";
+      setTimeout(() => {
+        if (window.history.length > 1) {
+          window.history.back();
+        }
+      }, 600);
+    }
+  }
+
+  function resetStopButton() {
+    stopConfirmationActive = false;
+    const btnText = document.getElementById('stop-text');
+    const btnSub = document.getElementById('stop-subtext');
+    const timerBar = document.getElementById('stop-timer-bar');
+    const timerFill = document.getElementById('stop-timer-fill');
+    
+    if (btnText && btnSub && timerBar && timerFill) {
+      btnText.innerText = "STOP (Appuyer 2 fois)";
+      btnSub.innerText = "Deuxième appui nécessaire pour valider le quai";
+      timerBar.classList.add('opacity-0');
+      timerFill.style.width = '0%';
+    }
+  }
+</script></main></body></html>

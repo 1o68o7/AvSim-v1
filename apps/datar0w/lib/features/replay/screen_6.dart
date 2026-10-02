@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../router.dart';
 import 'replay_load.dart';
 
+/// DR-56 — Replay flotte coach (Stitch).
 class CoachReplayScreen extends StatelessWidget {
   const CoachReplayScreen({super.key, this.sessionId});
 
@@ -14,7 +15,7 @@ class CoachReplayScreen extends StatelessWidget {
     final id = sessionId?.trim();
     final hasId = id != null && id.isNotEmpty;
     return ReplayLoadScreen(
-      title: 'COACH REPLAY',
+      title: 'Replay flotte',
       sessionId: hasId ? id : null,
       onBack: () => context.go(
         hasId ? '${AppRoutes.sessions}?from=coach' : AppRoutes.profile,

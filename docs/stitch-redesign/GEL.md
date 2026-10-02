@@ -48,10 +48,12 @@ les headers / pilules des écrans hub — pas de strip permanent sous AppBar.
 | DR-42 Trésorerie | — | hors MVP téléphone |
 | DR-43 Calendrier | `/calendar` | |
 | DR-45 Plans d’eau | `/waters` | |
-| DR-52 Gîte paysage | `/live` | Cockpit 3 col. + cadran avionique (`HeelGauge`) |
+| DR-52 Gîte paysage | `/live` | Cockpit 3 col. + `HeelGauge` avionique · gel `dr52-gite-paysage.html` / `dr52-cockpit-956.html` |
+| DR-52 Sur l’eau (portrait) | `/live` | Même route ; planche Stitch portrait non portée séparément |
 | DR-53 Live barreur | `/cox` | |
-| DR-55 Replay rameur | `/replay` | |
-| DR-56 Replay flotte | `/replay-coach` | |
+| DR-54 Quai | `/quai` | |
+| DR-55 Replay rameur | `/replay` | `RowerReplayScreen` + `ReplayBody` · gel `dr55-replay.html` |
+| DR-56 Replay flotte | `/replay-coach` | `CoachReplayScreen` · gel `dr56-replay-flotte.html` |
 | DR-60 Mes séances | `/sessions` | |
 | DR-61 Objets BLE | `/devices` | |
 | DR-62 Santé / consentement | `/consent` | |
@@ -59,7 +61,6 @@ les headers / pilules des écrans hub — pas de strip permanent sous AppBar.
 | DR-70 Sortir coque | `/ops/out` | |
 | DR-71 Rentrer coque | `/ops/in` | |
 | DR-72 Alignement | `/ops/departure` | |
-| Live rameur | `/live` | nav bar dismissée |
 
 Shell standard : 3 onglets `Aujourd’hui` · `Séances` · `Plus` (indicateur Volt 2px) —  
 `DeckTabScaffold` (`lib/widgets/deck_shell.dart`) + route `/plus`.  
