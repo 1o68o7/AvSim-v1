@@ -101,6 +101,22 @@ Licence + membership = redirects globaux à côté de `resolveRootRedirect`.
 
 1. **Lot copy P0** — tare / pré-session / live / quai / mode banner (pas de
    comportement).  
-2. **Lot porte club** — `/` discover + gates licence / membership.  
+2. ~~**Lot porte club** — `/` discover + gates licence / membership.~~ → voir § Livré.  
 3. **Lot Stitch athlète** — quai + replay 55/56 iso gel + home cox shell.  
 4. **Lot alerte gîte** — ambre + une seule ligne (alignement GEL).
+
+## Livré — porte club (MVP)
+
+Cold start = **`/discover`** (`ClubDiscoverScreen`) : marque DataR0w, CTAs
+calendrier / plans d’eau / rejoindre (`/auth`) / profils locaux (secondaire).
+`GoRouter(initialLocation: AppRoutes.discover)` ; `/` via `resolveRootRedirect`
+→ discover si aucun profil, sinon hubs métier.
+
+**Gate licence (tunnel eau)** : `needsLicence` + redirect sur
+`/presession`, `/tare`, `/live`, `/cox` → `/onboarding/rower` + SnackBar
+si profil actif sans `ffaLicence`. Tests widget qui pumpent les écrans
+directement (sans GoRouter) restent inchangés ; parcours router doit poser
+une licence factice sur le `Rower`.
+
+**Échappatoires** : « Passer (sans profil) » (debug only) et auth « Sans
+compte » → `/discover`, plus `/home/rower` / stack identité.

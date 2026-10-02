@@ -434,15 +434,15 @@ class _SessionOffBody extends StatelessWidget {
         if (kDebugMode) ...[
           const SizedBox(height: 28),
           TextButton(
-            onPressed: busy ? null : () => context.go(AppRoutes.identity),
+            onPressed: busy ? null : () => context.go(AppRoutes.discover),
             child: const Text(
               'Continuer en mode invité local (Sans compte)',
               style: TextStyle(fontSize: 13, color: DeckColors.muted),
             ),
           ),
-          // Ancre legacy tests debug.
+          // Ancre legacy tests debug — discover, pas stack identité.
           TextButton(
-            onPressed: busy ? null : () => context.go(AppRoutes.identity),
+            onPressed: busy ? null : () => context.go(AppRoutes.discover),
             child: const Text(
               'Sans compte',
               style: TextStyle(fontSize: 12, color: DeckColors.muted),

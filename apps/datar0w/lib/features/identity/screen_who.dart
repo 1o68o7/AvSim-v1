@@ -217,13 +217,13 @@ class _IdentityListScreenState extends ConsumerState<IdentityListScreen> {
                         await ref
                             .read(identityProvider.notifier)
                             .selectRower(null);
-                        // Debug only — plus de hub `/` ProfileScreen.
-                        if (mounted) await _nav(AppRoutes.homeRower);
+                        // Debug only — vitrine club, pas stack eau.
+                        if (mounted) await _nav(AppRoutes.discover);
                       } catch (e) {
                         if (!mounted) return;
                         setState(() {
                           _lastNavError =
-                              'Navigation bloquée : ${AppRoutes.homeRower} $e';
+                              'Navigation bloquée : ${AppRoutes.discover} $e';
                         });
                       }
                     },

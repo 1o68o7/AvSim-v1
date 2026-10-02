@@ -27,8 +27,8 @@ String resolvePostLogin({
   bool skipAccount = false,
   bool hasRowerProfile = false,
 }) {
-  // Debug « passer sans profil » → accueil rameur vide (plus `/`).
-  if (skipAccount) return AppRoutes.homeRower;
+  // Sans compte / passer → vitrine club (pas stack eau).
+  if (skipAccount) return AppRoutes.discover;
 
   if (isClubStaffRole(clubMemberRole)) {
     return homeRouteForClubRole(clubMemberRole!);
@@ -61,7 +61,29 @@ String resolveRootRedirect(IdentitySnapshot snap) {
   if (hasAnyProfile && rower != null && !isRowerProfilePlayable(rower)) {
     return AppRoutes.rowerOnboard;
   }
-  if (!hasAnyProfile) return AppRoutes.identity;
+  // Cold start sans profil → porte club, pas `/identity`.
+  if (!hasAnyProfile) return AppRoutes.discover;
+  return AppRoutes.rowerOnboard;
+}
+
+/// Licence FFA requise pour le tunnel eau si un profil rameur est actif.
+bool needsLicence(IdentitySnapshot snap) {
+  final rower = snap.activeRower;
+  if (rower == null) return false;
+  final lic = rower.ffaLicence?.trim();
+  return lic == null || lic.isEmpty;
+}
+
+/// Routes tunnel eau : pré-session → tare → live / cox.
+bool isWaterSessionPath(String path) =>
+    path == AppRoutes.presession ||
+    path == AppRoutes.tare ||
+    path == AppRoutes.live ||
+    path == AppRoutes.cox;
+
+/// `null` = accès OK ; sinon → onboarding licence.
+String? waterLicenceRedirect(IdentitySnapshot snap) {
+  if (!needsLicence(snap)) return null;
   return AppRoutes.rowerOnboard;
 }
 
