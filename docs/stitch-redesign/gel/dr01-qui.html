@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_blank" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface-container": "#201f1f", "secondary-fixed": "#81fba7", "surface-tint": "#afd500", "surface-variant": "#353534", "surface-container-low": "#1c1b1b", "on-primary-container": "#586c00", "surface-container-lowest": "#0e0e0e", "on-tertiary-fixed": "#410005", "on-primary-fixed-variant": "#3d4c00", "on-secondary": "#00391a", "on-error-container": "#ffdad6", "primary": "#ffffff", "secondary": "#64de8d", "on-surface": "#e5e2e1", "outline": "#8f937a", "on-secondary-fixed": "#00210d", "on-tertiary": "#68000e", "inverse-surface": "#e5e2e1", "inverse-primary": "#526600", "secondary-container": "#20a55c", "secondary-fixed-dim": "#64de8d", "on-secondary-fixed-variant": "#005229", "error-container": "#93000a", "primary-container": "#caf22e", "on-secondary-container": "#003116", "on-tertiary-fixed-variant": "#8d141e", "on-primary": "#293500", "tertiary": "#ffffff", "primary-fixed": "#caf22e", "on-tertiary-container": "#b63538", "on-background": "#e5e2e1", "on-primary-fixed": "#171e00", "surface-bright": "#3a3939", "surface-container-high": "#2a2a2a", "tertiary-container": "#ffdad7", "outline-variant": "#454934", "inverse-on-surface": "#313030", "on-surface-variant": "#c5c9ae", "surface-container-highest": "#353534", "surface": "#131313", "tertiary-fixed-dim": "#ffb3af", "primary-fixed-dim": "#afd500", "surface-dim": "#131313", "tertiary-fixed": "#ffdad7", "on-error": "#690005", "error": "#ffb4ab", "background": "#131313" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-xs": "0.25rem", "space-md": "1rem", "space-lg": "1.5rem", "space-xl": "2rem", "margin": "1rem", "gutter": "1rem", "space-sm": "0.5rem" }, fontFamily: { "label-ui": ["Inter"], "metric-hero": ["JetBrains Mono"], "body-lg": ["Inter"], "metric-md": ["JetBrains Mono"], "body-md": ["Inter"], "headline-lg": ["Inter"], "metric-lg": ["JetBrains Mono"], "label-mono": ["JetBrains Mono"], "metric-sm": ["JetBrains Mono"], "body-sm": ["Inter"], "headline-md": ["Inter"], "headline-sm": ["Inter"] }, fontSize: { "label-ui": ["13px", { "lineHeight": "16px", "fontWeight": "500" }], "metric-hero": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.04em", "fontWeight": "700" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "metric-md": ["20px", { "lineHeight": "24px", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "metric-lg": ["32px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-mono": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "500" }], "metric-sm": ["14px", { "lineHeight": "18px", "fontWeight": "500" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }] } } } };</script><style>@layer base { html, body { width: 100vw; min-height: 100vh; margin: 0; padding: 0; } body { overscroll-behavior-y: none; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-background text-on-surface pt-safe pb-safe flex flex-col min-h-screen selection:bg-primary-container selection:text-on-primary-container"><main class="flex-1 flex flex-col relative w-full bg-surface"><div class="flex flex-col w-full px-margin pb-space-xl">
+<!-- Status Bar / Telemetry Sync Header -->
+<div class="flex items-center justify-between py-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>
+<span class="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">Télémétrie prête</span>
+</div>
+<!-- Honest Status Badge: LOCAL -->
+<div class="flex items-center gap-1 bg-surface-container-high px-2 py-0.5 rounded text-on-surface-variant">
+<span class="font-label-mono text-label-mono">LOCAL</span>
+<span class="material-symbols-outlined text-[13px] text-outline">storage</span>
+</div>
+</div>
+<!-- Editorial & Purpose Framing -->
+<div class="mt-space-md mb-space-lg">
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Qui est là ?</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-space-xs leading-relaxed">
+      Un téléphone = une place de bateau. Les autres sièges ont leur propre appareil.
+    </p>
+</div>
+<!-- Profiles Listing Container -->
+<div class="flex flex-col gap-space-md">
+<!-- Active / Primary Profile Card -->
+<div class="group relative flex flex-col p-space-md rounded-xl bg-surface-container-low transition-all duration-150 cursor-pointer active:scale-[0.99] hover:bg-surface-container" onclick="selectProfile('alexandre')">
+<div class="flex items-start justify-between gap-space-sm mb-space-md">
+<div class="flex items-center gap-space-md">
+<!-- Profile Avatar / Rig Number Monogram -->
+<div class="relative w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary font-headline-sm text-headline-sm overflow-hidden">
+<img class="w-full h-full object-cover opacity-85" data-alt="Intense high-contrast portrait of a male rower, wet face after training under dramatic overcast sky, outdoor nautical telemetry ambiance" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC95qGRvRIyj7k_I49ccziPbGguXusXObqe0aRGpOuuzkq_sOHbUPYfcKw_v3RvMJkhOL-U_XLrPIePjTu1Ydxi6zhX_w2jBF5hLVjnsMacrABitiJUZEECU12d75iuCBjg30JQq95m02dUC8RT0xLGLaEeGx0XRCG09yYIyoDJzMFtAp7nIRYUG92HoTB25B4CjypyJPDZvJ6JXaNmDtCDOlsgpPIA-RABVQP8BwAFI7tbeme0-_mywQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 to-transparent"></div>
+<span class="absolute bottom-1 right-1 font-label-mono text-[10px] text-primary-fixed bg-surface-container-lowest/90 px-1 rounded">S1</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-primary tracking-tight">Alexandre Martin</span>
+</div>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="font-label-mono text-label-mono px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant">
+                Sénior H
+              </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-outline">kayaking</span>
+                Aviron Club de Lacanau
+              </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Session Preview Strip -->
+<div class="grid grid-cols-2 gap-space-sm p-space-sm rounded-lg bg-surface-container-lowest mb-space-md">
+<div class="flex flex-col">
+<span class="font-label-mono text-label-mono text-on-surface-variant">Dernier split /500m</span>
+<span class="font-metric-md text-metric-md text-primary mt-0.5">1:42.4</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-mono text-label-mono text-on-surface-variant">Cadence cible</span>
+<span class="font-metric-md text-metric-md text-secondary mt-0.5">32 spm</span>
+</div>
+</div>
+<!-- Card Action Button -->
+<button class="w-full h-12 rounded-lg bg-primary-container text-on-primary flex items-center justify-center gap-space-xs font-label-ui text-label-ui font-semibold shadow-sm group-hover:brightness-105 active:scale-[0.98] transition-transform" type="button">
+<span>Ouvrir Aujourd'hui</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+<!-- Secondary Profile Card -->
+<div class="group relative flex flex-col p-space-md rounded-xl bg-surface-container-low transition-all duration-150 cursor-pointer active:scale-[0.99] hover:bg-surface-container" onclick="selectProfile('camille')">
+<div class="flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-md">
+<!-- Monogram Fallback Avatar -->
+<div class="relative w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary font-headline-sm text-headline-sm overflow-hidden">
+<img class="w-full h-full object-cover opacity-85" data-alt="Athletic young female rower in dark waterproof rowing unisuite, sun flare across wet dock, focused expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBd9vZorLJlPeg5blzQRC06wDMESmMUzDwMrgImN5xROsmkyzlHRZcyJKmxC7sLut_DwkDI0MQJKfW7tkosDXC0-KIFVORMnuCfRQfBzy3_ZFvmT7pjrkx65C5POyCrXKBzDmUIl4dA4pBzW-xD6GGqnGJBCsUCRjsv-fBK4w6rrq_WiOFFUh1r84Ouur7Qqgs1oPoiy3Tpj089wm0zMRP1Ns71bSLIyuA8wWpVdBT23Hne71YykvcbzQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 to-transparent"></div>
+<span class="absolute bottom-1 right-1 font-label-mono text-[10px] text-on-surface-variant bg-surface-container-lowest/90 px-1 rounded">S2</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-primary tracking-tight">Camille Roy</span>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="font-label-mono text-label-mono px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant">
+                J18 F
+              </span>
+<span class="font-body-sm text-body-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">smartphone</span>
+                Profil local
+              </span>
+</div>
+</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Primary Registration Action -->
+<div class="mt-space-lg flex flex-col gap-space-sm">
+<button class="w-full h-14 rounded-xl bg-primary-container text-on-primary font-headline-sm text-body-lg font-semibold flex items-center justify-center gap-2 transition-transform active:scale-[0.98]" id="btn-create-profile" type="button">
+<span class="material-symbols-outlined text-[22px]">add</span>
+<span>Créer un profil</span>
+</button>
+<button class="w-full py-space-sm text-center font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" id="btn-club-login" type="button">
+      J'ai déjà un compte club (Connexion)
+    </button>
+</div>
+<!-- Technical Integrity Note -->
+<div class="mt-space-xl pt-space-md flex items-center justify-center gap-space-xs text-center">
+<span class="material-symbols-outlined text-[15px] text-outline">verified_user</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">
+      Données stockées localement sur ce téléphone.
+    </span>
+</div>
+</div>
+<script>
+  function selectProfile(profileId) {
+    const feedback = document.createElement('div');
+    feedback.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-surface-bright text-primary px-4 py-2 rounded-lg font-label-ui text-label-ui shadow-lg transition-all duration-300 pointer-events-none opacity-0 translate-y-2';
+    feedback.textContent = profileId === 'alexandre' ? 'Chargement du pont Alexandre...' : 'Chargement du pont Camille...';
+    document.body.appendChild(feedback);
+    
+    requestAnimationFrame(() => {
+      feedback.classList.remove('opacity-0', 'translate-y-2');
+    });
+
+    setTimeout(() => {
+      feedback.classList.add('opacity-0');
+      setTimeout(() => feedback.remove(), 300);
+    }, 1200);
+  }
+
+  document.getElementById('btn-create-profile')?.addEventListener('click', () => {
+    console.log('Navigation vers DR-02: Création de profil');
+  });
+
+  document.getElementById('btn-club-login')?.addEventListener('click', () => {
+    console.log('Ouverture du flux SSO / Compte Club');
+  });
+</script></main></body></html>

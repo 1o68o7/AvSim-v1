@@ -26,11 +26,12 @@ void main() {
         child: MaterialApp(home: PresessionScreen()),
       ),
     );
-    expect(find.text('Retour'), findsWidgets);
+    expect(find.text('Annuler'), findsWidgets);
     expect(find.text('2 000 m'), findsNothing);
   });
 
   testWidgets('2B : Retour profil absent pendant la tare', (tester) async {
+    // Tare gîte CTA n’apparaît qu’en paysage (DR-51).
     await tester.binding.setSurfaceSize(const Size(844, 390));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
@@ -40,14 +41,16 @@ void main() {
     );
     await tester.pump();
     expect(find.text('Retour'), findsWidgets);
-    await tester.tap(find.text('TARE GÎTE'));
+    await tester.ensureVisible(find.text('Tare gîte'));
+    await tester.pump();
+    await tester.tap(find.text('Tare gîte'));
     await tester.pump();
     expect(find.text('Retour'), findsNothing);
   });
 
   testWidgets('BARREUR 8+ : /cox affiche l’écran barreur, pas le live rameur',
       (tester) async {
-    await tester.binding.setSurfaceSize(const Size(844, 390));
+    await tester.binding.setSurfaceSize(const Size(430, 932));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final ov = identityStoreOverride();
     final container = ProviderContainer(overrides: [ov]);
@@ -62,8 +65,9 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.textContaining('BARREUR'), findsWidgets);
-    expect(find.text('réf. barreur'), findsOneWidget);
+    expect(find.textContaining('DR-53'), findsOneWidget);
+    expect(find.text('réf. barreur'), findsWidgets);
     expect(find.text('réf. rameur'), findsNothing);
+    expect(find.textContaining('Arrêt séance'), findsOneWidget);
   });
 }

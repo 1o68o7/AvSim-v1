@@ -17,9 +17,9 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('RAMEUR'), findsOneWidget);
-    expect(find.text('COACH'), findsOneWidget);
-    expect(find.text('BARREUR'), findsOneWidget);
+    expect(find.text('Rameur'), findsOneWidget);
+    expect(find.text('Coach'), findsOneWidget);
+    expect(find.text('Barreur'), findsOneWidget);
   });
 
   testWidgets('Qui rame : passer sans profil', (tester) async {
@@ -33,7 +33,8 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(find.text('Passer (sans profil)'), findsOneWidget);
-    expect(find.text('CRÉER UN PROFIL'), findsOneWidget);
+    expect(find.text('Créer un profil'), findsOneWidget);
+    expect(find.text('Qui est là'), findsWidgets);
   });
 
   testWidgets('accueil rameur : état vide, pas de parc', (tester) async {

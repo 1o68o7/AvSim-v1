@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#131313;color:#e5e2e1;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "error": "#ffb4ab", "tertiary-container": "#ffdad7", "surface-container-highest": "#353534", "on-tertiary": "#68000e", "on-error": "#690005", "on-tertiary-fixed": "#410005", "on-secondary-fixed": "#00210d", "surface": "#131313", "inverse-primary": "#526600", "on-error-container": "#ffdad6", "on-background": "#e5e2e1", "secondary": "#64de8d", "secondary-fixed": "#81fba7", "error-container": "#93000a", "outline": "#8f937a", "surface-container": "#201f1f", "on-primary-fixed": "#171e00", "outline-variant": "#454934", "inverse-surface": "#e5e2e1", "on-surface-variant": "#c5c9ae", "on-secondary-container": "#003116", "surface-container-low": "#1c1b1b", "secondary-container": "#20a55c", "background": "#131313", "secondary-fixed-dim": "#64de8d", "surface-tint": "#afd500", "surface-variant": "#353534", "on-secondary": "#00391a", "primary-fixed-dim": "#afd500", "on-tertiary-fixed-variant": "#8d141e", "on-primary-container": "#586c00", "surface-container-lowest": "#0e0e0e", "tertiary-fixed": "#ffdad7", "primary-fixed": "#caf22e", "on-tertiary-container": "#b63538", "tertiary-fixed-dim": "#ffb3af", "inverse-on-surface": "#313030", "surface-bright": "#3a3939", "surface-dim": "#131313", "on-primary-fixed-variant": "#3d4c00", "primary": "#ffffff", "on-secondary-fixed-variant": "#005229", "primary-container": "#caf22e", "surface-container-high": "#2a2a2a", "on-primary": "#293500", "on-surface": "#e5e2e1", "tertiary": "#ffffff" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-sm": "0.5rem", "gutter": "1rem", "space-xs": "0.25rem", "space-lg": "1.5rem", "space-md": "1rem", "margin": "1rem", "space-xl": "2rem" }, fontFamily: { "metric-hero": ["JetBrains Mono"], "label-ui": ["Inter"], "label-mono": ["JetBrains Mono"], "body-md": ["Inter"], "headline-md": ["Inter"], "headline-lg": ["Inter"], "body-sm": ["Inter"], "metric-lg": ["JetBrains Mono"], "headline-sm": ["Inter"], "metric-sm": ["JetBrains Mono"], "body-lg": ["Inter"], "metric-md": ["JetBrains Mono"] }, fontSize: { "metric-hero": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.04em", "fontWeight": "700" }], "label-ui": ["13px", { "lineHeight": "16px", "fontWeight": "500" }], "label-mono": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "metric-lg": ["32px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "metric-sm": ["14px", { "lineHeight": "18px", "fontWeight": "500" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "metric-md": ["20px", { "lineHeight": "24px", "fontWeight": "600" }] } } } }</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 inset-x-0 z-50 bg-surface/90 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.6)]"><div class="h-14 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><button aria-label="Retour" class="w-12 h-12 -ml-2 flex items-center justify-center text-on-surface rounded-full active:bg-surface-container-high transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><div class="flex flex-col"><span class="font-label-mono text-label-mono uppercase text-on-surface-variant leading-none">TÉLÉMÉTRIE DÉCK</span><h1 class="font-headline-sm text-headline-sm text-on-surface font-semibold tracking-tight">Quai Shell</h1></div></div><div class="flex items-center gap-space-sm"><span class="font-label-mono text-label-mono px-2 py-0.5 rounded bg-surface-container-highest text-secondary border border-secondary/30">SYSTÈME OP</span><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-14 pb-safe bg-surface"><div class="flex flex-col w-full text-on-surface">
+<!-- Status & Session Context Banner -->
+<section class="p-margin flex flex-col gap-space-sm bg-surface-container-low shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-mono text-label-mono px-2 py-0.5 rounded bg-error-container text-on-error-container">
+          ENREGISTREMENT TERMINÉ
+        </span>
+<span class="font-label-mono text-label-mono px-2 py-0.5 rounded bg-surface-container-highest text-secondary">
+          LOCAL • EN FILE CLOUD
+        </span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-mono text-label-mono">
+<span class="material-symbols-outlined text-[14px]">sensors</span>
+<span>GPS FIXED 10Hz</span>
+</div>
+</div>
+<div class="flex items-baseline justify-between pt-space-xs">
+<div>
+<p class="font-body-md text-body-md text-on-surface font-medium">Aujourd'hui, 08:42</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+          Lac de Lacanau • 1x Skiff Filippi F14
+        </p>
+</div>
+<div class="text-right">
+<span class="font-label-mono text-label-mono px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">
+          EAU CALME • 14°C
+        </span>
+</div>
+</div>
+</section>
+<!-- Hero Telemetry Metric -->
+<section class="px-margin pt-space-lg pb-space-md flex flex-col items-center justify-center text-center bg-surface">
+<span class="font-label-ui text-label-ui uppercase tracking-wider text-on-surface-variant mb-space-xs">
+      Distance Totale Naviguée
+    </span>
+<div class="flex items-baseline gap-1">
+<span class="font-metric-hero text-metric-hero tracking-tighter text-on-surface font-bold">
+        9 240
+      </span>
+<span class="font-metric-md text-metric-md text-primary-fixed">m</span>
+</div>
+<!-- Duration Pill Counter -->
+<div class="mt-space-sm flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-high shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">timer</span>
+<span class="font-label-mono text-label-mono text-on-surface uppercase">Durée d'effort</span>
+<span class="font-metric-sm text-metric-sm text-on-surface font-semibold">42 min 18 s</span>
+</div>
+</section>
+<!-- Photo Momento of Lake Surface -->
+<div class="px-margin mb-space-md">
+<div class="relative w-full h-36 rounded-xl overflow-hidden bg-surface-container shadow-sm flex items-end">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="Cinematic wide-angle view of a calm freshwater rowing basin at sunrise in Lacanau France. High contrast black water reflecting early morning soft light, mist floating over glassy surface, carbon fiber single scull bow slicing water, sleek marine aesthetic with deep charcoal shadows and cold green undertones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDbyd081B3uagTKtaUrB45CF6f6XyMC0uV5KWaK9j5UbUpXdW6pS8JA82NBvwdeGTnxXwA3D9-8BNncHZ-oeKr9e-IAQlIPG-ApxwPFaJa1_OvjMwOmEvnGu9PtMZFKYltegWTbkxYnfuAegnhaOxVVnOlrUTl_HZiwX8JklEN6v2nnFg1ojVjCB3ZuRoACp9oP-pIcLxM8mIw2czJMqsPxlRMDHAOuwYCDrA0UZwYkGwby6N6QY-vUA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/40 to-transparent"></div>
+<div class="relative z-10 p-3 flex justify-between items-center w-full">
+<span class="font-label-mono text-label-mono px-2 py-0.5 rounded bg-surface/80 text-on-surface">TRACE VALIDÉE SANS GLISSEMENT</span>
+<span class="font-metric-sm text-metric-sm text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">water</span> CLAPOT NUL
+        </span>
+</div>
+</div>
+</div>
+<!-- Real Honest Data Grid (Strict omission: no calories, no watts, no training effect) -->
+<section class="px-margin pb-space-lg">
+<div class="flex items-center justify-between mb-space-xs">
+<h2 class="font-label-ui text-label-ui uppercase tracking-wider text-on-surface-variant">Télémétrie de bord</h2>
+<span class="font-label-mono text-label-mono text-on-surface-variant">4 CAPTEURS SYNCHRONISÉS</span>
+</div>
+<div class="grid grid-cols-2 gap-space-sm">
+<!-- Allure Moyenne -->
+<div class="p-3 rounded-xl bg-surface-container shadow-sm flex flex-col justify-between min-h-[92px]">
+<div class="flex items-center justify-between">
+<span class="font-label-ui text-label-ui text-on-surface-variant">Allure moy.</span>
+<span class="font-label-mono text-label-mono text-on-surface-variant">/500m</span>
+</div>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-metric-lg text-metric-lg text-on-surface font-semibold">2:08.4</span>
+</div>
+<div class="text-[11px] font-label-mono text-secondary flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[12px]">trending_up</span> Cible 2:10 (+1.6s)
+        </div>
+</div>
+<!-- Split le plus rapide -->
+<div class="p-3 rounded-xl bg-surface-container shadow-sm flex flex-col justify-between min-h-[92px]">
+<div class="flex items-center justify-between">
+<span class="font-label-ui text-label-ui text-on-surface-variant">500m max</span>
+<span class="font-label-mono text-label-mono text-primary-fixed">TOUR 3</span>
+</div>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-metric-lg text-metric-lg text-primary-fixed font-semibold">1:56.2</span>
+</div>
+<div class="text-[11px] font-label-mono text-on-surface-variant">
+          Pointe à 1 350 m
+        </div>
+</div>
+<!-- Cadence Moyenne -->
+<div class="p-3 rounded-xl bg-surface-container shadow-sm flex flex-col justify-between min-h-[92px]">
+<div class="flex items-center justify-between">
+<span class="font-label-ui text-label-ui text-on-surface-variant">Cadence moy.</span>
+<span class="font-label-mono text-label-mono text-on-surface-variant">SPM</span>
+</div>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-metric-lg text-metric-lg text-on-surface font-semibold">26</span>
+<span class="font-metric-sm text-metric-sm text-on-surface-variant">spm</span>
+</div>
+<div class="text-[11px] font-label-mono text-on-surface-variant">
+          Pic instantané: 31 spm
+        </div>
+</div>
+<!-- FC Moyenne -->
+<div class="p-3 rounded-xl bg-surface-container shadow-sm flex flex-col justify-between min-h-[92px]">
+<div class="flex items-center justify-between">
+<span class="font-label-ui text-label-ui text-on-surface-variant">FC moyenne</span>
+<span class="material-symbols-outlined text-error text-[14px]">favorite</span>
+</div>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-metric-lg text-metric-lg text-on-surface font-semibold">154</span>
+<span class="font-metric-sm text-metric-sm text-on-surface-variant">bpm</span>
+</div>
+<div class="text-[11px] font-label-mono text-on-surface-variant truncate">
+          Polar H10 (Max 172)
+        </div>
+</div>
+</div>
+<!-- Hull Balance Instrument Strip -->
+<div class="mt-space-sm p-3 rounded-xl bg-surface-container shadow-sm flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-ui text-label-ui text-on-surface-variant">Gîte maximale observée</span>
+<span class="font-label-mono text-label-mono text-secondary font-semibold">+3.2° TRIBORD</span>
+</div>
+<!-- Marine Balance Bar -->
+<div class="w-full h-3 rounded-full bg-surface-container-highest relative flex items-center overflow-hidden">
+<!-- Port side indicator zone (Bâbord) -->
+<div class="w-1/2 h-full bg-error/20 flex justify-start items-center px-1">
+<span class="text-[9px] font-label-mono text-error">BÂBORD</span>
+</div>
+<!-- Center neutral line -->
+<div class="absolute left-1/2 -ml-[1px] w-[2px] h-full bg-on-surface z-10"></div>
+<!-- Starboard side indicator zone (Tribord) -->
+<div class="w-1/2 h-full bg-secondary/20 flex justify-end items-center px-1">
+<span class="text-[9px] font-label-mono text-secondary">TRIBORD</span>
+</div>
+<!-- Observed roll marker -->
+<div class="absolute left-[66%] w-2.5 h-full rounded-sm bg-secondary shadow-md"></div>
+</div>
+<div class="flex justify-between items-center text-[11px] font-label-mono text-on-surface-variant">
+<span>Assiette longitudinale: Neutre</span>
+<span>Stabilité coque: 94%</span>
+</div>
+</div>
+</section>
+<!-- Charts Section: Allure & Cadence -->
+<section class="px-margin pb-space-lg flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<h2 class="font-label-ui text-label-ui uppercase tracking-wider text-on-surface-variant">Profils d'évolution</h2>
+<span class="font-label-mono text-label-mono text-secondary">DONNÉES BRUTES ACCÉLÉROMÈTRE</span>
+</div>
+<!-- Chart 1: Allure /500m -->
+<div class="p-3 rounded-xl bg-surface-container shadow-sm flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-ui text-label-ui text-on-surface font-medium">Allure /500m</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Ligne pointillée: Allure cible moyenne (2:08.4)</p>
+</div>
+<span class="font-metric-sm text-metric-sm text-on-surface">500m à 9 200m</span>
+</div>
+<!-- Vector SVG Curve Chart -->
+<div class="w-full h-32 pt-2 relative">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 340 100">
+<!-- Background Grid lines -->
+<line class="text-surface-container-highest" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="340" y1="20" y2="20"></line>
+<line class="text-surface-container-highest" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="340" y1="50" y2="50"></line>
+<line class="text-surface-container-highest" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="340" y1="80" y2="80"></line>
+<!-- Average Dotted Line (2:08.4 level) -->
+<line opacity="0.8" stroke="#caf22e" stroke-dasharray="4 3" stroke-width="1.5" x1="0" x2="340" y1="56" y2="56"></line>
+<text class="text-[9px] font-metric-sm" fill="#caf22e" x="4" y="52">Moy 2:08.4</text>
+<!-- Pace curve (lower is faster) -->
+<path d="M 0 68 
+                   L 20 65 
+                   L 40 60 
+                   L 70 30 
+                   L 95 24 
+                   L 120 48 
+                   L 150 52 
+                   L 180 50 
+                   L 210 58 
+                   L 240 62 
+                   L 270 42 
+                   L 300 45 
+                   L 340 50" fill="none" stroke="#64de8d" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+<!-- Tour 3 peak marker -->
+<circle cx="95" cy="24" fill="#caf22e" r="4"></circle>
+<text class="text-[9px] font-metric-sm" fill="#e5e2e1" x="102" y="24">1:56.2 (T3)</text>
+</svg>
+</div>
+<div class="flex justify-between font-label-mono text-label-mono text-on-surface-variant pt-1">
+<span>0 km</span>
+<span>2.5 km</span>
+<span>5.0 km</span>
+<span>7.5 km</span>
+<span>9.2 km</span>
+</div>
+</div>
+<!-- Chart 2: Cadence spm -->
+<div class="p-3 rounded-xl bg-surface-container shadow-sm flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-ui text-label-ui text-on-surface font-medium">Cadence (spm)</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Fréquence de coup d'aviron par minute</p>
+</div>
+<span class="font-metric-sm text-metric-sm text-secondary">26 SPM MOY</span>
+</div>
+<!-- Vector SVG Cadence Chart -->
+<div class="w-full h-24 pt-2 relative">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 340 80">
+<line class="text-surface-container-highest" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="340" y1="20" y2="20"></line>
+<line class="text-surface-container-highest" stroke="currentColor" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="340" y1="60" y2="60"></line>
+<!-- Cadence curve -->
+<path d="M 0 62 
+                   C 30 60, 50 55, 70 42 
+                   C 85 30, 100 18, 110 22 
+                   C 130 30, 160 48, 190 48 
+                   C 220 48, 250 52, 280 40 
+                   C 310 28, 325 36, 340 38" fill="none" stroke="#e5e2e1" stroke-linecap="round" stroke-width="2"></path>
+<!-- Max Cadence Dot -->
+<circle cx="110" cy="22" fill="#ffb4ab" r="3.5"></circle>
+<text class="text-[9px] font-metric-sm" fill="#ffb4ab" x="116" y="20">31 spm</text>
+</svg>
+</div>
+<div class="flex justify-between font-label-mono text-label-mono text-on-surface-variant">
+<span>Min: 22 spm</span>
+<span>Régularité: 91%</span>
+<span>Max: 31 spm</span>
+</div>
+</div>
+</section>
+<!-- Tableau des tours (Splits 500m) -->
+<section class="px-margin pb-space-lg">
+<div class="flex items-center justify-between mb-space-xs">
+<h2 class="font-label-ui text-label-ui uppercase tracking-wider text-on-surface-variant">Tableau des tours (500m)</h2>
+<span class="font-label-mono text-label-mono text-on-surface-variant">18 INTERVALLES</span>
+</div>
+<div class="rounded-xl bg-surface-container overflow-hidden shadow-sm">
+<div class="px-3 py-2 bg-surface-container-high flex items-center justify-between text-on-surface-variant font-label-mono text-label-mono">
+<span class="w-16">INTERVALLE</span>
+<span class="w-20 text-center">ALLURE</span>
+<span class="w-16 text-center">CADENCE</span>
+<span class="w-16 text-right">FC MOY</span>
+</div>
+<!-- Tour 1 -->
+<div class="px-3 py-2.5 flex items-center justify-between bg-surface-container hover:bg-surface-container-high transition-colors">
+<div class="w-16 flex flex-col">
+<span class="font-metric-sm text-metric-sm text-on-surface font-semibold">T1</span>
+<span class="text-[10px] font-label-mono text-on-surface-variant">0-500m</span>
+</div>
+<div class="w-20 text-center font-metric-sm text-metric-sm text-on-surface font-medium">2:12.1</div>
+<div class="w-16 text-center font-metric-sm text-metric-sm text-on-surface">24 spm</div>
+<div class="w-16 text-right font-metric-sm text-metric-sm text-on-surface-variant">138 bpm</div>
+</div>
+<!-- Tour 2 -->
+<div class="px-3 py-2.5 flex items-center justify-between bg-surface-container-low hover:bg-surface-container-high transition-colors">
+<div class="w-16 flex flex-col">
+<span class="font-metric-sm text-metric-sm text-on-surface font-semibold">T2</span>
+<span class="text-[10px] font-label-mono text-on-surface-variant">500-1000m</span>
+</div>
+<div class="w-20 text-center font-metric-sm text-metric-sm text-on-surface font-medium">2:09.5</div>
+<div class="w-16 text-center font-metric-sm text-metric-sm text-on-surface">26 spm</div>
+<div class="w-16 text-right font-metric-sm text-metric-sm text-on-surface-variant">147 bpm</div>
+</div>
+<!-- Tour 3 (Highlight fastest) -->
+<div class="px-3 py-2.5 flex items-center justify-between bg-surface-container-highest transition-colors">
+<div class="w-16 flex flex-col">
+<div class="flex items-center gap-1">
+<span class="font-metric-sm text-metric-sm text-primary-fixed font-bold">T3</span>
+<span class="material-symbols-outlined text-primary-fixed text-[13px]">bolt</span>
+</div>
+<span class="text-[10px] font-label-mono text-primary-fixed">1000-1500m</span>
+</div>
+<div class="w-20 text-center font-metric-sm text-metric-sm text-primary-fixed font-bold">1:56.2</div>
+<div class="w-16 text-center font-metric-sm text-metric-sm text-primary-fixed font-semibold">29 spm</div>
+<div class="w-16 text-right font-metric-sm text-metric-sm text-primary-fixed">164 bpm</div>
+</div>
+<!-- Tour 4 -->
+<div class="px-3 py-2.5 flex items-center justify-between bg-surface-container-low hover:bg-surface-container-high transition-colors">
+<div class="w-16 flex flex-col">
+<span class="font-metric-sm text-metric-sm text-on-surface font-semibold">T4</span>
+<span class="text-[10px] font-label-mono text-on-surface-variant">1500-2000m</span>
+</div>
+<div class="w-20 text-center font-metric-sm text-metric-sm text-on-surface font-medium">2:07.8</div>
+<div class="w-16 text-center font-metric-sm text-metric-sm text-on-surface">26 spm</div>
+<div class="w-16 text-right font-metric-sm text-metric-sm text-on-surface-variant">156 bpm</div>
+</div>
+<!-- Tour 5 -->
+<div class="px-3 py-2.5 flex items-center justify-between bg-surface-container hover:bg-surface-container-high transition-colors">
+<div class="w-16 flex flex-col">
+<span class="font-metric-sm text-metric-sm text-on-surface font-semibold">T5</span>
+<span class="text-[10px] font-label-mono text-on-surface-variant">2000-2500m</span>
+</div>
+<div class="w-20 text-center font-metric-sm text-metric-sm text-on-surface font-medium">2:08.1</div>
+<div class="w-16 text-center font-metric-sm text-metric-sm text-on-surface">26 spm</div>
+<div class="w-16 text-right font-metric-sm text-metric-sm text-on-surface-variant">158 bpm</div>
+</div>
+</div>
+<!-- Toggle more splits button -->
+<button class="w-full mt-2 py-2 flex items-center justify-center gap-1 font-label-mono text-label-mono text-on-surface-variant bg-surface-container-low rounded-lg active:bg-surface-container-high transition-colors" id="toggle-splits" type="button">
+<span>AFFICHER LES 13 AUTRES SPLITS</span>
+<span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+</section>
+<!-- Patch Dorsal / Mock Banner (Collapsible) -->
+<section class="px-margin pb-space-lg">
+<div class="p-3 rounded-xl bg-surface-container shadow-sm flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">developer_board</span>
+<span class="font-body-md text-body-md font-medium text-on-surface">Patch dorsal cinématique</span>
+</div>
+<span class="font-label-mono text-label-mono px-2 py-0.5 rounded bg-error-container text-on-error-container">
+          MOCK / DÉMO
+        </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        Patch dorsal — Démo (firmware non branché). Les mesures d'angles vertébraux L4/L5 et de chaîne cinématique sont simulées pour démonstration d'interface quai.
+      </p>
+<div class="flex items-center justify-between pt-1">
+<span class="font-label-mono text-label-mono text-on-surface-variant">CANAL SÉRIE: COM4_OFFLINE</span>
+<button class="text-secondary font-label-mono text-label-mono underline underline-offset-2" type="button">
+          Consulter logs bruts
+        </button>
+</div>
+</div>
+</section>
+<!-- Photo Momento of Boat Docked at Pontoon -->
+<div class="px-margin pb-space-lg">
+<div class="relative w-full h-28 rounded-xl overflow-hidden bg-surface-container shadow-sm flex items-center justify-between p-3">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="Close up photograph of a carbon racing skiff oar handles and foot stretchers resting gently against a wet wooden rowing club pontoon dock after practice. Morning water drops on carbon weave texture, soft natural overcast morning light, authentic minimalist sport engineering mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBN5rc5WVAcoWC9psbMlyEHpw4MgMgpwAbpgk8EhTNNVBjStP1IsDyClaKujq8qxptLg5oQjKQkuL7kIZWVCZm26GOJ6Zo4lJwy7Ln3k6cuFPdZKbP7tkpER6MB1xkoW2fR9ftYvfa4MYOqG1h0J7S1Mbfc4VSVFdGN4oq21g4PekL1UPFp1QrKX-PKnDUOlF23z2yNCrUXu2f_Vo7l3KHPzSguhWl5h8BHilj_LcHJco9jZR6gliUGA"/>
+<div class="absolute inset-0 bg-surface/85"></div>
+<div class="relative z-10 flex flex-col">
+<span class="font-label-mono text-label-mono text-primary-fixed">MATÉRIEL DÉBÂTÉ</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">1x Skiff au ponton</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Fermeture session #2024-05-18-0842</span>
+</div>
+<div class="relative z-10 w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">anchor</span>
+</div>
+</div>
+</div>
+<!-- Primary Dock Actions Deck -->
+<footer class="p-margin flex flex-col gap-space-sm bg-surface-container-low shadow-xl">
+<!-- Primary Full Volt Action (Design specification: min 48px, high contrast Volt text-on-primary-fixed-variant or black) -->
+<button class="w-full h-14 rounded-xl bg-primary-container text-on-primary-fixed font-headline-sm text-headline-sm font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-md" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" type="button">
+<span class="material-symbols-outlined text-[22px]">check_circle</span>
+<span>Retour à Aujourd'hui</span>
+</button>
+<!-- Secondary Dark Deck Action -->
+<button class="w-full h-12 rounded-xl bg-surface-container-highest text-on-surface font-label-ui text-label-ui font-semibold flex items-center justify-center gap-2 active:bg-surface-bright transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[20px]">play_circle</span>
+<span>Revoir la séance (Replay GPS)</span>
+</button>
+<!-- Tertiary Local JSONL Export Trigger -->
+<div class="flex items-center justify-center pt-space-xs">
+<button class="font-label-mono text-label-mono text-on-surface-variant hover:text-secondary flex items-center gap-1.5 py-2 px-3 rounded active:bg-surface-container-highest transition-colors" id="share-jsonl" type="button">
+<span class="material-symbols-outlined text-[16px]">file_download</span>
+<span>Partager l'export local (JSONL)</span>
+</button>
+</div>
+</footer>
+<script>
+    // Micro-interaction for JSONL local payload export feedback
+    document.getElementById('share-jsonl')?.addEventListener('click', function() {
+      const btn = this;
+      const initialText = btn.innerHTML;
+      btn.innerHTML = `<span class="material-symbols-outlined text-[16px] text-secondary">done</span><span class="text-secondary font-label-mono">FICHIER JSONL PRÊT (3.8 MO)</span>`;
+      setTimeout(() => {
+        btn.innerHTML = initialText;
+      }, 2500);
+    });
+
+    // Expand splits feedback
+    document.getElementById('toggle-splits')?.addEventListener('click', function() {
+      const btn = this;
+      btn.innerHTML = `<span>18 TOURS TOTAL (AFFICHAGE RÉDUIT)</span><span class="material-symbols-outlined text-[16px]">expand_less</span>`;
+    });
+  </script>
+</div></main></body></html>

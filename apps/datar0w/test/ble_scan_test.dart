@@ -80,7 +80,7 @@ void main() {
     );
     await tester.pump();
     expect(find.text('♥ —'), findsOneWidget);
-    await tester.tap(find.textContaining('SCAN'));
+    await tester.tap(find.textContaining('scan BLE'));
     await tester.pump();
     await tester.pump();
     expect(find.text('Polar H10'), findsOneWidget);
@@ -110,7 +110,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.tap(find.textContaining('SCAN'));
+    await tester.tap(find.textContaining('scan BLE'));
     await tester.pump();
     expect(find.text('♥ —'), findsWidgets);
     expect(find.textContaining('Bluetooth refusé'), findsOneWidget);

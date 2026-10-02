@@ -73,10 +73,18 @@ void main() {
 
   test('routes gelées toujours listées', () {
     expect(AppRoutes.devices, '/devices');
+    expect(AppRoutes.bleJournal, '/devices/journal');
     expect(AppRoutes.presession, '/presession');
     expect(AppRoutes.live, '/live');
     expect(AppRoutes.quai, '/quai');
     expect(AppRoutes.calendar, '/calendar');
+    expect(AppRoutes.rowerReplay, '/replay');
+    expect(AppRoutes.coachReplay, '/replay-coach');
+    expect(AppRoutes.consent, '/consent');
+    expect(AppRoutes.settings, '/settings');
+    expect(AppRoutes.opsOut, '/ops/out');
+    expect(AppRoutes.opsIn, '/ops/in');
+    expect(AppRoutes.opsDeparture, '/ops/departure');
   });
 
   test('PatchSyncStore mock jsonl', () async {
@@ -98,9 +106,9 @@ void main() {
     await tester.pumpWidget(
       const ProviderScope(child: MaterialApp(home: PresessionScreen())),
     );
-    expect(find.text('ENTRAÎNEMENT'), findsOneWidget);
-    expect(find.text('COMPÉTITION'), findsOneWidget);
-    await tester.tap(find.text('COMPÉTITION'));
+    expect(find.text('Entraînement'), findsOneWidget);
+    expect(find.text('Compétition'), findsOneWidget);
+    await tester.tap(find.text('Compétition'));
     await tester.pump();
     expect(find.textContaining('tel au quai'), findsOneWidget);
   });
@@ -130,7 +138,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(find.textContaining('tel au quai'), findsOneWidget);
-    expect(find.text('♥ —'), findsOneWidget);
+    expect(find.text('GÎTE COQUE'), findsOneWidget);
     expect(find.textContaining('STOP'), findsOneWidget);
   });
 
@@ -149,8 +157,11 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(find.text('IMPORTER PATCH'), findsOneWidget);
-    expect(find.text('PARTAGER AU COACH'), findsOneWidget);
+    expect(find.text('Au quai'), findsOneWidget);
+    await tester.ensureVisible(find.textContaining('Importer patch'));
+    await tester.pump();
+    expect(find.textContaining('Importer patch'), findsOneWidget);
+    expect(find.textContaining('Partager l’export local'), findsOneWidget);
     expect(dir.path, isNotEmpty);
   });
 }

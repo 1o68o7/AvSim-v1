@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../../calendar/catalog.dart';
 import '../../identity/controller.dart';
 import '../../identity/models.dart';
+import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// DR-43 — Calendrier & régates (Stitch).
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
 
@@ -21,8 +23,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   Widget build(BuildContext context) {
     final rower = ref.watch(identityProvider).activeRower;
     return DeckScaffold(
-      title: 'CALENDRIER',
-      subtitle: 'catalogue curaté · pas un scrape FFA',
+      title: 'Calendrier',
+      subtitle: 'Catalogue curaté · pas un scrape FFA',
       body: FutureBuilder<CalendarCatalog>(
         future: CalendarCatalog.load(),
         builder: (context, snap) {
@@ -65,15 +67,54 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   itemCount: list.length,
                   itemBuilder: (context, i) {
                     final e = list[i];
-                    return ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(e.name),
-                      subtitle: Text(
-                        '${e.start.toIso8601String().split('T').first}'
-                        ' · ${e.city ?? '—'} · ${e.typeLabel}'
-                        ' · ${e.licenceRequise}',
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Material(
+                        color: DeckColors.surface,
+                        borderRadius: DeckRadii.cardAll,
+                        child: InkWell(
+                          borderRadius: DeckRadii.cardAll,
+                          onTap: () => context.go('/calendar/${e.id}'),
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              borderRadius: DeckRadii.cardAll,
+                              border: Border.all(color: DeckColors.hairline),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  e.typeLabel,
+                                  style: DeckType.labelMono(
+                                    color: DeckColors.volt,
+                                    size: 10,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  e.name,
+                                  style: const TextStyle(
+                                    fontFamily: DeckType.ui,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${e.start.toIso8601String().split('T').first}'
+                                  ' · ${e.city ?? '—'} · ${e.licenceRequise}',
+                                  style: const TextStyle(
+                                    fontFamily: DeckType.ui,
+                                    color: DeckColors.label,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                      onTap: () => context.go('/calendar/${e.id}'),
                     );
                   },
                 ),

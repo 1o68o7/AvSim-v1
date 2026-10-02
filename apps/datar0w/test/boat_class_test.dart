@@ -62,14 +62,16 @@ void main() {
         child: MaterialApp(home: PresessionScreen()),
       ),
     );
-    expect(find.textContaining('1 · CLASSE'), findsOneWidget);
-    expect(find.textContaining('2 · SIÈGE DANS 1X'), findsOneWidget);
+    expect(find.textContaining('02. Type d’embarcation'), findsOneWidget);
+    expect(find.textContaining('Siège dans 1x'), findsOneWidget);
     expect(find.text('1 nage'), findsOneWidget);
     expect(find.text('8'), findsNothing);
 
-    await tester.tap(find.text('8+'));
+    await tester.ensureVisible(find.textContaining('8+'));
     await tester.pump();
-    expect(find.textContaining('3 · SIÈGE DANS 8+'), findsOneWidget);
+    await tester.tap(find.textContaining('8+'));
+    await tester.pump();
+    expect(find.textContaining('Siège dans 8+'), findsOneWidget);
     expect(find.text('Barreur'), findsOneWidget);
     expect(find.text('8'), findsOneWidget);
     expect(find.textContaining('en attente'), findsOneWidget);
@@ -111,7 +113,11 @@ void main() {
         child: MaterialApp(home: PresessionScreen()),
       ),
     );
-    await tester.tap(find.text('8+'));
+    await tester.ensureVisible(find.textContaining('8+'));
+    await tester.pump();
+    await tester.tap(find.textContaining('8+'));
+    await tester.pump();
+    await tester.ensureVisible(find.text('Barreur'));
     await tester.pump();
     await tester.tap(find.text('Barreur'));
     await tester.pump();

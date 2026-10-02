@@ -8,8 +8,10 @@ import '../../ops/oar_set.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import '../../widgets/deck_widgets.dart';
 import 'screen_impact.dart';
 
+/// DR-70 — Sortir une coque (Stitch).
 class OpsOutScreen extends ConsumerStatefulWidget {
   const OpsOutScreen({super.key});
 
@@ -79,7 +81,7 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
     final snap = ref.watch(identityProvider);
     if (role != CrewRole.coach || !canCheckoutOps(snap, role)) {
       return const DeckScaffold(
-        title: 'SORTIE',
+        title: 'Sortir une coque',
         retourToProfile: true,
         body: Center(
           child: Text(
@@ -97,8 +99,8 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
     final boat = snap.boatById(_boatId);
 
     return DeckScaffold(
-      title: 'SORTIE DE PARC',
-      subtitle: 'Check-out explicite',
+      title: 'Sortir une coque',
+      subtitle: 'Registre sécurité ponton · DR-70',
       body: ready.isEmpty
           ? const Center(
               child: Text(
@@ -141,7 +143,7 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
                 if (boat != null) ...[
                   const SizedBox(height: 16),
                   const Text(
-                    'JEU DE PELLES',
+                    'Jeu de pelles',
                     style: TextStyle(
                       color: DeckColors.label,
                       fontSize: 11,
@@ -209,7 +211,7 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
                   const SizedBox(height: 20),
                   FilledButton(
                     onPressed: () => _sortir(boat),
-                    child: const Text('SORTIR'),
+                    child: const Text('Valider le départ sur l’eau'),
                   ),
                 ],
               ],

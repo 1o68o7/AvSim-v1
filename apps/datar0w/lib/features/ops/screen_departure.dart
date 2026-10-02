@@ -10,7 +10,9 @@ import '../../ops/service.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import '../../widgets/deck_widgets.dart';
 
+/// DR-72 — Alignement & starter (Stitch).
 class OpsDepartureScreen extends ConsumerWidget {
   const OpsDepartureScreen({super.key});
 
@@ -21,7 +23,7 @@ class OpsDepartureScreen extends ConsumerWidget {
     final ops = ref.watch(opsProvider);
     if (role != CrewRole.coach || !canCheckoutOps(ident, role)) {
       return const DeckScaffold(
-        title: 'DÉPART',
+        title: 'Alignement',
         retourToProfile: true,
         body: Center(
           child: Text(
@@ -44,8 +46,8 @@ class OpsDepartureScreen extends ConsumerWidget {
     ]);
 
     return DeckScaffold(
-      title: 'DÉPART',
-      subtitle: 'Alignement · 8+ d’abord',
+      title: 'Alignement',
+      subtitle: 'Départ · 8+ d’abord · DR-72',
       body: rows.isEmpty
           ? const Center(
               child: Text(
@@ -102,7 +104,7 @@ class OpsDepartureScreen extends ConsumerWidget {
                             onPressed: () => ref
                                 .read(opsProvider.notifier)
                                 .markDeparted(r.out.id),
-                            child: const Text('MARQUER PARTI'),
+                            child: const Text('Marquer parti'),
                           ),
                         ],
                       ],

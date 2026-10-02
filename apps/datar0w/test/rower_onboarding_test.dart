@@ -56,16 +56,19 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('TON PROFIL RAMEUR'), findsOneWidget);
+    expect(find.text('Fiche rameur'), findsOneWidget);
     expect(find.text('Je rame seul (loisir)'), findsOneWidget);
     expect(find.text('Je barre aussi'), findsOneWidget);
     await tester.enterText(find.byType(TextField).first, 'Ada');
-    await tester.tap(find.text('CONTINUER'));
+    await tester.tap(find.text('Continuer'));
     await tester.pumpAndSettle();
-    expect(find.text('TA LICENCE'), findsOneWidget);
+    expect(find.text('Licence & club'), findsOneWidget);
     expect(find.text('Licence FFA (optionnel)'), findsNothing);
     expect(find.textContaining('Loisir sans licence'), findsOneWidget);
-    expect(find.text('PASSER'), findsOneWidget);
+    expect(
+      find.textContaining('Passer cette étape'),
+      findsOneWidget,
+    );
     expect(find.textContaining('Catégorie FFA'), findsNothing);
   });
 }

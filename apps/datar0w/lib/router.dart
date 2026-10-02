@@ -9,6 +9,7 @@ import 'features/coach/screen_5.dart';
 import 'features/coach/screen_join.dart';
 import 'features/cox/screen_cox.dart';
 import 'features/identity/screen_boat_edit.dart';
+import 'features/identity/screen_ble_journal.dart';
 import 'features/identity/screen_club.dart';
 import 'features/identity/screen_crew.dart';
 import 'features/identity/screen_devices.dart';
@@ -93,6 +94,7 @@ abstract final class AppRoutes {
   static const waters = '/waters';
   static const consent = '/consent';
   static const devices = '/devices';
+  static const bleJournal = '/devices/journal';
   static const physio = '/physio';
 
   /// Après tare : barreur → `/cox`, rameur → `/live`. Écrans distincts.
@@ -380,6 +382,12 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.devices,
       name: 'devices',
       builder: (context, state) => const DevicesScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.bleJournal,
+      name: 'bleJournal',
+      builder: (context, state) =>
+          _hub(AppRoutes.bleJournal, const BleJournalScreen()),
     ),
     GoRoute(
       path: AppRoutes.physio,

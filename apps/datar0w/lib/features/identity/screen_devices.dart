@@ -8,11 +8,13 @@ import '../../identity/devices.dart';
 import '../../identity/id.dart';
 import '../../router.dart';
 import '../../sensors/ble/ble_client.dart';
+import '../../sensors/ble/ble_journal.dart';
 import '../../sensors/ble/cardio_hub.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
 
+/// DR-61 — Mes objets & capteurs BLE (Stitch).
 class DevicesScreen extends ConsumerStatefulWidget {
   const DevicesScreen({super.key});
 
@@ -46,6 +48,8 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
 
   Future<void> _scan() async {
     final client = ref.read(bleHrClientProvider);
+    final journal = ref.read(bleJournalProvider.notifier);
+    journal.info('SCAN', 'Démarrage scan BLE…');
     setState(() {
       _scanning = true;
       _denied = false;
@@ -53,6 +57,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
     });
     final ok = await client.ensurePermission();
     if (!ok) {
+      journal.warn('SCAN', 'Permission Bluetooth refusée');
       ref.read(cardioHubProvider.notifier).clear();
       setState(() {
         _scanning = false;
@@ -177,8 +182,8 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
             ? 'patch ${patches.first.patchLink?.label ?? 'pairé'}'
             : 'patch $patchBat %');
     return DeckScaffold(
-      title: 'MES OBJETS',
-      subtitle: 'Sangle cardio · patch dorsal · pas de montre',
+      title: 'Mes objets',
+      subtitle: 'Capteurs BLE · sangle · patch dorsal',
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
@@ -340,7 +345,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: () => _forget(d),
-                            child: Text(d.isPatch ? 'OUBLIER' : 'DÉCONNECTER'),
+                            child: Text(d.isPatch ? 'Oublier' : 'Déconnecter'),
                           ),
                         ),
                       ],
@@ -351,7 +356,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
             ),
           if (_hits.isNotEmpty) ...[
             const SizedBox(height: 8),
-            const DeckSectionLabel('Trouvés à proximité'),
+            const DeckSectionLabel('Nouveaux signaux au ponton'),
             for (final h in _hits)
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -398,13 +403,13 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
           FilledButton(
             onPressed: rower == null || _scanning ? null : _scan,
             child: Text(
-              _scanning ? 'SCAN…' : '+ AJOUTER UN OBJET (SCAN BLE)',
+              _scanning ? 'Scan…' : '+ Ajouter un objet (scan BLE)',
             ),
           ),
           const SizedBox(height: 8),
           OutlinedButton(
             onPressed: rower == null ? null : _mockPatch,
-            child: const Text('SIMULER UN PATCH'),
+            child: const Text('Simuler un patch'),
           ),
           const SizedBox(height: 12),
           const Text(
@@ -413,6 +418,12 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
             'États patch = mock jusqu’au firmware.',
             style: TextStyle(color: DeckColors.muted, fontSize: 11, height: 1.4),
           ),
+          OutlinedButton.icon(
+            onPressed: () => context.go(AppRoutes.bleJournal),
+            icon: const Icon(Icons.terminal, size: 18),
+            label: const Text('Journal technique BLE'),
+          ),
+          const SizedBox(height: 8),
           TextButton(
             onPressed: () => context.go(AppRoutes.consent),
             child: const Text('Consentement santé'),

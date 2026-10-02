@@ -131,7 +131,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.tap(find.text('Connexion'));
+    await tester.tap(find.textContaining('Connexion'));
     await tester.pump(); // lance le Future.delayed 300 ms
     await tester.pump(const Duration(milliseconds: 350));
     expect(find.text('AUTH'), findsOneWidget);
@@ -162,7 +162,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.tap(find.text('Connexion'));
+    await tester.tap(find.textContaining('Connexion'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
     await tester.pump(const Duration(milliseconds: 350));
@@ -176,7 +176,7 @@ void main() {
     if (blocked.evaluate().isNotEmpty) {
       // Au-dessus du CTA jaune, pas un SnackBar sous le bouton.
       expect(find.byType(SnackBar), findsNothing);
-      expect(find.text('CRÉER UN PROFIL'), findsOneWidget);
+      expect(find.text('Créer un profil'), findsOneWidget);
     }
   });
 
@@ -190,7 +190,7 @@ void main() {
     );
     await tester.pump();
     expect(find.text('Passer (sans profil)'), findsNothing);
-    expect(find.text('Connexion'), findsOneWidget);
+    expect(find.textContaining('Connexion'), findsOneWidget);
     expect(find.text('Espace club'), findsNothing);
   });
 

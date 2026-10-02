@@ -27,9 +27,10 @@ void main() {
   testWidgets('live : 1er STOP affiche Encore une fois pour arrêter', (tester) async {
     await pumpLive(tester);
     expect(find.text(kStopArmedMessage), findsNothing);
-    await tester.tap(find.textContaining('TOUCHER 2×'));
+    await tester.tap(find.textContaining('STOP / FIN'));
     await tester.pump();
     expect(find.text(kStopArmedMessage), findsOneWidget);
+    expect(find.text('STOP · RETOUCHER'), findsOneWidget);
     expect(find.text('Accueil'), findsNothing);
     await tester.pump(const Duration(seconds: 3));
   });

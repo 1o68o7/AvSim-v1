@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#131313;color:#e5e2e1;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "error": "#ffb4ab", "tertiary-container": "#ffdad7", "surface-container-highest": "#353534", "on-tertiary": "#68000e", "on-error": "#690005", "on-tertiary-fixed": "#410005", "on-secondary-fixed": "#00210d", "surface": "#131313", "inverse-primary": "#526600", "on-error-container": "#ffdad6", "on-background": "#e5e2e1", "secondary": "#64de8d", "secondary-fixed": "#81fba7", "error-container": "#93000a", "outline": "#8f937a", "surface-container": "#201f1f", "on-primary-fixed": "#171e00", "outline-variant": "#454934", "inverse-surface": "#e5e2e1", "on-surface-variant": "#c5c9ae", "on-secondary-container": "#003116", "surface-container-low": "#1c1b1b", "secondary-container": "#20a55c", "background": "#131313", "secondary-fixed-dim": "#64de8d", "surface-tint": "#afd500", "surface-variant": "#353534", "on-secondary": "#00391a", "primary-fixed-dim": "#afd500", "on-tertiary-fixed-variant": "#8d141e", "on-primary-container": "#586c00", "surface-container-lowest": "#0e0e0e", "tertiary-fixed": "#ffdad7", "primary-fixed": "#caf22e", "on-tertiary-container": "#b63538", "tertiary-fixed-dim": "#ffb3af", "inverse-on-surface": "#313030", "surface-bright": "#3a3939", "surface-dim": "#131313", "on-primary-fixed-variant": "#3d4c00", "primary": "#ffffff", "on-secondary-fixed-variant": "#005229", "primary-container": "#caf22e", "surface-container-high": "#2a2a2a", "on-primary": "#293500", "on-surface": "#e5e2e1", "tertiary": "#ffffff" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "space-sm": "0.5rem", "gutter": "1rem", "space-xs": "0.25rem", "space-lg": "1.5rem", "space-md": "1rem", "margin": "1rem", "space-xl": "2rem" }, fontFamily: { "metric-hero": ["JetBrains Mono"], "label-ui": ["Inter"], "label-mono": ["JetBrains Mono"], "body-md": ["Inter"], "headline-md": ["Inter"], "headline-lg": ["Inter"], "body-sm": ["Inter"], "metric-lg": ["JetBrains Mono"], "headline-sm": ["Inter"], "metric-sm": ["JetBrains Mono"], "body-lg": ["Inter"], "metric-md": ["JetBrains Mono"] }, fontSize: { "metric-hero": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.04em", "fontWeight": "700" }], "label-ui": ["13px", { "lineHeight": "16px", "fontWeight": "500" }], "label-mono": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "metric-lg": ["32px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "metric-sm": ["14px", { "lineHeight": "18px", "fontWeight": "500" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "metric-md": ["20px", { "lineHeight": "24px", "fontWeight": "600" }] } } } }</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 inset-x-0 z-50 bg-surface/90 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.6)]"><div class="h-14 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><button aria-label="Retour" class="w-12 h-12 -ml-2 flex items-center justify-center text-on-surface rounded-full active:bg-surface-container-high transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><div class="flex flex-col"><span class="font-label-mono text-label-mono uppercase text-on-surface-variant leading-none">TÉLÉMÉTRIE DÉCK</span><h1 class="font-headline-sm text-headline-sm text-on-surface font-semibold tracking-tight">Session Tunnel Shell</h1></div></div><div class="flex items-center gap-space-sm"><span class="font-label-mono text-label-mono px-2 py-0.5 rounded bg-surface-container-highest text-secondary border border-secondary/30">SYSTÈME OP</span><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-14 pb-safe bg-surface"><div class="flex flex-col w-full px-margin pb-space-xl">
+<!-- Status Chip & Sub-header banner -->
+<div class="flex items-center justify-between mt-space-sm mb-space-md">
+<div class="flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-surface-container-high">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+</span>
+<span class="font-label-mono text-label-mono text-secondary tracking-wider uppercase">PORTRAIT VERROUILLÉ • CAPTEURS IMU</span>
+</div>
+<div class="flex items-center gap-1 font-label-mono text-label-mono text-on-surface-variant">
+<span>100 Hz</span>
+<span class="material-symbols-outlined text-[14px]">sensors</span>
+</div>
+</div>
+<!-- Direct Instruction Callout -->
+<div class="rounded-xl bg-surface-container p-space-md shadow-md mb-space-md">
+<div class="flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center shrink-0 text-primary-fixed">
+<span class="material-symbols-outlined text-[20px]">screen_rotation_alt</span>
+</div>
+<div class="flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold tracking-tight">Mise à zéro du pont</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5 leading-snug">
+          Pose le téléphone à plat, dans l'axe du bateau. Ne le touche plus.
+        </p>
+</div>
+</div>
+</div>
+<!-- Main Telemetry Deck / Gyro Level Reticle -->
+<div class="relative w-full rounded-xl bg-surface-container-low p-space-md flex flex-col items-center shadow-xl mb-space-md">
+<!-- Top Deck Port/Starboard Axis Banner -->
+<div class="w-full flex items-center justify-between mb-space-sm px-space-xs">
+<div class="flex items-center gap-1 font-label-mono text-label-mono text-error">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span>BÂBORD</span>
+</div>
+<span class="font-label-mono text-label-mono text-on-surface-variant">AXE QUILLE DÉCK</span>
+<div class="flex items-center gap-1 font-label-mono text-label-mono text-secondary">
+<span>TRIBORD</span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+</div>
+<!-- Gyro Crosshair Sight Graphic (SVG) -->
+<div class="relative w-64 h-64 my-space-xs flex items-center justify-center">
+<svg class="w-full h-full" fill="none" viewbox="0 0 260 260">
+<!-- Outer Horizon Ring -->
+<circle cx="130" cy="130" r="120" stroke="#353534" stroke-dasharray="4 4" stroke-width="1.5"></circle>
+<circle cx="130" cy="130" r="92" stroke="#2a2a2a" stroke-width="1"></circle>
+<circle cx="130" cy="130" r="60" stroke="#2a2a2a" stroke-width="1"></circle>
+<!-- Center Target Ring (Tolerance Zone) -->
+<circle cx="130" cy="130" fill="#201f1f" r="24" stroke="#caf22e" stroke-width="1.5"></circle>
+<!-- Longitudinal Keel Axis Line -->
+<line stroke="#454934" stroke-dasharray="3 3" stroke-width="1" x1="130" x2="130" y1="10" y2="250"></line>
+<line stroke="#caf22e" stroke-width="2.5" x1="130" x2="130" y1="10" y2="34"></line>
+<line stroke="#caf22e" stroke-width="2.5" x1="130" x2="130" y1="226" y2="250"></line>
+<!-- Transverse Rigger Axis Line (Port/Starboard Balance) -->
+<line stroke="#454934" stroke-dasharray="3 3" stroke-width="1" x1="10" x2="250" y1="130" y2="130"></line>
+<line stroke="#ffb4ab" stroke-width="2.5" x1="10" x2="34" y1="130" y2="130"></line>
+<line stroke="#64de8d" stroke-width="2.5" x1="226" x2="250" y1="130" y2="130"></line>
+<!-- Graduated Pitch Markers -->
+<line stroke="#8f937a" stroke-width="1" x1="124" x2="136" y1="70" y2="70"></line>
+<line stroke="#8f937a" stroke-width="1.5" x1="120" x2="140" y1="100" y2="100"></line>
+<line stroke="#8f937a" stroke-width="1.5" x1="120" x2="140" y1="160" y2="160"></line>
+<line stroke="#8f937a" stroke-width="1" x1="124" x2="136" y1="190" y2="190"></line>
+<!-- Calibrated Zero Crosshair reticle (Slight 0.1° offset micro-indicator) -->
+<g class="transition-transform duration-500 ease-out" id="calibrated-bubble" transform="translate(130.5, 129.5)">
+<circle cx="0" cy="0" fill="#caf22e" fill-opacity="0.25" r="10" stroke="#caf22e" stroke-width="2"></circle>
+<circle cx="0" cy="0" fill="#caf22e" r="3"></circle>
+<line stroke="#caf22e" stroke-width="1.5" x1="-16" x2="-8" y1="0" y2="0"></line>
+<line stroke="#caf22e" stroke-width="1.5" x1="8" x2="16" y1="0" y2="0"></line>
+<line stroke="#caf22e" stroke-width="1.5" x1="0" x2="0" y1="-16" y2="-8"></line>
+<line stroke="#caf22e" stroke-width="1.5" x1="0" x2="0" y1="8" y2="16"></line>
+</g>
+</svg>
+<!-- Center Calibration Lock Stamp -->
+<div class="absolute bottom-2 font-label-mono text-label-mono text-primary-fixed bg-surface-container-highest/80 px-2 py-0.5 rounded">
+        Δ 0.00° / SEC
+      </div>
+</div>
+<!-- Real-Time IMU Metric Readouts (High-contrast Dual Clusters) -->
+<div class="w-full grid grid-cols-2 gap-space-sm mt-space-xs">
+<!-- Pitch / Assiette -->
+<div class="flex flex-col p-space-sm rounded-lg bg-surface-container">
+<span class="font-label-ui text-label-ui text-on-surface-variant truncate">Assiette longitudinale</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-metric-lg text-metric-lg text-on-surface tracking-tight font-bold">0.1</span>
+<span class="font-metric-sm text-metric-sm text-on-surface-variant">°</span>
+</div>
+<div class="flex items-center gap-1 mt-0.5 font-label-mono text-label-mono text-secondary">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span>DANS LA CIBLE</span>
+</div>
+</div>
+<!-- Roll / Gîte -->
+<div class="flex flex-col p-space-sm rounded-lg bg-surface-container">
+<span class="font-label-ui text-label-ui text-on-surface-variant truncate">Gîte transversale</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-metric-lg text-metric-lg text-on-surface tracking-tight font-bold">0.0</span>
+<span class="font-metric-sm text-metric-sm text-on-surface-variant">°</span>
+</div>
+<div class="flex items-center gap-1 mt-0.5 font-label-mono text-label-mono text-secondary">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+<span>STABLE Tribord</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Calibration Locked Badge Banner -->
+<div class="w-full flex items-center justify-between rounded-lg bg-surface-container px-space-md py-space-sm mb-space-sm shadow-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-3 h-3 rounded-full bg-secondary flex items-center justify-center">
+<div class="w-1.5 h-1.5 rounded-full bg-on-secondary"></div>
+</div>
+<span class="font-label-mono text-label-mono text-secondary font-semibold uppercase tracking-wider">
+        STABILISÉ • PRÊT POUR LE DÉPART
+      </span>
+</div>
+<span class="font-label-mono text-label-mono text-on-surface-variant">BIAS: OK</span>
+</div>
+<!-- Strict Warning Note -->
+<div class="flex items-center gap-2 px-space-xs mb-space-lg text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-outline">info</span>
+<p class="font-body-sm text-body-sm leading-tight text-on-surface-variant">
+      Toute rotation ou bascule du téléphone annulera la tare.
+    </p>
+</div>
+<!-- Primary Deck Action CTA (High-contrast Volt) -->
+<button class="w-full min-h-[56px] rounded-xl bg-primary-container text-on-primary-container font-headline-sm text-headline-sm font-bold flex items-center justify-center gap-space-sm active:scale-[0.98] transition-transform shadow-lg" id="start-recording-btn">
+<span>Démarrer l'enregistrement</span>
+<span class="material-symbols-outlined text-[24px]">arrow_forward</span>
+</button>
+<!-- Secondary Navigation Link -->
+<div class="w-full flex justify-center mt-space-md">
+<button class="py-2 px-space-md font-label-ui text-label-ui text-on-surface-variant active:text-on-surface transition-colors flex items-center gap-1" onclick="history.back()">
+<span class="material-symbols-outlined text-[16px]">close</span>
+<span>Annuler et revenir à la préparation</span>
+</button>
+</div>
+</div>
+<script>
+  // Subtle micro-settling animation for the IMU horizon reticle
+  (function() {
+    const bubble = document.getElementById('calibrated-bubble');
+    if (!bubble) return;
+    let t = 0;
+    setInterval(() => {
+      t += 0.05;
+      const x = 130 + Math.sin(t) * 0.4;
+      const y = 130 + Math.cos(t * 0.8) * 0.3;
+      bubble.setAttribute('transform', `translate(${x.toFixed(2)}, ${y.toFixed(2)})`);
+    }, 50);
+
+    const btn = document.getElementById('start-recording-btn');
+    if (btn) {
+      btn.addEventListener('click', function() {
+        this.innerHTML = '<span class="material-symbols-outlined text-[24px] animate-spin">refresh</span><span>Initialisation du deck...</span>';
+      });
+    }
+  })();
+</script></main></body></html>

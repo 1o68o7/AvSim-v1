@@ -7,8 +7,10 @@ import '../../ops/service.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import '../../widgets/deck_widgets.dart';
 import 'screen_impact.dart';
 
+/// DR-71 — Rentrer la coque (Stitch).
 class OpsInScreen extends ConsumerStatefulWidget {
   const OpsInScreen({super.key});
 
@@ -34,7 +36,7 @@ class _OpsInScreenState extends ConsumerState<OpsInScreen> {
     final ops = ref.watch(opsProvider);
     if (role != CrewRole.coach || !canCheckoutOps(ident, role)) {
       return const DeckScaffold(
-        title: 'RETOUR',
+        title: 'Rentrer la coque',
         retourToProfile: true,
         body: Center(
           child: Text(
@@ -47,8 +49,8 @@ class _OpsInScreenState extends ConsumerState<OpsInScreen> {
     final active = ops.activeOuts;
 
     return DeckScaffold(
-      title: 'RETOUR DE PARC',
-      subtitle: 'Check-in',
+      title: 'Rentrer la coque',
+      subtitle: 'Émargement retour · DR-71',
       body: active.isEmpty
           ? const Center(
               child: Text(
@@ -140,7 +142,7 @@ class _OutTile extends StatelessWidget {
             const SizedBox(height: 8),
             FilledButton(
               onPressed: onIn,
-              child: const Text('RENTRER'),
+              child: const Text('Clôturer la sortie & libérer'),
             ),
             const SizedBox(height: 8),
             SignalImpactButton(boatId: boatId),
