@@ -130,7 +130,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(find.textContaining('tel au quai'), findsOneWidget);
-    expect(find.text('♥ —'), findsOneWidget);
+    expect(find.text('GÎTE COQUE'), findsOneWidget);
     expect(find.textContaining('STOP'), findsOneWidget);
   });
 
