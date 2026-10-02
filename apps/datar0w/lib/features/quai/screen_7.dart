@@ -259,6 +259,7 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
         children: [
           Expanded(
             child: ListView(
+              cacheExtent: 3200,
               padding: const EdgeInsets.only(bottom: 8),
               children: [
                 if (boat.sessionMode == SessionMode.competition)

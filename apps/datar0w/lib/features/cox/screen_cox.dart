@@ -149,6 +149,7 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
                   ),
                   Expanded(
                     child: ListView(
+                      cacheExtent: 2400,
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                       children: [
                         _VoxBar(
