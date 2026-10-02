@@ -31,7 +31,7 @@ void main() {
   });
 
   testWidgets('2B : Retour profil absent pendant la tare', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(844, 390));
+    await tester.binding.setSurfaceSize(const Size(400, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       const ProviderScope(
@@ -49,7 +49,7 @@ void main() {
 
   testWidgets('BARREUR 8+ : /cox affiche l’écran barreur, pas le live rameur',
       (tester) async {
-    await tester.binding.setSurfaceSize(const Size(844, 390));
+    await tester.binding.setSurfaceSize(const Size(400, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final ov = identityStoreOverride();
     final container = ProviderContainer(overrides: [ov]);
@@ -64,8 +64,9 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.textContaining('BARREUR'), findsWidgets);
+    expect(find.textContaining('DR-53'), findsOneWidget);
     expect(find.text('réf. barreur'), findsOneWidget);
     expect(find.text('réf. rameur'), findsNothing);
+    expect(find.textContaining('Arrêt séance'), findsOneWidget);
   });
 }

@@ -23,7 +23,7 @@ void main() {
   });
 
   testWidgets('cox : pas d’Accueil, pas de leading Retour', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(844, 390));
+    await tester.binding.setSurfaceSize(const Size(400, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       const ProviderScope(child: MaterialApp(home: CoxLiveScreen())),
@@ -31,7 +31,9 @@ void main() {
     await tester.pump();
     expect(find.text('Accueil'), findsNothing);
     expect(find.text('Retour'), findsNothing);
+    expect(find.byType(BackButton), findsNothing);
     expect(find.byType(DeckRetour), findsNothing);
+    expect(find.textContaining('DR-53'), findsOneWidget);
   });
 
   testWidgets('gate coach : Retour → /', (tester) async {

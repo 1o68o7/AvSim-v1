@@ -73,10 +73,18 @@ void main() {
 
   test('routes gelées toujours listées', () {
     expect(AppRoutes.devices, '/devices');
+    expect(AppRoutes.bleJournal, '/devices/journal');
     expect(AppRoutes.presession, '/presession');
     expect(AppRoutes.live, '/live');
     expect(AppRoutes.quai, '/quai');
     expect(AppRoutes.calendar, '/calendar');
+    expect(AppRoutes.rowerReplay, '/replay');
+    expect(AppRoutes.coachReplay, '/replay-coach');
+    expect(AppRoutes.consent, '/consent');
+    expect(AppRoutes.settings, '/settings');
+    expect(AppRoutes.opsOut, '/ops/out');
+    expect(AppRoutes.opsIn, '/ops/in');
+    expect(AppRoutes.opsDeparture, '/ops/departure');
   });
 
   test('PatchSyncStore mock jsonl', () async {
@@ -149,8 +157,9 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(find.text('IMPORTER PATCH'), findsOneWidget);
-    expect(find.text('PARTAGER AU COACH'), findsOneWidget);
+    expect(find.text('Importer patch'), findsOneWidget);
+    expect(find.textContaining('Partager l’export local'), findsOneWidget);
+    expect(find.text('Au quai'), findsOneWidget);
     expect(dir.path, isNotEmpty);
   });
 }
