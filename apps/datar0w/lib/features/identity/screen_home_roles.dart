@@ -9,8 +9,8 @@ import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/club_banner.dart';
 import '../../widgets/deck_scaffold.dart';
+import '../../widgets/deck_shell.dart';
 import '../../widgets/deck_widgets.dart';
-import '../../widgets/sign_out_button.dart';
 
 void continueFromAssignment(
   WidgetRef ref, {
@@ -47,7 +47,7 @@ class HomeCoxScreen extends ConsumerWidget {
     final coxRear = asg?.coxPosition != 'front';
 
     return DeckScaffold(
-      title: 'ACCUEIL BARREUR',
+      title: 'Accueil barreur',
       subtitle: boat?.name ?? 'sans affectation',
       retourFallback: AppRoutes.homeCox,
       body: ListView(
@@ -69,7 +69,7 @@ class HomeCoxScreen extends ConsumerWidget {
               trailing: Text(
                 boat.classe.toUpperCase(),
                 style: const TextStyle(
-                  color: DeckColors.amber,
+                  color: DeckColors.volt,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                 ),
@@ -118,12 +118,12 @@ class HomeCoxScreen extends ConsumerWidget {
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(10),
-                      color: DeckColors.amber.withValues(alpha: 0.12),
+                      color: DeckColors.volt.withValues(alpha: 0.12),
                       child: const Text(
                         'Poste barreur obligatoire sur cette classe. '
                         'Lecture seule — composition coach.',
                         style: TextStyle(
-                          color: DeckColors.amber,
+                          color: DeckColors.volt,
                           fontSize: 11,
                           height: 1.35,
                         ),
@@ -186,17 +186,12 @@ class HomeCoxScreen extends ConsumerWidget {
               );
               context.go(AppRoutes.presession);
             },
-            child: const Text('CONTINUER LA SÉANCE'),
+            child: const Text('CONTINUER VERS LA SÉANCE'),
           ),
           const SizedBox(height: 8),
-          OutlinedButton(
+          TextButton(
             onPressed: () => context.go(AppRoutes.club),
-            child: const Text('REVOIR COQUE'),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: () => context.go(AppRoutes.sessions),
-            child: const Text('MES SÉANCES'),
+            child: const Text('REVOIR LE PARC COQUES'),
           ),
         ],
       ),
@@ -216,16 +211,16 @@ class _CoxPosChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: selected ? DeckColors.amber : DeckColors.bg,
+        color: selected ? DeckColors.volt : DeckColors.bg,
         border: Border.all(
-          color: selected ? DeckColors.amber : DeckColors.hairline,
+          color: selected ? DeckColors.volt : DeckColors.hairline,
         ),
       ),
       child: Text(
         label,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: selected ? DeckColors.onAlert : DeckColors.label,
+          color: selected ? DeckColors.onVolt : DeckColors.label,
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.6,
@@ -254,9 +249,9 @@ class _CrewRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: you ? DeckColors.amber.withValues(alpha: 0.1) : DeckColors.bg,
+        color: you ? DeckColors.volt.withValues(alpha: 0.1) : DeckColors.bg,
         border: Border.all(
-          color: you ? DeckColors.amber : DeckColors.hairline,
+          color: you ? DeckColors.volt : DeckColors.hairline,
         ),
       ),
       child: Row(
@@ -290,6 +285,7 @@ class _CrewRow extends StatelessWidget {
   }
 }
 
+/// DR-30 — Aujourd'hui coach (shell 3 onglets).
 class HomeCoachScreen extends ConsumerWidget {
   const HomeCoachScreen({super.key});
 
@@ -301,257 +297,348 @@ class HomeCoachScreen extends ConsumerWidget {
         ? snap.rowers
         : snap.rowers.where((r) => r.clubId == club.id).toList();
     final boats = snap.boatsForClub(club?.id);
-    final preview = rowers.take(4).toList();
+    final available = boats.length;
+    final coachName = snap.activeRower?.displayName ?? 'Coach';
 
-    return DeckScaffold(
-      title: 'ACCUEIL COACH',
-      subtitle: club?.name ?? 'Composition · parc · live',
-      retourFallback: AppRoutes.homeCoach,
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        children: [
-          if (club != null) ...[
-            ClubBanner(club: club),
-            const SizedBox(height: 16),
-          ],
-          _CoachAction(
-            icon: Icons.group_add,
-            title: 'COMPOSER UN ÉQUIPAGE',
-            subtitle: 'Affectation bancs & répartition tribord / bâbord',
-            onTap: () => context.go(AppRoutes.crew),
-            primary: true,
-          ),
-          _CoachAction(
-            icon: Icons.sensors,
-            title: 'REJOINDRE UNE SÉANCE',
-            subtitle: 'Connexion télémétrie bateau en direct',
-            onTap: () => context.go(AppRoutes.coachJoin),
-          ),
-          const SizedBox(height: 8),
-          DeckSectionLabel(
-            'Rameurs du club',
-            trailing: Text(
-              '${rowers.length}',
-              style: const TextStyle(
-                color: DeckColors.amber,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
+    return DeckTabScaffold(
+      tab: DeckTab.today,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            backgroundColor: DeckColors.bg.withValues(alpha: 0.92),
+            surfaceTintColor: Colors.transparent,
+            toolbarHeight: 56,
+            titleSpacing: 16,
+            title: const Text(
+              "Aujourd'hui",
+              style: TextStyle(
+                fontFamily: DeckType.ui,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: DeckColors.text,
+                letterSpacing: -0.2,
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          if (preview.isEmpty)
-            const Text(
-              'Aucun rameur — importe ou crée des profils.',
-              style: TextStyle(color: DeckColors.muted),
-            )
-          else
-            for (final r in preview)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: DeckColors.hairline),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              r.displayName,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w700),
-                            ),
-                            Text(
-                              '${r.category().code} · ${r.sex.wire}'
-                              '${r.weightKg == null ? '' : ' · ${r.weightKg!.toStringAsFixed(0)} kg'}',
-                              style: const TextStyle(
-                                color: DeckColors.muted,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (r.sidePref != SidePref.none) DeckSideChip(r.sidePref),
-                    ],
-                  ),
-                ),
-              ),
-          TextButton(
-            onPressed: () => context.go(AppRoutes.identity),
-            child: Text(
-              rowers.isEmpty
-                  ? 'VOIR LES PROFILS'
-                  : 'VOIR TOUS LES RAMEURS (${rowers.length})',
-            ),
-          ),
-          const SizedBox(height: 8),
-          DeckSectionLabel(
-            'Parc à bateaux',
-            trailing: Text(
-              '${boats.length} coques',
-              style: const TextStyle(color: DeckColors.label, fontSize: 11),
-            ),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: () => context.go(AppRoutes.club),
-            child: const Text('PARC'),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: () => context.go(AppRoutes.opsOut),
-            child: const Text('SORTIR'),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: () => context.go(AppRoutes.opsIn),
-            child: const Text('RENTRER'),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: () => context.go(AppRoutes.opsDeparture),
-            child: const Text('DÉPART'),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: () => context.go(AppRoutes.opsMaintenance),
-            child: const Text('MAINTENANCE'),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: () => context.go(AppRoutes.spinoscope),
-            child: const Text('SPINOSCOPE'),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: () => context.go(AppRoutes.calendar),
-            child: const Text('CALENDRIER'),
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            children: [
-              ChoiceChip(
-                label: const Text('ENTRAÎNEMENT'),
-                selected: ref.watch(boatConfigProvider).sessionMode ==
-                    SessionMode.training,
-                onSelected: (_) => ref
-                    .read(boatConfigProvider.notifier)
-                    .setSessionMode(SessionMode.training),
-              ),
-              ChoiceChip(
-                label: const Text('COMPÉTITION'),
-                selected: ref.watch(boatConfigProvider).sessionMode ==
-                    SessionMode.competition,
-                onSelected: (_) => ref
-                    .read(boatConfigProvider.notifier)
-                    .setSessionMode(SessionMode.competition),
+            actions: [
+              IconButton(
+                tooltip: 'Réglages',
+                onPressed: () => context.go(AppRoutes.settings),
+                icon: const Icon(Icons.person_outline, color: DeckColors.text),
               ),
             ],
           ),
-          OutlinedButton(
-            onPressed: () => context.go(AppRoutes.clubImport),
-            child: const Text('IMPORT CABANE'),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                Text(
+                  coachName,
+                  style: const TextStyle(
+                    fontFamily: DeckType.ui,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.24,
+                    color: DeckColors.text,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  club?.name ?? 'Sans club actif',
+                  style: const TextStyle(
+                    fontFamily: DeckType.ui,
+                    fontSize: 14,
+                    color: DeckColors.label,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    const DeckHonestChip(kind: DeckHonestKind.cloud, label: 'CLUB CLOUD ACTIF'),
+                    const DeckHonestChip(kind: DeckHonestKind.local, label: 'LOCAL SYNC'),
+                    DeckSessionModeSwitch(
+                      mode: ref.watch(boatConfigProvider).sessionMode,
+                      onChanged: (m) => ref
+                          .read(boatConfigProvider.notifier)
+                          .setSessionMode(m),
+                    ),
+                  ],
+                ),
+                if (club != null) ...[
+                  const SizedBox(height: 12),
+                  ClubBanner(club: club, compact: true),
+                ],
+                const SizedBox(height: 16),
+                _CoachCard(
+                  icon: Icons.radar,
+                  title: 'Flotte en navigation',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        'Rejoindre une séance sur l\'eau',
+                        style: TextStyle(
+                          fontFamily: DeckType.ui,
+                          fontSize: 14,
+                          color: DeckColors.text,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 48,
+                        child: FilledButton(
+                          onPressed: () => context.go(AppRoutes.coachJoin),
+                          child: const Text('Rejoindre le direct'),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => context.go(AppRoutes.coachJoin),
+                        child: const Text('Saisir un autre code de séance'),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _CoachCard(
+                  icon: Icons.group_add,
+                  title: 'Équipages du jour',
+                  badge: 'DR-31',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        '${rowers.length} rameurs · affecter bateaux et bordées',
+                        style: const TextStyle(
+                          fontFamily: DeckType.ui,
+                          fontSize: 13,
+                          color: DeckColors.label,
+                          height: 1.35,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 48,
+                        child: FilledButton.icon(
+                          onPressed: () => context.go(AppRoutes.crew),
+                          icon: const Icon(Icons.rule),
+                          label: const Text('Composer un équipage'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _CoachCard(
+                  icon: Icons.directions_boat,
+                  title: 'Parc & Flotte au ponton',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          _StatPill(label: 'Dispos', value: '$available'),
+                          const SizedBox(width: 8),
+                          _StatPill(label: 'Rameurs', value: '${rowers.length}'),
+                          const SizedBox(width: 8),
+                          const _StatPill(label: 'Maint.', value: '—'),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          OutlinedButton(
+                            onPressed: () => context.go(AppRoutes.opsOut),
+                            child: const Text('Sortir une coque'),
+                          ),
+                          OutlinedButton(
+                            onPressed: () => context.go(AppRoutes.opsIn),
+                            child: const Text('Rentrer une coque'),
+                          ),
+                          OutlinedButton(
+                            onPressed: () => context.go(AppRoutes.club),
+                            child: const Text('PARC'),
+                          ),
+                          OutlinedButton(
+                            onPressed: () => context.go(AppRoutes.opsDeparture),
+                            child: const Text('DÉPART'),
+                          ),
+                          OutlinedButton(
+                            onPressed: () =>
+                                context.go(AppRoutes.opsMaintenance),
+                            child: const Text('MAINTENANCE'),
+                          ),
+                          OutlinedButton(
+                            onPressed: () => context.go(AppRoutes.spinoscope),
+                            child: const Text('SPINOSCOPE'),
+                          ),
+                          OutlinedButton(
+                            onPressed: () => context.go(AppRoutes.calendar),
+                            child: const Text('CALENDRIER'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _CoachCard(
+                  icon: Icons.history_edu,
+                  title: 'Dernier débriefing',
+                  badge: 'DR-56',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        'Consulter le replay chronologique',
+                        style: TextStyle(
+                          fontFamily: DeckType.ui,
+                          fontSize: 14,
+                          color: DeckColors.text,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => context.go(
+                          '${AppRoutes.sessions}?from=coach',
+                        ),
+                        child: const Row(
+                          children: [
+                            Text('Mes séances'),
+                            Spacer(),
+                            Icon(Icons.chevron_right, size: 18),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => context.go(AppRoutes.clubSessions),
+                        child: const Text('Séances cloud'),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text.rich(
+                  TextSpan(
+                    style: const TextStyle(
+                      fontFamily: DeckType.ui,
+                      fontSize: 13,
+                      color: DeckColors.label,
+                    ),
+                    children: [
+                      const TextSpan(text: 'Tu rames aussi ? Retrouve ton profil dans '),
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.baseline,
+                        baseline: TextBaseline.alphabetic,
+                        child: GestureDetector(
+                          onTap: () => context.go(AppRoutes.plus),
+                          child: const Text(
+                            'Plus',
+                            style: TextStyle(
+                              fontFamily: DeckType.ui,
+                              fontSize: 13,
+                              color: DeckColors.volt,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const TextSpan(text: '.'),
+                    ],
+                  ),
+                ),
+              ]),
+            ),
           ),
-          OutlinedButton(
-            onPressed: () => context.go(AppRoutes.clubSessions),
-            child: const Text('SÉANCES DU CLUB'),
-          ),
-          OutlinedButton(
-            onPressed: () => context.go(AppRoutes.sessions),
-            child: const Text('MES SÉANCES'),
-          ),
-          TextButton(
-            onPressed: () => context.go(AppRoutes.settings),
-            child: const Text('RÉGLAGES'),
-          ),
-          TextButton(
-            onPressed: () => context.go(AppRoutes.identity),
-            child: const Text('CHANGER DE PROFIL'),
-          ),
-          const SignOutButton(),
         ],
       ),
     );
   }
 }
 
-class _CoachAction extends StatelessWidget {
-  const _CoachAction({
+class _CoachCard extends StatelessWidget {
+  const _CoachCard({
     required this.icon,
     required this.title,
-    required this.subtitle,
-    required this.onTap,
-    this.primary = false,
+    required this.child,
+    this.badge,
   });
 
   final IconData icon;
   final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-  final bool primary;
+  final Widget child;
+  final String? badge;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: primary ? DeckColors.amber : DeckColors.surfaceHigh,
-        child: InkWell(
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: primary ? DeckColors.amber : DeckColors.hairline,
-              ),
-            ),
-            child: Row(
-              children: [
-                DeckIconBox(icon: icon, accent: !primary),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: primary
-                              ? DeckColors.onAlert
-                              : DeckColors.text,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.8,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          color: primary
-                              ? DeckColors.onAlert.withValues(alpha: 0.7)
-                              : DeckColors.muted,
-                          fontSize: 11,
-                          height: 1.3,
-                        ),
-                      ),
-                    ],
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: DeckColors.surface,
+        borderRadius: DeckRadii.cardAll,
+        border: Border.all(color: DeckColors.hairline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 20, color: DeckColors.tribord),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontFamily: DeckType.ui,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: DeckColors.text,
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward,
-                  color: primary ? DeckColors.onAlert : DeckColors.label,
-                  size: 18,
+              ),
+              if (badge != null)
+                Text(
+                  badge!,
+                  style: DeckType.labelMono(color: DeckColors.label, size: 10),
                 ),
-              ],
-            ),
+            ],
           ),
+          const SizedBox(height: 12),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _StatPill extends StatelessWidget {
+  const _StatPill({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: DeckColors.bg,
+          borderRadius: DeckRadii.buttonAll,
+        ),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: DeckType.metric(size: 20, weight: FontWeight.w600),
+            ),
+            const SizedBox(height: 2),
+            Text(label, style: DeckType.uiLabel(size: 11)),
+          ],
         ),
       ),
     );

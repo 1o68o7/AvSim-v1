@@ -77,7 +77,7 @@ class OpsDepartureScreen extends ConsumerWidget {
                           r.out.status.wire +
                               (until.isEmpty ? '' : ' · prévu $until'),
                           style: const TextStyle(
-                            color: DeckColors.amber,
+                            color: DeckColors.volt,
                             fontSize: 12,
                           ),
                         ),

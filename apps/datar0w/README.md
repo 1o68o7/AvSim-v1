@@ -15,7 +15,7 @@ Un smartphone = **un hub / une place**. Multi-sièges = plusieurs tél. + `DATAR
 | G (API hub) | FastAPI `/datarow/*` + client si `DATAROW_API_BASE` (sinon fichier local). HTTP fail ≠ stop logger. |
 | Coach | Join code / dernière séance / séance live API. Écran 5 OSM + notes. Replay import jsonl. |
 | Classes | 1x, 2x, 2-, 4x, 4-, 4+, 8+. Rôle barreur 4+/8+. |
-| I1–I8 / C1–C6 / D1–D5 | **Codés** : identité, parc ops, import cabane **et rameurs** (`/club/import`), spinoscope. Mapping : `docs/stitch-mvp/GEL.md`. |
+| I1–I8 / C1–C6 / D1–D5 | **Codés** : identité, parc ops, import cabane **et rameurs** (`/club/import`), spinoscope. DA Volt : `docs/stitch-redesign/GEL.md`. |
 | B / O | `/auth` Google + magic link ; `/club/login` `/onboarding/rower` `/club/join`. Sans dart-define : local, pas de crash. Outbox : pas sur main (#50). |
 | E / L | `/calendar` `/calendar/:id` `/waters` — JSON curaté, **pas** de scrape FFA. |
 | I live | Presets + mini-carte sur `/live` (Deck conservé). |
@@ -106,6 +106,15 @@ flutter build apk --release --dart-define-from-file=dart_defines.json
 SDK : `sdk.dir` dans `android/local.properties` (machine, **non committé**).  
 `compileSdk = 37` (permission_handler_android).  
 NDK **30.0.16248370** via Android Studio → SDK Tools (GUI).
+
+### Warnings build Android (pas des échecs)
+
+| Message | Cause | Action |
+|---|---|---|
+| `Use --enable-native-access=ALL-UNNAMED` | JDK 24+ + Gradle native-platform | Déjà dans `android/gradle.properties` (daemon Gradle + Kotlin). Si ça apparaît encore dans Android Studio : *Help → Edit Custom VM Options* → ajouter `--enable-native-access=ALL-UNNAMED`, ou variable d’environnement `JAVA_TOOL_OPTIONS=--enable-native-access=ALL-UNNAMED`. |
+| `SDK XML versions up to 3` / `version 4` | Command-line Tools plus vieux que le SDK Studio | Android Studio → *Settings → Languages & Frameworks → Android SDK → SDK Tools* → cocher **Android SDK Command-line Tools (latest)** → Apply. Puis `flutter clean` + rebuild. |
+| `N packages have newer versions` / `flutter pub outdated` | Info pub, contraintes volontairement stables | `flutter pub upgrade` (patch/minor dans les `^`). **Pas** `--major-versions` sans lot dédié (Riverpod 3, go_router 18, FBP 2…). |
+| `wakelock_plus` 1.8.1 / `connectivity_plus` 7.3.2 bloqués | `battery_plus` → `upower` → `dbus ^0.7` vs wakelock/connectivity → `dbus ^0.8` | Attendre un `battery_plus` / `upower` compatible ; ne pas forcer via `dependency_overrides`. |
 
 Pas de cible `windows/` desktop.
 

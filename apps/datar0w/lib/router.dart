@@ -17,6 +17,7 @@ import 'features/identity/screen_physio.dart';
 import 'features/identity/screen_home_roles.dart';
 import 'features/identity/screen_home_rower.dart';
 import 'features/identity/screen_import.dart';
+import 'features/identity/screen_plus.dart';
 import 'features/identity/screen_rower_edit.dart';
 import 'features/identity/screen_club_sessions.dart';
 import 'features/identity/screen_settings.dart';
@@ -103,6 +104,7 @@ abstract final class AppRoutes {
   static const coachReplay = '/replay-coach';
   static const rowerReplay = '/replay';
   static const sessions = '/sessions';
+  static const plus = '/plus';
   static const quai = '/quai';
   static const auth = '/auth';
   static const authCallback = '/auth/callback';
@@ -352,6 +354,12 @@ final GoRouter appRouter = GoRouter(
         final id = state.pathParameters['id'] ?? '';
         return '${AppRoutes.rowerReplay}?id=${Uri.encodeQueryComponent(id)}';
       },
+    ),
+    GoRoute(
+      path: AppRoutes.plus,
+      name: 'plus',
+      builder: (context, state) =>
+          _hub(AppRoutes.plus, const PlusScreen()),
     ),
     GoRoute(
       path: AppRoutes.quai,

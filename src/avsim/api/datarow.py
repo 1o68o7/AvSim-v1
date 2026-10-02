@@ -8,11 +8,17 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 
-router = APIRouter(prefix="/datarow", tags=["datarow-phone"])
+from .roles import require_phone_key
+
+router = APIRouter(
+    prefix="/datarow",
+    tags=["datarow-phone"],
+    dependencies=[Depends(require_phone_key)],
+)
 
 _ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 _TTL = timedelta(hours=12)

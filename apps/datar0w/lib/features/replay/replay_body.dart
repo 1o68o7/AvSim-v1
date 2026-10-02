@@ -162,7 +162,7 @@ class _ReplayBodyState extends State<ReplayBody> {
                         if (seg.length >= 2)
                           Polyline(
                             points: seg,
-                            color: DeckColors.amber,
+                            color: DeckColors.volt,
                             strokeWidth: 3,
                           ),
                     ],
@@ -176,7 +176,7 @@ class _ReplayBodyState extends State<ReplayBody> {
                           height: 16,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: DeckColors.amber,
+                              color: DeckColors.volt,
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.white),
                             ),
@@ -192,12 +192,12 @@ class _ReplayBodyState extends State<ReplayBody> {
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Row(
                       children: [
-                        Container(width: 12, height: 2, color: DeckColors.amber),
+                        Container(width: 12, height: 2, color: DeckColors.volt),
                         const SizedBox(width: 6),
                         const Text(
                           'CADENCE (SPM)',
                           style: TextStyle(
-                            color: DeckColors.amber,
+                            color: DeckColors.volt,
                             fontSize: 10,
                           ),
                         ),
@@ -212,7 +212,7 @@ class _ReplayBodyState extends State<ReplayBody> {
                         Text(
                           '${formatDuration(elapsed)} / ${formatDuration(total)}',
                           style: const TextStyle(
-                            color: DeckColors.amber,
+                            color: DeckColors.volt,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                           ),
@@ -274,7 +274,7 @@ class _ReplayBodyState extends State<ReplayBody> {
           min: 0,
           max: (_samples.length - 1).toDouble(),
           divisions: _samples.length > 1 ? _samples.length - 1 : 1,
-          activeColor: DeckColors.amber,
+          activeColor: DeckColors.volt,
           onChanged: (v) {
             setState(() => _index = v.round());
             _moveMap();
@@ -330,7 +330,7 @@ class _CursorPanel extends StatelessWidget {
                   cur.cadenceSpm == null
                       ? '—'
                       : '${cur.cadenceSpm!.toStringAsFixed(0)} SPM',
-                  DeckColors.amber,
+                  DeckColors.volt,
                 ),
                 _kv(
                   'V. SOL (GPS)',
@@ -364,7 +364,7 @@ class _CursorPanel extends StatelessWidget {
                 : 'Δ CADENCE  ${dCad! >= 0 ? '+' : ''}${dCad!.toStringAsFixed(0)}',
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: DeckColors.amber,
+              color: DeckColors.volt,
               fontWeight: FontWeight.w700,
               fontSize: 13,
             ),
@@ -379,10 +379,10 @@ class _CursorPanel extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(0, 32),
                       foregroundColor: n == noteIdx
-                          ? DeckColors.onAlert
-                          : DeckColors.amber,
+                          ? DeckColors.onVolt
+                          : DeckColors.volt,
                       backgroundColor:
-                          n == noteIdx ? DeckColors.amber : Colors.transparent,
+                          n == noteIdx ? DeckColors.volt : Colors.transparent,
                     ),
                     child: Text('NOTE ${n + 1}'),
                   ),
@@ -436,7 +436,7 @@ class _CurvesPainter extends CustomPainter {
       canvas,
       size,
       samples.map((s) => s.cadenceSpm).toList(),
-      DeckColors.amber,
+      DeckColors.volt,
     );
     _line(
       canvas,
@@ -460,7 +460,7 @@ class _CurvesPainter extends CustomPainter {
         Offset(x, 0),
         Offset(x, size.height),
         Paint()
-          ..color = DeckColors.amber.withValues(alpha: 0.5)
+          ..color = DeckColors.volt.withValues(alpha: 0.5)
           ..strokeWidth = 1,
       );
     }
@@ -469,7 +469,7 @@ class _CurvesPainter extends CustomPainter {
       Offset(x, 0),
       Offset(x, size.height),
       Paint()
-        ..color = DeckColors.amber
+        ..color = DeckColors.volt
         ..strokeWidth = 1.2,
     );
   }

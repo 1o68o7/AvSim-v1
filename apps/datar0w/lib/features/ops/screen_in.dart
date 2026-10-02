@@ -60,7 +60,7 @@ class _OpsInScreenState extends ConsumerState<OpsInScreen> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               children: [
                 if (_flash != null)
-                  Text(_flash!, style: const TextStyle(color: DeckColors.amber)),
+                  Text(_flash!, style: const TextStyle(color: DeckColors.volt)),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Pelles OK'),

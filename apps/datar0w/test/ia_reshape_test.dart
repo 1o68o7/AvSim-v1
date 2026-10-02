@@ -181,7 +181,8 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byType(ProfileScreen), findsNothing);
-    expect(find.text('ACCUEIL RAMEUR'), findsOneWidget);
+    // Stitch DR-20 : titre hub « Aujourd'hui » (shell + AppBar).
+    expect(find.text("Aujourd'hui"), findsWidgets);
     expect(
       router.routerDelegate.currentConfiguration.uri.path,
       AppRoutes.homeRower,
@@ -208,7 +209,8 @@ void main() {
       router.routerDelegate.currentConfiguration.uri.path,
       AppRoutes.identity,
     );
-    expect(find.textContaining('QUI RAME'), findsOneWidget);
+    // Stitch : écran profils (ex Hangar « QUI RAME »).
+    expect(find.text('Profils'), findsOneWidget);
   });
 
   testWidgets('4. staff admin go(/) → /home/admin', (tester) async {
@@ -234,15 +236,16 @@ void main() {
     expect(find.text('ACCUEIL CLUB'), findsOneWidget);
   });
 
-  testWidgets('5. quai RETOUR ACCUEIL selon rôle séance', (tester) async {
+  testWidgets('5. quai Retour accueil selon rôle séance', (tester) async {
     final rower = Rower.create(
       displayName: 'Ada',
       birthDate: DateTime.utc(2000),
     );
     for (final entry in [
-      (CrewRole.rower, AppRoutes.homeRower, 'ACCUEIL RAMEUR'),
-      (CrewRole.cox, AppRoutes.homeCox, 'HOME_COX'),
-      (CrewRole.coach, AppRoutes.homeCoach, 'HOME_COACH'),
+      // Hub rameur Stitch : « Aujourd'hui » (plusieurs occurrences shell).
+      (CrewRole.rower, AppRoutes.homeRower, "Aujourd'hui", true),
+      (CrewRole.cox, AppRoutes.homeCox, 'HOME_COX', false),
+      (CrewRole.coach, AppRoutes.homeCoach, 'HOME_COACH', false),
     ]) {
       final container = ProviderContainer(
         overrides: [
@@ -260,15 +263,18 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('RETOUR ACCUEIL'));
-      await tester.tap(find.text('RETOUR ACCUEIL'));
+      await tester.ensureVisible(find.text('Retour accueil'));
+      await tester.tap(find.text('Retour accueil'));
       await tester.pumpAndSettle();
       expect(
         router.routerDelegate.currentConfiguration.uri.path,
         entry.$2,
         reason: 'role ${entry.$1}',
       );
-      expect(find.text(entry.$3), findsOneWidget);
+      expect(
+        find.text(entry.$3),
+        entry.$4 ? findsWidgets : findsOneWidget,
+      );
     }
   });
 

@@ -69,7 +69,7 @@ class _EventSheetScreenState extends ConsumerState<EventSheetScreen> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
                     'Licence loisir — compétition réservée à une licence compétition.',
-                    style: TextStyle(color: DeckColors.amber),
+                    style: TextStyle(color: DeckColors.volt),
                   ),
                 ),
               if (e.definitionLoisir != null)
@@ -96,7 +96,7 @@ class _EventSheetScreenState extends ConsumerState<EventSheetScreen> {
                             height: 24,
                             child: const Icon(
                               Icons.place,
-                              color: DeckColors.amber,
+                              color: DeckColors.volt,
                             ),
                           ),
                         ],

@@ -69,10 +69,10 @@ packages:
     dependency: "direct main"
     description:
       name: battery_plus
-      sha256: "3853aa1e18ea1d15493dd1d3edac05770b4b95c1e691fb85934c5fd3b1ac0fcc"
+      sha256: "49f75523cd5461a44202d67c5e1c73b790f16a822475b6f116d50714cd64a0ab"
       url: "https://pub.dev"
     source: hosted
-    version: "7.1.1"
+    version: "7.1.2"
   battery_plus_platform_interface:
     dependency: transitive
     description:
@@ -117,10 +117,10 @@ packages:
     dependency: transitive
     description:
       name: code_assets
-      sha256: bf394f466ba9205f1812a0433b392d6af280f155f56651eda7c18cc32ed493b8
+      sha256: "828110d598123b5ea96c00c9f3c72105bf79f8ee36c20a39b26209ade421ec57"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.1"
+    version: "2.1.0"
   collection:
     dependency: transitive
     description:
@@ -173,10 +173,10 @@ packages:
     dependency: "direct main"
     description:
       name: cupertino_icons
-      sha256: "41e005c33bd814be4d3096aff55b1908d419fde52ca656c8c47719ec745873cd"
+      sha256: b7cc2390aac296c083bea762859413eb1cf5b630c70e0c7e4d831018f762a8b2
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.9"
+    version: "2.0.0"
   dart_earcut:
     dependency: transitive
     description:
@@ -269,10 +269,10 @@ packages:
     dependency: transitive
     description:
       name: file_picker_darwin
-      sha256: deb3ff69d58656b885c85bc1627f09ecb79860f272a5e7577149582ede4dce5d
+      sha256: "51aef9f4c80449c736e7cc02198675fda73689f0bd45a84da642cfeab0250d46"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.2"
   file_picker_linux:
     dependency: transitive
     description:
@@ -460,18 +460,18 @@ packages:
     dependency: "direct main"
     description:
       name: geolocator
-      sha256: e146a6d63776582651e97a79cbe459f8e1211b100101fadcd84db83361fa599f
+      sha256: "4e41ad6bc072364ff01822531dac47936c065e5bf8f928f240a25bb51256ada0"
       url: "https://pub.dev"
     source: hosted
-    version: "14.0.3"
+    version: "14.1.1"
   geolocator_android:
     dependency: transitive
     description:
       name: geolocator_android
-      sha256: "86ea1654e4f61ff51466848e91c116b422d6010ea269fda0fbe1af7e9e742ce1"
+      sha256: "1be90ea8aaaf9db8e7816b4fe0387f082ee8b5cf03355912dad90fb0a75717fa"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.3"
+    version: "5.1.1+1"
   geolocator_apple:
     dependency: transitive
     description:
@@ -492,10 +492,10 @@ packages:
     dependency: transitive
     description:
       name: geolocator_platform_interface
-      sha256: "94db8255dc183d268765df682580440617ca35877fc82cacb5420ad03b86198d"
+      sha256: b640b6b687b14c66f51fe1130b1c2e8babbd408e0158052b92006b6675ca77fc
       url: "https://pub.dev"
     source: hosted
-    version: "4.3.0"
+    version: "4.4.0"
   geolocator_web:
     dependency: transitive
     description:
@@ -548,10 +548,10 @@ packages:
     dependency: transitive
     description:
       name: hooks
-      sha256: "9a62a50b50b769a737bc0a8ff381f333529df3ab746b2f6b02e83760231455ba"
+      sha256: eaac480a35ec0814146c2c48d96aaa829e0e44a7662c88ae84c9edf4bc35651f
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.2"
+    version: "2.2.0"
   http:
     dependency: "direct main"
     description:
@@ -596,10 +596,10 @@ packages:
     dependency: transitive
     description:
       name: image_picker_ios
-      sha256: ee3885b6fcd71958fbc79770dd194c63371439d536d69c47b279171a486482ae
+      sha256: "815921d05ef87d64dc64e9f7f855967614a9a67086d0c60fa27d47a1cd9a8896"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.13+7"
+    version: "0.8.13+9"
   image_picker_linux:
     dependency: transitive
     description:
@@ -644,10 +644,10 @@ packages:
     dependency: transitive
     description:
       name: jni
-      sha256: f038e58b4dc2c9037f50e233175086337e0b305e356d28211bf55f21c504cbd3
+      sha256: "6b9ca0602fef0230e83149afbe3f9f8227e94f2bbe84a1da4f14d699742f402d"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.3"
+    version: "1.1.0"
   jni_flutter:
     dependency: transitive
     description:
@@ -748,10 +748,10 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: c82594181e3312f3d0695fc95aaaf7758d75b8d4ae2bbecf223b9fd5109a059d
+      sha256: "307249ce4ff29d58a18e97f6345f539382eb9c9c29ecda628900f31de0443dd9"
       url: "https://pub.dev"
     source: hosted
-    version: "1.18.3"
+    version: "1.19.0"
   mgrs_dart:
     dependency: transitive
     description:
@@ -780,10 +780,10 @@ packages:
     dependency: transitive
     description:
       name: objective_c
-      sha256: b7fb95a6d9a4f009edd63dc5ac69f07420b23a16161c6dd8660290b59c602e8e
+      sha256: "5c80c2ad6e2c0397de5db38c6d653e69616a3397e13aa7633bf39eb668f2041b"
       url: "https://pub.dev"
     source: hosted
-    version: "9.5.0"
+    version: "9.6.2"
   package_config:
     dependency: transitive
     description:
@@ -796,10 +796,10 @@ packages:
     dependency: transitive
     description:
       name: package_info_plus
-      sha256: "127e1751e37ffb2ff4658beeaca77bad0c27bf5f932bd3a501c2296926d4b481"
+      sha256: "73ef2cd5c11a7548f9b7f6fc2a4f6113de2e64aa2a70de63feede95548822908"
       url: "https://pub.dev"
     source: hosted
-    version: "10.2.1"
+    version: "10.2.2"
   package_info_plus_platform_interface:
     dependency: transitive
     description:
@@ -892,10 +892,10 @@ packages:
     dependency: transitive
     description:
       name: permission_handler_apple
-      sha256: f49cb15a064ea9d974fc7fbb302099353b7b170d07284e86e264561579e5bcf8
+      sha256: "066bbbc60031b63b916a3871e7bb4b6a8c5e7cec8146dafec53d1da304eff0a5"
       url: "https://pub.dev"
     source: hosted
-    version: "9.6.1"
+    version: "9.6.2"
   permission_handler_html:
     dependency: transitive
     description:
@@ -924,10 +924,10 @@ packages:
     dependency: transitive
     description:
       name: petitparser
-      sha256: "91bd59303e9f769f108f8df05e371341b15d59e995e6806aefab827b58336675"
+      sha256: "2f1564aadb14215e478563b5406cb80729d022158c01dc50c96013c2f7eb4790"
       url: "https://pub.dev"
     source: hosted
-    version: "7.0.2"
+    version: "7.1.0"
   platform:
     dependency: transitive
     description:
@@ -988,10 +988,10 @@ packages:
     dependency: transitive
     description:
       name: record_use
-      sha256: "2551bd8eecfe95d14ae75f6021ad0248be5c27f138c2ec12fcb52b500b3ba1ed"
+      sha256: "1cb8564af8d43b464294411db9217f5ec04891c6f22ee2c32d73ae05e88a6bd2"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.0"
+    version: "1.1.1"
   riverpod:
     dependency: transitive
     description:
@@ -1012,10 +1012,10 @@ packages:
     dependency: "direct main"
     description:
       name: sensors_plus
-      sha256: "31182c626623de79d3f7e1f9b43028f940821ee012c092f68f165fe55b867822"
+      sha256: "50a01f66846bff68de947bd5df225c3627c923c467f758867f3916350be059ac"
       url: "https://pub.dev"
     source: hosted
-    version: "7.1.0"
+    version: "7.1.1"
   sensors_plus_platform_interface:
     dependency: transitive
     description:
@@ -1028,10 +1028,10 @@ packages:
     dependency: "direct main"
     description:
       name: share_plus
-      sha256: "34f00f9becd2743c1fb05363d624f9f70d37f7ccdcdda47450bc0b8c9d327b8c"
+      sha256: db40767f130189d53f3ae8a6393c217ff4a492da1baff718a9873679c0c00224
       url: "https://pub.dev"
     source: hosted
-    version: "13.3.0"
+    version: "13.3.1"
   share_plus_platform_interface:
     dependency: transitive
     description:
@@ -1145,10 +1145,10 @@ packages:
     dependency: transitive
     description:
       name: storage_client
-      sha256: b16aaaadcef812fda31fca056f50fb3485afe64f94e5d537d30f485ed55dec5e
+      sha256: b951281b8e2b293460f0e6cc4e866f2546681390f0e37d24fbbd7b4a0deb27a3
       url: "https://pub.dev"
     source: hosted
-    version: "2.8.0"
+    version: "2.8.1"
   stream_channel:
     dependency: transitive
     description:
@@ -1169,10 +1169,10 @@ packages:
     dependency: transitive
     description:
       name: supabase
-      sha256: "0645becf76f49d2633d8ec9bfd78ab98dce42de6899da8fa1f069c2c836d5d23"
+      sha256: "3662449640972335e50d075a1fceb000b9217e403564305d129a4d287ff4b4c9"
       url: "https://pub.dev"
     source: hosted
-    version: "2.16.1"
+    version: "2.16.2"
   supabase_common:
     dependency: transitive
     description:
@@ -1185,10 +1185,10 @@ packages:
     dependency: "direct main"
     description:
       name: supabase_flutter
-      sha256: "26eb3d3b71bcc5651551e64d6b131ba929ea261998570bbcc90356b1b42fd532"
+      sha256: "9698f61e83907b939fd6ee6bbf833d8456541e29cb38e9c08e52ebf88fa9faf4"
       url: "https://pub.dev"
     source: hosted
-    version: "2.17.2"
+    version: "2.18.0"
   term_glyph:
     dependency: transitive
     description:
@@ -1305,10 +1305,10 @@ packages:
     dependency: transitive
     description:
       name: vector_math
-      sha256: "1d774bbdf6b72a0b12122fc1560c9c2d2a67db5a4a4cc2bd8a5c990ab20e3188"
+      sha256: "92b9910f66ed1057fd4da7b040ae7c74cafacf885bdc81be496928d5049b032d"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.0"
+    version: "2.4.3"
   vm_service:
     dependency: transitive
     description:

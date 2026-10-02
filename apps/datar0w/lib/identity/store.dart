@@ -320,14 +320,14 @@ class IdentityPrefs {
   const IdentityPrefs({
     this.activeRowerId,
     this.activeClubId,
-    this.clubRole = ClubMemberRole.admin,
+    this.clubRole = ClubMemberRole.rower,
     this.lastImportId,
     this.lastRowerImportId,
   });
 
   final String? activeRowerId;
   final String? activeClubId;
-  /// Rôle club (Point B `club_members.role`). Défaut admin = téléphone qui tient le parc.
+  /// Rôle club (Point B `club_members.role`). Défaut rameur — pas de staff client sans membership.
   final ClubMemberRole clubRole;
   final String? lastImportId;
   final String? lastRowerImportId;

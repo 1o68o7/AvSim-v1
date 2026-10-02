@@ -167,7 +167,7 @@ class _ReplayLoadScreenState extends ConsumerState<ReplayLoadScreen> {
                     padding: const EdgeInsets.all(8),
                     child: Text(
                       _error!,
-                      style: const TextStyle(color: DeckColors.amber),
+                      style: const TextStyle(color: DeckColors.volt),
                     ),
                   ),
                 Expanded(

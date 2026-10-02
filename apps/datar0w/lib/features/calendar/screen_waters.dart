@@ -54,7 +54,7 @@ class WatersScreen extends StatelessWidget {
                                         height: 24,
                                         child: const Icon(
                                           Icons.water,
-                                          color: DeckColors.amber,
+                                          color: DeckColors.volt,
                                         ),
                                       ),
                                     ],

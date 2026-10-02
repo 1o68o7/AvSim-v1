@@ -63,7 +63,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
       expect(appRouter.state.uri.path, AppRoutes.identity);
-      expect(find.text('QUI RAME ?'), findsOneWidget);
+      expect(find.text('Profils'), findsOneWidget);
 
       await tester.tap(find.text('Connexion'));
       // go 300 ms (+ éventuel push 300 ms)
@@ -105,7 +105,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 350));
 
       expect(appRouter.state.uri.path, AppRoutes.homeRower);
-      expect(find.text('ACCUEIL RAMEUR'), findsOneWidget);
+      expect(find.text("Aujourd'hui"), findsWidgets);
       expect(find.textContaining('Navigation bloquée'), findsNothing);
     },
   );

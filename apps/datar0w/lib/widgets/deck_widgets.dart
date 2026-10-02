@@ -2,9 +2,72 @@ import 'package:flutter/material.dart';
 
 import '../identity/format.dart';
 import '../identity/models.dart';
+import '../session/boat_config.dart';
 import '../theme/deck_theme.dart';
 
-/// Pastille statut (Stitch : 1px hairline, pastille carrée).
+/// Honest status badge — LOCAL / EN FILE / CLOUD / MOCK (6px radius, mono).
+enum DeckHonestKind { local, enFile, cloud, mock, club }
+
+class DeckHonestChip extends StatelessWidget {
+  const DeckHonestChip({
+    super.key,
+    required this.kind,
+    this.label,
+  });
+
+  final DeckHonestKind kind;
+  final String? label;
+
+  @override
+  Widget build(BuildContext context) {
+    final (bg, fg, border, text) = switch (kind) {
+      DeckHonestKind.local => (
+          DeckColors.chipLocalBg,
+          DeckColors.label,
+          DeckColors.hairline,
+          'LOCAL',
+        ),
+      DeckHonestKind.enFile => (
+          DeckColors.amberWash,
+          DeckColors.amber,
+          DeckColors.amber,
+          'EN FILE',
+        ),
+      DeckHonestKind.cloud => (
+          DeckColors.tribordWash,
+          DeckColors.tribord,
+          DeckColors.tribord,
+          'CLOUD',
+        ),
+      DeckHonestKind.mock => (
+          DeckColors.babordWash,
+          DeckColors.babord,
+          DeckColors.babord,
+          'DÉMO',
+        ),
+      DeckHonestKind.club => (
+          DeckColors.amberWash,
+          DeckColors.amber,
+          DeckColors.amber,
+          'CLUB',
+        ),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: DeckRadii.chipAll,
+        border: Border.all(color: border),
+      ),
+      child: Text(
+        label ?? text,
+        style: DeckType.labelMono(color: fg),
+      ),
+    );
+  }
+}
+
+/// Pastille statut générique (ok / alerte).
 class DeckStatusChip extends StatelessWidget {
   const DeckStatusChip({
     super.key,
@@ -21,12 +84,25 @@ class DeckStatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final border = alert
         ? DeckColors.amber
-        : DeckColors.hairline;
+        : ok
+            ? DeckColors.tribord
+            : DeckColors.hairline;
+    final bg = alert
+        ? DeckColors.amberWash
+        : ok
+            ? DeckColors.tribordWash
+            : DeckColors.chipLocalBg;
+    final fg = alert
+        ? DeckColors.amber
+        : ok
+            ? DeckColors.tribord
+            : DeckColors.label;
     return Container(
       height: 24,
       padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
-        color: alert ? DeckColors.amber : Colors.transparent,
+        color: bg,
+        borderRadius: DeckRadii.chipAll,
         border: Border.all(color: border),
       ),
       child: FittedBox(
@@ -38,19 +114,15 @@ class DeckStatusChip extends StatelessWidget {
             Container(
               width: 8,
               height: 8,
-              color: alert
-                  ? DeckColors.onAlert
-                  : (ok ? DeckColors.tribord : DeckColors.hairline),
+              decoration: BoxDecoration(
+                color: fg,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
             const SizedBox(width: 6),
             Text(
-              label.toUpperCase(),
-              style: TextStyle(
-                fontSize: 9,
-                letterSpacing: 1.4,
-                fontWeight: FontWeight.w700,
-                color: alert ? DeckColors.onAlert : DeckColors.label,
-              ),
+              label,
+              style: DeckType.labelMono(color: fg, size: 10),
             ),
           ],
         ),
@@ -59,7 +131,7 @@ class DeckStatusChip extends StatelessWidget {
   }
 }
 
-/// Enceinte instrument 1px `#2A2F36`, label haut, valeur blanche.
+/// Telemetry HUD card — surface + 1px hairline, metric mono.
 class InstrumentPod extends StatelessWidget {
   const InstrumentPod({
     super.key,
@@ -68,6 +140,8 @@ class InstrumentPod extends StatelessWidget {
     this.unit,
     this.child,
     this.flex,
+    this.delta,
+    this.deltaPositive,
   });
 
   final String label;
@@ -75,55 +149,77 @@ class InstrumentPod extends StatelessWidget {
   final String? unit;
   final Widget? child;
   final int? flex;
+  final String? delta;
+  final bool? deltaPositive;
 
   @override
   Widget build(BuildContext context) {
+    // Padding compact : grille live paysage 844×390.
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
       decoration: BoxDecoration(
-        color: DeckColors.bg,
+        color: DeckColors.surface,
+        borderRadius: DeckRadii.cardAll,
         border: Border.all(color: DeckColors.hairline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 20,
-            child: Text(
-              label.toUpperCase(),
-              style: const TextStyle(
-                color: DeckColors.label,
-                fontSize: 9,
-                letterSpacing: 1.4,
-                fontWeight: FontWeight.w600,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: DeckType.uiLabel(size: 11),
+                ),
               ),
-            ),
+              if (unit != null) ...[
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    unit!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.right,
+                    style: DeckType.labelMono(
+                      color: DeckColors.label.withValues(alpha: 0.6),
+                      size: 10,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
-          Container(height: 1, color: DeckColors.hairline),
           const SizedBox(height: 6),
           if (child != null)
             child!
-          else ...[
-            Text(
-              value,
-              style: const TextStyle(
-                color: DeckColors.text,
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-                fontFeatures: [FontFeature.tabularFigures()],
-                height: 1,
+          else
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                style: DeckType.metric(size: 28, weight: FontWeight.w700),
               ),
             ),
-            if (unit != null)
-              Text(
-                unit!,
-                style: const TextStyle(
-                  color: DeckColors.label,
-                  fontSize: 9,
-                  letterSpacing: 1.2,
-                ),
+          if (delta != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              delta!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: DeckType.labelMono(
+                color: deltaPositive == true
+                    ? DeckColors.tribord
+                    : deltaPositive == false
+                        ? DeckColors.babord
+                        : DeckColors.label,
+                size: 11,
               ),
+            ),
           ],
         ],
       ),
@@ -147,14 +243,15 @@ class DeckIconBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = muted
         ? DeckColors.label
-        : (accent ? DeckColors.amber : DeckColors.label);
+        : (accent ? DeckColors.volt : DeckColors.label);
     return Container(
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: DeckColors.bg,
+        color: DeckColors.surface,
+        borderRadius: DeckRadii.buttonAll,
         border: Border.all(
-          color: accent ? DeckColors.amber.withValues(alpha: 0.4) : DeckColors.hairline,
+          color: accent ? DeckColors.volt : DeckColors.hairline,
         ),
       ),
       child: Icon(icon, size: 22, color: c),
@@ -162,7 +259,7 @@ class DeckIconBox extends StatelessWidget {
   }
 }
 
-/// Titre de section Deck (Stitch hairline + letter-spacing).
+/// Titre de section — sentence-case Inter (plus de screaming caps Hangar).
 class DeckSectionLabel extends StatelessWidget {
   const DeckSectionLabel(this.text, {super.key, this.trailing});
 
@@ -175,12 +272,12 @@ class DeckSectionLabel extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            text.toUpperCase(),
+            text,
             style: const TextStyle(
+              fontFamily: DeckType.ui,
               color: DeckColors.label,
-              fontSize: 11,
-              letterSpacing: 1.2,
-              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -190,7 +287,7 @@ class DeckSectionLabel extends StatelessWidget {
   }
 }
 
-/// Cellule fiche (label + valeur), grille Stitch accueil / physio.
+/// Cellule fiche (label + valeur).
 class DeckFactCell extends StatelessWidget {
   const DeckFactCell({
     super.key,
@@ -210,35 +307,32 @@ class DeckFactCell extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label.toUpperCase(),
-          style: const TextStyle(
-            color: DeckColors.label,
-            fontSize: 9,
-            letterSpacing: 1.1,
-          ),
-        ),
+        Text(label, style: DeckType.uiLabel(size: 11)),
         const SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(
+            fontFamily: DeckType.ui,
             color: accent ?? DeckColors.text,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             fontSize: 14,
-            letterSpacing: 0.4,
           ),
         ),
         if (hint != null)
           Text(
             hint!,
-            style: const TextStyle(color: DeckColors.muted, fontSize: 10),
+            style: const TextStyle(
+              fontFamily: DeckType.ui,
+              color: DeckColors.muted,
+              fontSize: 11,
+            ),
           ),
       ],
     );
   }
 }
 
-/// Pastille côté BÂBORD / TRIBORD (Stitch).
+/// Pastille côté Bâbord / Tribord.
 class DeckSideChip extends StatelessWidget {
   const DeckSideChip(this.side, {super.key});
 
@@ -255,15 +349,22 @@ class DeckSideChip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(width: 8, height: 8, color: color),
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
         const SizedBox(width: 6),
         Text(
           label,
           style: TextStyle(
+            fontFamily: DeckType.ui,
             color: color,
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.0,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -301,12 +402,12 @@ class DeckSeatStrip extends StatelessWidget {
       final hi = highlightSeat == seat;
       final side = a?.side ?? SidePref.none;
       final short = switch (side) {
-        SidePref.babord => 'BÂB',
-        SidePref.tribord => 'TRI',
+        SidePref.babord => 'Bâb',
+        SidePref.tribord => 'Tri',
         SidePref.none => '—',
       };
       final color = hi
-          ? DeckColors.amber
+          ? DeckColors.onVolt
           : switch (side) {
               SidePref.babord => DeckColors.babord,
               SidePref.tribord => DeckColors.tribord,
@@ -318,9 +419,10 @@ class DeckSeatStrip extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 2),
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
-              color: hi ? DeckColors.amber : DeckColors.bg,
+              color: hi ? DeckColors.volt : DeckColors.surface,
+              borderRadius: DeckRadii.chipAll,
               border: Border.all(
-                color: hi ? DeckColors.amber : DeckColors.hairline,
+                color: hi ? DeckColors.volt : DeckColors.hairline,
               ),
             ),
             child: Column(
@@ -328,17 +430,19 @@ class DeckSeatStrip extends StatelessWidget {
                 Text(
                   '$seat',
                   style: TextStyle(
-                    color: hi ? DeckColors.onAlert : DeckColors.label,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
+                    fontFamily: DeckType.mono,
+                    color: hi ? DeckColors.onVolt : DeckColors.label,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   short,
                   style: TextStyle(
-                    color: hi ? DeckColors.onAlert : color,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
+                    fontFamily: DeckType.ui,
+                    color: hi ? DeckColors.onVolt : color,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -354,6 +458,7 @@ class DeckSeatStrip extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 2),
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
+              borderRadius: DeckRadii.chipAll,
               border: Border.all(color: DeckColors.hairline),
             ),
             child: const Column(
@@ -361,17 +466,19 @@ class DeckSeatStrip extends StatelessWidget {
                 Text(
                   'C',
                   style: TextStyle(
+                    fontFamily: DeckType.mono,
                     color: DeckColors.label,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
-                  'COX',
+                  'Cox',
                   style: TextStyle(
+                    fontFamily: DeckType.ui,
                     color: DeckColors.text,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -387,12 +494,20 @@ class DeckSeatStrip extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'ÉTRAVE',
-              style: TextStyle(color: DeckColors.label, fontSize: 9),
+              'Étrave',
+              style: TextStyle(
+                fontFamily: DeckType.ui,
+                color: DeckColors.label,
+                fontSize: 11,
+              ),
             ),
             Text(
-              'POUPE',
-              style: TextStyle(color: DeckColors.label, fontSize: 9),
+              'Poupe',
+              style: TextStyle(
+                fontFamily: DeckType.ui,
+                color: DeckColors.label,
+                fontSize: 11,
+              ),
             ),
           ],
         ),
@@ -403,7 +518,7 @@ class DeckSeatStrip extends StatelessWidget {
   }
 }
 
-/// Marque DataR0w (Stitch logo, DA Deck : ambre pas cyan High-Vis).
+/// Marque DataR0w — accent Volt.
 class DataR0wMark extends StatelessWidget {
   const DataR0wMark({super.key, this.compact = false});
 
@@ -414,31 +529,31 @@ class DataR0wMark extends StatelessWidget {
     return Semantics(
       label: 'DataR0w',
       child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CustomPaint(
-          size: Size(compact ? 22 : 28, compact ? 22 : 28),
-          painter: _DiamondPainter(),
-        ),
-        const SizedBox(width: 8),
-        Text.rich(
-          TextSpan(
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.2,
-              fontSize: compact ? 16 : 20,
-              color: DeckColors.text,
-            ),
-            children: const [
-              TextSpan(text: 'DATA'),
-              TextSpan(
-                text: 'R0W',
-                style: TextStyle(color: DeckColors.amber),
-              ),
-            ],
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CustomPaint(
+            size: Size(compact ? 22 : 28, compact ? 22 : 28),
+            painter: _DiamondPainter(),
           ),
-        ),
-      ],
+          const SizedBox(width: 8),
+          Text.rich(
+            TextSpan(
+              style: TextStyle(
+                fontFamily: DeckType.ui,
+                fontWeight: FontWeight.w800,
+                fontSize: compact ? 16 : 20,
+                color: DeckColors.text,
+              ),
+              children: const [
+                TextSpan(text: 'Data'),
+                TextSpan(
+                  text: 'R0w',
+                  style: TextStyle(color: DeckColors.volt),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -457,19 +572,134 @@ class _DiamondPainter extends CustomPainter {
     canvas.drawPath(
       p,
       Paint()
-        ..color = DeckColors.amber.withValues(alpha: 0.2)
+        ..color = DeckColors.volt.withValues(alpha: 0.18)
         ..style = PaintingStyle.fill,
     );
     canvas.drawPath(
       p,
       Paint()
-        ..color = DeckColors.amber
+        ..color = DeckColors.volt
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5,
     );
-    canvas.drawCircle(c, 2.5, Paint()..color = DeckColors.amber);
+    canvas.drawCircle(c, 2.5, Paint()..color = DeckColors.volt);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Pilule LOCAL · EN FILE · CLOUD (DR-20).
+class DeckSyncPill extends StatelessWidget {
+  const DeckSyncPill({
+    super.key,
+    this.highlight = DeckHonestKind.local,
+  });
+
+  final DeckHonestKind highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget seg(String label, DeckHonestKind kind) {
+      final on = kind == highlight;
+      final color = switch (kind) {
+        DeckHonestKind.cloud => DeckColors.tribord,
+        DeckHonestKind.enFile => DeckColors.amber,
+        _ => on ? DeckColors.text : DeckColors.label,
+      };
+      return Text(
+        label,
+        style: DeckType.labelMono(
+          color: color,
+          size: 10,
+          weight: on ? FontWeight.w600 : FontWeight.w500,
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: DeckColors.bgTactical,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: DeckColors.hairline),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: highlight == DeckHonestKind.cloud
+                  ? DeckColors.tribord
+                  : highlight == DeckHonestKind.enFile
+                      ? DeckColors.amber
+                      : DeckColors.label,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 6),
+          seg('LOCAL', DeckHonestKind.local),
+          Text(' · ', style: DeckType.labelMono(size: 10)),
+          seg('EN FILE', DeckHonestKind.enFile),
+          Text(' · ', style: DeckType.labelMono(size: 10)),
+          seg('CLOUD', DeckHonestKind.cloud),
+        ],
+      ),
+    );
+  }
+}
+
+/// Sélecteur Entraînement / Compétition (DR-20).
+class DeckSessionModeSwitch extends StatelessWidget {
+  const DeckSessionModeSwitch({
+    super.key,
+    required this.mode,
+    required this.onChanged,
+  });
+
+  final SessionMode mode;
+  final ValueChanged<SessionMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget chip(String label, SessionMode value) {
+      final on = mode == value;
+      return GestureDetector(
+        onTap: () => onChanged(value),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: on ? DeckColors.volt : Colors.transparent,
+            borderRadius: DeckRadii.chipAll,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: DeckType.ui,
+              fontSize: 13,
+              fontWeight: on ? FontWeight.w600 : FontWeight.w500,
+              color: on ? DeckColors.onVolt : DeckColors.label,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: DeckColors.bgTactical,
+        borderRadius: DeckRadii.buttonAll,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          chip('Entraînement', SessionMode.training),
+          chip('Compétition', SessionMode.competition),
+        ],
+      ),
+    );
+  }
 }

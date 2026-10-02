@@ -126,7 +126,7 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
             const Text(
               'RÉSUMÉ D\'ACTIVITÉ',
               style: TextStyle(
-                color: DeckColors.amber,
+                color: DeckColors.volt,
                 letterSpacing: 1.4,
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -242,21 +242,47 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
               const SizedBox(height: 8),
               OutlinedButton(
                 onPressed: () async {
+                  final choice = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      backgroundColor: DeckColors.surface,
+                      title: const Text('Rentrer la coque ?'),
+                      content: const Text(
+                        'Les pelles sont-elles toutes rentrées ?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('Annuler'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text('Pelles manquantes'),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: const Text('Pelles OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (choice == null || !mounted) return;
                   await ref.read(opsProvider.notifier).checkIn(
                         outId: activeOut.id,
-                        oarsOk: true,
+                        oarsOk: choice,
                       );
                 },
-                child: const Text('RENTRER LA COQUE ?'),
+                child: const Text('RENTRER LA COQUE'),
               ),
             ],
             const SizedBox(height: 8),
             TextButton(
               onPressed: () {
+                // IA reshape : hub = rôle de séance (rameur/cox/coach), pas clubRole.
                 final role = ref.read(boatConfigProvider).role;
                 context.go(sessionRoleHome(role));
               },
-              child: const Text('RETOUR ACCUEIL'),
+              child: const Text('Retour accueil'),
             ),
           ],
         ),

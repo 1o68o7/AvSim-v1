@@ -62,7 +62,7 @@ class _SpinoscopeScreenState extends ConsumerState<SpinoscopeScreen> {
           ),
           const SizedBox(height: 8),
           _Bar(label: 'Compétiteurs', n: compet, color: DeckColors.tribord),
-          _Bar(label: 'Loisirs', n: loisir, color: DeckColors.amber),
+          _Bar(label: 'Loisirs', n: loisir, color: DeckColors.volt),
           Text(
             'Licenciés : ${snap.rowers.length}',
             style: const TextStyle(color: DeckColors.muted, fontSize: 12),
@@ -83,7 +83,7 @@ class _SpinoscopeScreenState extends ConsumerState<SpinoscopeScreen> {
           const SizedBox(height: 8),
           Text(
             'Sorties en cours : $outsToday',
-            style: const TextStyle(color: DeckColors.amber),
+            style: const TextStyle(color: DeckColors.volt),
           ),
           const SizedBox(height: 16),
           const Text(

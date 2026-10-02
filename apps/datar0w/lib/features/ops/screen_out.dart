@@ -114,7 +114,7 @@ class _OpsOutScreenState extends ConsumerState<OpsOutScreen> {
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Text(
                       _flash!,
-                      style: const TextStyle(color: DeckColors.amber),
+                      style: const TextStyle(color: DeckColors.volt),
                     ),
                   ),
                 InputDecorator(

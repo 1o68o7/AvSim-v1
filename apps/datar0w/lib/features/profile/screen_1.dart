@@ -23,7 +23,7 @@ class ProfileScreen extends ConsumerWidget {
     final ident = ref.watch(identityProvider);
     final rower = ident.activeRower;
     return DeckScaffold(
-      title: 'SÉLECTION PROFIL',
+      title: 'Rôle bateau',
       subtitle: rower == null ? 'sans profil (loisir)' : rower.displayName,
       showRetour: false,
       centerBrandOnly: true,
@@ -51,7 +51,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
           const SizedBox(height: 8),
           const Text(
-            'SÉLECTION PROFIL',
+            'Rôle pour cette sortie',
             style: TextStyle(
               color: DeckColors.label,
               fontSize: 11,
@@ -136,7 +136,7 @@ class _RoleCard extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border.all(
                 color: highlighted
-                    ? DeckColors.amber.withValues(alpha: 0.6)
+                    ? DeckColors.volt.withValues(alpha: 0.6)
                     : DeckColors.hairline,
               ),
             ),
@@ -145,7 +145,7 @@ class _RoleCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (highlighted)
-                    Container(width: 4, color: DeckColors.amber),
+                    Container(width: 4, color: DeckColors.volt),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
@@ -185,7 +185,7 @@ class _RoleCard extends StatelessWidget {
                               Icon(
                                 Icons.arrow_forward,
                                 color: highlighted
-                                    ? DeckColors.amber
+                                    ? DeckColors.volt
                                     : DeckColors.label,
                                 size: 20,
                               ),

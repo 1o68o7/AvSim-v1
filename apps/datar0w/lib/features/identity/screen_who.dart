@@ -136,7 +136,7 @@ class _IdentityListScreenState extends ConsumerState<IdentityListScreen> {
   Widget build(BuildContext context) {
     final snap = ref.watch(identityProvider);
     return DeckScaffold(
-      title: 'QUI RAME ?',
+      title: 'Profils',
       subtitle: 'Profil local · pas de mot de passe',
       showRetour: false,
       body: Column(
@@ -206,7 +206,7 @@ class _IdentityListScreenState extends ConsumerState<IdentityListScreen> {
                   Text(
                     _lastNavError!,
                     style: const TextStyle(
-                      color: DeckColors.amber,
+                      color: DeckColors.volt,
                       fontSize: 16,
                       height: 1.35,
                       fontWeight: FontWeight.w600,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../identity/controller.dart';
+import '../../onboarding/routing.dart';
 import '../../router.dart';
 import '../../sync/auth_google.dart';
 import '../../sync/supabase_boot.dart';
@@ -34,7 +35,7 @@ class SettingsScreen extends ConsumerWidget {
     return DeckScaffold(
       title: 'RÉGLAGES',
       subtitle: 'compte · téléphone',
-      retourFallback: AppRoutes.homeRower,
+      retourFallback: homeRouteForClubMemberRole(snap.prefs.clubRole),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
@@ -56,10 +57,16 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => context.go(AppRoutes.auth),
           ),
           const Divider(height: 1, color: DeckColors.hairline),
-          const _SettingsTile(
+          _SettingsTile(
             label: 'Capteurs',
             value: 'Bientôt',
-            enabled: false,
+            onTap: () => context.go(AppRoutes.devices),
+          ),
+          const Divider(height: 1, color: DeckColors.hairline),
+          _SettingsTile(
+            label: 'Données de santé',
+            value: 'Consentement et constantes',
+            onTap: () => context.go(AppRoutes.consent),
           ),
           const Divider(height: 1, color: DeckColors.hairline),
           const SizedBox(height: 24),
@@ -97,20 +104,18 @@ class _SettingsTile extends StatelessWidget {
     required this.label,
     required this.value,
     this.onTap,
-    this.enabled = true,
   });
 
   final String label;
   final String value;
   final VoidCallback? onTap;
-  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      enabled: enabled && onTap != null,
-      onTap: enabled ? onTap : null,
+      enabled: onTap != null,
+      onTap: onTap,
       title: Text(
         label,
         style: const TextStyle(
@@ -121,10 +126,10 @@ class _SettingsTile extends StatelessWidget {
       subtitle: Text(
         value,
         style: TextStyle(
-          color: enabled ? DeckColors.label : DeckColors.muted,
+          color: onTap != null ? DeckColors.label : DeckColors.muted,
         ),
       ),
-      trailing: enabled && onTap != null
+      trailing: onTap != null
           ? const Icon(Icons.chevron_right, color: DeckColors.label)
           : null,
       minVerticalPadding: 16,

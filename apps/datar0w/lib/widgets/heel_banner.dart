@@ -11,7 +11,8 @@ class HeelBanner extends StatefulWidget {
 
   static Color backgroundFor(HeelAlert alert) => switch (alert) {
         HeelAlert.babord => DeckColors.babord.withValues(alpha: 0.80),
-        HeelAlert.tribord => DeckColors.tribord.withValues(alpha: 0.80),
+        // Vert foncé d’alerte (≠ vert « OK » tribord côté).
+        HeelAlert.tribord => DeckColors.tribordAlert.withValues(alpha: 0.92),
         HeelAlert.none => Colors.transparent,
       };
 
@@ -19,7 +20,7 @@ class HeelBanner extends StatefulWidget {
 
   static String messageFor(HeelAlert alert) => switch (alert) {
         HeelAlert.babord => 'GÎTE — trop bâbord',
-        HeelAlert.tribord => 'GÎTE — trop tribords',
+        HeelAlert.tribord => 'GÎTE — trop tribord',
         HeelAlert.none => '',
       };
 

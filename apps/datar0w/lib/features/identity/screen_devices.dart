@@ -178,7 +178,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
             : 'patch $patchBat %');
     return DeckScaffold(
       title: 'MES OBJETS',
-      subtitle: 'sangle GATT 0x180D · patch dorsal · pas de montre',
+      subtitle: 'Sangle cardio · patch dorsal · pas de montre',
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
@@ -204,7 +204,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
               child: Text(
                 'Bluetooth refusé. En entraînement le GPS téléphone continue. '
                 'FC / patch indisponibles.',
-                style: TextStyle(color: DeckColors.amber, height: 1.4),
+                style: TextStyle(color: DeckColors.volt, height: 1.4),
               ),
             ),
           const SizedBox(height: 16),
@@ -308,7 +308,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
                                 '${d.lastBattery} %',
                                 style: TextStyle(
                                   color: (d.lastBattery ?? 100) < 20
-                                      ? DeckColors.amber
+                                      ? DeckColors.volt
                                       : DeckColors.tribord,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -331,7 +331,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
                               minHeight: 4,
                               backgroundColor: DeckColors.hairline,
                               color: (d.lastBattery ?? 100) < 20
-                                  ? DeckColors.amber
+                                  ? DeckColors.volt
                                   : DeckColors.tribord,
                             ),
                           ),
@@ -356,8 +356,8 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(h.name),
-                subtitle: Text('RSSI ${h.rssi} dBm · tap pour appairer'),
-                trailing: const Icon(Icons.add_link, color: DeckColors.amber),
+                subtitle: Text('RSSI ${h.rssi} · tap pour appairer'),
+                trailing: const Icon(Icons.add_link, color: DeckColors.volt),
                 onTap: rower == null ? null : () => _pair(h),
               ),
           ],
@@ -404,7 +404,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
           const SizedBox(height: 8),
           OutlinedButton(
             onPressed: rower == null ? null : _mockPatch,
-            child: const Text('APPARIER PATCH (MOCK)'),
+            child: const Text('SIMULER UN PATCH'),
           ),
           const SizedBox(height: 12),
           const Text(

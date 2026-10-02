@@ -96,7 +96,7 @@ class _PortraitTare extends ConsumerWidget {
                     state.imuHint,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: state.imuOk ? DeckColors.tribord : DeckColors.amber,
+                      color: state.imuOk ? DeckColors.tribord : DeckColors.volt,
                       fontSize: 12,
                     ),
                   ),
@@ -210,7 +210,7 @@ class _LandscapeHud extends ConsumerWidget {
                     Container(
                       width: 8,
                       height: 8,
-                      color: DeckColors.amber,
+                      color: DeckColors.volt,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -221,7 +221,7 @@ class _LandscapeHud extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: DeckColors.amber,
+                          color: DeckColors.volt,
                           fontWeight: FontWeight.w700,
                           fontSize: 12,
                           letterSpacing: 1.2,
@@ -264,7 +264,7 @@ class _LandscapeHud extends ConsumerWidget {
                             style: TextStyle(
                               color: state.imuOk
                                   ? DeckColors.tribord
-                                  : DeckColors.amber,
+                                  : DeckColors.volt,
                               fontSize: 10,
                             ),
                           ),
@@ -283,7 +283,7 @@ class _LandscapeHud extends ConsumerWidget {
                                     const Text(
                                       'GÎTE INSTANTANÉE',
                                       style: TextStyle(
-                                        color: DeckColors.amber,
+                                        color: DeckColors.volt,
                                         fontSize: 9,
                                         letterSpacing: 1.4,
                                         fontWeight: FontWeight.w600,
@@ -306,7 +306,7 @@ class _LandscapeHud extends ConsumerWidget {
                                           const TextSpan(
                                             text: ' °',
                                             style: TextStyle(
-                                              color: DeckColors.amber,
+                                              color: DeckColors.volt,
                                               fontSize: 28,
                                             ),
                                           ),
@@ -387,7 +387,7 @@ class _LandscapeHud extends ConsumerWidget {
                           const Text(
                             'SÉQUENCE D\'ÉTALONNAGE',
                             style: TextStyle(
-                              color: DeckColors.amber,
+                              color: DeckColors.volt,
                               fontSize: 10,
                               letterSpacing: 1.4,
                               fontWeight: FontWeight.w700,
@@ -422,14 +422,14 @@ class _LandscapeHud extends ConsumerWidget {
                                                 : '0%',
                                         textAlign: TextAlign.right,
                                         style: const TextStyle(
-                                          color: DeckColors.amber,
+                                          color: DeckColors.volt,
                                           fontSize: 11,
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
                                       LinearProgressIndicator(
                                         value: _tareProgress(state),
-                                        color: DeckColors.amber,
+                                        color: DeckColors.volt,
                                         backgroundColor: DeckColors.hairline,
                                         minHeight: 6,
                                       ),
@@ -473,7 +473,7 @@ class _LandscapeHud extends ConsumerWidget {
                                     color: state.tareStatus == TareStatus.ok
                                         ? DeckColors.tribord
                                         : state.tareStatus == TareStatus.approx
-                                            ? DeckColors.amber
+                                            ? DeckColors.volt
                                             : DeckColors.label,
                                     fontWeight: FontWeight.w800,
                                     fontSize: 16,
@@ -537,14 +537,14 @@ class _TareMountWarning extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        border: Border.all(color: DeckColors.amber),
+        border: Border.all(color: DeckColors.volt),
       ),
       child: const Text(
         'POSITION DE SÉANCE — La tare mémorise le niveau actuel du téléphone. '
         'Fixez-le d’abord comme en live (cale-pied, écran paysage, haut du tel à gauche). '
         'Ne pas tarer à la verticale à la main : le zéro resterait celui du portrait.',
         style: TextStyle(
-          color: DeckColors.amber,
+          color: DeckColors.volt,
           fontSize: 11,
           height: 1.35,
         ),

@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import '../router.dart';
 import '../theme/deck_theme.dart';
 import '../widgets/deck_scaffold.dart';
+import '../widgets/deck_widgets.dart';
 
 import 'session_pack.dart';
 import 'store.dart';
@@ -497,24 +498,24 @@ class _SessionSyncHostState extends State<SessionSyncHost>
       _offerClubCta = false;
       _bannerStatus = status;
     });
-    _statusTimer = Timer(const Duration(seconds: 2), () {
+    _statusTimer = Timer(const Duration(seconds: 6), () {
       if (!mounted) return;
       setState(() => _bannerStatus = null);
     });
   }
 
-  /// Bandeau : `sync: 42501` / `23505` / `409` — pas le pavé PostgREST.
+  /// Bandeau : messages lisibles (pas de codes Postgres bruts).
   static String _shortSyncError(String raw) {
-    if (raw == 'pas de club' || raw == 'pas d\'uid') return raw;
-    final pg = RegExp(r'^(42501|23505|409|PGRST\d+)$').firstMatch(raw.trim());
-    if (pg != null) return pg.group(1)!;
-    final embedded =
-        RegExp(r'\b(42501|23505|409|PGRST\d+)\b').firstMatch(raw);
-    if (embedded != null) return embedded.group(1)!;
+    if (raw == 'pas de club') return 'Aucun club';
+    if (raw == 'pas d\'uid') return 'Compte requis';
+    if (raw.contains('42501')) return 'Accès refusé';
+    if (raw.contains('23505')) return 'Déjà synchronisé';
+    if (raw.contains('409')) return 'Conflit sync';
+    if (RegExp(r'PGRST\d+').hasMatch(raw)) return 'Erreur serveur';
     if (raw.startsWith('pas de ')) return raw;
-    if (raw.startsWith('storage')) return 'storage';
-    if (raw.contains('session_meta')) return 'session_meta';
-    if (raw.length > 32) return raw.substring(0, 32);
+    if (raw.startsWith('storage')) return 'Échec stockage';
+    if (raw.contains('session_meta')) return 'Échec envoi séance';
+    if (raw.length > 40) return '${raw.substring(0, 40)}…';
     return raw;
   }
 
@@ -541,31 +542,34 @@ class _SessionSyncHostState extends State<SessionSyncHost>
     final pending = sync?.pendingCount ?? 0;
     final kind = sync?.bannerKind ?? SyncBannerKind.local;
     final status = _bannerStatus;
-    final showStrip =
-        sync != null && (pending > 0 || status != null || _offerClubCta);
-    // ST-09 : 36 px sous AppBar (pas overlay sur la barre titre).
+    // ST-09 : bandeau uniquement si action / alerte (file, club, statut retry).
+    // LOCAL / CLOUD calmes → déjà dans les headers DR (pilule / chips) :
+    // un strip global permanent cassait la lecture sous l’AppBar.
+    final showStrip = _offerClubCta ||
+        status != null ||
+        (sync != null && kind == SyncBannerKind.enFile);
+    // Overlay sous AppBar (36 px) quand visible.
     final top = MediaQuery.paddingOf(context).top + DeckAppBar.kToolbar;
 
     Widget? strip;
     if (showStrip) {
-      final chipLabel = _offerClubCta
-          ? 'CLUB'
+      final honestKind = _offerClubCta
+          ? DeckHonestKind.club
           : switch (kind) {
-              SyncBannerKind.local => 'LOCAL',
-              SyncBannerKind.enFile => 'EN FILE',
-              SyncBannerKind.cloud => 'CLOUD',
-            };
-      final chipColor = _offerClubCta
-          ? DeckColors.amber
-          : switch (kind) {
-              SyncBannerKind.local => DeckColors.label,
-              SyncBannerKind.enFile => DeckColors.amber,
-              SyncBannerKind.cloud => DeckColors.tribord,
+              SyncBannerKind.local => DeckHonestKind.local,
+              SyncBannerKind.enFile => DeckHonestKind.enFile,
+              SyncBannerKind.cloud => DeckHonestKind.cloud,
             };
       final right = status ??
           (_offerClubCta
               ? 'Choisir un club'
-              : (pending > 0 ? '$pending en file' : ''));
+              : (pending > 0
+                  ? '$pending en file'
+                  : switch (kind) {
+                      SyncBannerKind.local => 'Sur cet appareil',
+                      SyncBannerKind.enFile => 'Envoi en cours',
+                      SyncBannerKind.cloud => 'À jour',
+                    }));
       // Fond + texte ignorés ; seul le chip reçoit les taps (ST-09).
       strip = SizedBox(
         height: 36,
@@ -574,7 +578,7 @@ class _SessionSyncHostState extends State<SessionSyncHost>
             IgnorePointer(
               child: DecoratedBox(
                 decoration: const BoxDecoration(
-                  color: DeckColors.surface,
+                  color: DeckColors.bgTactical,
                   border: Border(
                     bottom: BorderSide(color: DeckColors.hairline),
                   ),
@@ -590,23 +594,8 @@ class _SessionSyncHostState extends State<SessionSyncHost>
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: _onBannerTap,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: chipColor),
-                      color: chipColor.withValues(alpha: 0.12),
-                    ),
-                    child: Text(
-                      chipLabel,
-                      style: TextStyle(
-                        color: chipColor,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 11,
-                        letterSpacing: 1.1,
-                      ),
-                    ),
-                  ),
+                  borderRadius: DeckRadii.chipAll,
+                  child: DeckHonestChip(kind: honestKind),
                 ),
               ),
             ),
@@ -620,9 +609,10 @@ class _SessionSyncHostState extends State<SessionSyncHost>
                     child: Text(
                       right,
                       style: const TextStyle(
+                        fontFamily: DeckType.ui,
                         color: DeckColors.label,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),

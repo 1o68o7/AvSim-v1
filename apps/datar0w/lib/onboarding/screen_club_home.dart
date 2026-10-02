@@ -116,16 +116,16 @@ class ClubRoleHomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
           ],
-          // treasurer : club + séances (pas de trésorerie neuve)
+          // treasurer : club + séances (pas de trésorerie neuve / DR-42)
           if (role == ClubMemberRole.treasurer) ...[
             const Text(
               'Cotisations / budget : plus tard.',
-              style: TextStyle(color: DeckColors.amber),
+              style: TextStyle(color: DeckColors.volt),
             ),
             const SizedBox(height: 8),
             OutlinedButton(
               onPressed: () => context.go(AppRoutes.clubSessions),
-              child: const Text('SÉANCES DU CLUB'),
+              child: const Text('Séances du club'),
             ),
           ],
           OutlinedButton(

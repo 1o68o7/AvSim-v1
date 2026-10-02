@@ -51,7 +51,11 @@ void main() {
     expect(DeckColors.tribord.toARGB32(), isNot(0xFF00E676));
     expect(
       HeelBanner.backgroundFor(HeelAlert.tribord).a,
-      closeTo(0.80, 0.02),
+      closeTo(0.92, 0.02),
+    );
+    expect(
+      HeelBanner.backgroundFor(HeelAlert.tribord),
+      DeckColors.tribordAlert.withValues(alpha: 0.92),
     );
     expect(
       HeelBanner.backgroundFor(HeelAlert.babord).a,
@@ -73,12 +77,12 @@ void main() {
     expect(f.filteredDeg, isNull);
   });
 
-  testWidgets('bandeau trop tribords et trop bâbord, overlay', (tester) async {
+  testWidgets('bandeau trop tribord et trop bâbord, overlay', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: HeelBanner(alert: HeelAlert.tribord)),
     );
     await tester.pump();
-    expect(find.text('GÎTE — trop tribords'), findsOneWidget);
+    expect(find.text('GÎTE — trop tribord'), findsOneWidget);
 
     await tester.pumpWidget(
       const MaterialApp(home: HeelBanner(alert: HeelAlert.babord)),
@@ -117,7 +121,7 @@ void main() {
 
     await pumpAlert(HeelAlert.tribord);
     await tester.pumpAndSettle();
-    expect(find.text('GÎTE — trop tribords'), findsOneWidget);
+    expect(find.text('GÎTE — trop tribord'), findsOneWidget);
     expect(tester.getTopLeft(find.byKey(bodyKey)).dy, y0);
   });
 

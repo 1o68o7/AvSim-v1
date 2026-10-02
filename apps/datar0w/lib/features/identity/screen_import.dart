@@ -149,7 +149,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
               padding: const EdgeInsets.only(bottom: 12),
               child: Text(
                 _flash!,
-                style: const TextStyle(color: DeckColors.amber),
+                style: const TextStyle(color: DeckColors.volt),
               ),
             ),
           _DropZone(
@@ -193,7 +193,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
         ),
         const SizedBox(height: 8),
         if (p.fatal != null)
-          Text(p.fatal!, style: const TextStyle(color: DeckColors.amber))
+          Text(p.fatal!, style: const TextStyle(color: DeckColors.volt))
         else ...[
           Text(
             _parkReportText(p),
@@ -202,7 +202,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
           if (p.unknownHeaders.isNotEmpty)
             Text(
               'Colonnes inconnues : ${p.unknownHeaders.join(', ')}',
-              style: const TextStyle(color: DeckColors.amber, fontSize: 12),
+              style: const TextStyle(color: DeckColors.volt, fontSize: 12),
             ),
           const SizedBox(height: 8),
           _boatTable(p),
@@ -217,7 +217,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
         const SizedBox(height: 12),
         Text(
           '${_parkReport!.created} créées · ${_parkReport!.updated} mises à jour · ${_parkReport!.ignored} ignorées',
-          style: const TextStyle(color: DeckColors.amber),
+          style: const TextStyle(color: DeckColors.volt),
         ),
       ],
       if (snap.prefs.lastImportId != null) ...[
@@ -254,7 +254,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
         ),
         const SizedBox(height: 8),
         if (p.fatal != null)
-          Text(p.fatal!, style: const TextStyle(color: DeckColors.amber))
+          Text(p.fatal!, style: const TextStyle(color: DeckColors.volt))
         else ...[
           Text(
             _rowerReportText(p),
@@ -273,7 +273,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
         const SizedBox(height: 12),
         Text(
           '${_rowerReport!.created} créés · ${_rowerReport!.updated} maj · ${_rowerReport!.ignored} ignorés',
-          style: const TextStyle(color: DeckColors.amber),
+          style: const TextStyle(color: DeckColors.volt),
         ),
       ],
       if (snap.prefs.lastRowerImportId != null) ...[
@@ -308,7 +308,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
                 p.headers[i],
                 style: TextStyle(
                   color: p.mapped[i] == MappedCol.unknown
-                      ? DeckColors.amber
+                      ? DeckColors.volt
                       : DeckColors.tribord,
                   fontSize: 11,
                 ),
@@ -352,7 +352,7 @@ class _ClubImportScreenState extends ConsumerState<ClubImportScreen> {
                 p.headers[i],
                 style: TextStyle(
                   color: p.mapped[i] == MappedRowerCol.unknown
-                      ? DeckColors.amber
+                      ? DeckColors.volt
                       : DeckColors.tribord,
                   fontSize: 11,
                 ),
@@ -430,7 +430,7 @@ class _DropZone extends StatelessWidget {
                   Text(
                     'Choisir un fichier',
                     style: TextStyle(
-                      color: DeckColors.amber,
+                      color: DeckColors.volt,
                       fontWeight: FontWeight.w600,
                       fontSize: 12,
                     ),
