@@ -39,14 +39,16 @@ class _ParkIdentity extends IdentityController {
 
 void main() {
   testWidgets('accueil coach : Sortir Rentrer', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(400, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(home: HomeCoachScreen()),
       ),
     );
     await tester.pump();
-    expect(find.text('SORTIR'), findsOneWidget);
-    expect(find.text('RENTRER'), findsOneWidget);
+    expect(find.textContaining('Sortir'), findsOneWidget);
+    expect(find.textContaining('Rentrer'), findsOneWidget);
     expect(find.text('DÉPART'), findsOneWidget);
     await tester.scrollUntilVisible(find.text('MAINTENANCE'), 120);
     await tester.pump();

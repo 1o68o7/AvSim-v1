@@ -105,7 +105,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 350));
 
       expect(appRouter.state.uri.path, AppRoutes.homeRower);
-      expect(find.text('ACCUEIL RAMEUR'), findsOneWidget);
+      expect(find.text("Aujourd'hui"), findsWidgets);
       expect(find.textContaining('Navigation bloquée'), findsNothing);
     },
   );

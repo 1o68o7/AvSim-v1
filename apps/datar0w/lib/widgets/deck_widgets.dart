@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../identity/format.dart';
 import '../identity/models.dart';
+import '../session/boat_config.dart';
 import '../theme/deck_theme.dart';
 
 /// Honest status badge — LOCAL / EN FILE / CLOUD / MOCK (6px radius, mono).
@@ -586,4 +587,119 @@ class _DiamondPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Pilule LOCAL · EN FILE · CLOUD (DR-20).
+class DeckSyncPill extends StatelessWidget {
+  const DeckSyncPill({
+    super.key,
+    this.highlight = DeckHonestKind.local,
+  });
+
+  final DeckHonestKind highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget seg(String label, DeckHonestKind kind) {
+      final on = kind == highlight;
+      final color = switch (kind) {
+        DeckHonestKind.cloud => DeckColors.tribord,
+        DeckHonestKind.enFile => DeckColors.amber,
+        _ => on ? DeckColors.text : DeckColors.label,
+      };
+      return Text(
+        label,
+        style: DeckType.labelMono(
+          color: color,
+          size: 10,
+          weight: on ? FontWeight.w600 : FontWeight.w500,
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: DeckColors.bgTactical,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: DeckColors.hairline),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: highlight == DeckHonestKind.cloud
+                  ? DeckColors.tribord
+                  : highlight == DeckHonestKind.enFile
+                      ? DeckColors.amber
+                      : DeckColors.label,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 6),
+          seg('LOCAL', DeckHonestKind.local),
+          Text(' · ', style: DeckType.labelMono(size: 10)),
+          seg('EN FILE', DeckHonestKind.enFile),
+          Text(' · ', style: DeckType.labelMono(size: 10)),
+          seg('CLOUD', DeckHonestKind.cloud),
+        ],
+      ),
+    );
+  }
+}
+
+/// Sélecteur Entraînement / Compétition (DR-20).
+class DeckSessionModeSwitch extends StatelessWidget {
+  const DeckSessionModeSwitch({
+    super.key,
+    required this.mode,
+    required this.onChanged,
+  });
+
+  final SessionMode mode;
+  final ValueChanged<SessionMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget chip(String label, SessionMode value) {
+      final on = mode == value;
+      return GestureDetector(
+        onTap: () => onChanged(value),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: on ? DeckColors.volt : Colors.transparent,
+            borderRadius: DeckRadii.chipAll,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: DeckType.ui,
+              fontSize: 13,
+              fontWeight: on ? FontWeight.w600 : FontWeight.w500,
+              color: on ? DeckColors.onVolt : DeckColors.label,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: DeckColors.bgTactical,
+        borderRadius: DeckRadii.buttonAll,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          chip('Entraînement', SessionMode.training),
+          chip('Compétition', SessionMode.competition),
+        ],
+      ),
+    );
+  }
 }

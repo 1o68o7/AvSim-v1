@@ -7,8 +7,10 @@ import '../../session/share_files.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
 import '../../theme/deck_theme.dart';
-import '../../widgets/deck_scaffold.dart';
+import '../../widgets/deck_shell.dart';
+import '../../widgets/deck_widgets.dart';
 
+/// DR-60 — Historique des séances (onglet Séances).
 class SessionHistoryScreen extends ConsumerStatefulWidget {
   const SessionHistoryScreen({
     super.key,
@@ -31,11 +33,13 @@ class _SessionRow {
     required this.meta,
     this.duration,
     this.distM,
+    this.cadenceMean,
   });
 
   final SessionMeta meta;
   final Duration? duration;
   final double? distM;
+  final double? cadenceMean;
 }
 
 class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
@@ -69,10 +73,12 @@ class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
       final samples = await SessionStore.loadSamples(m.id);
       Duration? duration;
       double? distM;
+      double? cad;
       if (samples.isNotEmpty) {
         final s = SessionSummary.fromSamples(samples);
         duration = s.duration;
         distM = s.distM;
+        cad = s.cadenceMean;
       } else {
         final a = DateTime.tryParse(m.startedAt ?? '');
         final b = DateTime.tryParse(m.endedAt ?? '');
@@ -80,7 +86,14 @@ class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
           duration = b.difference(a);
         }
       }
-      rows.add(_SessionRow(meta: m, duration: duration, distM: distM));
+      rows.add(
+        _SessionRow(
+          meta: m,
+          duration: duration,
+          distM: distM,
+          cadenceMean: cad,
+        ),
+      );
     }
     if (mounted) {
       setState(() {
@@ -97,8 +110,8 @@ class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
   }
 
   void _snack(String msg) {
-    final m = ScaffoldMessenger.maybeOf(context);
-    m?.showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.maybeOf(context)
+        ?.showSnackBar(SnackBar(content: Text(msg)));
   }
 
   Future<void> _shareSelected() async {
@@ -113,120 +126,350 @@ class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
     await shareBulkSessionZip(ids);
   }
 
+  String _pace(_SessionRow row) {
+    final d = row.duration;
+    final dist = row.distM;
+    if (d == null || dist == null || dist <= 0 || d.inMilliseconds <= 0) {
+      return '—';
+    }
+    final sec = d.inMilliseconds / 1000.0 * 500.0 / dist;
+    final m = sec ~/ 60;
+    final s = (sec % 60).round().clamp(0, 59);
+    return '$m:${s.toString().padLeft(2, '0')}';
+  }
+
+  String _dayHeader(String? iso) {
+    if (iso == null || iso.isEmpty) return 'Sans date';
+    final d = DateTime.tryParse(iso)?.toLocal();
+    if (d == null) return formatSessionDay(iso);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final day = DateTime(d.year, d.month, d.day);
+    final diff = today.difference(day).inDays;
+    if (diff == 0) return "Aujourd'hui";
+    if (diff == 1) return 'Hier';
+    return formatSessionDay(iso);
+  }
+
+  String _timeLabel(String? iso) {
+    final d = DateTime.tryParse(iso ?? '')?.toLocal();
+    if (d == null) return '—';
+    return '${d.hour.toString().padLeft(2, '0')}:'
+        '${d.minute.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DeckScaffold(
-      title: 'MES SÉANCES',
-      subtitle: widget.fromCoach
-          ? 'toutes les séances locales'
-          : 'historique local',
-      retourFallback:
-          widget.fromCoach ? AppRoutes.coachJoin : AppRoutes.homeRower,
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _rows.isEmpty
-              ? const Center(
-                  child: Text(
-                    'Aucune séance locale.\n'
-                    'Les fichiers restent dans Documents/sessions/.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: DeckColors.muted, height: 1.4),
-                  ),
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                        itemCount: _rows.length,
-                        separatorBuilder: (context, index) =>
-                            const Divider(height: 1),
-                        itemBuilder: (context, i) {
-                          final row = _rows[i];
-                          final m = row.meta;
-                          final code = (m.code ?? '').trim();
-                          final km = row.distM;
-                          final kmLabel = (km != null && km > 0)
-                              ? '${(km / 1000).toStringAsFixed(2)} km'
-                              : '— km';
-                          final dur = row.duration == null
-                              ? '—'
-                              : formatDuration(row.duration!);
-                          final checked = _selected.contains(m.id);
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Checkbox(
-                                  value: checked,
-                                  onChanged: (v) {
-                                    setState(() {
-                                      if (v == true) {
-                                        _selected.add(m.id);
-                                      } else {
-                                        _selected.remove(m.id);
-                                      }
-                                    });
-                                  },
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      Text(
-                                        code.isEmpty
-                                            ? m.id
-                                            : code.toUpperCase(),
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: 1.4,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '${m.classe}  ·  $dur  ·  $kmLabel  ·  '
-                                        '${formatSessionDay(m.startedAt ?? m.endedAt)}',
-                                        style: const TextStyle(
-                                          color: DeckColors.muted,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                context.go(_replayPath(m.id)),
-                                            child: const Text('REPLAY'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () =>
-                                                shareLocalSession(m.id),
-                                            child: const Text('ENVOYER'),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+    return DeckTabScaffold(
+      tab: DeckTab.sessions,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+              child: Row(
+                children: [
+                  if (widget.fromCoach)
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: DeckColors.text),
+                      onPressed: () => context.go(AppRoutes.homeCoach),
+                    ),
+                  const DeckHonestChip(kind: DeckHonestKind.cloud),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      widget.fromCoach
+                          ? 'Séances club'
+                          : 'Historique des séances',
+                      style: const TextStyle(
+                        fontFamily: DeckType.ui,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: DeckColors.text,
                       ),
                     ),
-                    if (_selected.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                        child: FilledButton(
-                          onPressed: _shareSelected,
-                          child: const Text('ENVOYER LA SÉLECTION'),
-                        ),
+                  ),
+                  IconButton(
+                    tooltip: 'Plus',
+                    onPressed: () => context.go(AppRoutes.plus),
+                    icon: const Icon(
+                      Icons.person_outline,
+                      color: DeckColors.text,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(child: _buildBody()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_rows.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'Aucune séance locale.\n'
+            'Les fichiers restent dans Documents/sessions/.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: DeckType.ui,
+              color: DeckColors.muted,
+              height: 1.4,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: DeckColors.surface,
+            borderRadius: DeckRadii.cardAll,
+            border: Border.all(color: DeckColors.hairline),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.smartphone, size: 20, color: DeckColors.text),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'STOCKAGE FLASH APPAREIL',
+                      style: DeckType.labelMono(
+                        color: DeckColors.label,
+                        size: 10,
                       ),
-                  ],
+                    ),
+                  ),
+                  Text(
+                    '${_rows.length} séances',
+                    style: DeckType.labelMono(color: DeckColors.text, size: 10),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Fichiers bruts enregistrés en mémoire flash du téléphone '
+                '(JSONL, GPS, IMU). Consultables même sans réseau.',
+                style: TextStyle(
+                  fontFamily: DeckType.ui,
+                  fontSize: 12,
+                  color: DeckColors.label,
+                  height: 1.35,
                 ),
+              ),
+              if (_selected.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: _shareSelected,
+                  child: Text('Envoyer la sélection (${_selected.length})'),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Text(
+              'Fichiers locaux récents',
+              style: DeckType.uiLabel(weight: FontWeight.w600),
+            ),
+            const Spacer(),
+            Text(
+              'ORDRE : DATE DESC',
+              style: DeckType.labelMono(color: DeckColors.muted, size: 10),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        for (var i = 0; i < _rows.length; i++) ...[
+          if (i == 0 ||
+              _dayHeader(_rows[i].meta.startedAt) !=
+                  _dayHeader(_rows[i - 1].meta.startedAt))
+            Padding(
+              padding: EdgeInsets.only(top: i == 0 ? 0 : 12, bottom: 8),
+              child: Text(
+                _dayHeader(_rows[i].meta.startedAt),
+                style: const TextStyle(
+                  fontFamily: DeckType.ui,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: DeckColors.text,
+                ),
+              ),
+            ),
+          _SessionCard(
+            row: _rows[i],
+            selected: _selected.contains(_rows[i].meta.id),
+            time: _timeLabel(_rows[i].meta.startedAt),
+            pace: _pace(_rows[i]),
+            onToggle: (v) {
+              setState(() {
+                if (v) {
+                  _selected.add(_rows[i].meta.id);
+                } else {
+                  _selected.remove(_rows[i].meta.id);
+                }
+              });
+            },
+            onReplay: () => context.go(_replayPath(_rows[i].meta.id)),
+            onShare: () => shareLocalSession(_rows[i].meta.id),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ],
+    );
+  }
+}
+
+class _SessionCard extends StatelessWidget {
+  const _SessionCard({
+    required this.row,
+    required this.selected,
+    required this.time,
+    required this.pace,
+    required this.onToggle,
+    required this.onReplay,
+    required this.onShare,
+  });
+
+  final _SessionRow row;
+  final bool selected;
+  final String time;
+  final String pace;
+  final ValueChanged<bool> onToggle;
+  final VoidCallback onReplay;
+  final VoidCallback onShare;
+
+  @override
+  Widget build(BuildContext context) {
+    final m = row.meta;
+    final code = (m.code ?? '').trim();
+    final dist = row.distM;
+    final distLabel =
+        (dist != null && dist > 0) ? '${dist.round()} m' : '—';
+    final dur = row.duration == null ? '—' : formatDuration(row.duration!);
+    final cad = row.cadenceMean?.round().toString() ?? '—';
+
+    return Material(
+      color: DeckColors.surface,
+      borderRadius: DeckRadii.cardAll,
+      child: InkWell(
+        borderRadius: DeckRadii.cardAll,
+        onTap: onReplay,
+        onLongPress: () => onToggle(!selected),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: DeckRadii.cardAll,
+            border: Border.all(
+              color: selected ? DeckColors.volt : DeckColors.hairline,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    time,
+                    style: DeckType.labelMono(color: DeckColors.label, size: 11),
+                  ),
+                  const Spacer(),
+                  const DeckHonestChip(kind: DeckHonestKind.local),
+                  Checkbox(
+                    value: selected,
+                    onChanged: (v) => onToggle(v ?? false),
+                  ),
+                ],
+              ),
+              Text(
+                m.bassin?.isNotEmpty == true
+                    ? m.bassin!
+                    : (code.isEmpty ? m.id : code.toUpperCase()),
+                style: const TextStyle(
+                  fontFamily: DeckType.ui,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: DeckColors.text,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.kayaking, size: 18, color: DeckColors.label),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      '${m.classe.toUpperCase()}'
+                      '${m.seatIndex == null ? '' : ' · poste ${m.seatIndex}'}',
+                      style: const TextStyle(
+                        fontFamily: DeckType.ui,
+                        fontSize: 13,
+                        color: DeckColors.text,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(child: _Mini('Distance', distLabel)),
+                  Expanded(child: _Mini('Durée', dur)),
+                  Expanded(child: _Mini('Allure /500m', pace)),
+                  Expanded(child: _Mini('Cadence', '$cad spm')),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  TextButton(onPressed: onReplay, child: const Text('Revoir')),
+                  TextButton(onPressed: onShare, child: const Text('Exporter')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Mini extends StatelessWidget {
+  const _Mini(this.label, this.value);
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: DeckType.uiLabel(size: 11)),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: DeckType.metric(size: 14, weight: FontWeight.w600),
+        ),
+      ],
     );
   }
 }
