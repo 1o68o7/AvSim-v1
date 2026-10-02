@@ -9,7 +9,6 @@ import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
-import '../../widgets/deck_widgets.dart';
 
 class _SeatDraft {
   _SeatDraft({this.rowerId, this.side = SidePref.tribord, this.oars = ''});
