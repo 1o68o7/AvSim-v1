@@ -6,7 +6,6 @@ import '../../identity/controller.dart';
 import '../../identity/models.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
-import '../../widgets/deck_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
