@@ -93,7 +93,7 @@ class _ClubSessionsScreenState extends ConsumerState<ClubSessionsScreen> {
     final snap = ref.watch(identityProvider);
     return DeckScaffold(
       title: 'Séances du club',
-      subtitle: 'cloud',
+      subtitle: 'Séances cloud',
       retourFallback: homeRouteForClubMemberRole(snap.prefs.clubRole),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -114,7 +114,7 @@ class _ClubSessionsScreenState extends ConsumerState<ClubSessionsScreen> {
                     const Padding(
                       padding: EdgeInsets.only(top: 24),
                       child: Text(
-                        'Aucune séance cloud — elles arriveront après STOP.',
+                        'Aucune séance cloud.',
                         style: TextStyle(
                           color: DeckColors.muted,
                           height: 1.4,
@@ -139,7 +139,7 @@ class _ClubSessionsScreenState extends ConsumerState<ClubSessionsScreen> {
                           ].join(' · '),
                           style: const TextStyle(color: DeckColors.label),
                         ),
-                        trailing: const DeckStatusChip(label: 'CLOUD', ok: true),
+                        trailing: const DeckStatusChip(label: 'Cloud', ok: true),
                         onTap: () => context.go(
                           '${AppRoutes.clubSessions}/${Uri.encodeComponent(r.code)}',
                         ),
@@ -214,7 +214,7 @@ class _ClubSessionDetailScreenState
     final r = _row;
     return DeckScaffold(
       title: widget.code.toUpperCase(),
-      subtitle: 'séance cloud',
+      subtitle: 'Séance cloud',
       retourFallback: AppRoutes.clubSessions,
       body: _loading
           ? const Center(child: CircularProgressIndicator())

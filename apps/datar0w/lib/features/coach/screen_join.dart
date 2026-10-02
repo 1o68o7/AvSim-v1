@@ -44,9 +44,7 @@ class _CoachJoinScreenState extends ConsumerState<CoachJoinScreen> {
   Future<void> _go(String? id) async {
     if (!mounted) return;
     if (id == null) {
-      setState(() => _error = SessionApi.enabled
-          ? 'Code inconnu (local + API).'
-          : 'Code inconnu (mode local, même téléphone).');
+      setState(() => _error = 'Code inconnu.');
       return;
     }
     context.go(AppRoutes.coachLive);
@@ -70,15 +68,15 @@ class _CoachJoinScreenState extends ConsumerState<CoachJoinScreen> {
   Widget build(BuildContext context) {
     final api = SessionApi.enabled;
     return DeckScaffold(
-      title: 'COACH',
-      subtitle: api ? 'code · local ou API' : 'code séance · mode local',
+      title: 'Coach',
+      subtitle: 'Code séance',
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'CODE SÉANCE (6 CAR.)',
+              'Code séance',
               style: TextStyle(color: DeckColors.label, fontSize: 11),
             ),
             const SizedBox(height: 8),
@@ -97,7 +95,7 @@ class _CoachJoinScreenState extends ConsumerState<CoachJoinScreen> {
             if (_last != null) ...[
               const SizedBox(height: 16),
               Text(
-                'DERNIÈRE SÉANCE LOCALE  ·  ${_last!.classe.toUpperCase()}'
+                'Dernière · ${_last!.classe.toUpperCase()}'
                 '${_last!.code == null ? '' : '  ${_last!.code}'}',
                 style: const TextStyle(color: DeckColors.label, fontSize: 11),
               ),
@@ -107,23 +105,23 @@ class _CoachJoinScreenState extends ConsumerState<CoachJoinScreen> {
             const Spacer(),
             FilledButton(
               onPressed: _join,
-              child: const Text('REJOINDRE'),
+              child: const Text('Rejoindre'),
             ),
             const SizedBox(height: 8),
             OutlinedButton(
               onPressed: () => _join(last: true),
-              child: const Text('DERNIÈRE SÉANCE (MÊME TÉL.)'),
+              child: const Text('Dernière séance'),
             ),
             const SizedBox(height: 8),
             OutlinedButton(
               onPressed: () => context.go('${AppRoutes.sessions}?from=coach'),
-              child: const Text('TOUTES LES SÉANCES LOCALES'),
+              child: const Text('Séances locales'),
             ),
             if (api) ...[
               const SizedBox(height: 8),
               OutlinedButton(
                 onPressed: () => _join(apiLive: true),
-                child: const Text('SÉANCE LIVE (API)'),
+                child: const Text('Séance live'),
               ),
             ],
           ],

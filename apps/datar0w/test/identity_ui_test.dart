@@ -93,14 +93,10 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('IMPORT CABANE'), findsOneWidget);
+    expect(find.text('Import cabane'), findsOneWidget);
     expect(find.text('Bateaux.csv'), findsOneWidget);
     expect(find.text('Rameurs.csv'), findsOneWidget);
-    expect(
-      find.textContaining('stockées cloud'),
-      findsOneWidget,
-    );
-    expect(find.text('ENVOYER VERS LE CLUB'), findsNothing);
+    expect(find.text('Envoyer'), findsNothing);
   });
 
   testWidgets('import : hors coach → réservé', (tester) async {
@@ -112,7 +108,7 @@ void main() {
     );
     await tester.pump();
     expect(find.text('Réservé au coach.'), findsOneWidget);
-    expect(find.text('ENVOYER VERS LE CLUB'), findsNothing);
+    expect(find.text('Envoyer'), findsNothing);
   });
 
   testWidgets('composition : hors coach → réservé', (tester) async {
@@ -135,8 +131,8 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('EFFECTIF'), findsOneWidget);
-    expect(find.text('COUPETTES'), findsOneWidget);
+    expect(find.text('Effectif'), findsOneWidget);
+    expect(find.text('Coupettes'), findsOneWidget);
   });
 
   testWidgets('chip ~N licenciés (estimation club)', (tester) async {
@@ -160,12 +156,14 @@ void main() {
     await tester.pump();
     expect(find.textContaining('Composer'), findsOneWidget);
     expect(find.textContaining('Rejoindre'), findsWidgets);
-    expect(find.text('PARC'), findsOneWidget);
+    expect(find.text('Parc'), findsOneWidget);
     expect(find.textContaining('Sortir'), findsOneWidget);
     expect(find.textContaining('Rentrer'), findsOneWidget);
-    expect(find.text('DÉPART'), findsOneWidget);
-    expect(find.text('MAINTENANCE'), findsOneWidget);
-    expect(find.text('SPINOSCOPE'), findsOneWidget);
+    expect(find.text('Départ'), findsOneWidget);
+    expect(find.text('Maintenance'), findsOneWidget);
+    expect(find.text('Spinoscope'), findsOneWidget);
     expect(find.textContaining('Mes séances'), findsOneWidget);
+    expect(find.text('DR-31'), findsNothing);
+    expect(find.text('DR-56'), findsNothing);
   });
 }

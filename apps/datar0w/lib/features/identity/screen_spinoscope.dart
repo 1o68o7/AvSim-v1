@@ -45,15 +45,15 @@ class _SpinoscopeScreenState extends ConsumerState<SpinoscopeScreen> {
     final cups = snap.trophies.where((t) => club != null && t.clubId == club.id).toList();
 
     return DeckScaffold(
-      title: 'SPINOSCOPE',
-      subtitle: 'Vitrine du club',
+      title: 'Spinoscope',
+      subtitle: 'Vitrine club',
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
           if (club != null) ClubBanner(club: club),
           const SizedBox(height: 16),
           const Text(
-            'EFFECTIF',
+            'Effectif',
             style: TextStyle(
               color: DeckColors.label,
               fontSize: 11,
@@ -64,12 +64,12 @@ class _SpinoscopeScreenState extends ConsumerState<SpinoscopeScreen> {
           _Bar(label: 'Compétiteurs', n: compet, color: DeckColors.tribord),
           _Bar(label: 'Loisirs', n: loisir, color: DeckColors.volt),
           Text(
-            'Licenciés : ${snap.rowers.length}',
+            '${snap.rowers.length} licenciés',
             style: const TextStyle(color: DeckColors.muted, fontSize: 12),
           ),
           const SizedBox(height: 16),
           const Text(
-            'PARC',
+            'Parc',
             style: TextStyle(
               color: DeckColors.label,
               fontSize: 11,
@@ -82,12 +82,12 @@ class _SpinoscopeScreenState extends ConsumerState<SpinoscopeScreen> {
             const Text('Aucune coque', style: TextStyle(color: DeckColors.muted)),
           const SizedBox(height: 8),
           Text(
-            'Sorties en cours : $outsToday',
+            'Sorties : $outsToday',
             style: const TextStyle(color: DeckColors.volt),
           ),
           const SizedBox(height: 16),
           const Text(
-            'LOISIR / RANDO / MASTER',
+            'Loisir',
             style: TextStyle(
               color: DeckColors.label,
               fontSize: 11,
@@ -100,7 +100,7 @@ class _SpinoscopeScreenState extends ConsumerState<SpinoscopeScreen> {
               final list = snap.data ?? const [];
               if (list.isEmpty) {
                 return const Text(
-                  'Aucune participation signalée.',
+                  'Aucune participation.',
                   style: TextStyle(color: DeckColors.muted),
                 );
               }
@@ -121,7 +121,7 @@ class _SpinoscopeScreenState extends ConsumerState<SpinoscopeScreen> {
           ),
           const SizedBox(height: 16),
           const Text(
-            'COUPETTES',
+            'Coupettes',
             style: TextStyle(
               color: DeckColors.label,
               fontSize: 11,
@@ -172,7 +172,7 @@ class _SpinoscopeScreenState extends ConsumerState<SpinoscopeScreen> {
                 _name.clear();
                 _result.clear();
               },
-              child: const Text('AJOUTER'),
+              child: const Text('Ajouter'),
             ),
           ],
         ],

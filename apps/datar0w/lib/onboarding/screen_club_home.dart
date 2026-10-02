@@ -79,14 +79,6 @@ class ClubRoleHomeScreen extends ConsumerWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    const DeckHonestChip(
-                      kind: DeckHonestKind.cloud,
-                      label: 'Club cloud',
-                    ),
-                    const DeckHonestChip(
-                      kind: DeckHonestKind.local,
-                      label: 'Base locale',
-                    ),
                     DeckHonestChip(
                       kind: DeckHonestKind.club,
                       label: roleLabel,
@@ -117,7 +109,7 @@ class ClubRoleHomeScreen extends ConsumerWidget {
                   _StaffCard(
                     icon: Icons.cloud_outlined,
                     title: 'Séances du club',
-                    subtitle: 'session_meta cloud',
+                    subtitle: 'Séances cloud',
                     onTap: () => context.go(AppRoutes.clubSessions),
                   ),
                   const SizedBox(height: 10),
@@ -148,7 +140,7 @@ class ClubRoleHomeScreen extends ConsumerWidget {
                   _StaffCard(
                     icon: Icons.cloud_outlined,
                     title: 'Séances du club',
-                    subtitle: 'session_meta cloud',
+                    subtitle: 'Séances cloud',
                     onTap: () => context.go(AppRoutes.clubSessions),
                   ),
                   const SizedBox(height: 16),
@@ -184,31 +176,12 @@ class ClubRoleHomeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                 ],
-                // treasurer : pas de DR-42 téléphone
+                // treasurer : pas de DR-42 téléphone — séances cloud seulement
                 if (role == ClubMemberRole.treasurer) ...[
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: DeckColors.surface,
-                      borderRadius: DeckRadii.cardAll,
-                      border: Border.all(color: DeckColors.hairline),
-                    ),
-                    child: const Text(
-                      'Cotisations / budget : plus tard.',
-                      style: TextStyle(
-                        fontFamily: DeckType.ui,
-                        fontSize: 14,
-                        color: DeckColors.volt,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
                   _StaffCard(
                     icon: Icons.cloud_outlined,
                     title: 'Séances du club',
-                    subtitle: 'session_meta cloud',
+                    subtitle: 'Séances cloud',
                     onTap: () => context.go(AppRoutes.clubSessions),
                   ),
                   const SizedBox(height: 16),
@@ -235,9 +208,7 @@ class ClubRoleHomeScreen extends ConsumerWidget {
                       color: DeckColors.label,
                     ),
                     children: [
-                      const TextSpan(
-                        text: 'Tu rames ou entraînes ? Retrouve ton profil dans ',
-                      ),
+                      const TextSpan(text: 'Profil dans '),
                       WidgetSpan(
                         alignment: PlaceholderAlignment.baseline,
                         baseline: TextBaseline.alphabetic,

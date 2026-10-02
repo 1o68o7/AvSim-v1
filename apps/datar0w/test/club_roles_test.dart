@@ -111,5 +111,18 @@ void main() {
     await tester.pump();
     expect(find.text('Import cabane'), findsOneWidget);
     expect(find.text('Composition'), findsOneWidget);
+    expect(find.text('Séances cloud'), findsOneWidget);
+    expect(find.textContaining('session_meta'), findsNothing);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [identityStoreOverride()],
+        child: const MaterialApp(
+          home: ClubRoleHomeScreen(role: ClubMemberRole.treasurer),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.textContaining('Cotisations'), findsNothing);
+    expect(find.text('Séances cloud'), findsOneWidget);
   });
 }

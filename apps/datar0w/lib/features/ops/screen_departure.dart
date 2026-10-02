@@ -21,7 +21,7 @@ class OpsDepartureScreen extends ConsumerWidget {
     final ops = ref.watch(opsProvider);
     if (role != CrewRole.coach || !canCheckoutOps(ident, role)) {
       return const DeckScaffold(
-        title: 'DÉPART',
+        title: 'Départ',
         retourToProfile: true,
         body: Center(
           child: Text(
@@ -44,7 +44,7 @@ class OpsDepartureScreen extends ConsumerWidget {
     ]);
 
     return DeckScaffold(
-      title: 'DÉPART',
+      title: 'Départ',
       subtitle: 'Alignement · 8+ d’abord',
       body: rows.isEmpty
           ? const Center(
@@ -102,7 +102,7 @@ class OpsDepartureScreen extends ConsumerWidget {
                             onPressed: () => ref
                                 .read(opsProvider.notifier)
                                 .markDeparted(r.out.id),
-                            child: const Text('MARQUER PARTI'),
+                            child: const Text('Marquer parti'),
                           ),
                         ],
                       ],

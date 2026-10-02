@@ -49,13 +49,13 @@ void main() {
     await tester.pump();
     expect(find.textContaining('Sortir'), findsOneWidget);
     expect(find.textContaining('Rentrer'), findsOneWidget);
-    expect(find.text('DÉPART'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('MAINTENANCE'), 120);
+    expect(find.text('Départ'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Maintenance'), 120);
     await tester.pump();
-    expect(find.text('MAINTENANCE'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('SPINOSCOPE'), 80);
+    expect(find.text('Maintenance'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Spinoscope'), 80);
     await tester.pump();
-    expect(find.text('SPINOSCOPE'), findsOneWidget);
+    expect(find.text('Spinoscope'), findsOneWidget);
   });
 
   testWidgets('sortie : hors coach → réservé', (tester) async {
@@ -67,7 +67,7 @@ void main() {
     );
     await tester.pump();
     expect(find.text('Réservé au coach.'), findsOneWidget);
-    expect(find.text('SORTIR'), findsNothing);
+    expect(find.text('Sortir'), findsNothing);
   });
 
   testWidgets('retour : hors coach → réservé', (tester) async {
