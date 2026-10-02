@@ -27,6 +27,10 @@ Rayons : chip 6 · bouton 12 · carte 14. Pas de coins carrés Hangar.
 
 `DeckHonestChip` — LOCAL / EN FILE / CLOUD / DÉMO / CLUB.
 
+Sync ST-09 : le bandeau global 36 px n’apparaît **que** si alerte
+(EN FILE, CTA club, statut retry). LOCAL / CLOUD calmes restent dans
+les headers / pilules des écrans hub — pas de strip permanent sous AppBar.
+
 ## Mapping DR → routes Flutter
 
 | Stitch | Route | Notes |

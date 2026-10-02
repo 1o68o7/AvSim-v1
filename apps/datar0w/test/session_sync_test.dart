@@ -90,6 +90,24 @@ void main() {
     expect(find.text('body'), findsOneWidget);
   });
 
+  testWidgets('bandeau ST-09 masqué si sync calme (LOCAL)', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SessionSyncHost(
+          sync: sync,
+          child: const Scaffold(body: Text('body')),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.text('LOCAL'), findsNothing);
+    expect(find.text('CLOUD'), findsNothing);
+    expect(find.text('EN FILE'), findsNothing);
+    expect(find.text('Sur cet appareil'), findsNothing);
+    expect(find.text('body'), findsOneWidget);
+  });
+
   test('autosyncAfterStop sans uid → enqueue, 0 upload', () async {
     SessionSync.debugReplace(
       SessionSync(
