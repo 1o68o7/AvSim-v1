@@ -98,9 +98,9 @@ void main() {
     await tester.pumpWidget(
       const ProviderScope(child: MaterialApp(home: PresessionScreen())),
     );
-    expect(find.text('ENTRAÎNEMENT'), findsOneWidget);
-    expect(find.text('COMPÉTITION'), findsOneWidget);
-    await tester.tap(find.text('COMPÉTITION'));
+    expect(find.text('Entraînement'), findsOneWidget);
+    expect(find.text('Compétition'), findsOneWidget);
+    await tester.tap(find.text('Compétition'));
     await tester.pump();
     expect(find.textContaining('tel au quai'), findsOneWidget);
   });
@@ -149,8 +149,8 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(find.text('IMPORTER PATCH'), findsOneWidget);
-    expect(find.text('PARTAGER AU COACH'), findsOneWidget);
+    expect(find.text('Importer patch'), findsOneWidget);
+    expect(find.text('Partager'), findsOneWidget);
     expect(dir.path, isNotEmpty);
   });
 }

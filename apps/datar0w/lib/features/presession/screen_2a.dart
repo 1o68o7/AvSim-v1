@@ -38,8 +38,8 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
     final info = cfg.info;
     final coxNeedsBoat = cfg.role == CrewRole.cox && !info.coxed;
     return DeckScaffold(
-      title: 'PRÉ-SESSION',
-      subtitle: 'Configuration séance',
+      title: 'Pré-session',
+      subtitle: 'Classe · siège · mode',
       retourFallback: sessionRoleHome(cfg.role),
       body: Column(
         children: [
@@ -52,7 +52,7 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                   const SizedBox(height: 16),
                 ],
                 const Text(
-                  'MODE',
+                  'Mode',
                   style: TextStyle(
                     color: DeckColors.label,
                     fontSize: 10,
@@ -64,14 +64,14 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                   spacing: 8,
                   children: [
                     ChoiceChip(
-                      label: const Text('ENTRAÎNEMENT'),
+                      label: const Text('Entraînement'),
                       selected: cfg.sessionMode == SessionMode.training,
                       onSelected: (_) => ref
                           .read(boatConfigProvider.notifier)
                           .setSessionMode(SessionMode.training),
                     ),
                     ChoiceChip(
-                      label: const Text('COMPÉTITION'),
+                      label: const Text('Compétition'),
                       selected: cfg.sessionMode == SessionMode.competition,
                       onSelected: (_) => ref
                           .read(boatConfigProvider.notifier)
@@ -82,24 +82,13 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                 const SizedBox(height: 8),
                 Text(
                   cfg.sessionMode == SessionMode.competition
-                      ? 'Téléphone interdit en bateau (FFA / World Rowing). '
-                          'Patch autonome. Feedback = vibration / OLED patch '
-                          '(cadence, gîte, HR). Pas de liaison coach en course.'
-                      : 'Téléphone = hub GPS + IMU + BLE. Live Deck. 4G coach optionnelle.',
+                      ? 'Tél. au quai (FFA). Patch autonome.'
+                      : 'Tél. = hub GPS + IMU. Live Deck.',
                   style: const TextStyle(color: DeckColors.muted, fontSize: 12, height: 1.35),
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'PARAMÉTRAGE MATÉRIEL ET TÉLÉMÉTRIE AVANT MISE À L’EAU',
-                  style: TextStyle(
-                    color: DeckColors.label,
-                    fontSize: 11,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  '1 · CLASSE D’EMBARCATION',
+                  '1 · Classe',
                   style: TextStyle(
                     color: DeckColors.label,
                     fontSize: 10,
@@ -108,8 +97,8 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'SÉLECTIONNÉ : ${info.code.toUpperCase()}  ·  ${info.seats} SIÈGE(S)'
-                  '${info.coxed ? '  ·  BARRÉ' : ''}',
+                  '${info.code.toUpperCase()}  ·  ${info.seats} siège(s)'
+                  '${info.coxed ? '  ·  barré' : ''}',
                   style: const TextStyle(
                     color: DeckColors.volt,
                     fontSize: 11,
@@ -139,7 +128,7 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                 if (info.coxed) ...[
                   const SizedBox(height: 16),
                   const Text(
-                    '2 · RÔLE DANS CE BATEAU',
+                    '2 · Rôle',
                     style: TextStyle(
                       color: DeckColors.label,
                       fontSize: 10,
@@ -170,7 +159,7 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                 if (cfg.isCox && info.coxed) ...[
                   const SizedBox(height: 16),
                   const Text(
-                    '3 · POSITION BARREUR',
+                    '3 · Position barreur',
                     style: TextStyle(
                       color: DeckColors.label,
                       fontSize: 10,
@@ -200,15 +189,14 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                   const Padding(
                     padding: EdgeInsets.only(top: 8),
                     child: Text(
-                      'Défaut : arrière (le plus courant). Pas de siège rameur. '
-                      'Les rameurs restent en attente (local / poll API).',
+                      'Défaut : arrière. Pas de siège rameur.',
                       style: TextStyle(color: DeckColors.label, fontSize: 11),
                     ),
                   ),
                 ] else ...[
                   const SizedBox(height: 16),
                   Text(
-                    '${info.coxed ? '3' : '2'} · SIÈGE DANS ${info.code.toUpperCase()}  ·  ${cfg.clampedSeat} / ${info.seats}  ·  1 = NAGE',
+                    '${info.coxed ? '3' : '2'} · Siège ${info.code.toUpperCase()}  ·  ${cfg.clampedSeat} / ${info.seats}  ·  1 = nage',
                     style: const TextStyle(
                       color: DeckColors.label,
                       fontSize: 10,
@@ -233,10 +221,9 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
                       cfg.waitingSeats.isEmpty
-                          ? 'Un smartphone = un hub / une place (${info.code}).'
-                          : 'Ce tél. = siège ${cfg.clampedSeat}. '
-                              'Autres places (${cfg.waitingSeats.join(', ')}) : '
-                              'en attente (local) ou poll API (Lot G).',
+                          ? 'Un tél. = une place (${info.code}).'
+                          : 'Siège ${cfg.clampedSeat}. '
+                              'Autres (${cfg.waitingSeats.join(', ')}) : en attente.',
                       style: const TextStyle(
                         color: DeckColors.label,
                         fontSize: 11,
@@ -248,13 +235,13 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                   const Padding(
                     padding: EdgeInsets.only(top: 12),
                     child: Text(
-                      'Profil BARREUR : choisir 4+ ou 8+.',
+                      'Barreur : choisir 4+ ou 8+.',
                       style: TextStyle(color: DeckColors.volt, fontSize: 12),
                     ),
                   ),
                 const SizedBox(height: 20),
                 const Text(
-                  'BASSIN / PLAN D’EAU',
+                  'Bassin',
                   style: TextStyle(
                     color: DeckColors.label,
                     fontSize: 10,
@@ -277,7 +264,7 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  'CAPTEURS TÉLÉMÉTRIQUES',
+                  'Capteurs',
                   style: TextStyle(
                     color: DeckColors.label,
                     fontSize: 10,
@@ -285,17 +272,17 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                const _SensorRow(name: 'GPS', state: 'ACTIF', ok: true),
-                const _SensorRow(name: 'IMU', state: 'ACTIF', ok: true),
+                const _SensorRow(name: 'GPS', state: 'actif', ok: true),
+                const _SensorRow(name: 'IMU', state: 'actif', ok: true),
                 _SensorRow(
                   name: 'BLE',
                   state: cfg.sessionMode == SessionMode.competition
-                      ? 'course : patch'
+                      ? 'patch'
                       : 'sangle / patch',
                   ok: true,
                 ),
                 _SensorRow(
-                  name: 'PATCH',
+                  name: 'Patch',
                   state: cfg.sessionMode == SessionMode.competition
                       ? 'autonome'
                       : 'option',
@@ -318,7 +305,7 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
                   onPressed: coxNeedsBoat
                       ? null
                       : () => context.go(AppRoutes.tare),
-                  child: const Text('CONTINUER — TARE GÎTE'),
+                  child: const Text('Tare'),
                 ),
               ],
             ),

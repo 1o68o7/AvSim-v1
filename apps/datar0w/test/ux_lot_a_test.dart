@@ -52,7 +52,7 @@ void main() {
     await tester.pumpWidget(
       const ProviderScope(child: MaterialApp(home: PresessionScreen())),
     );
-    expect(find.text('PRÉ-SESSION'), findsOneWidget);
+    expect(find.text('Pré-session'), findsOneWidget);
     expect(find.textContaining('2A'), findsNothing);
     expect(find.textContaining('DATAR0W /'), findsNothing);
   });
@@ -64,7 +64,7 @@ void main() {
       const ProviderScope(child: MaterialApp(home: TareScreen())),
     );
     await tester.pump();
-    expect(find.text('ÉTALONNAGE / TARE'), findsOneWidget);
+    expect(find.text('Tare'), findsOneWidget);
     expect(find.textContaining('2B'), findsNothing);
     expect(find.textContaining('DATAROW /'), findsNothing);
   });
