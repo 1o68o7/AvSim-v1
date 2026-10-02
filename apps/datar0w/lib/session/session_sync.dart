@@ -542,9 +542,13 @@ class _SessionSyncHostState extends State<SessionSyncHost>
     final pending = sync?.pendingCount ?? 0;
     final kind = sync?.bannerKind ?? SyncBannerKind.local;
     final status = _bannerStatus;
-    // Bandeau durable dès qu'un sync hub existe (LOCAL inclus).
-    final showStrip = sync != null || _offerClubCta;
-    // ST-09 : 36 px sous AppBar — réserve l'espace pour ne pas recouvrir.
+    // ST-09 : bandeau uniquement si action / alerte (file, club, statut retry).
+    // LOCAL / CLOUD calmes → déjà dans les headers DR (pilule / chips) :
+    // un strip global permanent cassait la lecture sous l’AppBar.
+    final showStrip = _offerClubCta ||
+        status != null ||
+        (sync != null && kind == SyncBannerKind.enFile);
+    // Overlay sous AppBar (36 px) quand visible.
     final top = MediaQuery.paddingOf(context).top + DeckAppBar.kToolbar;
 
     Widget? strip;
@@ -620,7 +624,6 @@ class _SessionSyncHostState extends State<SessionSyncHost>
     }
 
     // Toujours Stack : basculer child↔Stack remontait MaterialApp.router.
-    // Bandeau en overlay sous AppBar (36 px) — vérifié sur appareil (audit U3).
     return Stack(
       fit: StackFit.expand,
       children: [

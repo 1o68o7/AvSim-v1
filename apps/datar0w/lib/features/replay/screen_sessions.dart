@@ -175,8 +175,6 @@ class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
                       icon: const Icon(Icons.arrow_back, color: DeckColors.text),
                       onPressed: () => context.go(AppRoutes.homeCoach),
                     ),
-                  const DeckHonestChip(kind: DeckHonestKind.cloud),
-                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       widget.fromCoach

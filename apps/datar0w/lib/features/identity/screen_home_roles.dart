@@ -310,23 +310,15 @@ class HomeCoachScreen extends ConsumerWidget {
             surfaceTintColor: Colors.transparent,
             toolbarHeight: 56,
             titleSpacing: 16,
-            title: Row(
-              children: [
-                const DeckHonestChip(kind: DeckHonestKind.cloud),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    "Aujourd'hui",
-                    style: TextStyle(
-                      fontFamily: DeckType.ui,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: DeckColors.text,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                ),
-              ],
+            title: const Text(
+              "Aujourd'hui",
+              style: TextStyle(
+                fontFamily: DeckType.ui,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: DeckColors.text,
+                letterSpacing: -0.2,
+              ),
             ),
             actions: [
               IconButton(
