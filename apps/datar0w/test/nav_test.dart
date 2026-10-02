@@ -49,7 +49,7 @@ void main() {
 
   testWidgets('BARREUR 8+ : /cox affiche l’écran barreur, pas le live rameur',
       (tester) async {
-    await tester.binding.setSurfaceSize(const Size(400, 900));
+    await tester.binding.setSurfaceSize(const Size(430, 932));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final ov = identityStoreOverride();
     final container = ProviderContainer(overrides: [ov]);

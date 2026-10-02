@@ -23,7 +23,7 @@ void main() {
   });
 
   testWidgets('cox : pas d’Accueil, pas de leading Retour', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(400, 900));
+    await tester.binding.setSurfaceSize(const Size(430, 932));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       const ProviderScope(child: MaterialApp(home: CoxLiveScreen())),

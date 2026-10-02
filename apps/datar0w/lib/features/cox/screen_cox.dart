@@ -203,9 +203,13 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
                               color: DeckColors.label.withValues(alpha: 0.8),
                             ),
                             const SizedBox(width: 6),
-                            Text(
-                              'Verrouillage étanche · navigation prioritaire',
-                              style: DeckType.labelMono(size: 10),
+                            Flexible(
+                              child: Text(
+                                'Verrouillage étanche · navigation prioritaire',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: DeckType.labelMono(size: 10),
+                              ),
                             ),
                           ],
                         ),
