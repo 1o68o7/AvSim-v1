@@ -18,7 +18,7 @@ class ReplayBody extends StatefulWidget {
     required this.samples,
     this.notes = const [],
     this.meta,
-    this.title = 'REPLAY',
+    this.title = 'Replay',
     this.showEval = true,
     this.sourceLabel,
   });
@@ -118,7 +118,7 @@ class _ReplayBodyState extends State<ReplayBody> {
         : null;
     final giteSide = cur.giteDeg == null
         ? ''
-        : (cur.giteDeg! >= 0 ? 'TRIBORDS' : 'BÂBORD');
+        : (cur.giteDeg! >= 0 ? 'Tribord' : 'Bâbord');
 
     return Column(
       children: [
@@ -128,13 +128,13 @@ class _ReplayBodyState extends State<ReplayBody> {
             children: [
               Text(
                 widget.meta?.code == null
-                    ? 'SÉANCE  1X'
-                    : 'SÉANCE  ${widget.meta!.code}  ·  ${widget.meta!.classe.toUpperCase()}',
+                    ? 'Séance'
+                    : '${widget.meta!.code} · ${widget.meta!.classe}',
                 style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
               ),
               const Spacer(),
               DeckStatusChip(
-                label: (widget.sourceLabel ?? 'FICHIER CHARGÉ').toUpperCase(),
+                label: widget.sourceLabel ?? 'Fichier chargé',
                 ok: true,
               ),
             ],
@@ -195,7 +195,7 @@ class _ReplayBodyState extends State<ReplayBody> {
                         Container(width: 12, height: 2, color: DeckColors.volt),
                         const SizedBox(width: 6),
                         const Text(
-                          'CADENCE (SPM)',
+                          'Cadence (spm)',
                           style: TextStyle(
                             color: DeckColors.volt,
                             fontSize: 10,
@@ -205,7 +205,7 @@ class _ReplayBodyState extends State<ReplayBody> {
                         Container(width: 12, height: 2, color: Colors.white),
                         const SizedBox(width: 6),
                         const Text(
-                          'V. SOL (m/s)',
+                          'Vitesse sol (m/s)',
                           style: TextStyle(fontSize: 10),
                         ),
                         const Spacer(),
@@ -283,7 +283,7 @@ class _ReplayBodyState extends State<ReplayBody> {
         const Padding(
           padding: EdgeInsets.only(bottom: 6),
           child: Text(
-            'MODE REPLAY  ·  sol — pas eau  ·  cadence — si absente',
+            'Mode replay · Vitesse sol GPS — pas vitesse eau · cadence « — » si absente · Stockage local',
             style: TextStyle(color: DeckColors.label, fontSize: 10),
           ),
         ),
@@ -321,31 +321,31 @@ class _CursorPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           InstrumentPod(
-            label: 'VALEURS AU CURSEUR  (${formatDuration(elapsed)})',
+            label: 'Valeurs au curseur  (${formatDuration(elapsed)})',
             value: '',
             child: Column(
               children: [
                 _kv(
-                  'CADENCE',
+                  'Cadence',
                   cur.cadenceSpm == null
                       ? '—'
-                      : '${cur.cadenceSpm!.toStringAsFixed(0)} SPM',
+                      : '${cur.cadenceSpm!.toStringAsFixed(0)} spm',
                   DeckColors.volt,
                 ),
                 _kv(
-                  'V. SOL (GPS)',
+                  'Vitesse sol GPS',
                   cur.sog == null
                       ? '—'
                       : '${cur.sog!.toStringAsFixed(2)} m/s',
                   DeckColors.text,
                 ),
                 _kv(
-                  'DISTANCE',
+                  'Distance cumulée',
                   '${(cur.distM / 1000).toStringAsFixed(3)} km',
                   DeckColors.text,
                 ),
                 _kv(
-                  'GÎTE',
+                  'Gîte de coque',
                   cur.giteDeg == null
                       ? '—'
                       : '${cur.giteDeg!.toStringAsFixed(1)}° $giteSide',
@@ -360,8 +360,8 @@ class _CursorPanel extends StatelessWidget {
           if (showEval)
             Text(
             dCad == null
-                ? 'Δ CADENCE  —'
-                : 'Δ CADENCE  ${dCad! >= 0 ? '+' : ''}${dCad!.toStringAsFixed(0)}',
+                ? 'Δ cadence  —'
+                : 'Δ cadence  ${dCad! >= 0 ? '+' : ''}${dCad!.toStringAsFixed(0)}',
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: DeckColors.volt,
@@ -384,7 +384,7 @@ class _CursorPanel extends StatelessWidget {
                       backgroundColor:
                           n == noteIdx ? DeckColors.volt : Colors.transparent,
                     ),
-                    child: Text('NOTE ${n + 1}'),
+                    child: Text('Note ${n + 1}'),
                   ),
               ],
             ),
