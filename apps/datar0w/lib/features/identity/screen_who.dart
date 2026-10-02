@@ -178,9 +178,12 @@ class _IdentityListScreenState extends ConsumerState<IdentityListScreen> {
                             .read(identityProvider.notifier)
                             .selectRower(r.id);
                         if (!mounted) return;
-                        final dest = isRowerProfilePlayable(r)
-                            ? AppRoutes.homeRower
-                            : AppRoutes.rowerOnboard;
+                        final role = ref.read(identityProvider).prefs.clubRole;
+                        final dest = !isRowerProfilePlayable(r)
+                            ? AppRoutes.rowerOnboard
+                            : role == ClubMemberRole.cox
+                                ? AppRoutes.homeCox
+                                : AppRoutes.homeRower;
                         await _nav(dest);
                       } catch (e) {
                         if (!mounted) return;
@@ -223,12 +226,13 @@ class _IdentityListScreenState extends ConsumerState<IdentityListScreen> {
                         await ref
                             .read(identityProvider.notifier)
                             .selectRower(null);
-                        if (mounted) await _nav(AppRoutes.profile);
+                        // Debug only — plus de hub `/` ProfileScreen.
+                        if (mounted) await _nav(AppRoutes.homeRower);
                       } catch (e) {
                         if (!mounted) return;
                         setState(() {
                           _lastNavError =
-                              'Navigation bloquée : ${AppRoutes.profile} $e';
+                              'Navigation bloquée : ${AppRoutes.homeRower} $e';
                         });
                       }
                     },

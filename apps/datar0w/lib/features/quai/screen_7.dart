@@ -278,10 +278,11 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
             const SizedBox(height: 8),
             TextButton(
               onPressed: () {
-                final role = ref.read(identityProvider).prefs.clubRole;
-                context.go(homeRouteForClubMemberRole(role));
+                // IA reshape : hub = rôle de séance (rameur/cox/coach), pas clubRole.
+                final role = ref.read(boatConfigProvider).role;
+                context.go(sessionRoleHome(role));
               },
-              child: const Text('RETOUR ACCUEIL'),
+              child: const Text('Retour accueil'),
             ),
           ],
         ),

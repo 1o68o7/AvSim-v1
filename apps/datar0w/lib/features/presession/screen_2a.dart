@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../onboarding/routing.dart';
 import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
@@ -39,6 +40,7 @@ class _PresessionScreenState extends ConsumerState<PresessionScreen> {
     return DeckScaffold(
       title: 'PRÉ-SESSION',
       subtitle: 'Configuration séance',
+      retourFallback: sessionRoleHome(cfg.role),
       body: Column(
         children: [
           Expanded(

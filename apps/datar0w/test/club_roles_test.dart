@@ -97,9 +97,9 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('ACCUEIL INTENDANT'), findsOneWidget);
-    expect(find.text('MAINTENANCE'), findsOneWidget);
-    expect(find.text('IMPORT PARC'), findsOneWidget);
+    expect(find.text("Aujourd'hui"), findsWidgets);
+    expect(find.text('Maintenance'), findsOneWidget);
+    expect(find.text('Import bateaux'), findsOneWidget);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [identityStoreOverride()],
@@ -109,7 +109,7 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('IMPORT CABANE'), findsOneWidget);
-    expect(find.text('COMPOSITION'), findsOneWidget);
+    expect(find.text('Import cabane'), findsOneWidget);
+    expect(find.text('Composition'), findsOneWidget);
   });
 }

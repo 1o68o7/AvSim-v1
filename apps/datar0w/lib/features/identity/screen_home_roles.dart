@@ -47,9 +47,9 @@ class HomeCoxScreen extends ConsumerWidget {
     final coxRear = asg?.coxPosition != 'front';
 
     return DeckScaffold(
-      title: 'ACCUEIL BARREUR',
+      title: 'Accueil barreur',
       subtitle: boat?.name ?? 'sans affectation',
-      retourFallback: AppRoutes.profile,
+      retourFallback: AppRoutes.homeCox,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
