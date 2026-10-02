@@ -1,3 +1,4 @@
+import 'package:datar0w/features/identity/screen_home_roles.dart';
 import 'package:datar0w/features/identity/screen_home_rower.dart';
 import 'package:datar0w/features/identity/screen_who.dart';
 import 'package:datar0w/features/profile/screen_1.dart';
@@ -51,5 +52,22 @@ void main() {
     expect(find.text("Aujourd'hui"), findsWidgets);
     expect(find.text('Séances'), findsOneWidget);
     expect(find.text('Ajouter'), findsNothing);
+  });
+
+  testWidgets('accueil barreur : shell Aujourd’hui + onglets', (tester) async {
+    final ov = identityStoreOverride();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [ov],
+        child: const MaterialApp(home: HomeCoxScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(find.text("Aujourd'hui"), findsWidgets);
+    expect(find.text('Séances'), findsOneWidget);
+    expect(find.text('Plus'), findsOneWidget);
+    expect(find.textContaining('affectation barreur'), findsOneWidget);
+    expect(find.text('Continuer'), findsOneWidget);
   });
 }

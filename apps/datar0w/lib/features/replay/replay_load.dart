@@ -178,6 +178,9 @@ class _ReplayLoadScreenState extends ConsumerState<ReplayLoadScreen> {
                     title: widget.title,
                     showEval: widget.showEval,
                     sourceLabel: _bundle?.sourceLabel,
+                    onShare: _loadedId == null
+                        ? null
+                        : () => shareLocalSession(_loadedId!),
                   ),
                 ),
               ],
