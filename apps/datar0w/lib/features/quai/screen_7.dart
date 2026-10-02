@@ -88,7 +88,7 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
     final files = [XFile(jsonl)];
     if (meta != null) files.add(XFile(meta));
     await SharePlus.instance.share(
-      ShareParams(files: files, text: 'DataR0w séance (samples.jsonl + meta.json)'),
+      ShareParams(files: files, text: 'DataR0w séance'),
     );
   }
 
@@ -112,8 +112,8 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
     final activeOut = hullId == null ? null : ops.activeForBoat(hullId);
     final showCheckIn = boat.role == CrewRole.coach && activeOut != null;
     return DeckScaffold(
-      title: 'QUAI',
-      subtitle: 'SESSION #$sessionTag',
+      title: 'Quai',
+      subtitle: 'Séance #$sessionTag',
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -124,7 +124,7 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
               const SizedBox(height: 12),
             ],
             const Text(
-              'RÉSUMÉ D\'ACTIVITÉ',
+              'Résumé',
               style: TextStyle(
                 color: DeckColors.volt,
                 letterSpacing: 1.4,
@@ -145,26 +145,26 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
                 childAspectRatio: 1.2,
                 children: [
                   InstrumentPod(
-                    label: 'DURÉE',
+                    label: 'Durée',
                     value: s == null ? '—' : formatDuration(s.duration),
-                    unit: 'MIN',
+                    unit: 'min',
                   ),
                   InstrumentPod(
-                    label: 'DISTANCE GPS',
+                    label: 'Distance',
                     value: s == null ? '—' : (s.distM / 1000).toStringAsFixed(2),
-                    unit: 'KM',
+                    unit: 'km',
                   ),
                   InstrumentPod(
-                    label: 'CADENCE MOYENNE',
+                    label: 'Cadence',
                     value: s?.cadenceMean == null
                         ? '—'
                         : s!.cadenceMean!.toStringAsFixed(0),
-                    unit: 'SPM',
+                    unit: 'spm',
                   ),
                   InstrumentPod(
-                    label: 'GÎTE RMS',
+                    label: 'Gîte',
                     value: s == null ? '—' : s.giteRms.toStringAsFixed(1),
-                    unit: 'DEGRÉS (°)',
+                    unit: '°',
                   ),
                 ],
               ),
@@ -180,19 +180,19 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
                     alert: _chip.contains('attente'),
                   ),
                   if (isCox)
-                    const DeckStatusChip(label: 'séance barreur', ok: true),
+                    const DeckStatusChip(label: 'barreur', ok: true),
                   if (asg != null)
                     DeckStatusChip(label: assignmentChip(asg), ok: true)
                   else if (_meta?.seatIndex != null && _meta?.side != null)
                     DeckStatusChip(
-                      label: 'siège ${_meta!.seatIndex} / ${_meta!.side}',
+                      label: 'siège ${_meta!.seatIndex}',
                       ok: true,
                     ),
                   DeckStatusChip(
                     label: switch (_patchSync) {
                       PatchSyncStatus.ok => 'sync OK',
-                      PatchSyncStatus.pending => 'en attente sync patch',
-                      PatchSyncStatus.idle => 'en attente sync patch',
+                      PatchSyncStatus.pending => 'sync patch',
+                      PatchSyncStatus.idle => 'sync patch',
                     },
                     ok: _patchSync == PatchSyncStatus.ok,
                     alert: _patchSync != PatchSyncStatus.ok,
@@ -203,7 +203,7 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
             const SizedBox(height: 12),
             FilledButton(
               onPressed: _share,
-              child: const Text('PARTAGER AU COACH'),
+              child: const Text('Partager'),
             ),
             const SizedBox(height: 8),
             OutlinedButton(
@@ -215,7 +215,7 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
                       : '${AppRoutes.rowerReplay}?id=${Uri.encodeQueryComponent(id)}',
                 );
               },
-              child: const Text('REPLAY'),
+              child: const Text('Replay'),
             ),
             if (code != null && code.isNotEmpty) ...[
               const SizedBox(height: 8),
@@ -236,7 +236,7 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
               onPressed: _patchSync == PatchSyncStatus.pending
                   ? null
                   : _importPatch,
-              child: const Text('IMPORTER PATCH'),
+              child: const Text('Importer patch'),
             ),
             if (showCheckIn) ...[
               const SizedBox(height: 8),
@@ -272,7 +272,7 @@ class _QuaiScreenState extends ConsumerState<QuaiScreen> {
                         oarsOk: choice,
                       );
                 },
-                child: const Text('RENTRER LA COQUE'),
+                child: const Text('Rentrer la coque'),
               ),
             ],
             const SizedBox(height: 8),

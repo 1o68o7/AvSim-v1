@@ -111,7 +111,7 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
               DeckSessionHeader(
                 title: 'BARREUR  $tag',
                 trailing: [
-                  DeckStatusChip(label: 'GÎTE BATEAU', ok: gite != null),
+                  DeckStatusChip(label: 'Gîte', ok: gite != null),
                   const SizedBox(width: 8),
                   DeckStatusChip(
                     label: boat.coxPosition == CoxPosition.front
@@ -128,24 +128,24 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
                   children: [
                     Expanded(
                       child: InstrumentPod(
-                        label: 'VITESSE SOL',
+                        label: 'Vitesse',
                         value: sog == null ? '—' : sog.toStringAsFixed(1),
-                        unit: 'M/S  ·  SOL — PAS EAU',
+                        unit: 'm/s',
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: InstrumentPod(
-                        label: 'DISTANCE',
+                        label: 'Distance',
                         value: (dist / 1000).toStringAsFixed(2),
-                        unit: 'KM  ·  $tag',
+                        unit: 'km',
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       flex: 2,
                       child: InstrumentPod(
-                        label: 'GÎTE BATEAU',
+                        label: 'Gîte',
                         value: gite == null
                             ? 'tare'
                             : '${gite.toStringAsFixed(1)}°',
@@ -158,8 +158,8 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
                             ),
                             Text(
                               s.cadenceSpm == null
-                                  ? 'CADENCE  —  ·  pas de SPM inventé'
-                                  : 'CADENCE  ${s.cadenceSpm!.toStringAsFixed(0)}  ·  estim. tel',
+                                  ? 'Cadence —'
+                                  : 'Cadence ${s.cadenceSpm!.toStringAsFixed(0)}',
                               style: const TextStyle(
                                 color: DeckColors.label,
                                 fontSize: 9,

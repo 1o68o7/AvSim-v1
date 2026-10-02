@@ -79,10 +79,10 @@ class _PortraitTare extends ConsumerWidget {
     final persp =
         boat.isCox ? HeelPerspective.cox : HeelPerspective.rower;
     return DeckScaffold(
-      title: 'ÉTALONNAGE / TARE',
+      title: 'Tare',
       subtitle: boat.isCox
-          ? 'Tare gîte · ${boat.info.code.toUpperCase()} barreur ${boat.coxPosition.wire} · réf. barreur'
-          : 'Tare gîte · ${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats} · réf. rameur',
+          ? '${boat.info.code.toUpperCase()} barreur · ${boat.coxPosition.wire}'
+          : '${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats}',
       showRetour: !running,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -100,11 +100,9 @@ class _PortraitTare extends ConsumerWidget {
                       fontSize: 12,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  const _TareMountWarning(),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   const Text(
-                    'Bateau à quai, coque calée. Penchez le téléphone : le chiffre doit bouger. Puis tare = ce niveau devient 0°.',
+                    'Coque calme → tare = 0°',
                     style: TextStyle(color: DeckColors.label),
                     textAlign: TextAlign.center,
                   ),
@@ -118,17 +116,8 @@ class _PortraitTare extends ConsumerWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const Text(
-                    'NIVEAU TÉLÉPHONE  ·  lissé 12 Hz',
-                    style: TextStyle(color: DeckColors.label, fontSize: 11),
-                  ),
                   const SizedBox(height: 12),
                   HeelGauge(giteDeg: shown, perspective: persp),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'TOLÉRANCE  σ < 0,2°  ·  3–30 s  ·  clamp ±15° après tare',
-                    style: TextStyle(color: DeckColors.label, fontSize: 11),
-                  ),
                 ],
               ),
             ),
@@ -152,7 +141,7 @@ class _PortraitTare extends ConsumerWidget {
                 _TareCta(state: state, landscape: false),
                 const SizedBox(height: 8),
                 Text(
-                  'STATUT ÉTALONNAGE : ${_statusLine(state)}',
+                  'Statut : ${_statusLine(state)}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: DeckColors.label,
@@ -162,7 +151,7 @@ class _PortraitTare extends ConsumerWidget {
                 const SizedBox(height: 12),
                 FilledButton(
                   onPressed: null,
-                  child: const Text('DÉMARRER LA SESSION'),
+                  child: const Text('Démarrer'),
                 ),
               ],
             ),
@@ -186,11 +175,11 @@ class _LandscapeHud extends ConsumerWidget {
     final shown = state.displayGiteDeg ?? 0;
     final running = state.tareStatus == TareStatus.running;
     final chip = switch (state.tareStatus) {
-      TareStatus.running => 'ÉTALONNAGE ACTIF',
-      TareStatus.ok => 'TARE OK',
-      TareStatus.approx => 'TARE FAIBLE',
-      TareStatus.failed => 'RECOMMENCER',
-      TareStatus.none => 'TARE NON FAITE',
+      TareStatus.running => 'Tare…',
+      TareStatus.ok => 'Tare OK',
+      TareStatus.approx => 'Tare faible',
+      TareStatus.failed => 'Recommencer',
+      TareStatus.none => 'Tare non faite',
     };
     return Scaffold(
       backgroundColor: DeckColors.bg,
@@ -216,8 +205,8 @@ class _LandscapeHud extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         boat.isCox
-                            ? 'TARE GÎTE · ${boat.info.code.toUpperCase()} barreur ${boat.coxPosition.wire} · Bateau à quai, coque calée.'
-                            : 'TARE GÎTE · ${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats} · Bateau à quai, coque calée.',
+                            ? 'Tare · ${boat.info.code.toUpperCase()} barreur · Coque calme → tare = 0°'
+                            : 'Tare · ${boat.info.code.toUpperCase()} siège ${boat.clampedSeat}/${boat.seats} · Coque calme → tare = 0°',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -250,15 +239,6 @@ class _LandscapeHud extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const Text(
-                            'LECTURE ASSIETTE LIVE',
-                            style: TextStyle(
-                              color: DeckColors.label,
-                              fontSize: 10,
-                              letterSpacing: 1.4,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
                           Text(
                             state.imuHint,
                             style: TextStyle(
@@ -281,7 +261,7 @@ class _LandscapeHud extends ConsumerWidget {
                                 child: Column(
                                   children: [
                                     const Text(
-                                      'GÎTE INSTANTANÉE',
+                                      'Gîte',
                                       style: TextStyle(
                                         color: DeckColors.volt,
                                         fontSize: 9,
@@ -313,15 +293,6 @@ class _LandscapeHud extends ConsumerWidget {
                                         ],
                                       ),
                                     ),
-                                    Text(
-                                      'NIVEAU TÉLÉPHONE  ·  12 Hz',
-                                      style: TextStyle(
-                                        color: state.imuOk
-                                            ? DeckColors.tribord
-                                            : DeckColors.label,
-                                        fontSize: 9,
-                                      ),
-                                    ),
                                   ],
                                 ),
                               ),
@@ -342,35 +313,6 @@ class _LandscapeHud extends ConsumerWidget {
                                   : HeelPerspective.rower,
                             ),
                           ),
-                          Text(
-                            cox
-                                ? 'BÂBORD gauche écran  ·  σ < 0,2°  ·  3–30 s'
-                                : 'TRIBORD gauche écran  ·  σ < 0,2°  ·  3–30 s',
-                            style: const TextStyle(
-                              color: DeckColors.label,
-                              fontSize: 9,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _MiniTelemetry(
-                                  label: 'TANGAGE (PITCH)',
-                                  value: state.pitchDeg == null
-                                      ? '—'
-                                      : '${state.pitchDeg!.toStringAsFixed(1)}°',
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Expanded(
-                                child: _MiniTelemetry(
-                                  label: 'LACET (YAW)',
-                                  value: '—',
-                                ),
-                              ),
-                            ],
-                          ),
                         ],
                       ),
                     ),
@@ -385,7 +327,7 @@ class _LandscapeHud extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const Text(
-                            'SÉQUENCE D\'ÉTALONNAGE',
+                            'Tare',
                             style: TextStyle(
                               color: DeckColors.volt,
                               fontSize: 10,
@@ -394,7 +336,13 @@ class _LandscapeHud extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const _TareMountWarning(),
+                          const Text(
+                            'Coque calme → tare = 0°',
+                            style: TextStyle(
+                              color: DeckColors.label,
+                              fontSize: 12,
+                            ),
+                          ),
                           const SizedBox(height: 8),
                           Container(
                             padding: const EdgeInsets.all(10),
@@ -433,14 +381,6 @@ class _LandscapeHud extends ConsumerWidget {
                                         backgroundColor: DeckColors.hairline,
                                         minHeight: 6,
                                       ),
-                                      const SizedBox(height: 6),
-                                      const Text(
-                                        'Acquisition IMU filtrée 12 Hz (pas 100 Hz brut)',
-                                        style: TextStyle(
-                                          color: DeckColors.label,
-                                          fontSize: 9,
-                                        ),
-                                      ),
                                     ],
                                   ),
                                 ),
@@ -459,7 +399,7 @@ class _LandscapeHud extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text(
-                                  'STATUT ÉTALONNAGE',
+                                  'Statut',
                                   style: TextStyle(
                                     color: DeckColors.label,
                                     fontSize: 9,
@@ -485,7 +425,7 @@ class _LandscapeHud extends ConsumerWidget {
                           const SizedBox(height: 12),
                           FilledButton(
                             onPressed: state.tareOk ? onStart : null,
-                            child: const Text('DÉMARRER LA SESSION'),
+                            child: const Text('Démarrer'),
                           ),
                         ],
                       ),
@@ -517,37 +457,12 @@ class _TareCta extends ConsumerWidget {
           : () => ref.read(liveHubProvider.notifier).beginTare(),
       child: Text(
         !landscape
-            ? 'TOURNER EN PAYSAGE POUR TARER'
+            ? 'Tourne en paysage'
             : state.tareStatus == TareStatus.failed
-                ? 'RECOMMENCER TARE'
+                ? 'Recommencer'
                 : running
-                    ? 'TARE EN COURS… ${state.tareElapsedS} s'
-                    : 'TARE GÎTE',
-      ),
-    );
-  }
-}
-
-class _TareMountWarning extends StatelessWidget {
-  const _TareMountWarning();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        border: Border.all(color: DeckColors.volt),
-      ),
-      child: const Text(
-        'POSITION DE SÉANCE — La tare mémorise le niveau actuel du téléphone. '
-        'Fixez-le d’abord comme en live (cale-pied, écran paysage, haut du tel à gauche). '
-        'Ne pas tarer à la verticale à la main : le zéro resterait celui du portrait.',
-        style: TextStyle(
-          color: DeckColors.volt,
-          fontSize: 11,
-          height: 1.35,
-        ),
+                    ? 'Tare… ${state.tareElapsedS} s'
+                    : 'Tare',
       ),
     );
   }
@@ -597,43 +512,6 @@ class _SideBadge extends StatelessWidget {
   }
 }
 
-class _MiniTelemetry extends StatelessWidget {
-  const _MiniTelemetry({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: DeckColors.surface,
-        border: Border.all(color: DeckColors.hairline),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: DeckColors.label,
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.1,
-              ),
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 double _tareProgress(LiveHubState s) {
   if (s.tareOk) return 1;
   if (s.tareStatus != TareStatus.running) return 0;
@@ -651,13 +529,10 @@ String _tareRingCaption(LiveHubState s) {
 
 String _statusLine(LiveHubState s) {
   return switch (s.tareStatus) {
-    TareStatus.none => 'NON FAITE',
-    TareStatus.running =>
-      'EN COURS  ${s.tareElapsedS} s  ·  ${s.tareSampleCount} éch. IMU  ·  σ < 0,2° sur 3 s',
-    TareStatus.ok =>
-      'OK  offset ${s.tareOffset!.toStringAsFixed(2)}°  σ ${s.tareSigma?.toStringAsFixed(3)}°  ·  ${s.tareDurationS?.toStringAsFixed(1) ?? s.tareElapsedS} s',
-    TareStatus.approx =>
-      'TARE APPROXIMATIVE  offset ${s.tareOffset?.toStringAsFixed(2)}°  σ ${s.tareSigma?.toStringAsFixed(2)}°  ·  Démarrer autorisé',
-    TareStatus.failed => 'RECOMMENCER  ${s.imuHint}',
+    TareStatus.none => 'Non faite',
+    TareStatus.running => 'En cours  ${s.tareElapsedS} s',
+    TareStatus.ok => 'OK',
+    TareStatus.approx => 'Approximative — démarrer OK',
+    TareStatus.failed => 'Recommencer',
   };
 }

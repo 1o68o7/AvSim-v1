@@ -122,7 +122,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'MODE COMPÉTITION — tel au quai',
+                        'Course : tel au quai',
                         style: TextStyle(
                           color: DeckColors.volt,
                           fontSize: 11,
@@ -183,10 +183,10 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('PERSONNALISER'),
+                  const Text('Affichage'),
                   const SizedBox(height: 8),
                   Text(
-                    'DR-52 cockpit fixe — presets conservés pour tare / coach.',
+                    'Presets live (tare / coach).',
                     style: DeckType.uiLabel(size: 12),
                     textAlign: TextAlign.center,
                   ),
@@ -255,8 +255,8 @@ class _Dr52AlertBar extends StatelessWidget {
         ? '—'
         : '${g >= 0 ? '+' : ''}${g.toStringAsFixed(1)}°';
     final msg = hot
-        ? 'ALERTE DÉRIVE // GÎTE : TROP $side ($gStr)'
-        : 'LIVE';
+        ? 'Gîte trop $side ($gStr)'
+        : 'Live';
     final id = sessionId == null || sessionId!.isEmpty
         ? 'HUD'
         : 'ID: ${sessionId!}';
@@ -293,27 +293,6 @@ class _Dr52AlertBar extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (hot) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: DeckColors.onVolt,
-                        borderRadius: DeckRadii.chipAll,
-                      ),
-                      child: Text(
-                        'SEUIL EXCÉDÉ',
-                        style: DeckType.labelMono(
-                          color: DeckColors.volt,
-                          size: 10,
-                          weight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
                   Text(
                     id,
                     style: DeckType.labelMono(
@@ -608,8 +587,8 @@ class _CenterColumn extends StatelessWidget {
                 ? 'STABLE'
                 : (v >= 0 ? 'TRIBORD' : 'BÂBORD')))
         : (alert == HeelAlert.tribord
-            ? 'TRIBORD // DÉRIVE'
-            : 'BÂBORD // DÉRIVE');
+            ? 'TRIBORD'
+            : 'BÂBORD');
     final driftHot = alert != HeelAlert.none;
 
     return ColoredBox(
