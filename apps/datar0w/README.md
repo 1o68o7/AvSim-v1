@@ -114,6 +114,7 @@ NDK **30.0.16248370** via Android Studio → SDK Tools (GUI).
 | `Use --enable-native-access=ALL-UNNAMED` | JDK 24+ + Gradle native-platform | Déjà dans `android/gradle.properties` (daemon Gradle + Kotlin). Si ça apparaît encore dans Android Studio : *Help → Edit Custom VM Options* → ajouter `--enable-native-access=ALL-UNNAMED`, ou variable d’environnement `JAVA_TOOL_OPTIONS=--enable-native-access=ALL-UNNAMED`. |
 | `SDK XML versions up to 3` / `version 4` | Command-line Tools plus vieux que le SDK Studio | Android Studio → *Settings → Languages & Frameworks → Android SDK → SDK Tools* → cocher **Android SDK Command-line Tools (latest)** → Apply. Puis `flutter clean` + rebuild. |
 | `N packages have newer versions` / `flutter pub outdated` | Info pub, contraintes volontairement stables | `flutter pub upgrade` (patch/minor dans les `^`). **Pas** `--major-versions` sans lot dédié (Riverpod 3, go_router 18, FBP 2…). |
+| `wakelock_plus` 1.8.1 / `connectivity_plus` 7.3.2 bloqués | `battery_plus` → `upower` → `dbus ^0.7` vs wakelock/connectivity → `dbus ^0.8` | Attendre un `battery_plus` / `upower` compatible ; ne pas forcer via `dependency_overrides`. |
 
 Pas de cible `windows/` desktop.
 
