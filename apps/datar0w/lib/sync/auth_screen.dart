@@ -167,11 +167,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            Text(
-              'DATAR0W // TELEMETRY DECK',
-              style: DeckType.labelMono(color: DeckColors.volt, size: 11),
-            ),
-            const SizedBox(height: 8),
             const Text(
               'CONNEXION',
               style: TextStyle(
@@ -185,9 +180,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             const SizedBox(height: 8),
             Text(
               sessionOn
-                  ? 'Compte cloud actif — synchronise sorties et équipages.'
-                  : 'Associez votre compte pour synchroniser vos sorties, bateaux, '
-                      'capteurs et équipages sur tous vos appareils.',
+                  ? 'Compte actif — sync sorties et équipages.'
+                  : 'Connecte-toi pour sync sorties et équipages.',
               style: const TextStyle(
                 fontFamily: DeckType.ui,
                 fontSize: 14,
@@ -209,7 +203,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               const Padding(
                 padding: EdgeInsets.only(bottom: 12),
                 child: Text(
-                  'Pas de clés cloud. Tout reste sur cet appareil.',
+                  'Pas de clés cloud. Tout reste ici.',
                   style: TextStyle(color: DeckColors.muted, height: 1.4),
                 ),
               ),
@@ -250,19 +244,18 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'MODE HORS-LIGNE & LOCAL FIRST',
+                    'Sans réseau',
                     style: TextStyle(
                       fontFamily: DeckType.ui,
                       fontWeight: FontWeight.w700,
                       fontSize: 12,
-                      letterSpacing: 0.4,
+                      letterSpacing: 0.2,
                       color: DeckColors.volt,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 6),
                   Text(
-                    'Pas de connexion au ponton ? DataR0w fonctionne en local. '
-                    'Télémétrie et séances restent sur ce téléphone.',
+                    'Les séances restent sur ce téléphone.',
                     style: TextStyle(
                       fontFamily: DeckType.ui,
                       fontSize: 13,
@@ -413,7 +406,7 @@ class _SessionOffBody extends StatelessWidget {
             keyboardType: TextInputType.emailAddress,
             autocorrect: false,
             decoration: const InputDecoration(
-              labelText: 'Adresse email adhérent / athlète',
+              labelText: 'Email',
               hintText: 'toi@club.fr',
               prefixIcon: Icon(Icons.alternate_email),
             ),
@@ -429,7 +422,7 @@ class _SessionOffBody extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Connexion instantanée en un clic depuis votre boîte de réception.',
+            'Lien magique dans ta boîte mail.',
             style: TextStyle(
               fontFamily: DeckType.ui,
               fontSize: 12,

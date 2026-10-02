@@ -116,14 +116,14 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('RÉGLAGES'), findsOneWidget);
+    expect(find.text('Réglages'), findsOneWidget);
     expect(find.text('Profil local'), findsOneWidget);
-    expect(find.text('Compte cloud'), findsOneWidget);
+    expect(find.text('Compte'), findsOneWidget);
     expect(find.text('Capteurs'), findsOneWidget);
-    expect(find.text('Bientôt'), findsOneWidget);
+    expect(find.text('Objets connectés'), findsOneWidget);
     expect(find.textContaining('séances restent'), findsWidgets);
-    expect(find.text('DÉCONNEXION'), findsOneWidget);
-    await tester.tap(find.text('DÉCONNEXION'));
+    expect(find.text('Déconnexion'), findsOneWidget);
+    await tester.tap(find.text('Déconnexion'));
     await tester.pumpAndSettle();
     expect(find.text('Annuler'), findsOneWidget);
     expect(find.text('Déconnecter'), findsOneWidget);

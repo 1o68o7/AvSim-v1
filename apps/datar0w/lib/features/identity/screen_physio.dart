@@ -109,8 +109,7 @@ class _PhysioScreenState extends ConsumerState<PhysioScreen> {
     final rower = ref.watch(identityProvider).activeRower;
     final latest = _rows.isEmpty ? null : _rows.first;
     return DeckScaffold(
-      title: 'MES CONSTANTES',
-      subtitle: 'informatif · pas médical',
+      title: 'Mes constantes',
       body: !_consentLoaded
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -125,12 +124,7 @@ class _PhysioScreenState extends ConsumerState<PhysioScreen> {
                       shareWithCoach: v == true ? _r.shareWithCoach : false,
                     ),
                   ),
-                  title: const Text('Consentement santé (FC / constantes)'),
-                  subtitle: const Text(
-                    'Données de santé, usage informatif, pas médical. '
-                    'Aucun diagnostic. Partage uniquement si tu l’actives.',
-                    style: TextStyle(color: DeckColors.muted, fontSize: 12),
-                  ),
+                  title: const Text('Consentement santé'),
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
@@ -139,12 +133,6 @@ class _PhysioScreenState extends ConsumerState<PhysioScreen> {
                   onChanged: !_r.consent
                       ? null
                       : (v) => _save(_r.copyWith(shareWithCoach: v)),
-                ),
-                Text(
-                  _r.shareWithCoach
-                      ? 'Partage coach : activé (envoyé au cloud si configuré).'
-                      : 'Partage coach : privé par défaut.',
-                  style: const TextStyle(color: DeckColors.muted, fontSize: 11),
                 ),
                 const SizedBox(height: 16),
                 const DeckSectionLabel('Readiness'),
@@ -164,9 +152,9 @@ class _PhysioScreenState extends ConsumerState<PhysioScreen> {
                     for (final w in _PhysioWindow.values)
                       ChoiceChip(
                         label: Text(switch (w) {
-                          _PhysioWindow.d7 => '7 JOURS',
-                          _PhysioWindow.d28 => '28 JOURS',
-                          _PhysioWindow.d90 => '90 JOURS',
+                          _PhysioWindow.d7 => '7 jours',
+                          _PhysioWindow.d28 => '28 jours',
+                          _PhysioWindow.d90 => '90 jours',
                         }),
                         selected: _window == w,
                         onSelected: (_) {
@@ -183,8 +171,7 @@ class _PhysioScreenState extends ConsumerState<PhysioScreen> {
                   const Text('…', style: TextStyle(color: DeckColors.muted))
                 else if (latest == null)
                   const Text(
-                    'Aucune séance dans la fenêtre. Courbe FC + cadence + V sol : '
-                    'voir replay après STOP.',
+                    'Aucune séance dans cette période.',
                     style: TextStyle(color: DeckColors.muted, height: 1.4),
                   )
                 else
@@ -224,12 +211,6 @@ class _PhysioScreenState extends ConsumerState<PhysioScreen> {
                         unit: '°',
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'FC moy / max — non dispo ici (voir replay). '
-                    'Pas de courbe inventée.',
-                    style: TextStyle(color: DeckColors.label, fontSize: 11),
                   ),
                 ],
                 const SizedBox(height: 20),
@@ -323,7 +304,7 @@ class _PhysioScreenState extends ConsumerState<PhysioScreen> {
                 const SizedBox(height: 16),
                 OutlinedButton(
                   onPressed: () => context.go(AppRoutes.consent),
-                  child: const Text('GÉRER LE PARTAGE COACH'),
+                  child: const Text('Gérer le partage'),
                 ),
               ],
             ),
@@ -370,15 +351,6 @@ class _LatestCard extends StatelessWidget {
               row.meta.bassin!,
               style: const TextStyle(color: DeckColors.muted, fontSize: 12),
             ),
-          const SizedBox(height: 8),
-          const Text(
-            'Overlay multi-courbes : ouvrir le replay (pas de FC inventée ici).',
-            style: TextStyle(
-              color: DeckColors.muted,
-              fontSize: 11,
-              height: 1.35,
-            ),
-          ),
         ],
       ),
     );

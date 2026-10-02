@@ -275,24 +275,12 @@ class _HomeRowerScreenState extends ConsumerState<HomeRowerScreen> {
                   maint: maint.isNotEmpty,
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Text(
-                      'Mémoire locale',
-                      style: DeckType.uiLabel(
-                        color: DeckColors.label,
-                        weight: FontWeight.w600,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      'STOCKAGE OK',
-                      style: DeckType.labelMono(
-                        color: DeckColors.tribord,
-                        size: 10,
-                      ),
-                    ),
-                  ],
+                Text(
+                  'Mes sorties',
+                  style: DeckType.uiLabel(
+                    color: DeckColors.label,
+                    weight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Material(
@@ -307,80 +295,55 @@ class _HomeRowerScreenState extends ConsumerState<HomeRowerScreen> {
                         borderRadius: DeckRadii.cardAll,
                         border: Border.all(color: DeckColors.hairline),
                       ),
-                      child: Column(
+                      child: Row(
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: DeckColors.surfaceHighest,
-                                  borderRadius: DeckRadii.buttonAll,
-                                ),
-                                child: const Icon(
-                                  Icons.smartphone,
-                                  color: DeckColors.text,
-                                  size: 22,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Mes séances récentes sur ce téléphone',
-                                      style: TextStyle(
-                                        fontFamily: DeckType.ui,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 14,
-                                        color: DeckColors.text,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      _last == null
-                                          ? 'Aucune sortie enregistrée'
-                                          : '${_whenLabel(_last!.meta)} · '
-                                              '${_last!.distM == null ? '—' : '${_last!.distM!.round()} m'}',
-                                      style: DeckType.labelMono(
-                                        color: DeckColors.label,
-                                        size: 10,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const Icon(
-                                Icons.arrow_forward,
-                                color: DeckColors.label,
-                                size: 20,
-                              ),
-                            ],
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: DeckColors.surfaceHighest,
+                              borderRadius: DeckRadii.buttonAll,
+                            ),
+                            child: const Icon(
+                              Icons.smartphone,
+                              color: DeckColors.text,
+                              size: 22,
+                            ),
                           ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Text(
-                                _sessionCount == 0
-                                    ? 'Aucune sortie hors-ligne'
-                                    : '$_sessionCount sorties enregistrées hors-ligne',
-                                style: const TextStyle(
-                                  fontFamily: DeckType.ui,
-                                  fontSize: 12,
-                                  color: DeckColors.label,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _sessionCount == 0
+                                      ? 'Aucune sortie sur ce téléphone'
+                                      : '$_sessionCount sorties sur ce téléphone',
+                                  style: const TextStyle(
+                                    fontFamily: DeckType.ui,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
+                                    color: DeckColors.text,
+                                  ),
                                 ),
-                              ),
-                              const Spacer(),
-                              Text(
-                                'SYNCHRO AUTO',
-                                style: DeckType.labelMono(
-                                  color: DeckColors.muted,
-                                  size: 10,
-                                ),
-                              ),
-                            ],
+                                if (_last != null) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${_whenLabel(_last!.meta)} · '
+                                    '${_last!.distM == null ? '—' : '${_last!.distM!.round()} m'}',
+                                    style: DeckType.labelMono(
+                                      color: DeckColors.label,
+                                      size: 10,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const Icon(
+                            Icons.arrow_forward,
+                            color: DeckColors.label,
+                            size: 20,
                           ),
                         ],
                       ),
@@ -520,9 +483,7 @@ class _HeroLastOuting extends StatelessWidget {
               onPressed: onQuickStart,
               icon: const Icon(Icons.play_arrow, size: 24),
               label: Text(
-                last == null
-                    ? 'Continuer la séance'
-                    : 'Ramer comme la dernière fois',
+                last == null ? 'Aller ramer' : 'Reprendre',
               ),
             ),
           ),
@@ -531,7 +492,7 @@ class _HeroLastOuting extends StatelessWidget {
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Changer de bateau ou de bassin'),
+                Text('Autre bateau'),
                 SizedBox(width: 4),
                 Icon(Icons.chevron_right, size: 16),
               ],
@@ -706,7 +667,7 @@ class _AssignmentCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Pas d’affectation club pour aujourd’hui.',
+                            'Pas d’affectation aujourd’hui.',
                             style: TextStyle(
                               fontFamily: DeckType.ui,
                               fontSize: 14,
@@ -716,7 +677,7 @@ class _AssignmentCard extends StatelessWidget {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Tu es libre de choisir ta classe de coque (1x, 2-, ergo club).',
+                            'Choisis ta coque librement.',
                             style: TextStyle(
                               fontFamily: DeckType.ui,
                               fontSize: 12,

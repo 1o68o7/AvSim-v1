@@ -37,16 +37,14 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   @override
   Widget build(BuildContext context) {
     return DeckScaffold(
-      title: 'DONNÉES SANTÉ',
-      subtitle: 'informatif, pas médical',
+      title: 'Données santé',
       body: !_loaded
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
               children: [
                 const Text(
-                  'La fréquence cardiaque et la saturation sont des '
-                  'indications d’entraînement, pas un diagnostic.',
+                  'Indications d’entraînement, pas un diagnostic.',
                   style: TextStyle(color: DeckColors.muted, height: 1.4),
                 ),
                 SwitchListTile(
@@ -66,7 +64,6 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Partager avec le coach'),
-                  subtitle: const Text('Désactivé par défaut'),
                   value: _c.shareWithCoach,
                   onChanged: !_c.accepted
                       ? null

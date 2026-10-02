@@ -95,8 +95,8 @@ class _RowerOnboardingScreenState extends ConsumerState<RowerOnboardingScreen> {
   Widget _buildProfileStep(BuildContext context) {
     final cat = ageCategory(_birth);
     return DeckScaffold(
-      title: 'TON PROFIL RAMEUR',
-      subtitle: '1er login',
+      title: 'Ton profil',
+      subtitle: 'Premier login',
       retourFallback: AppRoutes.auth,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -124,11 +124,11 @@ class _RowerOnboardingScreenState extends ConsumerState<RowerOnboardingScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'SEXE',
+            'Sexe',
             style: TextStyle(
               color: DeckColors.label,
               fontSize: 11,
-              letterSpacing: 1.1,
+              letterSpacing: 0.4,
             ),
           ),
           Wrap(
@@ -144,7 +144,7 @@ class _RowerOnboardingScreenState extends ConsumerState<RowerOnboardingScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Catégorie FFA : ${cat.code} ${cat.label} (calculée)',
+            'Catégorie : ${cat.code} ${cat.label}',
             style: const TextStyle(color: DeckColors.muted, fontSize: 12),
           ),
           const SizedBox(height: 16),
@@ -171,7 +171,7 @@ class _RowerOnboardingScreenState extends ConsumerState<RowerOnboardingScreen> {
           const SizedBox(height: 16),
           FilledButton(
             onPressed: _goLicenceStep,
-            child: const Text('CONTINUER'),
+            child: const Text('Continuer'),
           ),
         ],
       ),
@@ -181,8 +181,8 @@ class _RowerOnboardingScreenState extends ConsumerState<RowerOnboardingScreen> {
   Widget _buildLicenceStep(BuildContext context) {
     final lookup = _lookup;
     return DeckScaffold(
-      title: 'TA LICENCE',
-      subtitle: 'optionnel',
+      title: 'Ta licence',
+      subtitle: 'Optionnel',
       leading: IconButton(
         tooltip: 'Retour',
         onPressed: () => setState(() {
@@ -197,7 +197,7 @@ class _RowerOnboardingScreenState extends ConsumerState<RowerOnboardingScreen> {
           TextField(
             controller: _licence,
             decoration: const InputDecoration(
-              labelText: 'n° licence FFA (optionnel)',
+              labelText: 'N° licence FFA',
               hintText: 'ex. 1234567A',
             ),
             textCapitalization: TextCapitalization.characters,
@@ -207,7 +207,7 @@ class _RowerOnboardingScreenState extends ConsumerState<RowerOnboardingScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Loisir sans licence : tu peux passer.',
+            'Sans licence : tu peux passer.',
             style: TextStyle(color: DeckColors.muted, height: 1.4),
           ),
           const SizedBox(height: 16),
@@ -234,11 +234,11 @@ class _RowerOnboardingScreenState extends ConsumerState<RowerOnboardingScreen> {
             Text(_err!, style: const TextStyle(color: DeckColors.volt)),
           FilledButton(
             onPressed: () => _finish(skipLicence: false),
-            child: const Text('CONTINUER'),
+            child: const Text('Continuer'),
           ),
           TextButton(
             onPressed: () => _finish(skipLicence: true),
-            child: const Text('PASSER'),
+            child: const Text('Passer'),
           ),
         ],
       ),

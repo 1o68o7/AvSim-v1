@@ -60,13 +60,13 @@ class PlusScreen extends ConsumerWidget {
             _PlusTile(
               icon: Icons.settings_outlined,
               title: 'Réglages',
-              subtitle: 'Compte cloud · téléphone',
+              subtitle: 'Compte et téléphone',
               onTap: () => context.go(AppRoutes.settings),
             ),
             _PlusTile(
               icon: Icons.groups_outlined,
               title: club == null ? 'Rejoindre un club' : 'Mon club',
-              subtitle: club?.name ?? 'Code club ou invitation',
+              subtitle: club?.name ?? 'Code ou invitation',
               onTap: () => context.go(
                 club == null ? AppRoutes.clubJoin : AppRoutes.club,
               ),
@@ -74,19 +74,19 @@ class PlusScreen extends ConsumerWidget {
             _PlusTile(
               icon: Icons.sensors,
               title: 'Mes objets',
-              subtitle: 'Capteurs BLE',
+              subtitle: 'Capteurs',
               onTap: () => context.go(AppRoutes.devices),
             ),
             _PlusTile(
               icon: Icons.favorite_border,
               title: 'Données santé',
-              subtitle: 'Consentement et constantes',
+              subtitle: 'Consentement',
               onTap: () => context.go(AppRoutes.consent),
             ),
             _PlusTile(
               icon: Icons.monitor_heart_outlined,
               title: 'Mes constantes',
-              subtitle: 'Physio locale',
+              subtitle: 'FC et sorties',
               onTap: () => context.go(AppRoutes.physio),
             ),
             _PlusTile(
@@ -98,14 +98,14 @@ class PlusScreen extends ConsumerWidget {
             _PlusTile(
               icon: Icons.swap_horiz,
               title: 'Rôle bateau',
-              subtitle: 'Rameur / coach / barreur',
+              subtitle: 'Rameur, coach, barreur',
               onTap: () => context.go(AppRoutes.profile),
             ),
             if (!isCoach)
               _PlusTile(
                 icon: Icons.rowing,
                 title: 'Je barre aussi',
-                subtitle: 'Accueil barreur',
+                subtitle: 'Mode barreur',
                 onTap: () async {
                   await ref.read(identityProvider.notifier).becomeCox();
                   if (context.mounted) context.go(AppRoutes.homeCox);
@@ -115,13 +115,13 @@ class PlusScreen extends ConsumerWidget {
               _PlusTile(
                 icon: Icons.person,
                 title: 'Profil rameur',
-                subtitle: 'Tu rames aussi ?',
+                subtitle: 'Mode rameur',
                 onTap: () => context.go(AppRoutes.homeRower),
               ),
             _PlusTile(
               icon: Icons.badge_outlined,
               title: 'Changer de profil',
-              subtitle: 'Qui est là ?',
+              subtitle: 'Autre personne',
               onTap: () => context.go(AppRoutes.identity),
             ),
             const SizedBox(height: 16),
