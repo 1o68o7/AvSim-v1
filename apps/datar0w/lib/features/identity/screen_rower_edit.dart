@@ -7,7 +7,6 @@ import '../../identity/models.dart';
 import '../../router.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
-import '../../widgets/deck_widgets.dart';
 
 String _sexLabel(RowerSex s) => switch (s) {
       RowerSex.m => 'Homme',

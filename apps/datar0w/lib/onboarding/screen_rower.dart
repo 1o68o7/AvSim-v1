@@ -206,9 +206,11 @@ class _RowerOnboardingScreenState extends ConsumerState<RowerOnboardingScreen> {
         }),
         icon: const Icon(Icons.arrow_back),
       ),
-      body: ListView(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        children: [
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
           Row(
             children: [
               Text(
@@ -643,7 +645,8 @@ class _RowerOnboardingScreenState extends ConsumerState<RowerOnboardingScreen> {
               'Passer cette étape (je renseignerai ma licence plus tard)',
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
