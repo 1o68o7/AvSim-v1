@@ -34,7 +34,7 @@ String _friendlyLoadError(Object e) {
   return raw;
 }
 
-/// ST-05 — liste `session_meta` du club (staff only).
+/// DR-34 — Séances du club (Stitch Deck Volt).
 class ClubSessionsScreen extends ConsumerStatefulWidget {
   const ClubSessionsScreen({super.key});
 
@@ -93,7 +93,7 @@ class _ClubSessionsScreenState extends ConsumerState<ClubSessionsScreen> {
     final snap = ref.watch(identityProvider);
     return DeckScaffold(
       title: 'Séances du club',
-      subtitle: 'cloud',
+      subtitle: 'Cloud',
       retourFallback: homeRouteForClubMemberRole(snap.prefs.clubRole),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -123,28 +123,62 @@ class _ClubSessionsScreenState extends ConsumerState<ClubSessionsScreen> {
                     )
                   else if (rows != null)
                     for (final r in rows) ...[
-                      ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          r.code.toUpperCase(),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.2,
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Material(
+                          color: DeckColors.surface,
+                          borderRadius: DeckRadii.cardAll,
+                          child: InkWell(
+                            borderRadius: DeckRadii.cardAll,
+                            onTap: () => context.go(
+                              '${AppRoutes.clubSessions}/${Uri.encodeComponent(r.code)}',
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                borderRadius: DeckRadii.cardAll,
+                                border: Border.all(color: DeckColors.hairline),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          r.code.toUpperCase(),
+                                          style: DeckType.metric(
+                                            size: 18,
+                                            color: DeckColors.volt,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          [
+                                            if (r.displayDate != null)
+                                              _fmtDate(r.displayDate!),
+                                            r.sizeLabel,
+                                            if (r.boatClass != null) r.boatClass!,
+                                          ].join(' · '),
+                                          style: const TextStyle(
+                                            fontFamily: DeckType.ui,
+                                            color: DeckColors.label,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const DeckHonestChip(
+                                    kind: DeckHonestKind.cloud,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                        subtitle: Text(
-                          [
-                            if (r.displayDate != null) _fmtDate(r.displayDate!),
-                            r.sizeLabel,
-                          ].join(' · '),
-                          style: const TextStyle(color: DeckColors.label),
-                        ),
-                        trailing: const DeckStatusChip(label: 'CLOUD', ok: true),
-                        onTap: () => context.go(
-                          '${AppRoutes.clubSessions}/${Uri.encodeComponent(r.code)}',
-                        ),
                       ),
-                      const Divider(height: 1, color: DeckColors.hairline),
                     ],
                 ],
               ),
@@ -214,7 +248,7 @@ class _ClubSessionDetailScreenState
     final r = _row;
     return DeckScaffold(
       title: widget.code.toUpperCase(),
-      subtitle: 'séance cloud',
+      subtitle: 'Séance cloud',
       retourFallback: AppRoutes.clubSessions,
       body: _loading
           ? const Center(child: CircularProgressIndicator())

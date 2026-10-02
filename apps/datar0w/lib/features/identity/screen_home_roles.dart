@@ -47,8 +47,8 @@ class HomeCoxScreen extends ConsumerWidget {
     final coxRear = asg?.coxPosition != 'front';
 
     return DeckScaffold(
-      title: 'ACCUEIL BARREUR',
-      subtitle: boat?.name ?? 'sans affectation',
+      title: 'Accueil barreur',
+      subtitle: boat?.name ?? 'Sans affectation',
       retourFallback: AppRoutes.profile,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -67,7 +67,7 @@ class HomeCoxScreen extends ConsumerWidget {
             DeckSectionLabel(
               'Affectation coque',
               trailing: Text(
-                boat.classe.toUpperCase(),
+                boat.classe,
                 style: const TextStyle(
                   color: DeckColors.volt,
                   fontSize: 11,
@@ -87,27 +87,20 @@ class HomeCoxScreen extends ConsumerWidget {
                 children: [
                   DeckFactCell(label: 'Bâtiment', value: boat.name),
                   const SizedBox(height: 14),
-                  const Text(
-                    'POSTE DU BARREUR',
-                    style: TextStyle(
-                      color: DeckColors.label,
-                      fontSize: 9,
-                      letterSpacing: 1.1,
-                    ),
-                  ),
+                  const DeckSectionLabel('Poste du barreur'),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: _CoxPosChip(
-                          label: 'AVANT (PROUE)',
+                          label: 'Avant (proue)',
                           selected: !coxRear,
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: _CoxPosChip(
-                          label: 'ARRIÈRE (POUPE)',
+                          label: 'Arrière (poupe)',
                           selected: coxRear,
                         ),
                       ),
@@ -158,7 +151,7 @@ class HomeCoxScreen extends ConsumerWidget {
             spacing: 8,
             children: [
               ChoiceChip(
-                label: const Text('ENTRAÎNEMENT'),
+                label: const Text('Entraînement'),
                 selected: ref.watch(boatConfigProvider).sessionMode ==
                     SessionMode.training,
                 onSelected: (_) => ref
@@ -166,7 +159,7 @@ class HomeCoxScreen extends ConsumerWidget {
                     .setSessionMode(SessionMode.training),
               ),
               ChoiceChip(
-                label: const Text('COMPÉTITION'),
+                label: const Text('Compétition'),
                 selected: ref.watch(boatConfigProvider).sessionMode ==
                     SessionMode.competition,
                 onSelected: (_) => ref
@@ -186,12 +179,12 @@ class HomeCoxScreen extends ConsumerWidget {
               );
               context.go(AppRoutes.presession);
             },
-            child: const Text('CONTINUER VERS LA SÉANCE'),
+            child: const Text('Continuer vers la séance'),
           ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: () => context.go(AppRoutes.club),
-            child: const Text('REVOIR LE PARC COQUES'),
+            child: const Text('Revoir le parc coques'),
           ),
         ],
       ),
@@ -220,10 +213,10 @@ class _CoxPosChip extends StatelessWidget {
         label,
         textAlign: TextAlign.center,
         style: TextStyle(
+          fontFamily: DeckType.ui,
           color: selected ? DeckColors.onVolt : DeckColors.label,
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.6,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

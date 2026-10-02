@@ -22,6 +22,7 @@ import '../../widgets/deck_widgets.dart';
 import '../../widgets/heel_banner.dart';
 import '../../widgets/heel_gauge.dart';
 
+/// DR-33 — Live coach (Stitch Deck Volt).
 class CoachLiveScreen extends ConsumerStatefulWidget {
   const CoachLiveScreen({super.key});
 
@@ -108,10 +109,10 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
           children: [
             HeelBanner(alert: alert),
             DeckSessionHeader(
-              title: 'COACH LIVE',
+              title: 'Live coach',
               trailing: [
                 DeckStatusChip(
-                  label: live || apiLive ? 'LIVE' : 'FICHIER',
+                  label: live || apiLive ? 'Live' : 'Fichier',
                   ok: live || apiLive,
                 ),
                 if (last?.hrBpm != null) ...[
@@ -232,7 +233,7 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                               border: Border.all(color: DeckColors.hairline),
                             ),
                             child: const Text(
-                              '▲ N   NORD EN HAUT',
+                              '▲ N · nord en haut',
                               style: TextStyle(
                                 color: DeckColors.volt,
                                 fontSize: 10,
@@ -252,7 +253,7 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                             ),
                             color: DeckColors.bg.withValues(alpha: 0.92),
                             child: Text(
-                              'TRACE GPS  ·  COORD $coord  ·  sol — pas eau',
+                              'Trace GPS · coord $coord · sol — pas eau',
                               style: const TextStyle(
                                 color: DeckColors.label,
                                 fontSize: 10,
@@ -275,12 +276,12 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                           Row(
                             children: [
                               DeckStatusChip(
-                                label: 'RÉF. RAMEUR',
+                                label: 'Réf. rameur',
                                 ok: true,
                               ),
                               const Spacer(),
                               Text(
-                                'DIST  ${(dist / 1000).toStringAsFixed(3)} km',
+                                'Dist ${(dist / 1000).toStringAsFixed(3)} km',
                                 style: const TextStyle(fontSize: 11),
                               ),
                             ],
@@ -290,37 +291,37 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                             children: [
                               Expanded(
                                 child: InstrumentPod(
-                                  label: 'CADENCE',
+                                  label: 'Cadence',
                                   value: cad == null
                                       ? '—'
                                       : cad.toStringAsFixed(0),
                                   unit: cad == null
-                                      ? 'SPM  ·  COUP/MIN'
-                                      : 'ESTIM. TEL  ·  SPM',
+                                      ? 'spm'
+                                      : 'estim. tél · spm',
                                 ),
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: InstrumentPod(
-                                  label: 'V. SOL (GPS)',
+                                  label: 'V. sol (GPS)',
                                   value: sog == null
                                       ? '—'
                                       : sog.toStringAsFixed(1),
-                                  unit: 'M/S  ·  SOL — PAS EAU',
+                                  unit: 'm/s · sol — pas eau',
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 8),
                           InstrumentPod(
-                            label: 'GÎTE INSTANTANÉE',
+                            label: 'Gîte instantanée',
                             value: giteLabel,
                             child: Column(
                               children: [
                                 const HeelLabels(),
                                 HeelGauge(giteDeg: giteUi ?? 0),
                                 const Text(
-                                  'TOLÉRANCE ±3.0°  ·  RÉF. RAMEUR',
+                                  'Tolérance ±3.0° · réf. rameur',
                                   style: TextStyle(
                                     color: DeckColors.label,
                                     fontSize: 9,
@@ -337,16 +338,16 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                                 ? () =>
                                     ref.read(liveHubProvider.notifier).annotate()
                                 : null,
-                            child: const Text('ANNOTER'),
+                            child: const Text('Annoter'),
                           ),
                           TextButton(
                             onPressed: () =>
                                 context.go(AppRoutes.coachReplay),
-                            child: const Text('REPLAY'),
+                            child: const Text('Replay'),
                           ),
                           TextButton(
                             onPressed: () => context.go(AppRoutes.profile),
-                            child: const Text('RETOUR'),
+                            child: const Text('Retour'),
                           ),
                         ],
                       ),

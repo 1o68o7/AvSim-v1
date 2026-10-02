@@ -7,8 +7,9 @@ import '../identity/models.dart';
 import '../router.dart';
 import '../theme/deck_theme.dart';
 import '../widgets/deck_scaffold.dart';
+import '../widgets/deck_widgets.dart';
 
-/// ST-03 — Accueil staff. Déconnexion → `/settings`.
+/// DR-40 — Aujourd’hui staff (Stitch Deck Volt).
 class ClubRoleHomeScreen extends ConsumerWidget {
   const ClubRoleHomeScreen({super.key, required this.role});
 
@@ -19,11 +20,11 @@ class ClubRoleHomeScreen extends ConsumerWidget {
     final snap = ref.watch(identityProvider);
     final club = snap.activeClub;
     final title = switch (role) {
-      ClubMemberRole.intendant => 'ACCUEIL INTENDANT',
-      ClubMemberRole.director => 'ACCUEIL DIRECTEUR',
-      ClubMemberRole.treasurer => 'ACCUEIL TRÉSORIER',
-      ClubMemberRole.admin => 'ACCUEIL CLUB',
-      _ => 'ACCUEIL CLUB',
+      ClubMemberRole.intendant => 'Aujourd’hui intendant',
+      ClubMemberRole.director => 'Aujourd’hui direction',
+      ClubMemberRole.treasurer => 'Aujourd’hui trésorerie',
+      ClubMemberRole.admin => 'Aujourd’hui staff',
+      _ => 'Aujourd’hui club',
     };
     return DeckScaffold(
       title: title,
@@ -40,12 +41,30 @@ class ClubRoleHomeScreen extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
           Text(
-            '${club?.name ?? 'Club'} · ${role.name.toUpperCase()}',
+            club?.name ?? 'Club',
             style: const TextStyle(
-              color: DeckColors.label,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.0,
+              fontFamily: DeckType.ui,
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.2,
             ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            role.name,
+            style: const TextStyle(
+              fontFamily: DeckType.ui,
+              color: DeckColors.label,
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Wrap(
+            spacing: 8,
+            children: [
+              DeckHonestChip(kind: DeckHonestKind.cloud, label: 'Club cloud'),
+              DeckHonestChip(kind: DeckHonestKind.local, label: 'Base locale'),
+            ],
           ),
           const SizedBox(height: 16),
           if (role == ClubMemberRole.admin ||
@@ -77,44 +96,44 @@ class ClubRoleHomeScreen extends ConsumerWidget {
           if (role == ClubMemberRole.intendant) ...[
             OutlinedButton(
               onPressed: () => context.go(AppRoutes.opsOut),
-              child: const Text('SORTIR'),
+              child: const Text('Sortir'),
             ),
             OutlinedButton(
               onPressed: () => context.go(AppRoutes.opsIn),
-              child: const Text('RENTRER'),
+              child: const Text('Rentrer'),
             ),
             OutlinedButton(
               onPressed: () => context.go(AppRoutes.opsMaintenance),
-              child: const Text('MAINTENANCE'),
+              child: const Text('Maintenance'),
             ),
             OutlinedButton(
               onPressed: () => context.go(AppRoutes.clubImport),
-              child: const Text('IMPORT PARC'),
+              child: const Text('Import parc'),
             ),
             const SizedBox(height: 8),
             OutlinedButton(
               onPressed: () => context.go(AppRoutes.clubSessions),
-              child: const Text('SÉANCES CLOUD'),
+              child: const Text('Séances cloud'),
             ),
           ],
           if (role == ClubMemberRole.admin) ...[
             OutlinedButton(
               onPressed: () => context.go(AppRoutes.crew),
-              child: const Text('COMPOSITION'),
+              child: const Text('Composition'),
             ),
             OutlinedButton(
               onPressed: () => context.go(AppRoutes.calendar),
-              child: const Text('CALENDRIER'),
+              child: const Text('Calendrier'),
             ),
           ],
           OutlinedButton(
             onPressed: () => context.go(AppRoutes.club),
-            child: const Text('CLUB'),
+            child: const Text('Club'),
           ),
           const SizedBox(height: 8),
           OutlinedButton(
             onPressed: () => context.go(AppRoutes.sessions),
-            child: const Text('MES SÉANCES'),
+            child: const Text('Mes séances'),
           ),
           TextButton(
             onPressed: () => context.go(AppRoutes.settings),
@@ -141,22 +160,26 @@ class _StaffCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: DeckColors.surface,
+      borderRadius: DeckRadii.cardAll,
       child: InkWell(
         onTap: onTap,
+        borderRadius: DeckRadii.cardAll,
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
+            borderRadius: DeckRadii.cardAll,
             border: Border.all(color: DeckColors.hairline),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title.toUpperCase(),
+                title,
                 style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.0,
+                  fontFamily: DeckType.ui,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
                 ),
               ),
               const SizedBox(height: 4),

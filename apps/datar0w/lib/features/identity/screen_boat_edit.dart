@@ -8,6 +8,7 @@ import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import '../../widgets/deck_widgets.dart';
 import 'screen_club.dart';
 
 class BoatEditScreen extends ConsumerStatefulWidget {
@@ -98,7 +99,7 @@ class _BoatEditScreenState extends ConsumerState<BoatEditScreen> {
     final info = BoatClassInfo.of(_classe);
     if (!edit) {
       return DeckScaffold(
-        title: 'COQUE',
+        title: 'Fiche bateau',
         body: const Center(
           child: Text(
             'Parc éditable par le coach seulement.',
@@ -108,17 +109,19 @@ class _BoatEditScreenState extends ConsumerState<BoatEditScreen> {
       );
     }
     return DeckScaffold(
-      title: 'COQUE',
+      title: 'Fiche bateau',
       subtitle: 'Parc du club',
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
+          const DeckSectionLabel('Identité'),
+          const SizedBox(height: 8),
           TextField(
             controller: _name,
             decoration: const InputDecoration(labelText: 'Nom'),
           ),
           const SizedBox(height: 12),
-          const Text('Classe'),
+          const DeckSectionLabel('Classe'),
           Wrap(
             spacing: 8,
             children: [
@@ -149,7 +152,7 @@ class _BoatEditScreenState extends ConsumerState<BoatEditScreen> {
             onChanged: (v) => setState(() => _loisirOk = v),
           ),
           const SizedBox(height: 8),
-          const Text('Statut'),
+          const DeckSectionLabel('Statut parc'),
           Wrap(
             spacing: 8,
             children: [
@@ -162,9 +165,13 @@ class _BoatEditScreenState extends ConsumerState<BoatEditScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          FilledButton(
-            onPressed: _save,
-            child: const Text('ENREGISTRER'),
+          SizedBox(
+            height: 52,
+            child: FilledButton.icon(
+              onPressed: _save,
+              icon: const Icon(Icons.check_circle_outline),
+              label: const Text('Enregistrer'),
+            ),
           ),
         ],
       ),
