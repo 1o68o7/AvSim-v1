@@ -40,7 +40,7 @@ void main() {
     );
     await tester.pump();
     expect(find.text('Retour'), findsWidgets);
-    await tester.tap(find.text('TARE GÎTE'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Tare'));
     await tester.pump();
     expect(find.text('Retour'), findsNothing);
   });

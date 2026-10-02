@@ -67,7 +67,7 @@ void main() {
     expect(find.text("Aujourd'hui"), findsWidgets);
     expect(find.text('Séances'), findsOneWidget);
     expect(find.text('Plus'), findsOneWidget);
-    expect(find.textContaining('affectation barreur'), findsOneWidget);
+    expect(find.text('Sans affectation barreur'), findsOneWidget);
     expect(find.text('Continuer'), findsOneWidget);
   });
 }

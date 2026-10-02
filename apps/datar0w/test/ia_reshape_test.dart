@@ -238,6 +238,8 @@ void main() {
   });
 
   testWidgets('5. quai Retour accueil selon rôle séance', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(800, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     final rower = Rower.create(
       displayName: 'Ada',
       birthDate: DateTime.utc(2000),
