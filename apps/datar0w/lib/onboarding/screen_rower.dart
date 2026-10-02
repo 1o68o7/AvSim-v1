@@ -578,7 +578,7 @@ class _RowerOnboardingScreenState extends ConsumerState<RowerOnboardingScreen> {
           _Card(
             child: Row(
               children: [
-                const DeckIconBox(icon: Icons.share_reviews, accent: true),
+                const DeckIconBox(icon: Icons.ios_share, accent: true),
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Column(
