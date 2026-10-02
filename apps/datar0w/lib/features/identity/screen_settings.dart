@@ -104,20 +104,18 @@ class _SettingsTile extends StatelessWidget {
     required this.label,
     required this.value,
     this.onTap,
-    this.enabled = true,
   });
 
   final String label;
   final String value;
   final VoidCallback? onTap;
-  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      enabled: enabled && onTap != null,
-      onTap: enabled ? onTap : null,
+      enabled: onTap != null,
+      onTap: onTap,
       title: Text(
         label,
         style: const TextStyle(
@@ -128,10 +126,10 @@ class _SettingsTile extends StatelessWidget {
       subtitle: Text(
         value,
         style: TextStyle(
-          color: enabled ? DeckColors.label : DeckColors.muted,
+          color: onTap != null ? DeckColors.label : DeckColors.muted,
         ),
       ),
-      trailing: enabled && onTap != null
+      trailing: onTap != null
           ? const Icon(Icons.chevron_right, color: DeckColors.label)
           : null,
       minVerticalPadding: 16,

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../identity/controller.dart';
 import '../identity/models.dart';
-import '../router.dart';
 import '../theme/deck_theme.dart';
 import '../widgets/deck_scaffold.dart';
 import 'routing.dart';
