@@ -97,13 +97,17 @@ Calendrier/victoires · CTA Rejoindre / Ramer.
 Production : tuer « Passer → /home/rower » ; « sans compte » = discover only.
 Licence + membership = redirects globaux à côté de `resolveRootRedirect`.
 
-## 6. Prochaines PR possibles
+## 6. Lots — statut (2026-10-02)
 
-1. **Lot copy P0** — tare / pré-session / live / quai / mode banner (pas de
-   comportement).  
-2. ~~**Lot porte club** — `/` discover + gates licence / membership.~~ → voir § Livré.  
-3. **Lot Stitch athlète** — quai + replay 55/56 iso gel + home cox shell.  
-4. **Lot alerte gîte** — ambre + une seule ligne (alignement GEL).
+| Lot | PR | Statut |
+|-----|-----|--------|
+| P0 copy tare/pré-session/live/quai | #97 | Merged |
+| Audit doc | #96 | Merged |
+| P1 hubs athlète + auth | #98 | Merged |
+| P2 staff/coach | #99 | Merged |
+| Alerte gîte ambre | #100 | Merged |
+| Porte club discover + licence | #101 | Merged |
+| Stitch athlète cox/quai/replay | #102 | Merged |
 
 ## Livré — porte club (MVP)
 
@@ -114,9 +118,12 @@ calendrier / plans d’eau / rejoindre (`/auth`) / profils locaux (secondaire).
 
 **Gate licence (tunnel eau)** : `needsLicence` + redirect sur
 `/presession`, `/tare`, `/live`, `/cox` → `/onboarding/rower` + SnackBar
-si profil actif sans `ffaLicence`. Tests widget qui pumpent les écrans
-directement (sans GoRouter) restent inchangés ; parcours router doit poser
-une licence factice sur le `Rower`.
+si profil actif sans `ffaLicence`.
 
 **Échappatoires** : « Passer (sans profil) » (debug only) et auth « Sans
 compte » → `/discover`, plus `/home/rower` / stack identité.
+
+## Livré — Stitch athlète
+
+Home cox dans `DeckTabScaffold` ; quai DR-54 hero+pods ; replay DR-55/56
+cartes métriques + export + éval coach si notes.
