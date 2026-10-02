@@ -9,6 +9,7 @@ import '../../router.dart';
 import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
+import '../../widgets/deck_widgets.dart';
 
 class _SeatDraft {
   _SeatDraft({this.rowerId, this.side = SidePref.tribord, this.oars = ''});
@@ -17,7 +18,7 @@ class _SeatDraft {
   String oars;
 }
 
-/// Composition d'équipage — coach seulement. Coques READY.
+/// DR-31 — Composer l’équipage (Stitch Deck Volt).
 class CrewScreen extends ConsumerStatefulWidget {
   const CrewScreen({super.key});
 
@@ -165,7 +166,7 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
         context.go(dest);
       });
       return const DeckScaffold(
-        title: 'COMPOSITION',
+        title: 'Composition',
         retourToProfile: true,
         body: Center(
           child: Text(
@@ -188,7 +189,7 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
         .toList();
 
     return DeckScaffold(
-      title: 'COMPOSITION',
+      title: 'Composition',
       subtitle: 'Coques prêtes · 1 tél. = 1 place',
       landscapeHint: true,
       body: ready.isEmpty && locked.isEmpty
@@ -247,9 +248,13 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
                     _seatRow(snap, boat, i),
                   if (boat.cox) _coxRow(snap),
                   const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: () => _save(snap),
-                    child: const Text('ENREGISTRER L’ÉQUIPAGE'),
+                  SizedBox(
+                    height: 52,
+                    child: FilledButton.icon(
+                      onPressed: () => _save(snap),
+                      icon: const Icon(Icons.check_circle_outline),
+                      label: const Text('Enregistrer l’équipage'),
+                    ),
                   ),
                 ],
               ],
@@ -264,17 +269,20 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
+          color: DeckColors.surface,
+          borderRadius: DeckRadii.cardAll,
           border: Border.all(color: DeckColors.hairline),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'SIÈGE $seat',
+              'Siège $seat',
               style: const TextStyle(
+                fontFamily: DeckType.ui,
                 color: DeckColors.label,
-                fontSize: 11,
-                letterSpacing: 1.1,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
               ),
             ),
             DropdownButton<String?>(
@@ -348,17 +356,20 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
+          color: DeckColors.surfaceHigh,
+          borderRadius: DeckRadii.cardAll,
           border: Border.all(color: DeckColors.hairline),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'BARREUR',
+              'Barreur',
               style: TextStyle(
+                fontFamily: DeckType.ui,
                 color: DeckColors.label,
-                fontSize: 11,
-                letterSpacing: 1.1,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
               ),
             ),
             DropdownButton<String?>(
