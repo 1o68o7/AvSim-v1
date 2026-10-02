@@ -42,7 +42,7 @@ les headers / pilules des écrans hub — pas de strip permanent sous AppBar.
 | DR-20 Aujourd’hui rameur | `/home/rower` | `HomeRowerScreen` + shell |
 | DR-30 Aujourd’hui Coach | `/home/coach` | `HomeCoachScreen` + shell |
 | DR-31 Composer équipage | `/crew` | |
-| DR-32 Rejoindre par code | `/join` | |
+| DR-32 Rejoindre par code | `/coach-join` | |
 | DR-33 Live Coach | `/coach` | |
 | DR-34 Séances du club | `/club/sessions` | |
 | DR-40 Aujourd’hui Staff | `/home/admin` | |
@@ -52,7 +52,8 @@ les headers / pilules des écrans hub — pas de strip permanent sous AppBar.
 | DR-45 Plans d’eau | `/waters` | |
 | DR-50 Préparer séance | `/presession` | |
 | DR-51 Tare | `/tare` | |
-| DR-52 Gîte paysage | `/live` | Cockpit 3 col. + `HeelGauge` |
+| DR-52 Gîte paysage | `/live` | Cockpit 3 col. + `HeelGauge` (844×390) |
+| DR-52 Sur l’eau (portrait) | `/live` | Même route ; planche Stitch portrait non portée séparément |
 | DR-53 Live barreur | `/cox` | |
 | DR-54 Quai | `/quai` | |
 | DR-55 Replay rameur | `/replay` | `RowerReplayScreen` + `ReplayBody` |
@@ -70,6 +71,27 @@ les headers / pilules des écrans hub — pas de strip permanent sous AppBar.
 Shell standard : 3 onglets `Aujourd’hui` · `Séances` · `Plus` (indicateur Volt 2px) —  
 `DeckTabScaffold` (`lib/widgets/deck_shell.dart`) + route `/plus`.  
 Mode eau : plein pont telemetry, pas de bottom nav.
+
+## Gaps routes / backend (travail restant)
+
+| Gap | Route actuelle | Besoin |
+|---|---|---|
+| **DR-42 Trésorerie** | `/home/treasurer` shell générique | **Pas de route dédiée** — écrans licences/paiements + **Supabase** (table licences, statut cotisation, sync club) |
+| **DR-52 portrait** | `/live` = cockpit paysage | Variante portrait Stitch (HUD vertical) si on veut les deux orientations |
+| Club import CSV | `/club/import` | UI token-only ; sync **Supabase** déjà partielle |
+| Spinoscope / physio | `/spinoscope`, `/physio` | Pas de planche Stitch DR — rester Deck utilitaire |
+| Event détail | `/calendar/:id` | Sheet local ; calendrier club → **Supabase** events |
+| Auth callback | `/auth/callback` | Deep link OAuth — pas une planche marketing |
+| Ops maintenance | `/ops/maintenance` | File maintenance ; pas DR Stitch dédié |
+| Session club détail | `/club/sessions/:code` | ST-06 ; sync cloud séances |
+
+### Supabase à brancher / durcir (pas des écrans manquants, mais data)
+
+- **Séances club** (`/club/sessions`) — lecture `session_meta` / RLS owner
+- **Identité & club** — rower ↔ club membership, licences FFA lookup
+- **Sync post-quai** — EN FILE → push JSONL / meta
+- **Calendrier / plans d’eau** — events & waters tables si multi-club
+- **Trésorerie DR-42** — hors MVP tant que pas de modèle cotisations
 
 ## Obsolète
 

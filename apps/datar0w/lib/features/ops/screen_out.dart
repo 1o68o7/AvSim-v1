@@ -11,6 +11,7 @@ import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
 import 'screen_impact.dart';
 
+/// DR-70 — Sortir une coque (Stitch).
 class OpsOutScreen extends ConsumerStatefulWidget {
   const OpsOutScreen({super.key});
 

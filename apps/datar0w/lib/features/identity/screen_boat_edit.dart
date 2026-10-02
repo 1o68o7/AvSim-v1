@@ -11,6 +11,7 @@ import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
 import 'screen_club.dart';
 
+/// DR-41 — Fiche bateau (Stitch).
 class BoatEditScreen extends ConsumerStatefulWidget {
   const BoatEditScreen({super.key, this.boatId});
 

@@ -31,7 +31,8 @@ void main() {
   });
 
   testWidgets('2B : Retour profil absent pendant la tare', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(400, 900));
+    // Tare gîte CTA n’apparaît qu’en paysage (DR-51).
+    await tester.binding.setSurfaceSize(const Size(844, 390));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       const ProviderScope(

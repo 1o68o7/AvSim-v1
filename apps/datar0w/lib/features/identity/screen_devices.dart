@@ -14,6 +14,7 @@ import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
 
+/// DR-61 — Mes objets & capteurs BLE (Stitch).
 class DevicesScreen extends ConsumerStatefulWidget {
   const DevicesScreen({super.key});
 

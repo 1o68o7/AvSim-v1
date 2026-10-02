@@ -10,6 +10,7 @@ import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
 import 'screen_impact.dart';
 
+/// DR-71 — Rentrer la coque (Stitch).
 class OpsInScreen extends ConsumerStatefulWidget {
   const OpsInScreen({super.key});
 

@@ -13,6 +13,7 @@ import '../../widgets/deck_widgets.dart';
 import '../../widgets/sign_out_button.dart';
 
 /// ST-10 — Réglages + déconnexion (tokens only, JSONL intacts).
+/// DR-64 — Réglages (Stitch).
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 

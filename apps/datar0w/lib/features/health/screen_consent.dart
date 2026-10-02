@@ -8,6 +8,7 @@ import '../../widgets/deck_widgets.dart';
 
 final consentStoreProvider = Provider<ConsentStore>((ref) => ConsentStore());
 
+/// DR-62 — Santé & consentement (Stitch).
 class ConsentScreen extends ConsumerStatefulWidget {
   const ConsentScreen({super.key});
 

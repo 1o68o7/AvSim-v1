@@ -12,6 +12,7 @@ import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
 
+/// DR-72 — Alignement & starter (Stitch).
 class OpsDepartureScreen extends ConsumerWidget {
   const OpsDepartureScreen({super.key});
 

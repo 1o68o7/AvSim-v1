@@ -8,6 +8,7 @@ import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// DR-43 — Calendrier & régates (Stitch).
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
 

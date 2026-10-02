@@ -8,6 +8,7 @@ import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
 
+/// DR-45 — Plans d'eau (Stitch).
 class WatersScreen extends StatelessWidget {
   const WatersScreen({super.key});
 
