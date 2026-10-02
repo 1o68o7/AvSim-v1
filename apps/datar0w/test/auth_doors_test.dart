@@ -79,6 +79,10 @@ void main() {
             builder: (_, __) => const IdentityListScreen(),
           ),
           GoRoute(
+            path: AppRoutes.discover,
+            builder: (_, __) => const Text('DISCOVER'),
+          ),
+          GoRoute(
             path: AppRoutes.homeRower,
             builder: (_, __) => const Text('HOME-ROWER'),
           ),

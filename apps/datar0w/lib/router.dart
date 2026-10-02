@@ -37,6 +37,7 @@ import 'features/tare/screen_2b.dart';
 import 'identity/controller.dart';
 import 'identity/models.dart';
 import 'onboarding/routing.dart';
+import 'onboarding/screen_club_discover.dart';
 import 'onboarding/screen_club_home.dart';
 import 'onboarding/screen_club_join.dart';
 import 'onboarding/screen_rower.dart';
@@ -66,6 +67,28 @@ String? _staffToolsRedirect(BuildContext context, GoRouterState state) {
   }
 }
 
+/// Guard licence FFA : tunnel eau sans licence → onboarding rameur.
+String? _waterLicenceRedirect(BuildContext context, GoRouterState state) {
+  if (!isWaterSessionPath(state.uri.path)) return null;
+  try {
+    final snap = ProviderScope.containerOf(context).read(identityProvider);
+    final denied = waterLicenceRedirect(snap);
+    if (denied != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final messenger = ScaffoldMessenger.maybeOf(context);
+        messenger?.showSnackBar(
+          const SnackBar(
+            content: Text('Licence FFA requise pour aller sur l’eau'),
+          ),
+        );
+      });
+    }
+    return denied;
+  } catch (_) {
+    return null;
+  }
+}
+
 /// try/catch builder → Page introuvable (pas de lock orientation ici :
 /// le lock portrait hub de #72 cassait le paysage live/cox).
 Widget _hub(String dest, Widget child) => SafeRoute(
@@ -74,6 +97,8 @@ Widget _hub(String dest, Widget child) => SafeRoute(
     );
 
 abstract final class AppRoutes {
+  /// Porte club froide (cold start).
+  static const discover = '/discover';
   static const identity = '/identity';
   static const identityEdit = '/identity/edit';
   static const rowerOnboard = '/onboarding/rower';
@@ -123,7 +148,7 @@ abstract final class AppRoutes {
 }
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: AppRoutes.identity,
+  initialLocation: AppRoutes.discover,
   errorBuilder: (context, state) {
     final uri = state.uri;
     if (isAuthCallback(uri) ||
@@ -138,6 +163,12 @@ final GoRouter appRouter = GoRouter(
     );
   },
   routes: [
+    GoRoute(
+      path: AppRoutes.discover,
+      name: '0-discover',
+      builder: (context, state) =>
+          _hub(AppRoutes.discover, const ClubDiscoverScreen()),
+    ),
     GoRoute(
       path: AppRoutes.identity,
       name: '0-identity',
@@ -281,7 +312,7 @@ final GoRouter appRouter = GoRouter(
       redirect: _staffToolsRedirect,
       builder: (context, state) => const MaintenanceQueueScreen(),
     ),
-    // `/` n’est plus ProfileScreen — redirect vers l’accueil métier.
+    // `/` n’est plus ProfileScreen — redirect métier ou porte club.
     GoRoute(
       path: AppRoutes.profile,
       name: '1-root-redirect',
@@ -291,28 +322,32 @@ final GoRouter appRouter = GoRouter(
               ProviderScope.containerOf(context).read(identityProvider);
           return resolveRootRedirect(snap);
         } catch (_) {
-          return AppRoutes.identity;
+          return AppRoutes.discover;
         }
       },
     ),
     GoRoute(
       path: AppRoutes.presession,
       name: '2a-presession',
+      redirect: _waterLicenceRedirect,
       builder: (context, state) => const PresessionScreen(),
     ),
     GoRoute(
       path: AppRoutes.tare,
       name: '2b-tare',
+      redirect: _waterLicenceRedirect,
       builder: (context, state) => const TareScreen(),
     ),
     GoRoute(
       path: AppRoutes.live,
       name: '3-live',
+      redirect: _waterLicenceRedirect,
       builder: (context, state) => const LiveScreen(),
     ),
     GoRoute(
       path: AppRoutes.cox,
       name: '3-cox',
+      redirect: _waterLicenceRedirect,
       builder: (context, state) => const CoxLiveScreen(),
     ),
     GoRoute(

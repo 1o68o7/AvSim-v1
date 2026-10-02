@@ -57,6 +57,10 @@ GoRouter _testRouter({required String initial}) {
     initialLocation: initial,
     routes: [
       GoRoute(
+        path: AppRoutes.discover,
+        builder: (context, state) => const Scaffold(body: Text('DISCOVER')),
+      ),
+      GoRoute(
         path: AppRoutes.identity,
         builder: (context, state) => const IdentityListScreen(),
       ),
@@ -123,9 +127,9 @@ GoRouter _testRouter({required String initial}) {
 }
 
 void main() {
-  test('1. initialLocation == /identity', () {
-    expect(AppRoutes.identity, '/identity');
-    // Contrat router.dart : GoRouter(initialLocation: AppRoutes.identity).
+  test('1. initialLocation == /discover', () {
+    expect(AppRoutes.discover, '/discover');
+    // Contrat router.dart : GoRouter(initialLocation: AppRoutes.discover).
   });
 
   test('resolveRootRedirect : staff / rower / vide', () {
@@ -156,7 +160,28 @@ void main() {
       ),
       AppRoutes.homeAdmin,
     );
-    expect(resolveRootRedirect(const IdentitySnapshot()), AppRoutes.identity);
+    expect(resolveRootRedirect(const IdentitySnapshot()), AppRoutes.discover);
+  });
+
+  test('needsLicence / waterLicenceRedirect', () {
+    final bare = Rower.create(
+      displayName: 'Ada',
+      birthDate: DateTime.utc(2000),
+    );
+    final licensed = bare.copyWith(ffaLicence: '1234567A');
+    final bareSnap = IdentitySnapshot(
+      rowers: [bare],
+      prefs: IdentityPrefs(activeRowerId: bare.id),
+    );
+    final licSnap = IdentitySnapshot(
+      rowers: [licensed],
+      prefs: IdentityPrefs(activeRowerId: licensed.id),
+    );
+    expect(needsLicence(bareSnap), isTrue);
+    expect(waterLicenceRedirect(bareSnap), AppRoutes.rowerOnboard);
+    expect(needsLicence(licSnap), isFalse);
+    expect(waterLicenceRedirect(licSnap), isNull);
+    expect(needsLicence(const IdentitySnapshot()), isFalse);
   });
 
   testWidgets('2. go(/) profil rameur → /home/rower, pas ProfileScreen',
@@ -189,7 +214,7 @@ void main() {
     );
   });
 
-  testWidgets('3. go(/) sans profil → /identity', (tester) async {
+  testWidgets('3. go(/) sans profil → /discover', (tester) async {
     final container = ProviderContainer(
       overrides: [
         identityStoreOverride(),
@@ -207,10 +232,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       router.routerDelegate.currentConfiguration.uri.path,
-      AppRoutes.identity,
+      AppRoutes.discover,
     );
-    // Stitch : écran profils (ex Hangar « QUI RAME »).
-    expect(find.text('Profils'), findsOneWidget);
+    expect(find.text('DISCOVER'), findsOneWidget);
+    expect(find.text('Profils'), findsNothing);
   });
 
   testWidgets('4. staff admin go(/) → /home/admin', (tester) async {
