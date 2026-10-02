@@ -48,6 +48,7 @@ les headers / pilules des écrans hub — pas de strip permanent sous AppBar.
 | DR-42 Trésorerie | — | hors MVP téléphone |
 | DR-43 Calendrier | `/calendar` | |
 | DR-45 Plans d’eau | `/waters` | |
+| DR-52 Gîte paysage | `/live` | Cockpit 3 col. + cadran avionique (`HeelGauge`) |
 | DR-53 Live barreur | `/cox` | |
 | DR-55 Replay rameur | `/replay` | |
 | DR-56 Replay flotte | `/replay-coach` | |
