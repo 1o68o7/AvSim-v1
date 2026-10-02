@@ -670,50 +670,56 @@ class _CenterColumn extends StatelessWidget {
                   color: DeckColors.tribord.withValues(alpha: 0.55),
                 ),
               ),
-              child: Row(
-                children: [
-                  Text(
-                    'Angle actuel',
-                    style: DeckType.labelMono(size: 10),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    signed,
-                    style: DeckType.metric(
-                      size: 26,
-                      color: DeckColors.tribord,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  children: [
+                    Text(
+                      'Angle actuel',
+                      style: DeckType.labelMono(size: 10),
                     ),
-                  ),
-                  const Spacer(),
-                  if (driftHot)
-                    Container(
-                      width: 8,
-                      height: 8,
-                      margin: const EdgeInsets.only(right: 6),
-                      decoration: const BoxDecoration(
+                    const SizedBox(width: 8),
+                    Text(
+                      signed,
+                      style: DeckType.metric(
+                        size: 26,
                         color: DeckColors.tribord,
-                        shape: BoxShape.circle,
                       ),
                     ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: driftHot ? DeckColors.onVolt : DeckColors.surfaceHighest,
-                      borderRadius: DeckRadii.chipAll,
-                    ),
-                    child: Text(
-                      drift,
-                      style: DeckType.labelMono(
-                        color: driftHot ? DeckColors.volt : DeckColors.text,
-                        size: 10,
-                        weight: FontWeight.w700,
+                    const SizedBox(width: 12),
+                    if (driftHot)
+                      Container(
+                        width: 8,
+                        height: 8,
+                        margin: const EdgeInsets.only(right: 6),
+                        decoration: const BoxDecoration(
+                          color: DeckColors.tribord,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: driftHot
+                            ? DeckColors.onVolt
+                            : DeckColors.surfaceHighest,
+                        borderRadius: DeckRadii.chipAll,
+                      ),
+                      child: Text(
+                        drift,
+                        style: DeckType.labelMono(
+                          color: driftHot ? DeckColors.volt : DeckColors.text,
+                          size: 10,
+                          weight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -796,11 +802,15 @@ class _RightColumn extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        'Cardio-fréq.',
-                        style: DeckType.uiLabel(color: DeckColors.label),
+                      Flexible(
+                        child: Text(
+                          'Cardio-fréq.',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: DeckType.uiLabel(color: DeckColors.label),
+                        ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 4),
                       Text(
                         hr == null ? '—' : _hrZone(hr),
                         style: DeckType.labelMono(
@@ -914,29 +924,35 @@ class _StatusRow extends StatelessWidget {
     return Row(
       children: [
         Text(label, style: DeckType.labelMono(size: 10)),
-        const Spacer(),
-        if (ok) ...[
-          Container(
-            width: 6,
-            height: 6,
-            margin: const EdgeInsets.only(right: 4),
-            decoration: BoxDecoration(
-              color: DeckColors.tribord,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ],
-        Flexible(
-          child: Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.right,
-            style: DeckType.labelMono(
-              color: fg,
-              size: 10,
-              weight: FontWeight.w700,
-            ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (ok)
+                Container(
+                  width: 6,
+                  height: 6,
+                  margin: const EdgeInsets.only(right: 4),
+                  decoration: const BoxDecoration(
+                    color: DeckColors.tribord,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              Flexible(
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                  style: DeckType.labelMono(
+                    color: fg,
+                    size: 10,
+                    weight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
