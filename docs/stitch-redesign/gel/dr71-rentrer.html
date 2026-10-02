@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "primary": "#ffffff", "secondary-fixed": "#81fba7", "on-surface-variant": "#c5c9ae", "secondary": "#64de8d", "secondary-fixed-dim": "#64de8d", "on-background": "#e5e2e1", "on-tertiary-container": "#b63538", "surface-container-lowest": "#0e0e0e", "on-surface": "#e5e2e1", "inverse-primary": "#526600", "tertiary": "#ffffff", "tertiary-fixed": "#ffdad7", "surface": "#131313", "outline": "#8f937a", "on-primary-fixed": "#171e00", "primary-container": "#caf22e", "primary-fixed-dim": "#afd500", "background": "#131313", "on-secondary-container": "#003116", "on-error": "#690005", "primary-fixed": "#caf22e", "error": "#ffb4ab", "on-tertiary": "#68000e", "outline-variant": "#454934", "on-tertiary-fixed": "#410005", "on-error-container": "#ffdad6", "surface-tint": "#afd500", "on-primary-fixed-variant": "#3d4c00", "secondary-container": "#20a55c", "on-primary": "#293500", "inverse-surface": "#e5e2e1", "surface-variant": "#353534", "on-secondary-fixed-variant": "#005229", "tertiary-container": "#ffdad7", "surface-container-low": "#1c1b1b", "on-tertiary-fixed-variant": "#8d141e", "surface-container-high": "#2a2a2a", "surface-container-highest": "#353534", "surface-container": "#201f1f", "tertiary-fixed-dim": "#ffb3af", "surface-bright": "#3a3939", "error-container": "#93000a", "on-secondary-fixed": "#00210d", "on-primary-container": "#586c00", "inverse-on-surface": "#313030", "surface-dim": "#131313", "on-secondary": "#00391a" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-sm": "0.5rem", "gutter": "1rem", "space-md": "1rem", "space-xl": "2rem", "space-xs": "0.25rem", "margin": "1rem", "space-lg": "1.5rem" }, "fontFamily": { "label-mono": ["JetBrains Mono"], "metric-lg": ["JetBrains Mono"], "body-sm": ["Inter"], "headline-lg": ["Inter"], "headline-sm": ["Inter"], "body-lg": ["Inter"], "metric-hero": ["JetBrains Mono"], "body-md": ["Inter"], "metric-sm": ["JetBrains Mono"], "metric-md": ["JetBrains Mono"], "label-ui": ["Inter"], "headline-md": ["Inter"] }, "fontSize": { "label-mono": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "500" }], "metric-lg": ["32px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "metric-hero": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.04em", "fontWeight": "700" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "metric-sm": ["14px", { "lineHeight": "18px", "fontWeight": "500" }], "metric-md": ["20px", { "lineHeight": "24px", "fontWeight": "600" }], "label-ui": ["13px", { "lineHeight": "16px", "fontWeight": "500" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-xs min-w-0"><button aria-label="Retour" class="w-11 h-11 -ml-space-xs flex items-center justify-center text-on-surface hover:text-primary transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><div class="flex flex-col justify-center min-w-0 pr-space-xs"><div class="flex items-center gap-space-xs truncate"><h1 class="font-headline-sm text-headline-sm text-primary truncate leading-tight tracking-tight">Replay Flotte Dr 56</h1></div><span class="font-label-mono text-label-mono text-on-surface-variant truncate opacity-85">Code #704-LK • Lac de Lacanau</span></div></div><div class="flex items-center gap-space-xs shrink-0"><div class="flex items-center gap-1 px-2 py-1 rounded bg-secondary-container/20 text-secondary border border-secondary/40 select-none"><span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span><span class="font-label-mono text-label-mono font-semibold tracking-wider">SYNCHRO OK</span></div><button aria-label="Exporter ou partager les données de replay" class="w-11 h-11 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[22px]">ios_share</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-space-xs shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-safe bg-surface min-h-screen"><div class="flex flex-col w-full pb-10 space-y-5 px-margin">
+<!-- Entête Opérationnelle de Clôture -->
+<div class="flex flex-col gap-space-xs mt-2">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="bg-surface-container-high text-on-surface px-2 py-0.5 rounded font-label-mono text-label-mono font-semibold uppercase tracking-wider">DR-71 • RENTRER LA COQUE</span>
+<span class="bg-secondary-container text-on-secondary px-2 py-0.5 rounded font-label-mono text-label-mono font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+        ÉMARGEMENT RETOUR
+      </span>
+</div>
+<p class="font-headline-sm text-headline-sm text-primary font-bold">Fin de navigation &amp; inventaire</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Clôture officielle du cahier de sortie, contrôle matériel et libération de travée.</p>
+</div>
+<!-- Bilan Télémétrique & Statut Équipage -->
+<section class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-space-sm shadow-md">
+<div class="flex items-center justify-between pb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim text-[20px]">sailing</span>
+<span class="font-headline-sm text-[16px] text-primary font-semibold">Empacher 4x/- (B-04 • L'Adour)</span>
+</div>
+<span class="font-label-mono text-label-mono text-on-surface-variant bg-surface-container-highest px-2 py-0.5 rounded">Chef : Alex. M</span>
+</div>
+<!-- 3 Stat Blocks -->
+<div class="grid grid-cols-3 gap-space-xs pt-1">
+<div class="bg-surface-container p-2.5 rounded-lg flex flex-col">
+<span class="font-label-mono text-[10px] text-on-surface-variant uppercase">Distance</span>
+<span class="font-metric-md text-metric-md text-primary font-bold">18.4 <span class="font-label-mono text-[11px] text-on-surface-variant">km</span></span>
+</div>
+<div class="bg-surface-container p-2.5 rounded-lg flex flex-col">
+<span class="font-label-mono text-[10px] text-on-surface-variant uppercase">Durée eau</span>
+<span class="font-metric-md text-metric-md text-primary font-bold">1h38<span class="font-label-mono text-[11px] text-on-surface-variant">m</span></span>
+</div>
+<div class="bg-surface-container p-2.5 rounded-lg flex flex-col">
+<span class="font-label-mono text-[10px] text-on-surface-variant uppercase">Allure moy.</span>
+<span class="font-metric-md text-metric-md text-primary font-bold">4:12</span>
+</div>
+</div>
+<!-- Status Ponton -->
+<div class="flex items-center justify-between bg-surface-container-highest/60 px-3 py-2 rounded-lg mt-1">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-fixed animate-pulse"></span>
+<span class="font-label-ui text-label-ui text-secondary-fixed font-semibold tracking-wide">ÉQUIPAGE RENTRÉ AU COMPLET</span>
+</div>
+<span class="font-label-mono text-label-mono text-on-surface-variant">Ponton • 10:12</span>
+</div>
+</section>
+<!-- Protocole Quai & Soins du Bateau -->
+<section class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-space-sm shadow-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">checklist</span>
+<h2 class="font-headline-sm text-[16px] text-primary font-semibold">Checklist de quai &amp; rinçage</h2>
+</div>
+<span class="font-label-mono text-label-mono text-secondary-fixed bg-surface-container-highest px-2 py-0.5 rounded">5/5 VALIDÉS</span>
+</div>
+<div class="flex flex-col gap-2 mt-1">
+<label class="flex items-center gap-3 p-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors cursor-pointer">
+<input checked="" class="w-4 h-4 accent-primary-fixed rounded bg-surface-variant cursor-pointer" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface select-none">Rinçage coque intérieure &amp; extérieure eau douce</span>
+</label>
+<label class="flex items-center gap-3 p-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors cursor-pointer">
+<input checked="" class="w-4 h-4 accent-primary-fixed rounded bg-surface-variant cursor-pointer" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface select-none">Rails de coulisses et galets séchés et essuyés</span>
+</label>
+<label class="flex items-center gap-3 p-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors cursor-pointer">
+<input checked="" class="w-4 h-4 accent-primary-fixed rounded bg-surface-variant cursor-pointer" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface select-none">Dames de nage desserrées, portoirs réalignés</span>
+</label>
+<label class="flex items-center gap-3 p-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors cursor-pointer">
+<input checked="" class="w-4 h-4 accent-primary-fixed rounded bg-surface-variant cursor-pointer" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface select-none">Bateau rangé sur travée #3 (Garage A)</span>
+</label>
+<label class="flex items-center gap-3 p-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors cursor-pointer">
+<input checked="" class="w-4 h-4 accent-primary-fixed rounded bg-surface-variant cursor-pointer" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface select-none">Rames rincées et suspendues par paire au râtelier</span>
+</label>
+</div>
+</section>
+<!-- Déclaration Avarie & État du Matériel -->
+<section class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-space-sm shadow-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed text-[20px]">construction</span>
+<h2 class="font-headline-sm text-[16px] text-primary font-semibold">Contrôle d'état &amp; Avarie</h2>
+</div>
+<span class="font-label-mono text-label-mono text-tertiary-fixed bg-error-container/60 px-2 py-0.5 rounded uppercase">Signaler DR-41</span>
+</div>
+<!-- Toggle Sélecteur d'état -->
+<div class="flex flex-col gap-2 mt-1">
+<label class="flex items-center justify-between p-3 rounded-lg bg-surface-container cursor-pointer transition-colors opacity-70">
+<div class="flex items-center gap-2.5">
+<input class="w-4 h-4 accent-primary-fixed bg-surface-variant" name="avarie_toggle" type="radio"/>
+<span class="font-label-ui text-body-md text-on-surface font-medium">Aucune avarie (Bateau en parfait état)</span>
+</div>
+</label>
+<label class="flex items-center justify-between p-3 rounded-lg bg-surface-container-highest cursor-pointer transition-colors">
+<div class="flex items-center gap-2.5">
+<input checked="" class="w-4 h-4 accent-primary-fixed bg-surface-variant" name="avarie_toggle" type="radio"/>
+<span class="font-label-ui text-body-md text-primary font-semibold">Signaler une avarie ou usure matérielle</span>
+</div>
+<span class="font-label-mono text-[10px] text-tertiary-fixed bg-error-container px-2 py-0.5 rounded font-bold">ALERTE STAFF</span>
+</label>
+</div>
+<!-- Zone Active Signalement -->
+<div class="bg-surface-container p-3 rounded-lg flex flex-col gap-3 mt-1">
+<!-- Degré Gravité -->
+<div class="flex flex-col gap-1.5">
+<span class="font-label-mono text-[11px] text-on-surface-variant uppercase">Niveau de criticité</span>
+<div class="grid grid-cols-3 gap-1.5">
+<button class="py-2 px-1 text-center rounded bg-surface-container-high font-label-mono text-[11px] text-on-surface-variant font-medium" type="button">Légère / Usure</button>
+<button class="py-2 px-1 text-center rounded bg-tertiary-container/30 text-tertiary font-label-mono text-[11px] font-bold" type="button">À SURVEILLER</button>
+<button class="py-2 px-1 text-center rounded bg-surface-container-high font-label-mono text-[11px] text-on-surface-variant font-medium" type="button">Bloquante</button>
+</div>
+</div>
+<!-- Composant touché -->
+<div class="flex flex-col gap-1.5">
+<span class="font-label-mono text-[11px] text-on-surface-variant uppercase">Composant touché</span>
+<div class="flex flex-wrap gap-1.5">
+<span class="px-2.5 py-1 rounded bg-surface-container-high text-on-surface font-label-mono text-[11px]">Portant</span>
+<span class="px-2.5 py-1 rounded bg-surface-container-high text-on-surface font-label-mono text-[11px]">Dame de nage</span>
+<span class="px-2.5 py-1 rounded bg-primary-container text-on-primary-container font-label-mono text-[11px] font-bold">Coulisse / Rail ✓</span>
+<span class="px-2.5 py-1 rounded bg-surface-container-high text-on-surface font-label-mono text-[11px]">Gouvernail</span>
+<span class="px-2.5 py-1 rounded bg-surface-container-high text-on-surface font-label-mono text-[11px]">Coque / Gelcoat</span>
+<span class="px-2.5 py-1 rounded bg-surface-container-high text-on-surface font-label-mono text-[11px]">Barre de pieds</span>
+</div>
+</div>
+<!-- Description textuelle -->
+<div class="flex flex-col gap-1">
+<label class="font-label-mono text-[11px] text-on-surface-variant uppercase">Précisions pour l'atelier</label>
+<div class="bg-surface-container-highest p-2.5 rounded text-on-surface font-body-md text-[13px] leading-relaxed">
+          Légère résistance sur le rail de coulisse poste 2 (bâbord). Galet à vérifier par l'atelier lors de la revue hebdomadaire.
+        </div>
+</div>
+<!-- Bouton Ajout Photo -->
+<button class="flex items-center justify-center gap-2 py-3 px-3 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">photo_camera</span>
+<span class="font-label-ui text-label-ui font-medium">Ajouter une photo de l'avarie (optionnel)</span>
+</button>
+<!-- Fiche notification -->
+<div class="flex items-start gap-2 bg-surface-container-highest/70 p-2.5 rounded text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-secondary-fixed shrink-0">info</span>
+<p class="font-body-sm text-body-sm text-on-surface">L'intendant et le coach recevront une fiche de maintenance en attente synchronisée sur le module <span class="font-label-mono text-primary font-semibold">DR-41</span>.</p>
+</div>
+</div>
+</section>
+<!-- Clôture & Signature -->
+<section class="flex flex-col gap-space-sm pt-2">
+<div class="flex items-center justify-center gap-2 text-center">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">schedule</span>
+<p class="font-label-mono text-label-mono text-on-surface-variant">
+        Heure officielle <span class="text-primary font-bold">10:12</span> enregistrée sur FFA &amp; Registre Club
+      </p>
+</div>
+<!-- Grand Bouton Principal Volt -->
+<button class="w-full bg-primary-container text-on-primary py-4 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg hover:brightness-105 active:scale-[0.98] transition-all" id="btn-cloture" type="button">
+<span class="material-symbols-outlined text-[22px] font-bold">done_all</span>
+<span class="font-label-ui text-[14px] font-bold tracking-tight">CLÔTURER LA SORTIE &amp; LIBÉRER LE BATEAU (DR-71)</span>
+</button>
+<!-- Navigation secondaire -->
+<div class="flex justify-center pt-1 pb-4">
+<button class="flex items-center gap-1.5 font-label-ui text-label-ui text-on-surface-variant hover:text-primary transition-colors py-2 px-3" type="button">
+<span class="material-symbols-outlined text-[18px]">history</span>
+<span>Consulter le Replay de séance (DR-55)</span>
+</button>
+</div>
+</section>
+</div>
+<script>
+  // Simple micro-interaction de confirmation tactile
+  document.getElementById('btn-cloture')?.addEventListener('click', function() {
+    const originalText = this.innerHTML;
+    this.classList.add('bg-secondary-fixed');
+    this.innerHTML = '<span class="material-symbols-outlined text-[22px]">check_circle</span> <span class="font-label-ui text-[14px] font-bold">SORTIE CLÔTURÉE AVEC SUCCÈS</span>';
+    setTimeout(() => {
+      this.classList.remove('bg-secondary-fixed');
+      this.innerHTML = originalText;
+    }, 2400);
+  });
+</script></main></body></html>

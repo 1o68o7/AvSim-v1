@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+  <title>DR-62 • Données de santé & Consentement</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            surface: "#131313",
+            "surface-dim": "#131313",
+            "surface-bright": "#3a3939",
+            "surface-container-lowest": "#0e0e0e",
+            "surface-container-low": "#1c1b1b",
+            "surface-container": "#201f1f",
+            "surface-container-high": "#2a2a2a",
+            "surface-container-highest": "#353534",
+            "on-surface": "#e5e2e1",
+            "on-surface-variant": "#c5c9ae",
+            outline: "#8f937a",
+            "outline-variant": "#454934",
+            primary: "#caf22e",
+            "on-primary": "#293500",
+            secondary: "#64de8d",
+            "on-secondary": "#00391a",
+            error: "#ffb4ab",
+            "error-container": "#93000a",
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      background-color: #131313;
+      color: #e5e2e1;
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Hide scrollbar */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col antialiased select-none pb-28">
+
+  <!-- HEADER NAVIGATION (App Shell Mobile Stack) -->
+  <header class="sticky top-0 z-50 bg-[#131313]/90 backdrop-blur-md border-b border-surface-container-highest/60 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <button onclick="history.back()" class="w-10 h-10 -ml-2 rounded-xl flex items-center justify-center text-on-surface hover:bg-surface-container-high active:scale-95 transition-all" aria-label="Retour">
+        <span class="material-symbols-outlined text-[22px]">arrow_back</span>
+      </button>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-mono text-[10px] tracking-widest text-primary font-bold uppercase">DR-62</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+          <span class="text-[10px] font-mono text-secondary tracking-wider uppercase font-semibold">RGPD Art. 9</span>
+        </div>
+        <h1 class="text-base font-bold text-on-surface leading-tight">Santé &amp; Consentement</h1>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-surface-container-high text-on-surface-variant border border-outline-variant/30 flex items-center gap-1">
+        <span class="material-symbols-outlined text-[13px] text-secondary">verified_user</span> Chiffré
+      </span>
+    </div>
+  </header>
+
+  <main class="flex-1 px-4 py-4 space-y-4 max-w-lg mx-auto w-full">
+
+    <!-- CADRE CNIL / LOCAL-FIRST BANNER -->
+    <div class="p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant/30 relative overflow-hidden">
+      <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-xl pointer-events-none"></div>
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-xl bg-surface-container-high border border-outline-variant/40 flex items-center justify-center shrink-0 text-primary">
+          <span class="material-symbols-outlined text-[20px]">shield_lock</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="text-xs font-bold text-on-surface tracking-wide uppercase font-mono">Chiffrement &amp; Souveraineté</h2>
+            <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-surface-container-highest text-secondary border border-secondary/20 font-bold">AES-256 GCM</span>
+          </div>
+          <p class="text-[12px] text-on-surface-variant mt-1 leading-relaxed">
+            Vos flux physiologiques et biomécaniques sont stockés en priorité sur votre terminal (<strong class="text-on-surface font-semibold">Local-First</strong>). Aucun partage tiers sans autorisation explicite.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MASTER SWITCH : ACCORD GLOBAL -->
+    <div class="p-4 rounded-2xl bg-surface-container-low border border-primary/30 relative">
+      <div class="flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-primary font-bold">Consentement actif</span>
+          <h3 class="text-sm font-bold text-on-surface">Collecte biométrique en séance</h3>
+          <p class="text-[11px] text-on-surface-variant mt-0.5">Autorise l'acquisition en direct via capteurs BLE (FC, cadence, puissances).</p>
+        </div>
+        <!-- Switch actif -->
+        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+          <input type="checkbox" checked class="sr-only peer">
+          <div class="w-12 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#131313] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+        </label>
+      </div>
+
+      <!-- Métadonnées de signature -->
+      <div class="mt-3 pt-3 border-t border-surface-container-highest/60 flex flex-wrap items-center justify-between gap-y-1 text-[10px] font-mono text-on-surface-variant">
+        <span class="flex items-center gap-1">
+          <span class="material-symbols-outlined text-[12px] text-secondary">fingerprint</span> Signé par Alexandre Martin
+        </span>
+        <span class="text-on-surface-variant/80">12/03/2025 à 09:14</span>
+      </div>
+      <div class="mt-1 flex items-center justify-between text-[9px] font-mono text-on-surface-variant/60">
+        <span>Hash d'intégrité</span>
+        <span class="text-primary/90">SHA256: 8f4e-291a-b302-c941</span>
+      </div>
+    </div>
+
+    <!-- SECTION : GESTION DES FLUX DE DONNÉES -->
+    <div class="space-y-2.5">
+      <div class="flex items-center justify-between px-1">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-on-surface font-mono">Périmètre des capteurs &amp; signaux</h4>
+        <span class="text-[11px] font-mono text-primary font-semibold">3 / 4 autorisés</span>
+      </div>
+
+      <!-- CARD 1: FC & VRC -->
+      <div class="p-3.5 rounded-xl bg-surface-container-low border border-surface-container-highest hover:border-outline-variant transition-colors">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-start gap-3 min-w-0">
+            <div class="w-8 h-8 rounded-lg bg-red-950/40 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0 mt-0.5">
+              <span class="material-symbols-outlined text-[18px]">favorite</span>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-on-surface">Fréquence Cardiaque &amp; VRC</span>
+                <span class="text-[9px] font-mono px-1 py-0.2 rounded bg-surface-container-high text-secondary border border-secondary/20">POLAR H10</span>
+              </div>
+              <p class="text-[11px] text-on-surface-variant mt-0.5">Intervalles R-R en temps réel pour zones physiologiques Z1-Z5 et charge TRIMP.</p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+            <input type="checkbox" checked class="sr-only peer">
+            <div class="w-10 h-5 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#131313] after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- CARD 2: DAMES DE NAGE & FORCE -->
+      <div class="p-3.5 rounded-xl bg-surface-container-low border border-surface-container-highest hover:border-outline-variant transition-colors">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-start gap-3 min-w-0">
+            <div class="w-8 h-8 rounded-lg bg-amber-950/40 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 mt-0.5">
+              <span class="material-symbols-outlined text-[18px]">sync_alt</span>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-on-surface">Biomécanique &amp; Dames de nage</span>
+                <span class="text-[9px] font-mono px-1 py-0.2 rounded bg-surface-container-high text-primary border border-primary/20">SMARTOAR</span>
+              </div>
+              <p class="text-[11px] text-on-surface-variant mt-0.5">Force instantanée (Newtons), angle d'attaque (-42° à +38°) et symétrie bâbord/tribord.</p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+            <input type="checkbox" checked class="sr-only peer">
+            <div class="w-10 h-5 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#131313] after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- CARD 3: GPS & SÉCURITÉ PLAN D'EAU -->
+      <div class="p-3.5 rounded-xl bg-surface-container-low border border-surface-container-highest hover:border-outline-variant transition-colors">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-start gap-3 min-w-0">
+            <div class="w-8 h-8 rounded-lg bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-center text-secondary shrink-0 mt-0.5">
+              <span class="material-symbols-outlined text-[18px]">explore</span>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-on-surface">Trace GPS continue &amp; Sécurité</span>
+                <span class="text-[9px] font-mono px-1 py-0.2 rounded bg-surface-container-high text-secondary border border-secondary/20">DR-45 / DR-70</span>
+              </div>
+              <p class="text-[11px] text-on-surface-variant mt-0.5">Suivi de trajectoire, balisage chenal et sécurité au registre de quai (main courante).</p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+            <input type="checkbox" checked class="sr-only peer">
+            <div class="w-10 h-5 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#131313] after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- CARD 4: PARTAGE DIRECT COACH (DR-33 / DR-56) -->
+      <div class="p-3.5 rounded-xl bg-surface-container-low border border-surface-container-highest hover:border-outline-variant transition-colors">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-start gap-3 min-w-0">
+            <div class="w-8 h-8 rounded-lg bg-purple-950/40 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0 mt-0.5">
+              <span class="material-symbols-outlined text-[18px]">sports</span>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-on-surface">Cockpit Coach Live &amp; Débrief</span>
+                <span class="text-[9px] font-mono px-1 py-0.2 rounded bg-surface-container-high text-on-surface-variant">RESTREINT</span>
+              </div>
+              <p class="text-[11px] text-on-surface-variant mt-0.5">Autorise le coach référent (<strong class="text-on-surface font-semibold">Marc Delmas</strong>) à visualiser les données en direct pendant la séance.</p>
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+            <input type="checkbox" checked class="sr-only peer">
+            <div class="w-10 h-5 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#131313] after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- GOUVERNANCE & RÉTENTION -->
+    <div class="p-4 rounded-2xl bg-surface-container-low border border-surface-container-highest space-y-3">
+      <h4 class="text-xs font-bold uppercase tracking-wider text-on-surface font-mono flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px] text-primary">manage_history</span>
+        Gouvernance &amp; Durée de conservation
+      </h4>
+
+      <div class="space-y-3 text-xs">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="font-semibold text-on-surface">Conservation locale sur l'appareil</span>
+            <p class="text-[11px] text-on-surface-variant">Purger automatiquement les logs bruts après</p>
+          </div>
+          <span class="font-mono text-xs px-2 py-1 rounded bg-surface-container-high text-primary border border-outline-variant/40 font-bold">90 jours</span>
+        </div>
+
+        <div class="pt-2 border-t border-surface-container-highest/60 flex items-center justify-between">
+          <div class="pr-2">
+            <span class="font-semibold text-on-surface">Recherche &amp; Statistiques FFA anonymisées</span>
+            <p class="text-[11px] text-on-surface-variant">Transmission de moyennes désidentifiées pour benchmark national.</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer shrink-0">
+            <input type="checkbox" class="sr-only peer">
+            <div class="w-10 h-5 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#131313] after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIONS RGPD : EXPORT & DROIT À L'OUBLI -->
+    <div class="p-4 rounded-2xl bg-surface-container-low border border-surface-container-highest space-y-2.5">
+      <span class="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant font-bold">Droits du titulaire (RGPD Art. 15 à 17)</span>
+      
+      <button class="w-full h-11 px-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/40 text-on-surface flex items-center justify-between text-xs font-semibold active:scale-[0.98] transition-all">
+        <span class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px] text-primary">download</span>
+          Télécharger l'archive complète (.ZIP / FIT + JSON)
+        </span>
+        <span class="font-mono text-[10px] text-on-surface-variant">24.6 Mo</span>
+      </button>
+
+      <button class="w-full h-11 px-3 rounded-xl bg-error-container/20 hover:bg-error-container/30 border border-error/30 text-error flex items-center justify-between text-xs font-semibold active:scale-[0.98] transition-all">
+        <span class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px]">delete_forever</span>
+          Révoquer tous les accès &amp; Purger les données
+        </span>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- FIXED BOTTOM ACTION BAR -->
+  <div class="fixed bottom-0 left-0 right-0 p-4 bg-[#131313]/95 backdrop-blur-md border-t border-surface-container-highest/60 flex items-center justify-between max-w-lg mx-auto z-40">
+    <div class="text-[11px] font-mono text-on-surface-variant flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+      <span>Paramètres synchronisés</span>
+    </div>
+    <button class="h-11 px-6 rounded-xl bg-primary hover:bg-primary/90 active:scale-95 text-[#131313] font-bold text-xs tracking-wide uppercase transition-all shadow-[0_0_16px_rgba(202,242,46,0.25)] flex items-center gap-1.5 font-mono">
+      <span class="material-symbols-outlined text-[18px]">save</span>
+      Enregistrer
+    </button>
+  </div>
+
+</body>
+</html>

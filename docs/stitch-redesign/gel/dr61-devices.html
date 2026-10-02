@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+  <title>DR-61 • Mes objets &amp; Capteurs BLE</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#131313",
+            "surface-dim": "#131313",
+            "surface-bright": "#3a3939",
+            "surface-container-lowest": "#0e0e0e",
+            "surface-container-low": "#1c1b1b",
+            "surface-container": "#201f1f",
+            "surface-container-high": "#2a2a2a",
+            "surface-container-highest": "#353534",
+            "on-surface": "#e5e2e1",
+            "on-surface-variant": "#c5c9ae",
+            "primary": "#d6ff3c",
+            "primary-container": "#d6ff3c",
+            "on-primary": "#171e00",
+            "secondary": "#64de8d",
+            "on-secondary": "#00391a",
+            "error": "#ffb4ab",
+            "error-container": "#93000a",
+            "outline": "#8f937a",
+            "outline-variant": "#454934"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @layer base {
+      html, body { width: 100vw; margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
+      .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="bg-[#131313] font-sans text-[#e5e2e1] flex flex-col min-h-screen antialiased selection:bg-[#d6ff3c] selection:text-[#171e00]">
+
+  <!-- TOP APP BAR -->
+  <header class="fixed top-0 inset-x-0 z-50 bg-[#131313]/95 backdrop-blur-md border-b border-[#2a2a2a] pt-safe">
+    <div class="h-16 px-4 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <button aria-label="Retour" class="w-10 h-10 -ml-1 rounded-lg flex items-center justify-center text-[#e5e2e1] hover:bg-[#201f1f] transition-colors shrink-0" onclick="history.back()">
+          <span class="material-symbols-outlined text-[24px]">arrow_back</span>
+        </button>
+        <div class="flex flex-col min-w-0">
+          <span class="font-bold text-[17px] text-white tracking-tight truncate leading-tight">DR-61 • Mes objets</span>
+          <div class="flex items-center gap-1.5 mt-0.5">
+            <span class="w-2 h-2 rounded-full bg-[#64de8d] animate-pulse shrink-0"></span>
+            <span class="font-mono text-[10px] uppercase font-semibold text-[#64de8d] tracking-widest truncate">BLE 5.2 ACTIF • SCAN EN COURS</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#201f1f] border border-[#2a2a2a] text-[12px] font-semibold text-white hover:bg-[#2a2a2a] active:scale-95 transition-all">
+          <span class="material-symbols-outlined text-[16px] text-[#d6ff3c] animate-spin" style="animation-duration: 4s;">autorenew</span>
+          <span>Scanner</span>
+        </button>
+        <div class="w-9 h-9 rounded-full bg-[#2a2a2a] border border-[#454934]/60 flex items-center justify-center text-white">
+          <span class="material-symbols-outlined text-[19px]">person</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 w-full max-w-md mx-auto pt-20 pb-16 px-4 flex flex-col gap-5">
+
+    <!-- GLOBAL SUMMARY CARD -->
+    <div class="bg-[#1c1b1b] border border-[#2a2a2a] rounded-2xl p-4 flex flex-col gap-3.5 relative overflow-hidden shadow-lg">
+      <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-[#d6ff3c]/5 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="font-mono text-[11px] font-bold text-[#d6ff3c] bg-[#2a2a2a] px-2 py-0.5 rounded">TÉLÉMÉTRIE QUAI</span>
+          <span class="text-[12px] text-[#c5c9ae]">Réseau local direct</span>
+        </div>
+        <span class="font-mono text-[11px] font-semibold text-[#64de8d] flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#64de8d]"></span> 3 / 4 OPÉRATIONNELS
+        </span>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 pt-1 border-t border-[#2a2a2a]/60">
+        <div class="flex flex-col">
+          <span class="text-[11px] text-[#c5c9ae]">Latence BLE</span>
+          <span class="font-mono font-bold text-[16px] text-white">8 ms</span>
+          <span class="text-[10px] text-[#64de8d]">Temps réel</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-[11px] text-[#c5c9ae]">Batterie moy.</span>
+          <span class="font-mono font-bold text-[16px] text-[#d6ff3c]">85%</span>
+          <span class="text-[10px] text-[#c5c9ae]">3h40 estimées</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-[11px] text-[#c5c9ae]">Débit IMU</span>
+          <span class="font-mono font-bold text-[16px] text-white">100 Hz</span>
+          <span class="text-[10px] text-[#c5c9ae]">Haute précision</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVE SENSORS SECTION -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center justify-between px-1">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px] text-[#d6ff3c]">sensors</span>
+          <h2 class="font-bold text-[14px] text-white uppercase tracking-wider">Capteurs Actifs &amp; Appairés (3)</h2>
+        </div>
+        <span class="font-mono text-[11px] text-[#c5c9ae]">Sync active</span>
+      </div>
+
+      <!-- SENSOR 1: CARDIAC -->
+      <div class="bg-[#1c1b1b] border border-[#2a2a2a] rounded-xl p-3.5 flex flex-col gap-3 hover:border-[#454934] transition-all">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-[#2a2a2a] flex items-center justify-center text-[#ff8383] shrink-0">
+              <span class="material-symbols-outlined text-[22px]">favorite</span>
+            </div>
+            <div class="flex flex-col">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-[15px] text-white">Polar H10</span>
+                <span class="font-mono text-[10px] bg-[#2a2a2a] px-1.5 py-0.5 rounded text-[#c5c9ae]">#8F2A</span>
+              </div>
+              <span class="text-[12px] text-[#c5c9ae]">Ceinture thoracique • VRC active</span>
+            </div>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#64de8d]/10 border border-[#64de8d]/30 font-mono text-[10px] font-bold text-[#64de8d]">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#64de8d]"></span> CONNECTÉ
+          </span>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 bg-[#131313] p-2.5 rounded-lg border border-[#2a2a2a]">
+          <div>
+            <div class="text-[10px] text-[#c5c9ae]">FC Directe</div>
+            <div class="font-mono font-bold text-[15px] text-white flex items-baseline gap-1">
+              <span>62</span> <span class="text-[10px] font-normal text-[#c5c9ae]">bpm</span>
+            </div>
+          </div>
+          <div>
+            <div class="text-[10px] text-[#c5c9ae]">Batterie</div>
+            <div class="font-mono font-bold text-[15px] text-[#64de8d] flex items-baseline gap-1">
+              <span>92%</span>
+            </div>
+          </div>
+          <div>
+            <div class="text-[10px] text-[#c5c9ae]">Signal RSSI</div>
+            <div class="font-mono font-bold text-[15px] text-white flex items-baseline gap-1">
+              <span>-54</span> <span class="text-[10px] font-normal text-[#c5c9ae]">dBm</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-1 text-[11px] text-[#c5c9ae]">
+          <span>Affecté à : <strong class="text-white">Alexandre Martin (Nage)</strong></span>
+          <button class="text-[#d6ff3c] hover:underline font-medium">Calibrer</button>
+        </div>
+      </div>
+
+      <!-- SENSOR 2: KEEL IMU -->
+      <div class="bg-[#1c1b1b] border border-[#2a2a2a] rounded-xl p-3.5 flex flex-col gap-3 hover:border-[#454934] transition-all">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-[#2a2a2a] flex items-center justify-center text-[#d6ff3c] shrink-0">
+              <span class="material-symbols-outlined text-[22px]">navigation</span>
+            </div>
+            <div class="flex flex-col">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-[15px] text-white">DataR0w Pod Pro</span>
+                <span class="font-mono text-[10px] bg-[#2a2a2a] px-1.5 py-0.5 rounded text-[#d6ff3c]">Quille #04</span>
+              </div>
+              <span class="text-[12px] text-[#c5c9ae]">Centrale inertielle IMU 9-axes • GPS Diff.</span>
+            </div>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#64de8d]/10 border border-[#64de8d]/30 font-mono text-[10px] font-bold text-[#64de8d]">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#64de8d]"></span> TARÉ (DR-51)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 bg-[#131313] p-2.5 rounded-lg border border-[#2a2a2a]">
+          <div>
+            <div class="text-[10px] text-[#c5c9ae]">Échantillonnage</div>
+            <div class="font-mono font-bold text-[15px] text-white">100 Hz</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-[#c5c9ae]">Batterie</div>
+            <div class="font-mono font-bold text-[15px] text-[#d6ff3c]">78%</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-[#c5c9ae]">Fixation</div>
+            <div class="font-mono font-bold text-[14px] text-white truncate">Rigide Axe X</div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-1 text-[11px] text-[#c5c9ae]">
+          <span>Coque : <strong class="text-white">Empacher 4x/- (B-04)</strong></span>
+          <div class="flex items-center gap-3">
+            <button class="text-[#c5c9ae] hover:text-white">Tester LED</button>
+            <button class="text-[#d6ff3c] hover:underline font-medium">Re-tarer</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SENSOR 3: OARLOCKS -->
+      <div class="bg-[#1c1b1b] border border-[#2a2a2a] rounded-xl p-3.5 flex flex-col gap-3 hover:border-[#454934] transition-all">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-[#2a2a2a] flex items-center justify-center text-[#64de8d] shrink-0">
+              <span class="material-symbols-outlined text-[22px]">swap_horiz</span>
+            </div>
+            <div class="flex flex-col">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-[15px] text-white">SmartOar Dames de nage</span>
+                <span class="font-mono text-[10px] bg-[#2a2a2a] px-1.5 py-0.5 rounded text-[#c5c9ae]">Paire #12</span>
+              </div>
+              <span class="text-[12px] text-[#c5c9ae]">Capteur d'angle (-42° à +38°) &amp; Force (N)</span>
+            </div>
+          </div>
+          <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#64de8d]/10 border border-[#64de8d]/30 font-mono text-[10px] font-bold text-[#64de8d]">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#64de8d]"></span> PAIRE SYNCHRO
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 bg-[#131313] p-2.5 rounded-lg border border-[#2a2a2a]">
+          <div class="flex items-center justify-between pr-2 border-r border-[#2a2a2a]">
+            <div>
+              <div class="text-[10px] text-[#c5c9ae]">Bâbord (G)</div>
+              <div class="font-mono text-[13px] font-bold text-white">Batterie 88%</div>
+            </div>
+            <span class="font-mono text-[11px] text-[#64de8d]">0.0 N</span>
+          </div>
+          <div class="flex items-center justify-between pl-2">
+            <div>
+              <div class="text-[10px] text-[#c5c9ae]">Tribord (D)</div>
+              <div class="font-mono text-[13px] font-bold text-white">Batterie 85%</div>
+            </div>
+            <span class="font-mono text-[11px] text-[#64de8d]">0.0 N</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-1 text-[11px] text-[#c5c9ae]">
+          <span>Poste : <strong class="text-white">Nage 1 (Alexandre M.)</strong></span>
+          <button class="text-[#d6ff3c] hover:underline font-medium">Vérifier le zéro</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAVED SENSORS OUT OF RANGE -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center justify-between px-1">
+        <h2 class="font-bold text-[14px] text-white uppercase tracking-wider">Capteurs Enregistrés Hors Portée (1)</h2>
+        <span class="font-mono text-[11px] text-[#c5c9ae]">Veille</span>
+      </div>
+
+      <div class="bg-[#1c1b1b]/70 border border-[#2a2a2a] rounded-xl p-3.5 flex items-center justify-between gap-3 opacity-80 hover:opacity-100 transition-opacity">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-[#2a2a2a] flex items-center justify-center text-[#8f937a] shrink-0">
+            <span class="material-symbols-outlined text-[22px]">timer</span>
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-[14px] text-white">StrokeCoach GPS 2</span>
+              <span class="text-[10px] font-mono text-[#c5c9ae]">#CX-09</span>
+            </div>
+            <span class="text-[11px] text-[#c5c9ae]">Dernière détection : Hier à 18:40</span>
+          </div>
+        </div>
+
+        <button class="px-2.5 py-1 rounded bg-[#2a2a2a] text-[11px] text-white font-medium hover:bg-[#353534] transition-colors">
+          Réveiller
+        </button>
+      </div>
+    </div>
+
+    <!-- DISCOVERED SURROUNDING BLE DEVICES -->
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center justify-between px-1">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-[#d6ff3c] animate-ping"></span>
+          <h2 class="font-bold text-[14px] text-white uppercase tracking-wider">Nouveaux signaux au ponton</h2>
+        </div>
+        <span class="font-mono text-[10px] text-[#d6ff3c]">SCAN ACTIF</span>
+      </div>
+
+      <div class="bg-[#1c1b1b] border border-[#2a2a2a] rounded-xl divide-y divide-[#2a2a2a]">
+        <!-- DISCOVERED 1 -->
+        <div class="p-3 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="material-symbols-outlined text-[18px] text-[#c5c9ae]">bluetooth_searching</span>
+            <div class="flex flex-col min-w-0">
+              <span class="font-bold text-[13px] text-white truncate">DataR0w Sensor Pod #09</span>
+              <span class="text-[10px] font-mono text-[#c5c9ae]">RSSI: -62 dBm • Non appairé</span>
+            </div>
+          </div>
+          <button class="px-3 py-1 rounded bg-[#d6ff3c] text-[#171e00] font-bold text-[11px] hover:brightness-110 active:scale-95 transition-transform shrink-0">
+            + Associer
+          </button>
+        </div>
+
+        <!-- DISCOVERED 2 -->
+        <div class="p-3 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="material-symbols-outlined text-[18px] text-[#c5c9ae]">favorite</span>
+            <div class="flex flex-col min-w-0">
+              <span class="font-bold text-[13px] text-white truncate">Garmin HRM-Pro #914</span>
+              <span class="text-[10px] font-mono text-[#c5c9ae]">RSSI: -78 dBm • Ceinture cardio</span>
+            </div>
+          </div>
+          <button class="px-3 py-1 rounded bg-[#2a2a2a] text-white text-[11px] font-medium hover:bg-[#353534] transition-colors shrink-0">
+            Associer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HARDWARE SETTINGS ACCORDION/CARD -->
+    <div class="bg-[#1c1b1b] border border-[#2a2a2a] rounded-xl p-3.5 flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <span class="font-bold text-[13px] text-white uppercase tracking-wider">Paramètres de transmission</span>
+        <span class="font-mono text-[10px] text-[#d6ff3c]">OPTIMISÉ AVIRON</span>
+      </div>
+
+      <div class="flex flex-col gap-2.5 text-[12px]">
+        <div class="flex items-center justify-between">
+          <span class="text-[#c5c9ae]">Fréquence IMU</span>
+          <span class="font-mono font-bold text-white bg-[#2a2a2a] px-2 py-0.5 rounded">100 Hz (Recommandé)</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-[#c5c9ae]">Alerte sonore de décrochage sur l'eau</span>
+          <span class="font-bold text-[#64de8d]">ACTIVÉE</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-[#c5c9ae]">Mise en veille automatique ponton</span>
+          <span class="text-white">Après 10 min immobilité</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM ACTION CTAS -->
+    <div class="flex flex-col gap-2.5 pt-2 pb-safe">
+      <button class="w-full py-3.5 px-4 rounded-xl bg-[#d6ff3c] text-[#171e00] font-bold text-[14px] flex items-center justify-center gap-2 shadow-lg hover:brightness-105 active:scale-[0.98] transition-all">
+        <span class="material-symbols-outlined text-[20px]">tune</span>
+        <span>LANCER LA PROCÉDURE DE TARE (DR-51)</span>
+      </button>
+
+      <button class="w-full py-3 px-4 rounded-xl bg-[#201f1f] border border-[#2a2a2a] text-[#e5e2e1] font-semibold text-[13px] flex items-center justify-center gap-2 hover:bg-[#2a2a2a] transition-colors">
+        <span class="material-symbols-outlined text-[18px] text-[#c5c9ae]">description</span>
+        <span>Exporter le rapport d'intégrité capteurs (.JSON)</span>
+      </button>
+    </div>
+
+  </main>
+
+</body>
+</html>

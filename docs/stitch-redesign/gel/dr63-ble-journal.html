@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>DR-63 • Journal technique & Diagnostics BLE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            surface: "#131313",
+            "surface-dim": "#101010",
+            "surface-bright": "#222222",
+            "surface-container": "#181818",
+            "surface-container-high": "#222222",
+            "surface-container-highest": "#2c2c2c",
+            "on-surface": "#e5e2e1",
+            "on-surface-variant": "#a5a995",
+            outline: "#8f937a",
+            "outline-variant": "#343825",
+            primary: "#d6ff3c",
+            "primary-container": "#2f3800",
+            secondary: "#64de8d",
+            cyan: "#38bdf8",
+            amber: "#fbbf24",
+            error: "#ff6b6b",
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      background-color: #0e0e0e;
+      color: #e5e2e1;
+      font-family: 'Inter', sans-serif;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #141414;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #2a2a2a;
+      border-radius: 3px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #3e3e3e;
+    }
+  </style>
+</head>
+<body class="bg-[#0e0e0e] text-[#e5e2e1] min-h-screen flex flex-col">
+
+  <!-- TOP APP BAR / CONSOLE HEADER -->
+  <header class="sticky top-0 z-50 bg-[#131313]/95 backdrop-blur-md border-b border-surface-container-highest px-6 py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <button onclick="history.back()" class="w-9 h-9 rounded-lg bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface transition-colors border border-surface-container-highest">
+        <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+      </button>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-mono text-[11px] font-bold text-primary tracking-widest uppercase">DR-63</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+          <span class="font-mono text-[10px] text-secondary font-semibold uppercase tracking-wider">BLE 5.2 GATT Core</span>
+          <span class="px-2 py-0.5 rounded bg-surface-container-highest text-[10px] font-mono text-cyan border border-cyan/20">SQLCipher AES-256</span>
+        </div>
+        <h1 class="text-base font-bold text-on-surface flex items-center gap-2">
+          Journal technique & Diagnostics BLE
+          <span class="text-xs font-normal text-on-surface-variant font-mono">(Télémétrie bas-niveau & Buffer live)</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- HEADER CONTROLS & BUFFER STATE -->
+    <div class="flex items-center gap-3">
+      <div class="hidden md:flex items-center gap-3 bg-surface-container border border-surface-container-highest px-3 py-1.5 rounded-lg text-xs font-mono">
+        <span class="text-on-surface-variant">Buffer local:</span>
+        <div class="w-24 bg-surface-container-highest h-2 rounded-full overflow-hidden">
+          <div class="bg-primary h-full rounded-full" style="width: 24%"></div>
+        </div>
+        <span class="text-primary font-bold">14.8 / 64 Mo</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button class="px-3 py-1.5 bg-surface-container hover:bg-surface-container-high border border-surface-container-highest rounded-lg text-xs font-mono text-on-surface flex items-center gap-1.5 transition-all">
+          <span class="material-symbols-outlined text-[16px] text-amber">pause_circle</span>
+          Pause flux
+        </button>
+        <button class="px-3 py-1.5 bg-surface-container hover:bg-surface-container-high border border-surface-container-highest rounded-lg text-xs font-mono text-on-surface flex items-center gap-1.5 transition-all">
+          <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+          Vider
+        </button>
+        <button class="px-3.5 py-1.5 bg-primary hover:bg-primary/90 text-[#131313] font-bold rounded-lg text-xs font-mono flex items-center gap-1.5 shadow-[0_0_12px_rgba(214,255,60,0.25)] transition-all">
+          <span class="material-symbols-outlined text-[16px]">file_download</span>
+          Exporter (.LOG/.JSON)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN DIAGNOSTIC WORKSPACE -->
+  <main class="flex-1 p-6 max-w-7xl mx-auto w-full space-y-5">
+
+    <!-- 1. BUS TÉLÉMÉTRIE & PERFORMANCE GATT -->
+    <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div class="bg-surface-container rounded-xl p-3.5 border border-surface-container-highest flex flex-col justify-between">
+        <span class="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">Fréquence Bus</span>
+        <div class="mt-2 flex items-baseline gap-1">
+          <span class="text-2xl font-bold font-mono text-primary">100.2</span>
+          <span class="text-xs font-mono text-on-surface-variant">Hz</span>
+        </div>
+        <span class="text-[10px] font-mono text-secondary mt-1 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Nominal
+        </span>
+      </div>
+
+      <div class="bg-surface-container rounded-xl p-3.5 border border-surface-container-highest flex flex-col justify-between">
+        <span class="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">Latence moyenne</span>
+        <div class="mt-2 flex items-baseline gap-1">
+          <span class="text-2xl font-bold font-mono text-on-surface">8.2</span>
+          <span class="text-xs font-mono text-on-surface-variant">ms</span>
+        </div>
+        <span class="text-[10px] font-mono text-on-surface-variant mt-1">Jitter ±1.4 ms</span>
+      </div>
+
+      <div class="bg-surface-container rounded-xl p-3.5 border border-surface-container-highest flex flex-col justify-between">
+        <span class="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">Perte de paquets</span>
+        <div class="mt-2 flex items-baseline gap-1">
+          <span class="text-2xl font-bold font-mono text-secondary">0.08%</span>
+        </div>
+        <span class="text-[10px] font-mono text-on-surface-variant mt-1">4 paquets / 5k</span>
+      </div>
+
+      <div class="bg-surface-container rounded-xl p-3.5 border border-surface-container-highest flex flex-col justify-between">
+        <span class="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">Débit entrant</span>
+        <div class="mt-2 flex items-baseline gap-1">
+          <span class="text-2xl font-bold font-mono text-cyan">24.6</span>
+          <span class="text-xs font-mono text-on-surface-variant">Ko/s</span>
+        </div>
+        <span class="text-[10px] font-mono text-on-surface-variant mt-1">Plafond 64 Ko/s</span>
+      </div>
+
+      <div class="bg-surface-container rounded-xl p-3.5 border border-surface-container-highest flex flex-col justify-between">
+        <span class="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">MTU négocier</span>
+        <div class="mt-2 flex items-baseline gap-1">
+          <span class="text-2xl font-bold font-mono text-on-surface">247</span>
+          <span class="text-xs font-mono text-on-surface-variant">octets</span>
+        </div>
+        <span class="text-[10px] font-mono text-primary mt-1">DLE Extended Data</span>
+      </div>
+
+      <div class="bg-surface-container rounded-xl p-3.5 border border-surface-container-highest flex flex-col justify-between">
+        <span class="text-[10px] font-mono text-on-surface-variant uppercase tracking-wider">Base locale WAL</span>
+        <div class="mt-2 flex items-baseline gap-1">
+          <span class="text-2xl font-bold font-mono text-on-surface">48</span>
+          <span class="text-xs font-mono text-on-surface-variant">lignes/s</span>
+        </div>
+        <span class="text-[10px] font-mono text-secondary mt-1">Sync commit OK</span>
+      </div>
+    </section>
+
+    <!-- 2. DIAGNOSTIC PAR PÉRIPHÉRIQUE (3 CARTES MATÉRIELLES) -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs font-bold font-mono text-on-surface uppercase tracking-wider flex items-center gap-2">
+          <span class="material-symbols-outlined text-[16px] text-primary">sensors</span>
+          État détaillé des périphériques BLE en écoute (3 actifs)
+        </h2>
+        <span class="text-[11px] font-mono text-on-surface-variant">Scan continu 2.4 GHz • Filtre RSSI &gt; -90 dBm</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <!-- CARD 1: POLAR H10 -->
+        <div class="bg-surface-container rounded-xl p-4 border border-surface-container-highest hover:border-outline transition-colors flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-surface-container-highest">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400">
+                  <span class="material-symbols-outlined text-[18px]">favorite</span>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-on-surface">Polar H10 #8F2A</div>
+                  <div class="text-[10px] font-mono text-on-surface-variant">UUID: 0x180D (Heart Rate)</div>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-secondary/10 border border-secondary/30 text-[10px] font-mono text-secondary font-semibold">
+                LINK OK
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mt-3 text-xs font-mono">
+              <div class="bg-surface-container-high rounded p-2 border border-surface-container-highest">
+                <span class="text-[9px] text-on-surface-variant block uppercase">Signal RSSI</span>
+                <span class="text-sm font-bold text-secondary">-56 dBm</span>
+              </div>
+              <div class="bg-surface-container-high rounded p-2 border border-surface-container-highest">
+                <span class="text-[9px] text-on-surface-variant block uppercase">Notifications</span>
+                <span class="text-sm font-bold text-on-surface">142,890</span>
+              </div>
+              <div class="bg-surface-container-high rounded p-2 border border-surface-container-highest">
+                <span class="text-[9px] text-on-surface-variant block uppercase">Intervalle R-R</span>
+                <span class="text-sm font-bold text-cyan">968 ms</span>
+              </div>
+              <div class="bg-surface-container-high rounded p-2 border border-surface-container-highest">
+                <span class="text-[9px] text-on-surface-variant block uppercase">Batterie Service</span>
+                <span class="text-sm font-bold text-primary">92%</span>
+              </div>
+            </div>
+
+            <div class="mt-3 bg-surface-container-lowest rounded p-2 border border-surface-container-highest font-mono text-[10px] text-on-surface-variant overflow-x-auto">
+              <span class="text-outline text-[9px] block mb-0.5">DERNIER PAYLOAD BRUT HEX:</span>
+              <span class="text-primary">16 3E 03 E8 03 C8 03 B2</span>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-surface-container-highest flex items-center justify-between text-[11px] font-mono">
+            <span class="text-on-surface-variant">Drop rate: 0.00%</span>
+            <button class="text-primary hover:underline flex items-center gap-1">
+              Ping Echo <span class="material-symbols-outlined text-[12px]">send</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CARD 2: DATAR0W POD PRO -->
+        <div class="bg-surface-container rounded-xl p-4 border border-surface-container-highest hover:border-outline transition-colors flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-surface-container-highest">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                  <span class="material-symbols-outlined text-[18px]">navigation</span>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-on-surface">DataR0w Pod Pro #04</div>
+                  <div class="text-[10px] font-mono text-on-surface-variant">IMU 9-Axes + Baro (Quille)</div>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-secondary/10 border border-secondary/30 text-[10px] font-mono text-secondary font-semibold">
+                CALIBRÉ
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mt-3 text-xs font-mono">
+              <div class="bg-surface-container-high rounded p-2 border border-surface-container-highest">
+                <span class="text-[9px] text-on-surface-variant block uppercase">Signal RSSI</span>
+                <span class="text-sm font-bold text-secondary">-52 dBm</span>
+              </div>
+              <div class="bg-surface-container-high rounded p-2 border border-surface-container-highest">
+                <span class="text-[9px] text-on-surface-variant block uppercase">Cadence IMU</span>
+                <span class="text-sm font-bold text-primary">100.0 Hz</span>
+              </div>
+              <div class="bg-surface-container-high rounded p-2 border border-surface-container-highest">
+                <span class="text-[9px] text-on-surface-variant block uppercase">Dérive Gyro</span>
+                <span class="text-sm font-bold text-secondary">&lt; 0.02°/s</span>
+              </div>
+              <div class="bg-surface-container-high rounded p-2 border border-surface-container-highest">
+                <span class="text-[9px] text-on-surface-variant block uppercase">Température</span>
+                <span class="text-sm font-bold text-on-surface">32.4 °C</span>
+              </div>
+            </div>
+
+            <div class="mt-3 bg-surface-container-lowest rounded p-2 border border-surface-container-highest font-mono text-[10px] text-on-surface-variant overflow-x-auto">
+              <span class="text-outline text-[9px] block mb-0.5">ORIENTATION QUATERNION:</span>
+              <span class="text-cyan">w:0.92 x:-0.03 y:0.01 z:0.38</span>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-surface-container-highest flex items-center justify-between text-[11px] font-mono">
+            <span class="text-on-surface-variant">Drift recal: OK</span>
+            <button class="text-primary hover:underline flex items-center gap-1">
+              Re-tare (DR-51) <span class="material-symbols-outlined text-[12px]">tune</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CARD 3: SMARTOAR DAMES DE NAGE -->
+        <div class="bg-surface-container rounded-xl p-4 border border-surface-container-highest hover:border-outline transition-colors flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-surface-container-highest">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-cyan/10 border border-cyan/20 flex items-center justify-center text-cyan">
+                  <span class="material-symbols-outlined text-[18px]">sync_alt</span>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-on-surface">SmartOar Dames #12</div>
+                  <div class="text-[10px] font-mono text-on-surface-variant">Bi-capteur Bâbord / Tribord</div>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-secondary/10 border border-secondary/30 text-[10px] font-mono text-secondary font-semibold">
+                PAIR SYNC
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 mt-3 text-xs font-mono">
+              <div class="bg-surface-container-high rounded p-2 border border-surface-container-highest">
+                <span class="text-[9px] text-on-surface-variant block uppercase">Signal RSSI</span>
+                <span class="text-sm font-bold text-amber">-68 dBm</span>
+              </div>
+              <div class="bg-surface-container-high rounded p-2 border border-surface-container-highest">
+                <span class="text-[9px] text-on-surface-variant block uppercase">Synchro Paire</span>
+                <span class="text-sm font-bold text-secondary">&lt; 1.0 ms</span>
+              </div>
+              <div class="bg-surface-container-high rounded p-2 border border-surface-container-highest">
+                <span class="text-[9px] text-on-surface-variant block uppercase">Pic Force (N)</span>
+                <span class="text-sm font-bold text-on-surface">680 N</span>
+              </div>
+              <div class="bg-surface-container-high rounded p-2 border border-surface-container-highest">
+                <span class="text-[9px] text-on-surface-variant block uppercase">Tension Cell</span>
+                <span class="text-sm font-bold text-primary">3.84 V</span>
+              </div>
+            </div>
+
+            <div class="mt-3 bg-surface-container-lowest rounded p-2 border border-surface-container-highest font-mono text-[10px] text-on-surface-variant overflow-x-auto">
+              <span class="text-outline text-[9px] block mb-0.5">DAME BABORD / TRIBORD:</span>
+              <span class="text-secondary">L: 412 N (-38.2°) | R: 408 N (-38.4°)</span>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-surface-container-highest flex items-center justify-between text-[11px] font-mono">
+            <span class="text-on-surface-variant">Symétrie: 99.1%</span>
+            <button class="text-primary hover:underline flex items-center gap-1">
+              Zero-load <span class="material-symbols-outlined text-[12px]">refresh</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 3. CONSOLE DE LOGS BRUTS EN TEMPS RÉEL (TERMINAL FLUIDE) -->
+    <section class="bg-surface-container rounded-xl border border-surface-container-highest overflow-hidden flex flex-col">
+      <!-- TERMINAL TOOLBAR -->
+      <div class="bg-[#101010] px-4 py-2.5 border-b border-surface-container-highest flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-3 rounded-full bg-red-500/80"></span>
+            <span class="w-3 h-3 rounded-full bg-amber/80"></span>
+            <span class="w-3 h-3 rounded-full bg-secondary/80"></span>
+          </div>
+          <span class="text-xs font-mono font-bold text-on-surface ml-2">Console Live GATT & Télémétrie</span>
+          <span class="px-2 py-0.5 rounded bg-surface-container-highest text-[10px] font-mono text-secondary">
+            Auto-scroll ACTIF
+          </span>
+        </div>
+
+        <!-- FILTRES DE VERBOSITÉ -->
+        <div class="flex items-center gap-1 text-[11px] font-mono">
+          <span class="text-on-surface-variant mr-1">Filtre:</span>
+          <button class="px-2 py-0.5 rounded bg-primary text-[#131313] font-bold">TOUS (1,248)</button>
+          <button class="px-2 py-0.5 rounded bg-surface-container-highest text-cyan hover:bg-surface-container">DEBUG</button>
+          <button class="px-2 py-0.5 rounded bg-surface-container-highest text-secondary hover:bg-surface-container">INFO</button>
+          <button class="px-2 py-0.5 rounded bg-surface-container-highest text-amber hover:bg-surface-container">WARN (2)</button>
+          <button class="px-2 py-0.5 rounded bg-surface-container-highest text-error hover:bg-surface-container">ERR (0)</button>
+        </div>
+      </div>
+
+      <!-- TERMINAL CONTENT STREAM -->
+      <div class="bg-[#0a0a0a] p-4 font-mono text-[11px] leading-relaxed custom-scroll overflow-y-auto max-h-[340px] space-y-1.5 text-on-surface">
+        <div class="text-outline-variant text-[10px] pb-1 border-b border-surface-container-highest/40 mb-2">
+          --- Démarrage de la session d'écoute Bluetooth Low Energy 5.2 - Protocole DataR0w v2.4 ---
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="text-on-surface-variant select-none">[09:42:15.892]</span>
+          <span class="text-cyan font-semibold">[DEBUG]</span>
+          <span class="text-primary font-medium">[BLE_GATT]</span>
+          <span class="text-on-surface">MTU exchange acknowledged by peripheral #04 (MTU=247, Handle 0x0012, RX buffer primed)</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="text-on-surface-variant select-none">[09:42:15.912]</span>
+          <span class="text-secondary font-semibold">[INFO]</span>
+          <span class="text-primary font-medium">[IMU_FUSION]</span>
+          <span class="text-on-surface">AHRS Mahony filter converged | pitch: -1.24° | roll: +0.42° | yaw: 184.6° | gyro bias OK</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="text-on-surface-variant select-none">[09:42:16.004]</span>
+          <span class="text-secondary font-semibold">[INFO]</span>
+          <span class="text-primary font-medium">[HEART_RATE]</span>
+          <span class="text-on-surface">Polar H10 notified: RR interval 968ms | instant HR: 62 bpm | HRV SDNN: 64ms | Stress: Low</span>
+        </div>
+        <div class="flex items-start gap-2 bg-amber/5 px-1 rounded">
+          <span class="text-on-surface-variant select-none">[09:42:16.140]</span>
+          <span class="text-amber font-semibold">[WARN]</span>
+          <span class="text-primary font-medium">[RF_LINK]</span>
+          <span class="text-amber">RSSI transient dip on Pod #04 (-78 dBm -&gt; -54 dBm) - Atténuation clapot d'eau sur quille</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="text-on-surface-variant select-none">[09:42:16.200]</span>
+          <span class="text-cyan font-semibold">[DEBUG]</span>
+          <span class="text-primary font-medium">[SYNC_ENGINE]</span>
+          <span class="text-on-surface">SQLite local WAL flushed: 48 rows committed to table <code class="text-secondary">telemetry_live</code> (commit time 1.1ms)</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="text-on-surface-variant select-none">[09:42:16.350]</span>
+          <span class="text-secondary font-semibold">[INFO]</span>
+          <span class="text-primary font-medium">[STROKE_DETECTOR]</span>
+          <span class="text-on-surface">Catch detected at t=1842.10s | peak force: 680 N | entry angle: -38.5° | drive phase initiated</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="text-on-surface-variant select-none">[09:42:16.480]</span>
+          <span class="text-cyan font-semibold">[DEBUG]</span>
+          <span class="text-primary font-medium">[BLE_SMARTOAR]</span>
+          <span class="text-on-surface">Differential load frame: Babord=412N, Tribord=408N, Balance=99.1% | Jitter delta=0.4ms</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="text-on-surface-variant select-none">[09:42:16.600]</span>
+          <span class="text-secondary font-semibold">[INFO]</span>
+          <span class="text-primary font-medium">[GPS_DIFF]</span>
+          <span class="text-on-surface">RTK Float fix acquired (14 satellites tracked, HDOP 0.72) | Lat: 44.8378° N, Lon: 0.2184° E</span>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="text-on-surface-variant select-none">[09:42:16.710]</span>
+          <span class="text-cyan font-semibold">[DEBUG]</span>
+          <span class="text-primary font-medium">[MEM_GUARD]</span>
+          <span class="text-on-surface">Ring buffer check: 14.82 Mo / 64 Mo (23.1% capacity) | GC cycle skipped | zero dropped frames</span>
+        </div>
+      </div>
+
+      <!-- TERMINAL FOOTER / COMMAND QUICK RUN -->
+      <div class="bg-[#101010] px-4 py-3 border-t border-surface-container-highest flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-xs font-mono text-on-surface-variant">
+          <span class="text-secondary">●</span> Télémétrie non bloquante (Thread dédié RT-Priority 95)
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-3 py-1 bg-surface-container hover:bg-surface-container-high border border-surface-container-highest rounded text-xs font-mono text-on-surface transition-colors">
+            Tester injection de trame
+          </button>
+          <button class="px-3 py-1 bg-surface-container hover:bg-surface-container-high border border-surface-container-highest rounded text-xs font-mono text-on-surface transition-colors">
+            Forcer flush SQLite
+          </button>
+          <button class="px-3 py-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded text-xs font-mono transition-colors">
+            Copier les logs (Clipboard)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. INSPECTION DE LA SOUVERAINETÉ & PIPELINE LOCAL-FIRST -->
+    <section class="bg-surface-container rounded-xl p-4 border border-surface-container-highest flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-secondary/10 border border-secondary/30 flex items-center justify-center text-secondary">
+          <span class="material-symbols-outlined text-[22px]">verified_user</span>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-on-surface">Audit d'intégrité cryptographique & Local-First</div>
+          <div class="text-[11px] font-mono text-on-surface-variant">
+            Empreinte session: <span class="text-primary">SHA256: d82a-44fe-91c0-aa31</span> • Base isolée du terminal, aucun relai cloud sans validation
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 w-full md:w-auto">
+        <button class="flex-1 md:flex-none px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest border border-surface-container-highest text-xs font-mono rounded-lg text-on-surface transition-colors">
+          Vérifier les tables SQLCipher
+        </button>
+        <button class="flex-1 md:flex-none px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest border border-surface-container-highest text-xs font-mono rounded-lg text-on-surface transition-colors">
+          Rapport de conformité FFA
+        </button>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>
