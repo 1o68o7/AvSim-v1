@@ -38,6 +38,7 @@ import 'funnel/screen_ateliers.dart';
 import 'funnel/screen_brief.dart';
 import 'funnel/screen_onboard.dart';
 import 'funnel/screen_player.dart';
+import 'funnel/screen_pm5.dart';
 import 'funnel/screen_preview.dart';
 import 'funnel/screen_proof.dart';
 import 'funnel/screen_suite.dart';
@@ -132,6 +133,7 @@ abstract final class AppRoutes {
   static const funnelAteliers = '/funnel/ateliers';
   static const funnelPreview = '/funnel/preview';
   static const funnelBrief = '/funnel/brief';
+  static const funnelPm5 = '/funnel/pm5';
   static const funnelPlayer = '/funnel/player';
   static const funnelProof = '/funnel/proof';
   static const funnelSuite = '/funnel/suite';
@@ -480,6 +482,12 @@ final GoRouter appRouter = GoRouter(
       name: 'funnel-brief',
       builder: (context, state) =>
           _hub(AppRoutes.funnelBrief, const FunnelBriefScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.funnelPm5,
+      name: 'funnel-pm5',
+      builder: (context, state) =>
+          _hub(AppRoutes.funnelPm5, const FunnelPm5Screen()),
     ),
     GoRoute(
       path: AppRoutes.funnelPlayer,

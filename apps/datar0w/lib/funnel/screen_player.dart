@@ -8,8 +8,9 @@ import '../router.dart';
 import '../theme/deck_theme.dart';
 import 'controller.dart';
 import 'models.dart';
+import 'pm5_client.dart';
 
-/// DR-FR-5 / DR-FR-R — Player erg (MVP chrono + saisie manuelle, Lot 1+2).
+/// DR-FR-5 / DR-FR-R — Player erg (+ PM5 live Lot 3).
 class FunnelPlayerScreen extends ConsumerStatefulWidget {
   const FunnelPlayerScreen({super.key});
 
@@ -24,12 +25,27 @@ class _FunnelPlayerScreenState extends ConsumerState<FunnelPlayerScreen> {
   bool _running = false;
   int _legIndex = 0; // relay / intervals
   final List<double> _legTimes = [];
+  StreamSubscription<Pm5LiveTick>? _pm5Sub;
+  Pm5LiveTick? _pm5;
 
   ErgPiece get _piece => ref.read(funnelProvider).resolvedPiece;
 
   @override
+  void initState() {
+    super.initState();
+    final client = ref.read(pm5ClientProvider);
+    if (client.connectedId != null) {
+      _pm5Sub = client.ticks.listen((t) {
+        if (mounted) setState(() => _pm5 = t);
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _timer?.cancel();
+    _pm5Sub?.cancel();
+    unawaited(ref.read(pm5ClientProvider).stopWorkout());
     super.dispose();
   }
 
@@ -40,18 +56,29 @@ class _FunnelPlayerScreenState extends ConsumerState<FunnelPlayerScreen> {
     });
   }
 
-  void _start() {
+  Future<void> _start() async {
     _startedAt = DateTime.now().subtract(_elapsed);
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(milliseconds: 200), (_) => _tick());
+    final client = ref.read(pm5ClientProvider);
+    if (client.connectedId != null) {
+      final dist = _piece.logDistM > 0 ? _piece.logDistM : 2000;
+      await client.startWorkout(targetDistM: dist);
+    }
     setState(() => _running = true);
   }
 
   Future<void> _stop() async {
     _timer?.cancel();
+    await ref.read(pm5ClientProvider).stopWorkout();
     setState(() => _running = false);
     final piece = _piece;
-    final sec = _elapsed.inMilliseconds / 1000.0;
+    final sec = _pm5 != null && _pm5!.elapsedS > 0
+        ? _pm5!.elapsedS
+        : _elapsed.inMilliseconds / 1000.0;
+    final liveCadence = _pm5?.cadence;
+    final liveWatts = _pm5?.watts;
+    final liveDf = _pm5?.dragFactor;
 
     if (piece.kind == ErgPieceKind.duration) {
       final target = (piece.durationS ?? 300).toDouble();
@@ -59,7 +86,9 @@ class _FunnelPlayerScreenState extends ConsumerState<FunnelPlayerScreen> {
       await ref.read(funnelProvider.notifier).finishSession(
             piece: piece,
             durationS: sec > 0 ? sec : target,
-            cadence: piece.targetCadence?.toDouble(),
+            cadence: liveCadence ?? piece.targetCadence?.toDouble(),
+            watts: liveWatts,
+            dragFactor: liveDf,
             complete: complete,
           );
       if (!mounted) return;
@@ -85,10 +114,13 @@ class _FunnelPlayerScreenState extends ConsumerState<FunnelPlayerScreen> {
             durationS: total,
             complete: true,
             blockCadences: piece.blockCadences,
-            cadence: piece.blockCadences.isEmpty
-                ? null
-                : piece.blockCadences.reduce((a, b) => a + b) /
-                    piece.blockCadences.length,
+            cadence: liveCadence ??
+                (piece.blockCadences.isEmpty
+                    ? null
+                    : piece.blockCadences.reduce((a, b) => a + b) /
+                        piece.blockCadences.length),
+            watts: liveWatts,
+            dragFactor: liveDf,
           );
       if (!mounted) return;
       context.go(AppRoutes.funnelProof);
@@ -111,13 +143,38 @@ class _FunnelPlayerScreenState extends ConsumerState<FunnelPlayerScreen> {
             piece: piece,
             durationS: total,
             complete: true,
+            cadence: liveCadence,
+            watts: liveWatts,
+            dragFactor: liveDf,
           );
       if (!mounted) return;
       context.go(AppRoutes.funnelProof);
       return;
     }
 
-    // Distance (incl. 1 000 m annoncé).
+    // Distance (incl. 1 000 m annoncé) — PM5 peut remplir sans dialogue.
+    if (_pm5 != null && _pm5!.distM > 0 && _pm5!.elapsedS > 0) {
+      final realized = _pm5!.distM;
+      var complete = true;
+      if (piece.announcedMinM != null) {
+        complete = announced1000InBand(realized);
+      } else if (piece.distM != null && piece.distM! > 0) {
+        complete = realized >= (piece.distM! * 0.98).round();
+      }
+      await ref.read(funnelProvider.notifier).finishSession(
+            piece: piece,
+            durationS: _pm5!.elapsedS,
+            complete: complete,
+            cadence: liveCadence,
+            watts: liveWatts,
+            dragFactor: liveDf,
+            realizedDistM: piece.announcedMinM != null ? realized : null,
+          );
+      if (!mounted) return;
+      context.go(AppRoutes.funnelProof);
+      return;
+    }
+
     await _finishDistanceDialog(piece, sec);
   }
 
@@ -235,12 +292,20 @@ class _FunnelPlayerScreenState extends ConsumerState<FunnelPlayerScreen> {
     final funnel = ref.watch(funnelProvider);
     final piece = funnel.resolvedPiece;
     final target = funnel.profile?.targetSplit500s;
-    final elapsedS = _elapsed.inMilliseconds / 1000.0;
-    final cadenceHint = piece.kind == ErgPieceKind.intervals
-        ? (piece.blockCadences.length > _legIndex
-            ? piece.blockCadences[_legIndex]
-            : null)
-        : piece.targetCadence;
+    final elapsedS = _pm5 != null && _pm5!.elapsedS > 0
+        ? _pm5!.elapsedS
+        : _elapsed.inMilliseconds / 1000.0;
+    final cadenceHint = _pm5 != null && _pm5!.cadence > 0
+        ? _pm5!.cadence.round()
+        : (piece.kind == ErgPieceKind.intervals
+            ? (piece.blockCadences.length > _legIndex
+                ? piece.blockCadences[_legIndex]
+                : null)
+            : piece.targetCadence);
+    final dfLive = _pm5?.dragFactor ?? funnel.activeDragFactor;
+    final wattsLive = _pm5 != null && _pm5!.watts > 0
+        ? '${_pm5!.watts.round()}'
+        : '—';
 
     String heroLabel;
     String heroValue;
@@ -250,17 +315,21 @@ class _FunnelPlayerScreenState extends ConsumerState<FunnelPlayerScreen> {
       heroValue = formatErgTime(elapsedS);
     } else {
       heroLabel = 'Split';
-      final distM = piece.kind == ErgPieceKind.relay
-          ? (piece.blockDistM ?? 500)
-          : (piece.distM ?? 500);
-      final estPace = target ?? 120.0;
-      final projectedDist = elapsedS > 0
-          ? (elapsedS / estPace * 500).clamp(0, distM.toDouble())
-          : 0.0;
-      final liveSplit = elapsedS > 1 && projectedDist > 10
-          ? split500Seconds(durationS: elapsedS, distM: projectedDist.round())
-          : (target ?? 0);
-      heroValue = liveSplit > 0 ? formatErgTime(liveSplit) : '—';
+      if (_pm5 != null && _pm5!.split500S > 0) {
+        heroValue = formatErgTime(_pm5!.split500S);
+      } else {
+        final distM = piece.kind == ErgPieceKind.relay
+            ? (piece.blockDistM ?? 500)
+            : (piece.distM ?? 500);
+        final estPace = target ?? 120.0;
+        final projectedDist = elapsedS > 0
+            ? (elapsedS / estPace * 500).clamp(0, distM.toDouble())
+            : 0.0;
+        final liveSplit = elapsedS > 1 && projectedDist > 10
+            ? split500Seconds(durationS: elapsedS, distM: projectedDist.round())
+            : (target ?? 0);
+        heroValue = liveSplit > 0 ? formatErgTime(liveSplit) : '—';
+      }
     }
 
     final stopLabel = (piece.kind == ErgPieceKind.relay ||
@@ -324,6 +393,13 @@ class _FunnelPlayerScreenState extends ConsumerState<FunnelPlayerScreen> {
                   style: DeckType.labelMono(size: 12),
                   textAlign: TextAlign.center,
                 ),
+              if (dfLive != null)
+                Text(
+                  key: const Key('funnel-player-df'),
+                  'DF $dfLive${_pm5 != null ? ' · live' : ''}',
+                  style: DeckType.labelMono(size: 12, color: DeckColors.volt),
+                  textAlign: TextAlign.center,
+                ),
               if (piece.kind == ErgPieceKind.relay) ...[
                 const SizedBox(height: 20),
                 _RelayBar(
@@ -347,8 +423,8 @@ class _FunnelPlayerScreenState extends ConsumerState<FunnelPlayerScreen> {
                       value: cadenceHint?.toString() ?? '—',
                     ),
                   ),
-                  const Expanded(
-                    child: _Sec(label: 'Watts', value: '—'),
+                  Expanded(
+                    child: _Sec(label: 'Watts', value: wattsLive),
                   ),
                 ],
               ),

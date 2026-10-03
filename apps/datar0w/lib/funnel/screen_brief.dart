@@ -95,7 +95,7 @@ class FunnelBriefScreen extends ConsumerWidget {
               SizedBox(
                 height: 52,
                 child: FilledButton(
-                  onPressed: () => context.go(AppRoutes.funnelPlayer),
+                  onPressed: () => context.go(AppRoutes.funnelPm5),
                   child: const Text('C’est parti'),
                 ),
               ),
