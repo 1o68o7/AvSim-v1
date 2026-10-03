@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../identity/controller.dart';
 import '../router.dart';
+import '../sync/erg_session_meta.dart';
 import '../theme/deck_theme.dart';
+import 'account_gate.dart';
 import 'controller.dart';
 import 'logbook_export.dart';
 import 'models.dart';
@@ -12,10 +15,37 @@ import 'models.dart';
 class FunnelProofScreen extends ConsumerWidget {
   const FunnelProofScreen({super.key});
 
+  Future<void> _keepTime(BuildContext context, WidgetRef ref) async {
+    final log = ref.read(funnelProvider).lastResult;
+    if (log == null || log.complete != true) return;
+    final signed = await AccountGate.ensureSignedIn(
+      context,
+      ref,
+      reason: 'Garder ce temps sur ton compte',
+    );
+    if (!signed) return;
+    await AccountGate.attachActiveRower(ref);
+    final uid = AccountGate.sessionUserId(ref);
+    final clubId = ref.read(identityProvider).activeClub?.id;
+    if (uid != null && clubId != null) {
+      await upsertErgSessionMeta(
+        log: log,
+        ownerUserId: uid,
+        clubId: clubId,
+        origin: log.origin,
+      );
+    }
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Temps gardé sur le compte')),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final funnel = ref.watch(funnelProvider);
     final log = funnel.lastResult;
+    final showKeep = log != null && log.complete == true;
     final piece = ErgPiece.byId(log?.pieceId) ?? funnel.resolvedPiece;
     final target = funnel.profile?.targetSplit500s;
     final distLabel = piece.label;
@@ -54,151 +84,188 @@ class FunnelProofScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                distLabel,
-                style: DeckType.uiLabel(),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                timeLabel,
-                key: const Key('funnel-proof-time'),
-                style: DeckType.metric(size: 56, weight: FontWeight.w700),
-                textAlign: TextAlign.center,
-              ),
-              if (isReplacement) ...[
-                const SizedBox(height: 6),
-                Text(
-                  'Indoor · remplacement',
-                  key: const Key('funnel-proof-remplacement'),
-                  style: DeckType.uiLabel(
-                    color: DeckColors.amber,
-                    weight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-              if (funnel.lastWasPb && log?.complete == true) ...[
-                const SizedBox(height: 8),
-                Center(
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: DeckColors.volt,
-                      borderRadius: DeckRadii.chipAll,
-                    ),
-                    child: Text(
-                      'PB ${ErgDistance.fromMeters(log!.distM)?.label ?? piece.label}',
-                      style: const TextStyle(
-                        fontFamily: DeckType.ui,
-                        fontWeight: FontWeight.w700,
-                        color: DeckColors.onVolt,
-                        fontSize: 12,
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        distLabel,
+                        style: DeckType.uiLabel(),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                  ),
-                ),
-              ],
-              if (piece.kind == ErgPieceKind.duration &&
-                  log?.complete == true) ...[
-                const SizedBox(height: 8),
-                Center(
-                  child: Text(
-                    'Créneau tenu',
-                    style: DeckType.uiLabel(
-                      color: DeckColors.tribord,
-                      weight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-              if (announcedOk) ...[
-                const SizedBox(height: 8),
-                Center(
-                  child: Text(
-                    'Bande 990–1 010 m · ${log!.realizedDistM} m',
-                    style: DeckType.uiLabel(
-                      color: DeckColors.tribord,
-                      weight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-              if (vsTarget != null) ...[
-                const SizedBox(height: 10),
-                Center(
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: onTarget
-                          ? DeckColors.tribordWash
-                          : DeckColors.babordWash,
-                      borderRadius: DeckRadii.chipAll,
-                      border: Border.all(
-                        color:
-                            onTarget ? DeckColors.tribord : DeckColors.babord,
+                      const SizedBox(height: 4),
+                      Text(
+                        timeLabel,
+                        key: const Key('funnel-proof-time'),
+                        style:
+                            DeckType.metric(size: 56, weight: FontWeight.w700),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    child: Text(
-                      onTarget
-                          ? 'Sous la cible · ${formatErgTime(-vsTarget)}'
-                          : 'Au-dessus · +${formatErgTime(vsTarget)}',
-                      style: TextStyle(
-                        fontFamily: DeckType.ui,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color:
-                            onTarget ? DeckColors.tribord : DeckColors.babord,
+                      if (isReplacement) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          'Indoor · remplacement',
+                          key: const Key('funnel-proof-remplacement'),
+                          style: DeckType.uiLabel(
+                            color: DeckColors.amber,
+                            weight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                      if (funnel.lastWasPb && log?.complete == true) ...[
+                        const SizedBox(height: 8),
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: DeckColors.volt,
+                              borderRadius: DeckRadii.chipAll,
+                            ),
+                            child: Text(
+                              'PB ${ErgDistance.fromMeters(log!.distM)?.label ?? piece.label}',
+                              style: const TextStyle(
+                                fontFamily: DeckType.ui,
+                                fontWeight: FontWeight.w700,
+                                color: DeckColors.onVolt,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (piece.kind == ErgPieceKind.duration &&
+                          log?.complete == true) ...[
+                        const SizedBox(height: 8),
+                        Center(
+                          child: Text(
+                            'Créneau tenu',
+                            style: DeckType.uiLabel(
+                              color: DeckColors.tribord,
+                              weight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (announcedOk) ...[
+                        const SizedBox(height: 8),
+                        Center(
+                          child: Text(
+                            'Bande 990–1 010 m · ${log!.realizedDistM} m',
+                            style: DeckType.uiLabel(
+                              color: DeckColors.tribord,
+                              weight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (vsTarget != null) ...[
+                        const SizedBox(height: 10),
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: onTarget
+                                  ? DeckColors.tribordWash
+                                  : DeckColors.babordWash,
+                              borderRadius: DeckRadii.chipAll,
+                              border: Border.all(
+                                color: onTarget
+                                    ? DeckColors.tribord
+                                    : DeckColors.babord,
+                              ),
+                            ),
+                            child: Text(
+                              onTarget
+                                  ? 'Sous la cible · ${formatErgTime(-vsTarget)}'
+                                  : 'Au-dessus · +${formatErgTime(vsTarget)}',
+                              style: TextStyle(
+                                fontFamily: DeckType.ui,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: onTarget
+                                    ? DeckColors.tribord
+                                    : DeckColors.babord,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+                      if (piece.kind == ErgPieceKind.distance ||
+                          piece.kind == ErgPieceKind.relay)
+                        _Kpi(
+                          label: 'Split moy.',
+                          value: '$splitLabel /500 m',
+                        ),
+                      if (log?.blockCadences.isNotEmpty == true)
+                        _Kpi(
+                          label: 'Cadences',
+                          value: log!.blockCadences.join(' / '),
+                        )
+                      else
+                        _Kpi(
+                          label: 'Cadence',
+                          value: log?.cadence == null
+                              ? '—'
+                              : '${log!.cadence!.round()} spm',
+                        ),
+                      _Kpi(
+                        label: 'Watts',
+                        value: log?.watts == null
+                            ? '—'
+                            : '${log!.watts!.round()} W',
                       ),
-                    ),
+                      _Kpi(
+                        label: 'Drag factor',
+                        value: log?.dragFactor?.toString() ?? '—',
+                      ),
+                      if (log?.complete != true) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          piece.kind == ErgPieceKind.duration
+                              ? 'Partiel gardé.'
+                              : 'Partiel gardé — pas un PB.',
+                          style: DeckType.uiLabel(color: DeckColors.amber),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              if (showKeep) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 52,
+                  child: FilledButton(
+                    key: const Key('funnel-proof-keep'),
+                    onPressed: () => _keepTime(context, ref),
+                    child: const Text('Garder ce temps'),
                   ),
                 ),
               ],
-              const SizedBox(height: 24),
-              if (piece.kind == ErgPieceKind.distance ||
-                  piece.kind == ErgPieceKind.relay)
-                _Kpi(label: 'Split moy.', value: '$splitLabel /500 m'),
-              if (log?.blockCadences.isNotEmpty == true)
-                _Kpi(
-                  label: 'Cadences',
-                  value: log!.blockCadences.join(' / '),
-                )
-              else
-                _Kpi(
-                  label: 'Cadence',
-                  value: log?.cadence == null
-                      ? '—'
-                      : '${log!.cadence!.round()} spm',
-                ),
-              _Kpi(
-                label: 'Watts',
-                value: log?.watts == null ? '—' : '${log!.watts!.round()} W',
-              ),
-              _Kpi(
-                label: 'Drag factor',
-                value: log?.dragFactor?.toString() ?? '—',
-              ),
-              if (log?.complete != true) ...[
-                const SizedBox(height: 12),
-                Text(
-                  piece.kind == ErgPieceKind.duration
-                      ? 'Partiel gardé.'
-                      : 'Partiel gardé — pas un PB.',
-                  style: DeckType.uiLabel(color: DeckColors.amber),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-              const Spacer(),
+              const SizedBox(height: 8),
               SizedBox(
                 height: 52,
                 child: FilledButton(
                   onPressed: () => context.go(AppRoutes.funnelSuite),
+                  style: showKeep
+                      ? FilledButton.styleFrom(
+                          backgroundColor: DeckColors.surface,
+                          foregroundColor: DeckColors.text,
+                        )
+                      : null,
                   child: const Text('Poser la suivante'),
                 ),
               ),
-              const SizedBox(height: 8),
               TextButton(
                 key: const Key('funnel-export-logbook'),
                 onPressed: () async {

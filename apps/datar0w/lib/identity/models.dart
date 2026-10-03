@@ -298,6 +298,7 @@ class Club {
     required this.id,
     required this.name,
     this.shortCode,
+    this.ffaCode,
     this.fullName,
     this.slogan,
     this.foundedYear,
@@ -316,6 +317,8 @@ class Club {
   final String id;
   final String name;
   final String? shortCode;
+  /// Code structure FFA (ex. C033003). Jamais écrit dans [shortCode].
+  final String? ffaCode;
   final String? fullName;
   final String? slogan;
   final int? foundedYear;
@@ -335,6 +338,7 @@ class Club {
         'id': id,
         'name': name,
         'shortCode': shortCode,
+        if (ffaCode != null) 'ffaCode': ffaCode,
         'fullName': fullName,
         'slogan': slogan,
         'foundedYear': foundedYear,
@@ -354,6 +358,7 @@ class Club {
         id: j['id'] as String,
         name: j['name'] as String? ?? '',
         shortCode: j['shortCode'] as String?,
+        ffaCode: (j['ffaCode'] ?? j['ffa_code']) as String?,
         fullName: j['fullName'] as String?,
         slogan: j['slogan'] as String?,
         foundedYear: (j['foundedYear'] as num?)?.toInt(),
@@ -373,6 +378,8 @@ class Club {
     String? name,
     String? shortCode,
     bool clearCode = false,
+    String? ffaCode,
+    bool clearFfaCode = false,
     String? fullName,
     bool clearFullName = false,
     String? slogan,
@@ -395,6 +402,7 @@ class Club {
       id: id,
       name: name ?? this.name,
       shortCode: clearCode ? null : (shortCode ?? this.shortCode),
+      ffaCode: clearFfaCode ? null : (ffaCode ?? this.ffaCode),
       fullName: clearFullName ? null : (fullName ?? this.fullName),
       slogan: clearSlogan ? null : (slogan ?? this.slogan),
       foundedYear: clearFounded ? null : (foundedYear ?? this.foundedYear),
@@ -413,11 +421,16 @@ class Club {
     );
   }
 
-  static Club create({required String name, String? shortCode}) {
+  static Club create({
+    required String name,
+    String? shortCode,
+    String? ffaCode,
+  }) {
     return Club(
       id: newIdentityId(),
       name: name,
       shortCode: shortCode,
+      ffaCode: ffaCode,
       createdAt: DateTime.now().toUtc(),
     );
   }

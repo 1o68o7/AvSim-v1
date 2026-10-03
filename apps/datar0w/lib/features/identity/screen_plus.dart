@@ -58,6 +58,12 @@ class PlusScreen extends ConsumerWidget {
               ),
             ),
             _PlusTile(
+              icon: Icons.badge_outlined,
+              title: 'Importer ma licence',
+              subtitle: 'PDF officiel FFA — jamais stocké',
+              onTap: () => context.go(AppRoutes.licenseImport),
+            ),
+            _PlusTile(
               icon: Icons.settings_outlined,
               title: 'Réglages',
               subtitle: 'Compte et téléphone',
@@ -137,7 +143,7 @@ class PlusScreen extends ConsumerWidget {
                 onTap: () => context.go(AppRoutes.homeRower),
               ),
             _PlusTile(
-              icon: Icons.badge_outlined,
+              icon: Icons.switch_account_outlined,
               title: 'Changer de profil',
               subtitle: 'Autre personne',
               onTap: () => context.go(AppRoutes.identity),

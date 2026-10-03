@@ -12,11 +12,13 @@ class RemoteClub {
     required this.id,
     required this.name,
     this.shortCode,
+    this.ffaCode,
   });
 
   final String id;
   final String name;
   final String? shortCode;
+  final String? ffaCode;
 }
 
 class RemoteMembership {
@@ -47,12 +49,16 @@ class RemotePark {
 abstract class ClubRemote {
   Future<RemoteMembership?> membershipFor(String userId);
   Future<RemoteClub?> clubById(String id);
+  /// Rapprochement licence par `ffa_code`, jamais `short_code`.
+  Future<RemoteClub?> clubByFfaCode(String ffaCode);
   Future<void> insertClub({
     required String id,
     required String name,
     String? shortCode,
+    String? ffaCode,
   });
   Future<void> upsertRower(Map<String, dynamic> row);
+  Future<void> upsertLicense(Map<String, dynamic> row);
   Future<void> approveJoin(String requestId, {required bool accept});
   Future<void> upsertBoat(Map<String, dynamic> row);
   Future<void> upsertAssignment(Map<String, dynamic> row);
@@ -69,14 +75,21 @@ class SilentClubRemote implements ClubRemote {
   Future<RemoteClub?> clubById(String id) async => null;
 
   @override
+  Future<RemoteClub?> clubByFfaCode(String ffaCode) async => null;
+
+  @override
   Future<void> insertClub({
     required String id,
     required String name,
     String? shortCode,
+    String? ffaCode,
   }) async {}
 
   @override
   Future<void> upsertRower(Map<String, dynamic> row) async {}
+
+  @override
+  Future<void> upsertLicense(Map<String, dynamic> row) async {}
 
   @override
   Future<void> approveJoin(String requestId, {required bool accept}) async {}
@@ -134,7 +147,7 @@ class LiveClubRemote implements ClubRemote {
     try {
       final data = await client
           .from('clubs')
-          .select('id, name, short_code')
+          .select('id, name, short_code, ffa_code')
           .eq('id', id)
           .limit(1);
       final list = asRowList(data);
@@ -144,6 +157,33 @@ class LiveClubRemote implements ClubRemote {
         id: row['id'] as String,
         name: row['name'] as String? ?? '',
         shortCode: row['short_code'] as String?,
+        ffaCode: row['ffa_code'] as String?,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Future<RemoteClub?> clubByFfaCode(String ffaCode) async {
+    final client = supabaseOrNull();
+    if (client == null) return null;
+    final code = ffaCode.trim().toUpperCase();
+    if (code.isEmpty) return null;
+    try {
+      final data = await client
+          .from('clubs')
+          .select('id, name, short_code, ffa_code')
+          .eq('ffa_code', code)
+          .limit(1);
+      final list = asRowList(data);
+      if (list.isEmpty) return null;
+      final row = list.first;
+      return RemoteClub(
+        id: row['id'] as String,
+        name: row['name'] as String? ?? '',
+        shortCode: row['short_code'] as String?,
+        ffaCode: row['ffa_code'] as String?,
       );
     } catch (_) {
       return null;
@@ -155,6 +195,7 @@ class LiveClubRemote implements ClubRemote {
     required String id,
     required String name,
     String? shortCode,
+    String? ffaCode,
   }) async {
     final client = supabaseOrNull();
     if (client == null) return;
@@ -163,12 +204,17 @@ class LiveClubRemote implements ClubRemote {
         'id': id,
         'name': name,
         'short_code': shortCode,
+        if (ffaCode != null) 'ffa_code': ffaCode,
       });
     } catch (_) {}
   }
 
   @override
   Future<void> upsertRower(Map<String, dynamic> row) => _upsert('rowers', row);
+
+  @override
+  Future<void> upsertLicense(Map<String, dynamic> row) =>
+      _upsert('licenses', row);
 
   @override
   Future<void> upsertBoat(Map<String, dynamic> row) => _upsert('boats', row);
@@ -218,6 +264,7 @@ class MemoryClubRemote implements ClubRemote {
   RemoteMembership? membership;
   final clubs = <String, RemoteClub>{};
   final rowers = <Map<String, dynamic>>[];
+  final licenses = <Map<String, dynamic>>[];
   final boats = <Map<String, dynamic>>[];
   final assignments = <Map<String, dynamic>>[];
   RemotePark park = const RemotePark();
@@ -231,18 +278,38 @@ class MemoryClubRemote implements ClubRemote {
   Future<RemoteClub?> clubById(String id) async => clubs[id];
 
   @override
+  Future<RemoteClub?> clubByFfaCode(String ffaCode) async {
+    final code = ffaCode.trim().toUpperCase();
+    for (final c in clubs.values) {
+      if ((c.ffaCode ?? '').toUpperCase() == code) return c;
+    }
+    return null;
+  }
+
+  @override
   Future<void> insertClub({
     required String id,
     required String name,
     String? shortCode,
+    String? ffaCode,
   }) async {
     insertClubCalls++;
-    clubs[id] = RemoteClub(id: id, name: name, shortCode: shortCode);
+    clubs[id] = RemoteClub(
+      id: id,
+      name: name,
+      shortCode: shortCode,
+      ffaCode: ffaCode,
+    );
   }
 
   @override
   Future<void> upsertRower(Map<String, dynamic> row) async {
     rowers.add(row);
+  }
+
+  @override
+  Future<void> upsertLicense(Map<String, dynamic> row) async {
+    licenses.add(row);
   }
 
   @override

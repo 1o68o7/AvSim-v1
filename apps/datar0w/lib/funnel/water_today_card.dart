@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../identity/controller.dart';
+import '../identity/id.dart';
 import '../identity/models.dart';
 import '../router.dart';
 import '../theme/deck_theme.dart';
+import 'account_gate.dart';
+import 'boat_fiche.dart';
 import 'lot5_controller.dart';
 import 'lot5_gates.dart';
 import 'lot5_models.dart';
@@ -224,6 +228,15 @@ class WaterTodayCard extends ConsumerWidget {
               child: Text('Faire le $distLabel sur l’erg'),
             ),
           ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 48,
+            child: OutlinedButton(
+              key: const Key('funnel-water-share-fiche'),
+              onPressed: () => _shareFiche(context, ref, plan),
+              child: const Text('Partager la fiche'),
+            ),
+          ),
           if (gate.canDownsize)
             TextButton(
               onPressed: () => context.go(crewDest),
@@ -262,5 +275,42 @@ class WaterTodayCard extends ConsumerWidget {
           ),
         ];
     }
+  }
+
+  Future<void> _shareFiche(
+    BuildContext context,
+    WidgetRef ref,
+    WaterOutingPlan plan,
+  ) async {
+    final signed = await AccountGate.ensureSignedIn(
+      context,
+      ref,
+      reason: 'Compte requis pour partager la fiche',
+    );
+    if (!signed) return;
+    await AccountGate.attachActiveRower(ref);
+
+    final id = ref.read(identityProvider);
+    final club = id.activeClub;
+    final boat = id.boatById(plan.boatId);
+    if (club == null || boat == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Club ou bateau manquant')),
+        );
+      }
+      return;
+    }
+    final payload = buildFicheFromPlan(
+      tokenId: newIdentityId(),
+      club: club,
+      boat: boat,
+      plan: plan,
+      assignments: id.assignmentsForBoat(boat.id),
+      displayNameOf: (rid) => id.rowerById(rid)?.displayName ?? 'Rameur',
+    );
+    final token = encodeFicheToken(payload);
+    final text = ficheShareText(payload, token);
+    await SharePlus.instance.share(ShareParams(text: text));
   }
 }
