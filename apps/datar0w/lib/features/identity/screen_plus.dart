@@ -99,7 +99,25 @@ class PlusScreen extends ConsumerWidget {
               icon: Icons.swap_horiz,
               title: 'Rôle bateau',
               subtitle: 'Rameur, coach, barreur',
-              onTap: () => context.go(AppRoutes.profile),
+              onTap: () => context.go(AppRoutes.role),
+            ),
+            _PlusTile(
+              icon: Icons.straighten_outlined,
+              title: 'Distances FFA',
+              subtitle: 'Erg · PB locales',
+              onTap: () => context.go(AppRoutes.funnelDistances),
+            ),
+            _PlusTile(
+              icon: Icons.calendar_month_outlined,
+              title: 'Calendrier',
+              subtitle: 'Séances et sorties',
+              onTap: () => context.go(AppRoutes.calendar),
+            ),
+            _PlusTile(
+              icon: Icons.water_outlined,
+              title: 'Plans d’eau',
+              subtitle: 'Bassins du club',
+              onTap: () => context.go(AppRoutes.waters),
             ),
             if (!isCoach)
               _PlusTile(

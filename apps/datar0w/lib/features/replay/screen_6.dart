@@ -18,7 +18,7 @@ class CoachReplayScreen extends StatelessWidget {
       title: 'Replay flotte',
       sessionId: hasId ? id : null,
       onBack: () => context.go(
-        hasId ? '${AppRoutes.sessions}?from=coach' : AppRoutes.profile,
+        hasId ? '${AppRoutes.sessions}?from=coach' : AppRoutes.role,
       ),
       showEval: true,
       allowImport: true,
