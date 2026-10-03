@@ -291,6 +291,7 @@ class _HomeRowerScreenState extends ConsumerState<HomeRowerScreen> {
                   },
                   onSetupPractice: () => context.go(AppRoutes.funnelOnboard),
                   onAteliers: () => context.go(AppRoutes.funnelAteliers),
+                  onDistances: () => context.go(AppRoutes.funnelDistances),
                 ),
                 const SizedBox(height: 12),
                 _HeroLastOuting(
@@ -401,6 +402,7 @@ class _FunnelTodayCard extends StatelessWidget {
     required this.onStart,
     required this.onSetupPractice,
     required this.onAteliers,
+    required this.onDistances,
   });
 
   final FunnelState funnel;
@@ -408,6 +410,16 @@ class _FunnelTodayCard extends StatelessWidget {
   final VoidCallback onStart;
   final VoidCallback onSetupPractice;
   final VoidCallback onAteliers;
+  final VoidCallback onDistances;
+
+  ErgSessionLog? get _lastCompleteErg {
+    ErgSessionLog? last;
+    for (final log in funnel.logs) {
+      if (!log.complete) continue;
+      if (last == null || log.at.isAfter(last.at)) last = log;
+    }
+    return last;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -464,6 +476,7 @@ class _FunnelTodayCard extends StatelessWidget {
     final label = profile.todayCardLabel;
     final pb = profile.pb2000s;
     final df = profile.dragFactor;
+    final lastErg = _lastCompleteErg;
 
     return Container(
       width: double.infinity,
@@ -511,6 +524,20 @@ class _FunnelTodayCard extends StatelessWidget {
               color: DeckColors.text,
             ),
           ),
+          if (lastErg != null && lastErg.split500S > 0) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Split moyen · ${formatErgTime(lastErg.split500S)} /500 m',
+              style: DeckType.labelMono(size: 12, color: DeckColors.label),
+            ),
+            if (lastErg.cadence != null) ...[
+              const SizedBox(height: 2),
+              Text(
+                'Cadence moy. · ${lastErg.cadence!.round()}',
+                style: DeckType.labelMono(size: 12, color: DeckColors.label),
+              ),
+            ],
+          ],
           if (df != null) ...[
             const SizedBox(height: 4),
             Text(
@@ -532,6 +559,13 @@ class _FunnelTodayCard extends StatelessWidget {
             onPressed: onAteliers,
             child: const Text(
               'Ateliers brevet',
+              style: TextStyle(color: DeckColors.muted),
+            ),
+          ),
+          TextButton(
+            onPressed: onDistances,
+            child: const Text(
+              'Distances FFA',
               style: TextStyle(color: DeckColors.muted),
             ),
           ),

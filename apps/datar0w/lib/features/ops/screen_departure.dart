@@ -19,7 +19,7 @@ class OpsDepartureScreen extends ConsumerWidget {
     final role = ref.watch(boatConfigProvider).role;
     final ident = ref.watch(identityProvider);
     final ops = ref.watch(opsProvider);
-    if (role != CrewRole.coach || !canCheckoutOps(ident, role)) {
+    if (!canCheckoutOps(ident, role)) {
       return const DeckScaffold(
         title: 'Départ',
         retourToProfile: true,

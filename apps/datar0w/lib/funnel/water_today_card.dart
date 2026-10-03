@@ -212,6 +212,9 @@ class WaterTodayCard extends ConsumerWidget {
           ),
         ];
       case WaterGateKind.crewBroken:
+        final crewDest = canComposeCrew(ref.read(identityProvider))
+            ? AppRoutes.crew
+            : AppRoutes.funnelDispos;
         return [
           SizedBox(
             height: 48,
@@ -223,14 +226,14 @@ class WaterTodayCard extends ConsumerWidget {
           ),
           if (gate.canDownsize)
             TextButton(
-              onPressed: () => context.go(AppRoutes.crew),
+              onPressed: () => context.go(crewDest),
               child: const Text(
                 'Descendre en bateau plus court',
                 style: TextStyle(color: DeckColors.muted),
               ),
             ),
           TextButton(
-            onPressed: () => context.go(AppRoutes.crew),
+            onPressed: () => context.go(crewDest),
             child: const Text(
               'Relancer',
               style: TextStyle(color: DeckColors.muted),

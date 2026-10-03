@@ -343,7 +343,7 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                             child: const Text('Replay'),
                           ),
                           TextButton(
-                            onPressed: () => context.go(AppRoutes.profile),
+                            onPressed: () => context.go(AppRoutes.role),
                             child: const Text('Retour'),
                           ),
                         ],

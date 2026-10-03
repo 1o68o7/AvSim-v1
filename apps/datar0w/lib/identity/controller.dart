@@ -515,14 +515,20 @@ final identityProvider =
   IdentityController.new,
 );
 
+/// Édition parc : admin club — [session] ignoré (compat call sites).
 bool canEditPark(IdentitySnapshot snap, CrewRole session) =>
-    session == CrewRole.coach && snap.prefs.clubRole == ClubMemberRole.admin;
+    snap.prefs.clubRole == ClubMemberRole.admin;
 
+/// Composition équipage : coach / admin / intendant club.
+bool canComposeCrew(IdentitySnapshot snap) =>
+    snap.prefs.clubRole == ClubMemberRole.coach ||
+    snap.prefs.clubRole == ClubMemberRole.admin ||
+    snap.prefs.clubRole == ClubMemberRole.intendant;
+
+/// Ops check-out / check-in : même périmètre club que [canComposeCrew].
+/// [session] conservé pour compat ; le rôle bateau n’est plus exigé.
 bool canCheckoutOps(IdentitySnapshot snap, CrewRole session) =>
-    session == CrewRole.coach &&
-    (snap.prefs.clubRole == ClubMemberRole.coach ||
-        snap.prefs.clubRole == ClubMemberRole.admin ||
-        snap.prefs.clubRole == ClubMemberRole.intendant);
+    canComposeCrew(snap);
 
 bool boatAllowsRower(ParkBoat boat, Rower rower) {
   if (rower.level == RowerLevel.loisir) return boat.loisirOk;

@@ -32,7 +32,10 @@ class _ParkIdentity extends IdentityController {
     return IdentitySnapshot(
       clubs: [club],
       boats: [ready, out],
-      prefs: IdentityPrefs(activeClubId: club.id),
+      prefs: IdentityPrefs(
+        activeClubId: club.id,
+        clubRole: ClubMemberRole.coach,
+      ),
     );
   }
 }

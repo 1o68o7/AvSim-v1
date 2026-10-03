@@ -29,6 +29,7 @@ import 'features/ops/screen_in.dart';
 import 'features/ops/screen_out.dart';
 import 'features/live/screen_3.dart';
 import 'features/presession/screen_2a.dart';
+import 'features/profile/screen_1.dart';
 import 'features/quai/screen_7.dart';
 import 'features/replay/screen_6.dart';
 import 'features/replay/screen_6r.dart';
@@ -37,6 +38,7 @@ import 'features/tare/screen_2b.dart';
 import 'funnel/screen_ateliers.dart';
 import 'funnel/screen_brief.dart';
 import 'funnel/screen_dispos.dart';
+import 'funnel/screen_distances.dart';
 import 'funnel/screen_onboard.dart';
 import 'funnel/screen_player.dart';
 import 'funnel/screen_pm5.dart';
@@ -107,7 +109,10 @@ abstract final class AppRoutes {
   static const opsIn = '/ops/in';
   static const opsDeparture = '/ops/departure';
   static const opsMaintenance = '/ops/maintenance';
+  /// Redirect métier (cold start) — ne pas y envoyer le picker de rôle.
   static const profile = '/';
+  /// Picker RAMEUR / COACH / BARREUR ([ProfileScreen]).
+  static const role = '/role';
   static const presession = '/presession';
   static const tare = '/tare';
   static const live = '/live';
@@ -141,6 +146,7 @@ abstract final class AppRoutes {
   static const funnelSuite = '/funnel/suite';
   static const funnelDispos = '/funnel/dispos';
   static const funnelWaterVeto = '/funnel/water-veto';
+  static const funnelDistances = '/funnel/distances';
 
   /// Après tare : barreur → `/cox`, rameur → `/live`. Écrans distincts.
   static String afterTare(CrewRole role) =>
@@ -325,6 +331,12 @@ final GoRouter appRouter = GoRouter(
           return AppRoutes.discover;
         }
       },
+    ),
+    GoRoute(
+      path: AppRoutes.role,
+      name: '1-role-picker',
+      builder: (context, state) =>
+          _hub(AppRoutes.role, const ProfileScreen()),
     ),
     GoRoute(
       path: AppRoutes.presession,
@@ -522,6 +534,12 @@ final GoRouter appRouter = GoRouter(
       name: 'funnel-water-veto',
       builder: (context, state) =>
           _hub(AppRoutes.funnelWaterVeto, const FunnelWaterVetoScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.funnelDistances,
+      name: 'funnel-distances',
+      builder: (context, state) =>
+          _hub(AppRoutes.funnelDistances, const FunnelDistancesScreen()),
     ),
   ],
 );

@@ -32,7 +32,7 @@ class _OpsInScreenState extends ConsumerState<OpsInScreen> {
     final role = ref.watch(boatConfigProvider).role;
     final ident = ref.watch(identityProvider);
     final ops = ref.watch(opsProvider);
-    if (role != CrewRole.coach || !canCheckoutOps(ident, role)) {
+    if (!canCheckoutOps(ident, role)) {
       return const DeckScaffold(
         title: 'Retour',
         retourToProfile: true,

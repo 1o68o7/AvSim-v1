@@ -359,6 +359,12 @@ class HomeCoachScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Aligne le rôle de séance sur le hub coach (ops / crew via clubRole).
+    if (ref.watch(boatConfigProvider).role != CrewRole.coach) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(boatConfigProvider.notifier).setRole(CrewRole.coach);
+      });
+    }
     final snap = ref.watch(identityProvider);
     final club = snap.activeClub;
     final rowers = club == null

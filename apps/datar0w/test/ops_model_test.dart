@@ -197,10 +197,18 @@ void main() {
     const snapCoach = IdentitySnapshot(
       prefs: IdentityPrefs(clubRole: ClubMemberRole.coach),
     );
+    const snapRower = IdentitySnapshot(
+      prefs: IdentityPrefs(clubRole: ClubMemberRole.rower),
+    );
     expect(canEditPark(snapAdmin, CrewRole.coach), isTrue);
+    expect(canEditPark(snapAdmin, CrewRole.rower), isTrue);
     expect(canEditPark(snapCoach, CrewRole.coach), isFalse);
     expect(canCheckoutOps(snapCoach, CrewRole.coach), isTrue);
     expect(canCheckoutOps(snapAdmin, CrewRole.coach), isTrue);
-    expect(canCheckoutOps(snapAdmin, CrewRole.rower), isFalse);
+    // clubRole admin suffit — session rameur n’bloque plus les ops.
+    expect(canCheckoutOps(snapAdmin, CrewRole.rower), isTrue);
+    expect(canCheckoutOps(snapRower, CrewRole.coach), isFalse);
+    expect(canComposeCrew(snapAdmin), isTrue);
+    expect(canComposeCrew(snapRower), isFalse);
   });
 }

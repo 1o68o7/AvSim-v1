@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../funnel/lot5_controller.dart';
 import '../../identity/controller.dart';
 import '../../identity/models.dart';
 import '../../ops/controller.dart';
 import '../../router.dart';
-import '../../session/boat_config.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 
@@ -148,20 +148,20 @@ class _CrewScreenState extends ConsumerState<CrewScreen> {
       );
     }
     await ref.read(identityProvider.notifier).saveCrew(boat.id, crew);
+    await ref.read(lot5Provider.notifier).reload();
     if (mounted) context.go(AppRoutes.homeCoach);
   }
 
   @override
   Widget build(BuildContext context) {
-    final role = ref.watch(boatConfigProvider).role;
     final snap = ref.watch(identityProvider);
-    if (role != CrewRole.coach) {
+    if (!canComposeCrew(snap)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         if (GoRouter.maybeOf(context) == null) return;
         final dest = snap.activeRower != null
             ? AppRoutes.homeRower
-            : AppRoutes.profile;
+            : AppRoutes.role;
         context.go(dest);
       });
       return const DeckScaffold(
