@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>DataR0w — Home Aujourd’hui</title>
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 with Forms & Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration for Dark Deck Volt Theme -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            oled: '#0B0E12',
+            surface: '#161B22',
+            'surface-subtle': '#1B222C',
+            'border-tech': '#222B38',
+            'border-light': '#2A3644',
+            volt: '#D6FF3C',
+            'volt-muted': 'rgba(214, 255, 60, 0.15)',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles for Technical Accents & Typography -->
+<style data-purpose="custom-styling">
+    body {
+      background-color: #050709;
+      color: #E6EDF3;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .font-mono-numbers {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    /* Subtle scanline/grid overlay for telemetry feel */
+    .bg-telemetry-grid {
+      background-image: linear-gradient(to right, rgba(34, 43, 56, 0.3) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(34, 43, 56, 0.3) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    /* Pulse dot styling */
+    .pulse-glow {
+      box-shadow: 0 0 10px rgba(214, 255, 60, 0.6);
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-0 sm:p-4">
+<!-- BEGIN: MobileDeviceContainer -->
+<!-- Constrained precisely to requested 390x844 px portrait format -->
+<div class="relative w-[390px] h-[844px] bg-oled overflow-hidden flex flex-col justify-between shadow-2xl border border-border-tech/40 sm:rounded-[44px]">
+<!-- BEGIN: TopBarAndHeader -->
+<header class="w-full flex-none z-20 pt-2 px-5 bg-oled/95 backdrop-blur-md border-b border-border-tech/40">
+<!-- iOS Status Bar Simulation -->
+<div class="flex justify-between items-center h-7 text-[13px] font-semibold tracking-tight text-[#8B949E] px-1" data-purpose="status-bar">
+<span>09:41</span>
+<div class="flex items-center space-x-2">
+<!-- Signal Icon -->
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24">
+<path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.29 19.3A10.97 10.97 0 0 1 1 12C1 5.92 5.92 1 12 1s11 4.92 11 11c0 2.76-.99 5.29-2.65 7.24l-.68-.74A9.97 9.97 0 0 0 21 12c0-4.97-4.03-9-9-9zM12 6c-3.31 0-6 2.69-6 6 0 1.43.5 2.74 1.34 3.78l.73-.78A4.97 4.97 0 0 1 7 12c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.09-.35 2.1-.95 2.92l.75.76A5.96 5.96 0 0 0 18 12c0-3.31-2.69-6-6-6z"></path>
+</svg>
+<!-- Battery Pill -->
+<div class="w-5 h-2.5 border border-[#8B949E] rounded-sm p-0.5 flex items-center">
+<div class="h-full w-3.5 bg-volt rounded-[1px]"></div>
+</div>
+</div>
+</div>
+<!-- App Branding & Connection Telemetry Row -->
+<div class="flex items-center justify-between py-2.5" data-purpose="brand-row">
+<!-- Logo: DataR0w with diamond glyph -->
+<div class="flex items-center space-x-2.5">
+<div class="w-5 h-5 flex items-center justify-center relative">
+<div class="w-3.5 h-3.5 border-2 border-volt rotate-45 transform"></div>
+<div class="w-1.5 h-1.5 bg-volt rounded-full absolute"></div>
+</div>
+<span class="font-bold tracking-tight text-lg text-white font-mono flex items-center">
+            Data<span class="text-volt">R0w</span>
+</span>
+</div>
+<!-- Telemetry Sync / BLE Status Indicator -->
+<div class="flex items-center space-x-2 bg-surface px-2.5 py-1 rounded-full border border-border-tech text-xs">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-volt opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-volt pulse-glow"></span>
+</span>
+<span class="font-mono text-[11px] font-medium tracking-wide text-gray-300">PM5 · BLE</span>
+</div>
+</div>
+<!-- Section Title Context -->
+<div class="pb-2.5 pt-1">
+<h1 class="text-xl font-bold tracking-tight text-white flex items-baseline justify-between">
+<span>Aujourd’hui</span>
+<span class="text-xs font-mono text-[#8B949E] font-normal tracking-wide">SESSION #084</span>
+</h1>
+</div>
+</header>
+<!-- END: TopBarAndHeader -->
+<!-- BEGIN: MainContentScroll -->
+<main class="flex-1 overflow-y-auto px-5 py-3 space-y-4 bg-telemetry-grid scrollbar-none" data-purpose="telemetry-dashboard">
+<!-- BEGIN: ReferenceMetricsRow -->
+<!-- 3 Key Reference Indicators in JetBrains Mono -->
+<section aria-label="Métriques de référence" class="grid grid-cols-3 gap-2.5">
+<!-- Card 1: PB 2000m -->
+<div class="bg-surface border border-border-tech rounded-xl p-2.5 flex flex-col justify-between" data-purpose="metric-pb">
+<span class="text-[11px] font-medium text-[#8B949E] leading-none">PB 2 000 m</span>
+<div class="my-1.5">
+<span class="font-mono-numbers text-xl font-bold text-white tracking-tight">7:42</span>
+</div>
+<span class="text-[9.5px] font-mono text-gray-400 leading-none">Allure réf.</span>
+</div>
+<!-- Card 2: Split moyen -->
+<div class="bg-surface border border-border-tech rounded-xl p-2.5 flex flex-col justify-between" data-purpose="metric-split">
+<span class="text-[11px] font-medium text-[#8B949E] leading-none">Split moy.</span>
+<div class="my-1.5 flex items-baseline space-x-0.5">
+<span class="font-mono-numbers text-xl font-bold text-white tracking-tight">1:55</span>
+</div>
+<span class="text-[9.5px] font-mono text-gray-400 leading-none">/500 m</span>
+</div>
+<!-- Card 3: Cadence moy. -->
+<div class="bg-surface border border-border-tech rounded-xl p-2.5 flex flex-col justify-between" data-purpose="metric-cadence">
+<span class="text-[11px] font-medium text-[#8B949E] leading-none">Cadence moy.</span>
+<div class="my-1.5 flex items-baseline space-x-0.5">
+<span class="font-mono-numbers text-xl font-bold text-volt tracking-tight">26</span>
+</div>
+<span class="text-[9.5px] font-mono text-gray-400 leading-none">SPM</span>
+</div>
+</section>
+<!-- END: ReferenceMetricsRow -->
+<!-- BEGIN: HeroCardWorkout -->
+<!-- Grande carte Hero valorisante avec bordure volt subtile -->
+<section class="relative bg-surface rounded-2xl border border-volt/30 p-4 shadow-xl overflow-hidden" data-purpose="hero-workout-card">
+<!-- Subtle Top Glow Accent -->
+<div class="absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-12 bg-volt/15 blur-2xl pointer-events-none"></div>
+<!-- Card Header: Badges & Distance -->
+<div class="flex items-center justify-between pb-2 border-b border-border-tech/60">
+<div class="flex items-center space-x-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-volt/10 text-volt border border-volt/30">
+              PROGRAMMÉ
+            </span>
+<span class="text-xs text-gray-400 font-medium">Banc fixe / Skiff</span>
+</div>
+<span class="text-[11px] font-mono text-[#8B949E]">16:00 UTC</span>
+</div>
+<!-- Hero Title & Target Distance -->
+<div class="pt-3 pb-1">
+<div class="text-[13px] font-semibold text-gray-300 tracking-wide uppercase font-mono">
+            Aujourd’hui
+          </div>
+<div class="flex items-baseline space-x-2 mt-0.5">
+<span class="font-mono-numbers text-4xl font-extrabold text-white tracking-tighter">2 000</span>
+<span class="font-mono text-lg font-bold text-volt">m</span>
+</div>
+<p class="text-xs text-gray-400 mt-1 font-normal leading-relaxed">
+            Test d'allure 2k · Profil aérobique &amp; cadence cible 28-30 SPM
+          </p>
+</div>
+<!-- Target Pacing Breakdown Chips -->
+<div class="grid grid-cols-2 gap-2 my-3">
+<div class="bg-oled/60 rounded-lg p-2 border border-border-tech">
+<span class="text-[10px] text-[#8B949E] block">Split visé</span>
+<span class="font-mono-numbers text-sm font-bold text-gray-200">1:54.5 <span class="text-[10px] font-normal text-gray-400">/500m</span></span>
+</div>
+<div class="bg-oled/60 rounded-lg p-2 border border-border-tech">
+<span class="text-[10px] text-[#8B949E] block">Fréquence cible</span>
+<span class="font-mono-numbers text-sm font-bold text-gray-200">28 - 30 <span class="text-[10px] font-normal text-gray-400">SPM</span></span>
+</div>
+</div>
+<!-- Graphic Telemetry Preview (Workout Segments Chart) -->
+<div class="my-2 p-2.5 bg-oled/80 rounded-xl border border-border-tech" data-purpose="workout-profile-viz">
+<div class="flex justify-between items-center mb-1 text-[10px] font-mono text-[#8B949E]">
+<span>PALIER ALLURE (SPLIT)</span>
+<span class="text-volt">TEST OFFICIEL</span>
+</div>
+<!-- Stylized Telemetric Waveform SVG -->
+<svg class="w-full h-14" fill="none" preserveaspectratio="none" viewbox="0 0 320 60">
+<!-- Gridlines -->
+<line stroke="#222B38" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="320" y1="15" y2="15"></line>
+<line stroke="#222B38" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="320" y1="35" y2="35"></line>
+<line stroke="#222B38" stroke-width="1" x1="0" x2="320" y1="55" y2="55"></line>
+<!-- Shaded Area Under Curve -->
+<polygon fill="rgba(214, 255, 60, 0.08)" points="0,55 0,42 60,40 120,28 180,24 240,20 290,12 320,10 320,55"></polygon>
+<!-- Pacing Profile Line in Volt -->
+<polyline fill="none" points="0,42 60,40 120,28 180,24 240,20 290,12 320,10" stroke="#D6FF3C" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></polyline>
+<!-- Split Markers / Points -->
+<circle cx="60" cy="40" fill="#D6FF3C" r="2.5"></circle>
+<circle cx="120" cy="28" fill="#D6FF3C" r="2.5"></circle>
+<circle cx="180" cy="24" fill="#D6FF3C" r="2.5"></circle>
+<circle cx="240" cy="20" fill="#D6FF3C" r="2.5"></circle>
+<circle cx="320" cy="10" fill="#FFFFFF" r="3" stroke="#D6FF3C" stroke-width="2"></circle>
+</svg>
+<!-- Timeline Markers -->
+<div class="flex justify-between items-center text-[9px] font-mono text-[#8B949E] pt-1">
+<span>Départ (0m)</span>
+<span>1 000m</span>
+<span>Sprint (2 000m)</span>
+</div>
+</div>
+<!-- Main Primary Call To Action Button (Min height 52px, Volt Accent) -->
+<button aria-label="Démarrer la séance 2 000 mètres" class="w-full mt-3 h-[52px] bg-volt active:bg-[#BEE62F] transition-colors duration-150 rounded-xl flex items-center justify-center space-x-2.5 text-black font-extrabold text-base tracking-wide shadow-lg shadow-volt/20 focus:outline-none" data-purpose="cta-start-workout" type="button">
+<!-- Play Icon -->
+<svg class="w-5 h-5 fill-current" viewbox="0 0 24 24">
+<path d="M8 5v14l11-7z"></path>
+</svg>
+<span class="uppercase tracking-wider">Start</span>
+</button>
+</section>
+<!-- END: HeroCardWorkout -->
+<!-- BEGIN: SubHeroTechnicalInfo -->
+<!-- Drag factor, tare coque & sensor condition indicators -->
+<section aria-label="Réglages et télémétrie rameur" class="grid grid-cols-2 gap-2.5">
+<!-- Drag Factor Capsule -->
+<div class="bg-surface border border-border-tech rounded-xl p-3 flex items-center justify-between" data-purpose="drag-factor-pill">
+<div>
+<div class="text-[10px] text-[#8B949E] uppercase tracking-wider font-medium">Volant d'inertie</div>
+<div class="text-xs font-semibold text-gray-200 mt-0.5">Drag factor</div>
+</div>
+<div class="bg-surface-subtle px-2.5 py-1 rounded-lg border border-border-light text-right">
+<span class="font-mono-numbers text-base font-extrabold text-volt leading-none">DF 115</span>
+</div>
+</div>
+<!-- Sensor Status / Tare Coque -->
+<div class="bg-surface border border-border-tech rounded-xl p-3 flex items-center justify-between" data-purpose="calibration-pill">
+<div>
+<div class="text-[10px] text-[#8B949E] uppercase tracking-wider font-medium">Capteur / Tare</div>
+<div class="text-xs font-semibold text-gray-200 mt-0.5">Étalonnage</div>
+</div>
+<div class="flex items-center space-x-1.5 bg-surface-subtle px-2 py-1 rounded-lg border border-border-light">
+<span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+<span class="font-mono text-xs font-bold text-gray-200">0.0° Gîte</span>
+</div>
+</div>
+</section>
+<!-- END: SubHeroTechnicalInfo -->
+</main>
+<!-- END: MainContentScroll -->
+<!-- BEGIN: BottomNavigationBar -->
+<!-- 4 Tabs: Home (Active with 2px Volt Indicator), Plan, Distances, Moi -->
+<nav aria-label="Navigation principale" class="flex-none bg-surface/95 backdrop-blur-md border-t border-border-tech px-2 pb-6 pt-1.5 z-30">
+<div class="grid grid-cols-4 items-center">
+<!-- Tab 1: Home (ACTIVE) -->
+<a aria-current="page" class="relative flex flex-col items-center py-1 text-volt group" href="#home">
+<!-- Active Line Indicator 2px Volt on top -->
+<div class="absolute -top-1.5 w-8 h-[2px] bg-volt rounded-full"></div>
+<!-- Home Icon -->
+<svg class="w-6 h-6 stroke-current fill-none stroke-[2]" viewbox="0 0 24 24">
+<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-semibold mt-1 tracking-tight">Home</span>
+</a>
+<!-- Tab 2: Plan -->
+<a class="flex flex-col items-center py-1 text-[#8B949E] hover:text-gray-200 transition-colors" href="#plan">
+<!-- Calendar / Plan Icon -->
+<svg class="w-6 h-6 stroke-current fill-none stroke-[1.8]" viewbox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium mt-1 tracking-tight">Plan</span>
+</a>
+<!-- Tab 3: Distances -->
+<a class="flex flex-col items-center py-1 text-[#8B949E] hover:text-gray-200 transition-colors" href="#distances">
+<!-- Distance / Speed Gauge Icon -->
+<svg class="w-6 h-6 stroke-current fill-none stroke-[1.8]" viewbox="0 0 24 24">
+<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium mt-1 tracking-tight">Distances</span>
+</a>
+<!-- Tab 4: Moi -->
+<a class="flex flex-col items-center py-1 text-[#8B949E] hover:text-gray-200 transition-colors" href="#moi">
+<!-- Profile / Moi Icon -->
+<svg class="w-6 h-6 stroke-current fill-none stroke-[1.8]" viewbox="0 0 24 24">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium mt-1 tracking-tight">Moi</span>
+</a>
+</div>
+<!-- iOS Home Indicator Pill -->
+<div class="w-32 h-1 bg-[#8B949E]/30 rounded-full mx-auto mt-3"></div>
+</nav>
+<!-- END: BottomNavigationBar -->
+</div>
+<!-- END: MobileDeviceContainer -->
+</body></html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>DR-FR-3 Preview erg</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "volt": "#D6FF3C",
+            "surface-dark": "#0A0A0A",
+            "surface-card": "#111418",
+            "border-tech": "#2A2F36",
+            "text-primary": "#F4F6F8",
+            "text-muted": "#8C96A5",
+            "maritime-starboard": "#34D399",
+            "maritime-port": "#E05353",
+            "maritime-amber": "#E8C547"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+    .tabular-numbers {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-[#0A0A0A] text-[#F4F6F8] antialiased min-h-screen flex items-center justify-center p-0 selection:bg-[#D6FF3C] selection:text-[#0A0A0A]">
+  <!-- Mobile Container 390x844 strict target -->
+  <main class="w-full max-w-[390px] min-h-[844px] h-[844px] flex flex-col justify-between bg-[#0A0A0A] px-5 py-6 relative overflow-hidden border border-[#2A2F36]/60">
+    <!-- Matrix Technical Deck Overlay -->
+    <div class="absolute inset-0 pointer-events-none opacity-[0.025]" style="background-size: 20px 20px; background-image: linear-gradient(to right, #F4F6F8 1px, transparent 1px), linear-gradient(to bottom, #F4F6F8 1px, transparent 1px);"></div>
+
+    <!-- Top Flow Section (App bar + Content) -->
+    <div class="relative z-10 flex flex-col gap-5">
+      <!-- 1. App Bar: Session Tunnel (No tab bar, Back + title "2 000 m") -->
+      <header class="flex items-center justify-between pt-1 pb-1 border-b border-[#2A2F36]/50">
+        <div class="flex items-center gap-3">
+          <button type="button" aria-label="Retour" class="w-9 h-9 rounded-lg flex items-center justify-center text-[#8C96A5] hover:text-[#F4F6F8] bg-[#111418] border border-[#2A2F36] active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+          </button>
+          <div class="flex items-center gap-2">
+            <h1 class="font-['JetBrains_Mono'] text-[17px] font-bold tracking-tight text-[#F4F6F8]">2 000 m</h1>
+            <span class="font-['JetBrains_Mono'] text-[9px] uppercase tracking-wider text-[#8C96A5] px-1.5 py-0.5 rounded bg-[#111418] border border-[#2A2F36]">
+              FFA RÉF
+            </span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 px-2 py-1 rounded bg-[#111418] border border-[#2A2F36]">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#D6FF3C] animate-pulse"></span>
+          <span class="font-['JetBrains_Mono'] text-[9.5px] font-semibold text-[#8C96A5] tracking-wider uppercase">PM5 BLE</span>
+        </div>
+      </header>
+
+      <!-- 2. Section: Fiche du morceau -->
+      <section class="flex flex-col gap-2.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-1 h-3.5 bg-[#D6FF3C] rounded-none"></span>
+            <span class="font-['Inter'] text-[12px] font-semibold text-[#8C96A5] uppercase tracking-wider">Fiche du morceau</span>
+          </div>
+          <span class="font-['JetBrains_Mono'] text-[10px] text-[#8C96A5]/70 uppercase">Épreuve officielle</span>
+        </div>
+
+        <!-- Technical Card Rows -->
+        <div class="bg-[#111418] rounded-xl border border-[#2A2F36] p-4 flex flex-col divide-y divide-[#2A2F36]/60">
+          <!-- Row 1: Distance -->
+          <div class="pb-3.5 flex items-center justify-between">
+            <span class="font-['Inter'] text-[13px] text-[#8C96A5] font-medium">Distance</span>
+            <span class="font-['JetBrains_Mono'] text-[15px] font-bold text-[#F4F6F8] tabular-numbers tracking-tight">2 000 m</span>
+          </div>
+
+          <!-- Row 2: Drag factor (editable-looking field) -->
+          <div class="py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="font-['Inter'] text-[13px] text-[#8C96A5] font-medium">Drag factor</span>
+              <span class="font-['JetBrains_Mono'] text-[9px] text-[#8C96A5]/60 uppercase">(DF)</span>
+            </div>
+            <!-- Editable-looking input pill -->
+            <div class="flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#0A0A0A] border border-[#2A2F36] focus-within:border-[#D6FF3C] transition-colors cursor-text">
+              <span class="font-['JetBrains_Mono'] text-[15px] font-bold text-[#D6FF3C] tabular-numbers">115</span>
+              <span class="material-symbols-outlined text-[13px] text-[#8C96A5]">edit</span>
+            </div>
+          </div>
+
+          <!-- Row 3: Split cible -->
+          <div class="pt-3.5 flex items-center justify-between">
+            <span class="font-['Inter'] text-[13px] text-[#8C96A5] font-medium">Split cible</span>
+            <div class="text-right">
+              <span class="font-['JetBrains_Mono'] text-[15px] font-bold text-[#F4F6F8] tabular-numbers tracking-tight">1:55</span>
+              <span class="font-['JetBrains_Mono'] text-[11px] font-medium text-[#8C96A5] ml-1">/500 m</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Section: Cues (Consignes de course) -->
+      <section class="flex flex-col gap-2.5">
+        <div class="flex items-center gap-2">
+          <span class="w-1 h-3.5 bg-[#8C96A5] rounded-none"></span>
+          <span class="font-['Inter'] text-[12px] font-semibold text-[#8C96A5] uppercase tracking-wider">Cues</span>
+        </div>
+
+        <!-- Cues Card -->
+        <div class="bg-[#111418] rounded-xl border border-[#2A2F36] p-4 flex flex-col divide-y divide-[#2A2F36]/60">
+          <!-- Line 1: 0–500 m · installation -->
+          <div class="pb-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#34D399]"></span>
+              <span class="font-['JetBrains_Mono'] text-[12px] font-semibold text-[#F4F6F8] tabular-numbers">0–500 m</span>
+            </div>
+            <span class="font-['Inter'] text-[13px] text-[#8C96A5] font-normal">installation</span>
+          </div>
+
+          <!-- Line 2: 500–1 500 m · tenu -->
+          <div class="py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#E8C547]"></span>
+              <span class="font-['JetBrains_Mono'] text-[12px] font-semibold text-[#F4F6F8] tabular-numbers">500–1 500 m</span>
+            </div>
+            <span class="font-['Inter'] text-[13px] text-[#8C96A5] font-normal">tenu</span>
+          </div>
+
+          <!-- Line 3: 1 500–2 000 m · cadence +2 -->
+          <div class="pt-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#D6FF3C]"></span>
+              <span class="font-['JetBrains_Mono'] text-[12px] font-semibold text-[#F4F6F8] tabular-numbers">1 500–2 000 m</span>
+            </div>
+            <span class="font-['Inter'] text-[13px] text-[#D6FF3C] font-medium">cadence +2</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Technical Protocol Indicator Tag -->
+      <div class="bg-[#111418]/60 border border-[#2A2F36]/50 rounded-lg p-2.5 flex items-center justify-between">
+        <span class="font-['Inter'] text-[11px] text-[#8C96A5]">Chronométrage</span>
+        <span class="font-['JetBrains_Mono'] text-[10px] text-[#8C96A5] uppercase tracking-wider">Sync volant automatique</span>
+      </div>
+    </div>
+
+    <!-- Bottom Section: CTA Volt 52px height (Session Tunnel - No tab bar) -->
+    <footer class="relative z-10 pt-2 pb-1 flex flex-col items-center">
+      <button type="button" class="w-full h-[52px] rounded-xl bg-[#D6FF3C] text-[#0A0A0A] font-['Inter'] text-[15px] font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer">
+        <span>Je suis sur l’erg</span>
+        <span class="material-symbols-outlined text-[19px]">arrow_forward</span>
+      </button>
+
+      <!-- Nautical Protocol Subtitle -->
+      <div class="mt-3 flex items-center gap-1.5 text-[#8C96A5]/60">
+        <span class="font-['JetBrains_Mono'] text-[9px] tracking-tight uppercase">
+          Tunnel session ergomètre DataR0w · FFA
+        </span>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>
