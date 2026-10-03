@@ -10,10 +10,15 @@ import '../sync/club_remote.dart';
 import '../sync/club_sql.dart';
 import '../sync/supabase_boot.dart';
 import '../sync/sync_identity.dart' show ensureActiveClubForSync;
+import 'id.dart';
+import 'license.dart';
+import 'license_store.dart';
 import 'models.dart';
 import 'store.dart';
 
 final identityStoreProvider = Provider<IdentityStore>((ref) => IdentityStore());
+
+final licenseStoreProvider = Provider<LicenseStore>((ref) => LicenseStore());
 
 class IdentitySnapshot {
   const IdentitySnapshot({
@@ -121,6 +126,7 @@ class IdentitySnapshot {
 class IdentityController extends Notifier<IdentitySnapshot> {
   IdentityStore get _store => ref.read(identityStoreProvider);
   ClubRemote get _remote => ref.read(clubRemoteProvider);
+  LicenseStore get _licenses => ref.read(licenseStoreProvider);
 
   String? get _sessionUserId {
     final fromAuth = ref.read(authGoogleProvider).sessionUserId;
@@ -330,6 +336,7 @@ class IdentityController extends Notifier<IdentitySnapshot> {
             id: rc.id,
             name: rc.name,
             shortCode: rc.shortCode,
+            ffaCode: rc.ffaCode,
             createdAt: DateTime.now().toUtc(),
           ),
         );
@@ -507,6 +514,145 @@ class IdentityController extends Notifier<IdentitySnapshot> {
 
   Future<void> reloadFromStore() async {
     await _refresh();
+  }
+
+  /// Rattache `auth.users.id` → `rowers.user_id` + cloud. Pas de second profil.
+  Future<void> linkRowerUserIdCloud({
+    required String rowerId,
+    required String userId,
+  }) async {
+    final rower = state.rowerById(rowerId);
+    if (rower == null) return;
+    final linked = rower.copyWith(
+      userId: userId,
+      updatedAt: DateTime.now().toUtc(),
+    );
+    await _store.upsertRower(linked);
+    await _remote.upsertRower(rowerToSql(linked));
+    await _refresh();
+  }
+
+  Future<FfaLicense?> licenseForActiveRower() async {
+    final r = state.activeRower;
+    if (r == null) return null;
+    return _licenses.byRowerId(r.id);
+  }
+
+  /// Écriture après confirmation PDF. PDF déjà jeté (bytes hors scope).
+  /// [createClubIfConfirmed] : si le ffa_code n’existe pas et l’utilisateur confirme.
+  Future<({Rower rower, FfaLicense license, Club? club})> applyLicenseDraft(
+    LicenseDraft draft, {
+    bool createClubIfMissing = false,
+  }) async {
+    // Même numéro = update saison, pas un second rower.
+    Rower? rower;
+    final existingLic = draft.licenseNumber == null
+        ? null
+        : await _licenses.byLicenseNumber(draft.licenseNumber!);
+    if (existingLic != null) {
+      rower = state.rowerById(existingLic.rowerId);
+    }
+    rower ??= state.activeRower;
+
+    final display = draft.displayName.trim().isNotEmpty
+        ? draft.displayName.trim()
+        : (rower?.displayName ?? 'Rameur');
+    final birth = draft.birthDate ??
+        rower?.birthDate ??
+        DateTime(DateTime.now().year - 30);
+    final sex = switch ((draft.sex ?? '').toUpperCase()) {
+      'F' => RowerSex.f,
+      'X' => RowerSex.x,
+      _ => rower?.sex ?? RowerSex.m,
+    };
+
+    Club? club;
+    final code = draft.ffaCode?.trim().toUpperCase();
+    if (code != null && code.isNotEmpty) {
+      for (final c in state.clubs) {
+        if ((c.ffaCode ?? '').toUpperCase() == code) {
+          club = c;
+          break;
+        }
+      }
+      if (club == null) {
+        final remote = await _remote.clubByFfaCode(code);
+        if (remote != null) {
+          club = Club(
+            id: remote.id,
+            name: remote.name,
+            shortCode: remote.shortCode,
+            ffaCode: remote.ffaCode ?? code,
+            createdAt: DateTime.now().toUtc(),
+          );
+          await _store.upsertClub(club);
+        } else if (createClubIfMissing &&
+            draft.clubName != null &&
+            draft.clubName!.trim().isNotEmpty) {
+          // Confirmation explicite uniquement — jamais silencieux.
+          club = Club.create(
+            name: draft.clubName!.trim(),
+            ffaCode: code,
+          );
+          await saveClub(club);
+          await _remote.insertClub(
+            id: club.id,
+            name: club.name,
+            ffaCode: code,
+          );
+        }
+      }
+    }
+
+    final uid = _sessionUserId;
+    if (rower == null) {
+      rower = Rower.create(
+        displayName: display,
+        birthDate: birth,
+        sex: sex,
+      );
+    }
+    rower = rower.copyWith(
+      displayName: display,
+      birthDate: birth,
+      sex: sex,
+      clubId: club?.id ?? rower.clubId,
+      userId: uid ?? rower.userId,
+      ffaLicence: draft.licenseNumber ?? rower.ffaLicence,
+      level: draft.isAlLike ? RowerLevel.loisir : rower.level,
+      updatedAt: DateTime.now().toUtc(),
+    );
+    // Poids seulement si la carte le porte (draft n’a pas weight — skip).
+    await saveRower(rower);
+    if (club != null) {
+      await selectClub(club.id);
+    }
+    await _remote.upsertRower(rowerToSql(rower));
+
+    final lic = FfaLicense(
+      id: existingLic?.id ?? newIdentityId(),
+      rowerId: rower.id,
+      licenseNumber: draft.licenseNumber,
+      licenseType: draft.licenseType,
+      validUntil: draft.validUntil,
+      ffaCode: code,
+      category: draft.category,
+      surclassement: draft.surclassement,
+      handiClassification: draft.handiClassification,
+      source: draft.source,
+      myffaVerified: false,
+    );
+    await _licenses.upsert(lic);
+    await _remote.upsertLicense(lic.toSql());
+    await _refresh();
+    return (rower: rower, license: lic, club: club);
+  }
+}
+
+extension on LicenseDraft {
+  bool get isAlLike {
+    final t = (licenseType ?? '').toUpperCase();
+    return t.contains('AL') || t.contains('LOISIR');
   }
 }
 

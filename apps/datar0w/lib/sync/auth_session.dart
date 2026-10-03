@@ -121,6 +121,21 @@ class _AuthSessionBinderState extends ConsumerState<AuthSessionBinder> {
   }
 
   Future<void> _onLink(Uri uri) async {
+    // Fiche bateau : datarow://fiche/{token} ou https://…/fiche/{token}
+    if ((uri.scheme == 'datarow' && uri.host == 'fiche') ||
+        uri.path.startsWith('/fiche/')) {
+      final token = uri.scheme == 'datarow' && uri.host == 'fiche'
+          ? (uri.pathSegments.isNotEmpty
+              ? uri.pathSegments.first
+              : uri.path.replaceFirst('/', ''))
+          : uri.pathSegments.length >= 2
+              ? uri.pathSegments[1]
+              : '';
+      if (token.isNotEmpty) {
+        _router.go('${AppRoutes.fiche}/$token');
+      }
+      return;
+    }
     if (!isAuthCallback(uri) &&
         uri.path != AppRoutes.authCallback &&
         !uri.path.endsWith('/auth/callback')) {

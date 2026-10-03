@@ -62,6 +62,7 @@ class _FunnelOnboardScreenState extends ConsumerState<FunnelOnboardScreen> {
             0 => _PromiseStep(
                 onStart: () => setState(() => _step = 1),
                 onAccount: () => context.go(AppRoutes.auth),
+                onImportLicense: () => context.go(AppRoutes.licenseImport),
               ),
             1 => _PracticeStep(
                 onPick: (f) {
@@ -116,10 +117,15 @@ class _FunnelOnboardScreenState extends ConsumerState<FunnelOnboardScreen> {
 }
 
 class _PromiseStep extends StatelessWidget {
-  const _PromiseStep({required this.onStart, required this.onAccount});
+  const _PromiseStep({
+    required this.onStart,
+    required this.onAccount,
+    required this.onImportLicense,
+  });
 
   final VoidCallback onStart;
   final VoidCallback onAccount;
+  final VoidCallback onImportLicense;
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +160,15 @@ class _PromiseStep extends StatelessWidget {
           child: FilledButton(
             onPressed: onStart,
             child: const Text('Commencer'),
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 48,
+          child: OutlinedButton(
+            key: const Key('funnel-onboard-import-license'),
+            onPressed: onImportLicense,
+            child: const Text('Importer ma licence'),
           ),
         ),
         const SizedBox(height: 8),

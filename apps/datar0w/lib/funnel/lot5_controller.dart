@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../identity/controller.dart';
 import '../identity/id.dart';
 import '../identity/models.dart';
+import '../sync/auth_google.dart';
+import '../sync/supabase_boot.dart';
+import '../sync/water_remote.dart';
 import 'controller.dart';
 import 'lot5_gates.dart';
 import 'lot5_models.dart';
@@ -48,6 +51,13 @@ class Lot5State {
 
 class Lot5Controller extends Notifier<Lot5State> {
   Lot5Store get _store => ref.read(lot5StoreProvider);
+  WaterRemote get _waterRemote => ref.read(waterRemoteProvider);
+
+  String? get _uid {
+    final fromAuth = ref.read(authGoogleProvider).sessionUserId;
+    if (fromAuth != null && fromAuth.isNotEmpty) return fromAuth;
+    return supabaseOrNull()?.auth.currentUser?.id;
+  }
 
   @override
   Lot5State build() {
@@ -57,11 +67,24 @@ class Lot5Controller extends Notifier<Lot5State> {
 
   Future<void> reload() async {
     final dispos = await _store.loadDispos();
-    final closures = await _store.loadClosures();
+    var closures = await _store.loadClosures();
     var plan = await _store.loadPlan();
     final chose = await _store.loadRowerChoseErg();
 
     final id = ref.read(identityProvider);
+    // Miroir cloud water_closures si club actif.
+    final clubId = id.activeClub?.id;
+    if (clubId != null) {
+      final remote = await _waterRemote.listClosuresForClub(clubId);
+      if (remote.isNotEmpty) {
+        final byId = {for (final c in closures) c.id: c};
+        for (final c in remote) {
+          byId[c.id] = c;
+        }
+        closures = byId.values.toList();
+        await _store.saveClosures(closures);
+      }
+    }
     final asg = id.activeRower == null
         ? null
         : id.assignmentForRower(id.activeRower!.id);
@@ -149,6 +172,12 @@ class Lot5Controller extends Notifier<Lot5State> {
     );
     final next = [...state.closures, closure];
     await _store.saveClosures(next);
+    final clubId = ref.read(identityProvider).activeClub?.id;
+    await _waterRemote.upsertClosure(
+      closure,
+      clubId: clubId,
+      createdBy: _uid,
+    );
     state = state.copyWith(closures: next);
     await reload();
   }
@@ -156,6 +185,7 @@ class Lot5Controller extends Notifier<Lot5State> {
   Future<void> liftVeto(String closureId) async {
     final next = state.closures.where((c) => c.id != closureId).toList();
     await _store.saveClosures(next);
+    await _waterRemote.deleteClosure(closureId);
     state = state.copyWith(closures: next);
     await reload();
   }

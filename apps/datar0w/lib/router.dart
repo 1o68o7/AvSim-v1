@@ -17,6 +17,7 @@ import 'features/identity/screen_physio.dart';
 import 'features/identity/screen_home_roles.dart';
 import 'features/identity/screen_home_rower.dart';
 import 'features/identity/screen_import.dart';
+import 'features/identity/screen_license_import.dart';
 import 'features/identity/screen_plus.dart';
 import 'features/identity/screen_rower_edit.dart';
 import 'features/identity/screen_club_sessions.dart';
@@ -39,6 +40,7 @@ import 'funnel/screen_ateliers.dart';
 import 'funnel/screen_brief.dart';
 import 'funnel/screen_dispos.dart';
 import 'funnel/screen_distances.dart';
+import 'funnel/screen_fiche.dart';
 import 'funnel/screen_onboard.dart';
 import 'funnel/screen_player.dart';
 import 'funnel/screen_pm5.dart';
@@ -147,6 +149,8 @@ abstract final class AppRoutes {
   static const funnelDispos = '/funnel/dispos';
   static const funnelWaterVeto = '/funnel/water-veto';
   static const funnelDistances = '/funnel/distances';
+  static const licenseImport = '/license/import';
+  static const fiche = '/fiche';
 
   /// Après tare : barreur → `/cox`, rameur → `/live`. Écrans distincts.
   static String afterTare(CrewRole role) =>
@@ -161,6 +165,15 @@ final GoRouter appRouter = GoRouter(
         uri.path == AppRoutes.authCallback ||
         uri.path.endsWith('/auth/callback')) {
       return AuthCallbackScreen(uri: uri);
+    }
+    // Deep link fiche : datarow://fiche/{token}
+    if (uri.scheme == 'datarow' && uri.host == 'fiche') {
+      final token = uri.pathSegments.isNotEmpty
+          ? uri.pathSegments.first
+          : uri.path.replaceFirst('/', '');
+      if (token.isNotEmpty) {
+        return FunnelFicheScreen(token: token);
+      }
     }
     // Throw builder / route inconnue : visible, pas de snap-back /identity.
     return PageIntrouvableScreen(
@@ -540,6 +553,23 @@ final GoRouter appRouter = GoRouter(
       name: 'funnel-distances',
       builder: (context, state) =>
           _hub(AppRoutes.funnelDistances, const FunnelDistancesScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.licenseImport,
+      name: 'license-import',
+      builder: (context, state) =>
+          _hub(AppRoutes.licenseImport, const LicenseImportScreen()),
+    ),
+    GoRoute(
+      path: '${AppRoutes.fiche}/:token',
+      name: 'fiche',
+      builder: (context, state) {
+        final token = state.pathParameters['token'] ?? '';
+        return _hub(
+          '${AppRoutes.fiche}/:token',
+          FunnelFicheScreen(token: token),
+        );
+      },
     ),
   ],
 );
