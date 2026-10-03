@@ -7,17 +7,19 @@ import '../theme/deck_theme.dart';
 import 'controller.dart';
 import 'models.dart';
 
-/// Suite — même distance J+3, ou 500 m si c’était un 2000.
+/// Suite — même pièce, 500 m, ou ateliers Lot 2.
 class FunnelSuiteScreen extends ConsumerWidget {
   const FunnelSuiteScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final log = ref.watch(funnelProvider).lastResult;
+    final piece = ErgPiece.byId(log?.pieceId);
     final was2000 = log?.distM == ErgDistance.m2000.meters;
     final sameDist = log?.distM ?? ErgDistance.m500.meters;
-    final sameLabel =
-        ErgDistance.fromMeters(sameDist)?.label ?? '$sameDist m';
+    final sameLabel = piece?.label ??
+        ErgDistance.fromMeters(sameDist)?.label ??
+        '$sameDist m';
 
     return Scaffold(
       backgroundColor: DeckColors.bg,
@@ -53,7 +55,13 @@ class FunnelSuiteScreen extends ConsumerWidget {
                 title: 'Même distance dans 3 jours',
                 subtitle: sameLabel,
                 onTap: () {
-                  ref.read(funnelProvider.notifier).bookNext(distM: sameDist);
+                  if (piece != null) {
+                    ref.read(funnelProvider.notifier).bookNext(piece: piece);
+                  } else {
+                    ref
+                        .read(funnelProvider.notifier)
+                        .bookNext(distM: sameDist);
+                  }
                   context.go(AppRoutes.homeRower);
                 },
               ),
@@ -70,6 +78,12 @@ class FunnelSuiteScreen extends ConsumerWidget {
                   },
                 ),
               ],
+              const SizedBox(height: 10),
+              _Choice(
+                title: 'Ateliers brevet',
+                subtitle: '5 min · 3×1 min · 1 000 m · relais 4×500',
+                onTap: () => context.go(AppRoutes.funnelAteliers),
+              ),
               const Spacer(),
               TextButton(
                 onPressed: () => context.go(AppRoutes.homeRower),

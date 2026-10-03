@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>DR-FR-A Ateliers brevet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "volt": "#D6FF3C",
+            "surface-bg": "#0A0A0A",
+            "surface-card": "#111418",
+            "surface-item": "#161B22",
+            "border-hairline": "#2A2F36",
+            "border-hairline-subtle": "#1F242B",
+            "text-primary": "#F4F6F8",
+            "text-secondary": "#8C96A5",
+            "text-muted": "#5A6472",
+            "maritime-starboard": "#34D399",
+            "maritime-port": "#E05353",
+            "accent-amber": "#E8C547"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: 400;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-[#050709] text-text-primary antialiased min-h-screen flex items-center justify-center p-0 selection:bg-volt selection:text-black">
+  <!-- Mobile Container strictly 390x844 viewport target -->
+  <main class="w-[390px] h-[844px] max-h-[844px] flex flex-col justify-between bg-surface-bg px-5 py-5 relative overflow-hidden border border-border-hairline/60">
+    <!-- Subtle technical grid background -->
+    <div class="absolute inset-0 pointer-events-none opacity-[0.025]" style="background-size: 20px 20px; background-image: linear-gradient(to right, #F4F6F8 1px, transparent 1px), linear-gradient(to bottom, #F4F6F8 1px, transparent 1px);"></div>
+
+    <!-- Top Stack Navigation / Header -->
+    <div class="relative z-10 flex flex-col">
+      <!-- Top Bar: Back Chevron + Protocol Tag + BLE Status -->
+      <header class="flex items-center justify-between pt-1 pb-3">
+        <div class="flex items-center gap-3">
+          <button aria-label="Retour" class="w-9 h-9 rounded-lg bg-surface-card border border-border-hairline flex items-center justify-center text-text-primary hover:border-volt active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+          </button>
+          <div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-card border border-border-hairline">
+            <span class="font-mono text-[9px] font-bold text-volt tracking-widest uppercase">DR-FR-A</span>
+            <span class="text-text-muted text-[10px]">/</span>
+            <span class="font-mono text-[9px] text-text-secondary uppercase tracking-wider">FFA INDOOR</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-card border border-border-hairline">
+          <span class="w-1.5 h-1.5 rounded-full bg-maritime-starboard animate-pulse"></span>
+          <span class="font-mono text-[9px] font-semibold text-text-primary tracking-wider uppercase">PM5 BLE</span>
+        </div>
+      </header>
+
+      <!-- Screen Title & Subtitle in App Bar area -->
+      <div class="pt-2 pb-4 border-b border-border-hairline/70">
+        <div class="flex items-baseline justify-between">
+          <h1 class="font-sans text-[22px] font-extrabold tracking-tight text-text-primary">
+            Ateliers brevet
+          </h1>
+          <span class="font-mono text-[10px] text-volt tracking-wider uppercase font-semibold">4 épreuves</span>
+        </div>
+        <p class="font-mono text-[11px] leading-tight text-text-secondary mt-1">
+          Formats FFA indoor — pas une bibliothèque libre
+        </p>
+      </div>
+
+      <!-- Instruction / Context micro-strip -->
+      <div class="mt-3 flex items-center justify-between px-3 py-2 rounded-lg bg-surface-card border border-border-hairline text-text-secondary">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[15px] text-volt">verified</span>
+          <span class="font-mono text-[9.5px] uppercase tracking-wide">Validation épreuve standardisée</span>
+        </div>
+        <span class="font-mono text-[9.5px] text-text-muted">CUES LIVE</span>
+      </div>
+
+      <!-- List of 4 Tappable Cards -->
+      <section class="mt-3 flex flex-col gap-2.5">
+        <!-- 1. 5 min continu -->
+        <article class="group relative rounded-[14px] bg-surface-card border border-border-hairline p-3.5 hover:border-volt/80 active:border-volt transition-colors cursor-pointer">
+          <div class="flex items-start justify-between">
+            <div class="flex flex-col">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-[10px] font-bold text-volt">01</span>
+                <h2 class="font-sans text-[15px] font-bold text-text-primary tracking-tight group-hover:text-volt transition-colors">
+                  5 min continu
+                </h2>
+              </div>
+              <div class="flex items-center gap-1.5 mt-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-volt"></span>
+                <span class="font-mono text-[11px] text-text-primary font-medium tracking-wide">
+                  Cadence 18
+                </span>
+                <span class="font-mono text-[10px] text-text-muted">· régularité stricte</span>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-text-muted group-hover:text-volt group-hover:translate-x-0.5 transition-all text-[18px] mt-0.5">
+              arrow_forward
+            </span>
+          </div>
+
+          <!-- Bottom KPI pill -->
+          <div class="mt-3 pt-2.5 border-t border-border-hairline-subtle flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono text-[9px] uppercase tracking-wider text-text-muted">KPI</span>
+              <span class="font-mono text-[10.5px] text-text-secondary font-medium tracking-tight">
+                cadence · split
+              </span>
+            </div>
+            <span class="font-mono text-[9.5px] px-2 py-0.5 rounded bg-surface-item border border-border-hairline text-text-secondary">
+              5:00
+            </span>
+          </div>
+        </article>
+
+        <!-- 2. 3 × 1 min -->
+        <article class="group relative rounded-[14px] bg-surface-card border border-border-hairline p-3.5 hover:border-volt/80 active:border-volt transition-colors cursor-pointer">
+          <div class="flex items-start justify-between">
+            <div class="flex flex-col">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-[10px] font-bold text-volt">02</span>
+                <h2 class="font-sans text-[15px] font-bold text-text-primary tracking-tight group-hover:text-volt transition-colors">
+                  3 × 1 min
+                </h2>
+              </div>
+              <div class="flex items-center gap-1.5 mt-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-maritime-starboard"></span>
+                <span class="font-mono text-[11px] text-text-primary font-medium tracking-wide">
+                  18 / 22 / 26
+                </span>
+                <span class="font-mono text-[10px] text-text-muted">· montée de régime</span>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-text-muted group-hover:text-volt group-hover:translate-x-0.5 transition-all text-[18px] mt-0.5">
+              arrow_forward
+            </span>
+          </div>
+
+          <!-- Bottom KPI pill -->
+          <div class="mt-3 pt-2.5 border-t border-border-hairline-subtle flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono text-[9px] uppercase tracking-wider text-text-muted">KPI</span>
+              <span class="font-mono text-[10.5px] text-text-secondary font-medium tracking-tight">
+                cadence par bloc
+              </span>
+            </div>
+            <span class="font-mono text-[9.5px] px-2 py-0.5 rounded bg-surface-item border border-border-hairline text-text-secondary">
+              r: 1:00
+            </span>
+          </div>
+        </article>
+
+        <!-- 3. 1 000 m annoncé -->
+        <article class="group relative rounded-[14px] bg-surface-card border border-border-hairline p-3.5 hover:border-volt/80 active:border-volt transition-colors cursor-pointer">
+          <div class="flex items-start justify-between">
+            <div class="flex flex-col">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-[10px] font-bold text-volt">03</span>
+                <h2 class="font-sans text-[15px] font-bold text-text-primary tracking-tight group-hover:text-volt transition-colors">
+                  1 000 m annoncé
+                </h2>
+              </div>
+              <div class="flex items-center gap-1.5 mt-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-accent-amber"></span>
+                <span class="font-mono text-[11px] text-text-primary font-medium tracking-wide">
+                  Réalisé 990–1 010 m
+                </span>
+                <span class="font-mono text-[10px] text-text-muted">· aveugle</span>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-text-muted group-hover:text-volt group-hover:translate-x-0.5 transition-all text-[18px] mt-0.5">
+              arrow_forward
+            </span>
+          </div>
+
+          <!-- Bottom KPI pill -->
+          <div class="mt-3 pt-2.5 border-t border-border-hairline-subtle flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono text-[9px] uppercase tracking-wider text-text-muted">KPI</span>
+              <span class="font-mono text-[10.5px] text-text-secondary font-medium tracking-tight">
+                distance vs temps
+              </span>
+            </div>
+            <span class="font-mono text-[9.5px] px-2 py-0.5 rounded bg-surface-item border border-border-hairline text-text-secondary">
+              ±10 m tol.
+            </span>
+          </div>
+        </article>
+
+        <!-- 4. Relais 4 × 500 m -->
+        <article class="group relative rounded-[14px] bg-surface-card border border-border-hairline p-3.5 hover:border-volt/80 active:border-volt transition-colors cursor-pointer">
+          <div class="flex items-start justify-between">
+            <div class="flex flex-col">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-[10px] font-bold text-volt">04</span>
+                <h2 class="font-sans text-[15px] font-bold text-text-primary tracking-tight group-hover:text-volt transition-colors">
+                  Relais 4 × 500 m
+                </h2>
+              </div>
+              <div class="flex items-center gap-1.5 mt-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-maritime-starboard"></span>
+                <span class="font-mono text-[11px] text-text-primary font-medium tracking-wide">
+                  Championnats FFA
+                </span>
+                <span class="font-mono text-[10px] text-text-muted">· transition</span>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-text-muted group-hover:text-volt group-hover:translate-x-0.5 transition-all text-[18px] mt-0.5">
+              arrow_forward
+            </span>
+          </div>
+
+          <!-- Bottom KPI pill -->
+          <div class="mt-3 pt-2.5 border-t border-border-hairline-subtle flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono text-[9px] uppercase tracking-wider text-text-muted">KPI</span>
+              <span class="font-mono text-[10.5px] text-text-secondary font-medium tracking-tight">
+                temps · split
+              </span>
+            </div>
+            <span class="font-mono text-[9.5px] px-2 py-0.5 rounded bg-surface-item border border-border-hairline text-text-secondary">
+              2 000 m tot.
+            </span>
+          </div>
+        </article>
+      </section>
+    </div>
+
+    <!-- Bottom Tunnel Footer (No Tab Bar) -->
+    <footer class="relative z-10 pt-2 pb-1 border-t border-border-hairline/60">
+      <!-- Muted bottom note -->
+      <div class="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-surface-card border border-border-hairline-subtle mb-3">
+        <span class="material-symbols-outlined text-text-muted text-[16px] shrink-0 mt-0.5">info</span>
+        <p class="font-mono text-[11px] leading-[15px] text-text-muted">
+          Le 500 m pace boat cadence 24 est dans le Plan.
+        </p>
+      </div>
+
+      <!-- Tunnel Context indicator -->
+      <div class="flex items-center justify-between px-1">
+        <div class="flex items-center gap-1.5">
+          <span class="w-1 h-1 rounded-full bg-volt"></span>
+          <span class="font-mono text-[9px] text-text-muted uppercase tracking-wider">TUNNEL DISTANCES</span>
+        </div>
+        <span class="font-mono text-[9px] text-text-muted uppercase">STANDARD FFA TECHNIQUE</span>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>

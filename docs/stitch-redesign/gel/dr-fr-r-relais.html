@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>DataR0w // DR-FR-R Relais 4×500</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "volt": "#D6FF3C",
+            "port": "#E05353",
+            "starboard": "#46C275",
+            "surface-dark": "#0A0A0A",
+            "surface-card": "#111418",
+            "border-card": "#262C35",
+            "border-subtle": "#1B2028",
+            "text-primary": "#F4F6F8",
+            "text-secondary": "#8C96A5",
+            "text-muted": "#4B5563"
+          },
+          fontFamily: {
+            "mono": ["JetBrains Mono", "monospace"],
+            "sans": ["Inter", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-[#050709] text-[#F4F6F8] antialiased min-h-screen flex items-center justify-center p-0 selection:bg-volt selection:text-black">
+
+<!-- Mobile Frame 390x844 strict -->
+<main class="w-full max-w-[390px] h-[844px] max-h-[844px] flex flex-col justify-between bg-[#0A0A0A] px-4 py-5 relative overflow-hidden border border-[#1A202C]">
+
+  <!-- Background Technical Grid Matrix Pattern (Very Subtle) -->
+  <div class="absolute inset-0 pointer-events-none opacity-[0.03]" style="background-size: 20px 20px; background-image: linear-gradient(to right, #F4F6F8 1px, transparent 1px), linear-gradient(to bottom, #F4F6F8 1px, transparent 1px);"></div>
+
+  <!-- SECTION TOP: Header + Status bar info -->
+  <header class="relative z-10 flex flex-col gap-2">
+    <!-- Top System Line -->
+    <div class="flex items-center justify-between text-[11px] font-mono border-b border-border-subtle/80 pb-2.5">
+      <div class="flex items-center gap-2">
+        <!-- Technical Diamond -->
+        <span class="text-volt flex items-center" data-icon="diamond">
+          <svg fill="currentColor" height="14" viewBox="0 0 256 256" width="14" xmlns="http://www.w3.org/2000/svg">
+            <path d="M235.33,116.72,139.28,20.66a16,16,0,0,0-22.56,0l-96,96.06a16,16,0,0,0,0,22.56l96.05,96.06h0a16,16,0,0,0,22.56,0l96.05-96.06a16,16,0,0,0,0-22.56ZM128,224h0L32,128,128,32,224,128Z"></path>
+          </svg>
+        </span>
+        <span class="font-bold tracking-tight text-[#F4F6F8]">DataR0w</span>
+        <span class="text-[9px] uppercase tracking-wider text-text-secondary px-1.5 py-0.5 rounded bg-surface-card border border-border-card">
+          DR-FR-R
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#161C24] border border-[#232B36] text-[10px] text-starboard font-medium">
+          <span class="size-1.5 rounded-full bg-starboard animate-pulse"></span>
+          LOCAL
+        </span>
+        <span class="text-text-secondary font-medium tracking-wider text-[10px]">PM5 50Hz</span>
+      </div>
+    </div>
+
+    <!-- Title and Subtitle Row -->
+    <div class="flex items-center justify-between mt-1">
+      <div>
+        <h1 class="font-sans text-[20px] font-extrabold tracking-tight text-[#F4F6F8]">
+          Relais 4 × 500 m
+        </h1>
+        <div class="text-[11px] font-mono text-text-secondary flex items-center gap-2 mt-0.5">
+          <span>DISTANCE TOTALE : 2 000 M</span>
+          <span class="text-border-card">•</span>
+          <span>FFA RELAY</span>
+        </div>
+      </div>
+
+      <!-- Chip Jambe 2 / 4 -->
+      <div class="flex flex-col items-end">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#1C2415] border border-volt/40 text-[11px] font-mono font-bold text-volt uppercase tracking-wider">
+          <span class="size-1.5 rounded-full bg-volt"></span>
+          Jambe 2 / 4
+        </span>
+        <span class="font-mono text-[9px] text-text-secondary mt-0.5">RELAIS ACTIF</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- SECTION MAIN TELEMETRY: HERO SPLIT & SECONDARY METRICS -->
+  <div class="relative z-10 flex flex-col gap-3 my-auto">
+
+    <!-- HERO CARD: Split instantané 1:52.4 /500 m -->
+    <section class="bg-surface-card rounded-[12px] border border-border-card p-4 flex flex-col items-center justify-center relative">
+      <div class="w-full flex items-center justify-between text-text-secondary font-mono text-[10px] uppercase font-bold tracking-wider mb-1 border-b border-border-subtle/80 pb-1.5">
+        <span class="flex items-center gap-1.5">
+          <span class="size-1.5 rounded-full bg-starboard"></span>
+          ALLURE INSTANTANÉE
+        </span>
+        <span class="text-text-muted">CIBLE 1:52.0</span>
+      </div>
+
+      <!-- Giant Metric Split -->
+      <div class="py-2 flex items-baseline justify-center gap-1">
+        <div class="font-mono text-[56px] leading-none font-bold text-[#F4F6F8] tabular-nums tracking-tighter">
+          1:52<span class="text-volt">.4</span>
+        </div>
+        <span class="font-mono text-[16px] font-semibold text-text-secondary tracking-tight">
+          /500m
+        </span>
+      </div>
+
+      <!-- Pace Delta Indicator Pill -->
+      <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-[#192212] border border-volt/30 text-[10.5px] font-mono text-volt font-medium">
+        <span class="material-symbols-outlined text-[14px]">arrow_drop_down</span>
+        <span>+0.4 s vs CIBLE REQUIS</span>
+      </div>
+    </section>
+
+    <!-- SECONDARY ROW: Restant jambe (180 m) · Cadence (30) · Watts (268) -->
+    <section class="grid grid-cols-3 gap-2.5">
+      <!-- Col 1: Restant jambe -->
+      <div class="bg-surface-card rounded-[10px] border border-border-card p-3 flex flex-col justify-between">
+        <span class="font-mono text-[9.5px] uppercase font-bold tracking-wider text-text-secondary leading-tight">
+          RESTANT JAMBE
+        </span>
+        <div class="mt-2">
+          <div class="font-mono text-[26px] leading-none font-bold text-[#F4F6F8] tabular-nums">
+            180
+          </div>
+          <span class="font-mono text-[9.5px] text-text-secondary uppercase">MÈTRES</span>
+        </div>
+        <div class="mt-1.5 pt-1.5 border-t border-border-subtle text-[9px] font-mono text-text-muted">
+          320 m faits
+        </div>
+      </div>
+
+      <!-- Col 2: Cadence SPM -->
+      <div class="bg-surface-card rounded-[10px] border border-border-card p-3 flex flex-col justify-between">
+        <span class="font-mono text-[9.5px] uppercase font-bold tracking-wider text-text-secondary leading-tight">
+          CADENCE
+        </span>
+        <div class="mt-2">
+          <div class="font-mono text-[26px] leading-none font-bold text-volt tabular-nums">
+            30
+          </div>
+          <span class="font-mono text-[9.5px] text-text-secondary uppercase">SPM</span>
+        </div>
+        <div class="mt-1.5 pt-1.5 border-t border-border-subtle text-[9px] font-mono text-starboard flex items-center gap-1">
+          <span class="size-1 rounded-full bg-starboard"></span>
+          Rythme stable
+        </div>
+      </div>
+
+      <!-- Col 3: Watts -->
+      <div class="bg-surface-card rounded-[10px] border border-border-card p-3 flex flex-col justify-between">
+        <span class="font-mono text-[9.5px] uppercase font-bold tracking-wider text-text-secondary leading-tight">
+          PUISSANCE
+        </span>
+        <div class="mt-2">
+          <div class="font-mono text-[26px] leading-none font-bold text-[#F4F6F8] tabular-nums">
+            268
+          </div>
+          <span class="font-mono text-[9.5px] text-text-secondary uppercase">WATTS</span>
+        </div>
+        <div class="mt-1.5 pt-1.5 border-t border-border-subtle text-[9px] font-mono text-text-muted">
+          DF 120
+        </div>
+      </div>
+    </section>
+
+    <!-- PROGRESSION DES 4 RELAIS / JAMBES -->
+    <section class="bg-surface-card rounded-[12px] border border-border-card p-3.5 flex flex-col gap-2.5">
+      <div class="flex items-center justify-between text-[10px] font-mono font-bold">
+        <span class="text-text-secondary uppercase tracking-wider flex items-center gap-1.5">
+          <span class="size-1.5 rounded-full bg-volt"></span>
+          PROGRESSION DU RELAIS (4 × 500 M)
+        </span>
+        <span class="text-volt tabular-nums">820 / 2 000 m (41%)</span>
+      </div>
+
+      <!-- 4 Segment Progress Bar:
+           - Seg 1: 100% Volt (Leg 1 done)
+           - Seg 2: ~64% filling Volt (320/500m done)
+           - Seg 3: muted
+           - Seg 4: muted
+      -->
+      <div class="grid grid-cols-4 gap-1.5 h-2.5 w-full">
+        <!-- Segment 1: Completed -->
+        <div class="h-full rounded-[2px] bg-volt overflow-hidden"></div>
+
+        <!-- Segment 2: In Progress (filling 64%) -->
+        <div class="h-full rounded-[2px] bg-[#1E2530] overflow-hidden relative">
+          <div class="h-full bg-volt rounded-[2px]" style="width: 64%;"></div>
+        </div>
+
+        <!-- Segment 3: Pending muted -->
+        <div class="h-full rounded-[2px] bg-[#1A2028]"></div>
+
+        <!-- Segment 4: Pending muted -->
+        <div class="h-full rounded-[2px] bg-[#1A2028]"></div>
+      </div>
+
+      <!-- Frozen Leg Times Table (4 legs: 1:53.1 · en cours · — · —) -->
+      <div class="grid grid-cols-4 gap-1 pt-1.5 border-t border-border-subtle text-center font-mono">
+        <!-- Leg 1 -->
+        <div class="flex flex-col items-center">
+          <span class="text-[9px] uppercase tracking-wider text-text-muted">Jambe 1</span>
+          <span class="text-[12px] font-bold text-[#F4F6F8] tabular-nums mt-0.5">1:53.1</span>
+          <span class="text-[8.5px] text-starboard font-medium mt-0.5">VALIDÉ</span>
+        </div>
+
+        <!-- Leg 2 (Current) -->
+        <div class="flex flex-col items-center bg-[#182012]/80 rounded p-0.5 border border-volt/30">
+          <span class="text-[9px] uppercase tracking-wider text-volt font-semibold">Jambe 2</span>
+          <span class="text-[12px] font-bold text-volt tracking-tight mt-0.5 animate-pulse">en cours</span>
+          <span class="text-[8.5px] text-volt/80 font-medium mt-0.5">320/500 m</span>
+        </div>
+
+        <!-- Leg 3 -->
+        <div class="flex flex-col items-center opacity-40">
+          <span class="text-[9px] uppercase tracking-wider text-text-secondary">Jambe 3</span>
+          <span class="text-[12px] font-bold text-text-secondary mt-0.5">—</span>
+          <span class="text-[8.5px] text-text-muted mt-0.5">ATTENTE</span>
+        </div>
+
+        <!-- Leg 4 -->
+        <div class="flex flex-col items-center opacity-40">
+          <span class="text-[9px] uppercase tracking-wider text-text-secondary">Jambe 4</span>
+          <span class="text-[12px] font-bold text-text-secondary mt-0.5">—</span>
+          <span class="text-[8.5px] text-text-muted mt-0.5">ATTENTE</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Transition Warning Indicator Box -->
+    <div class="bg-[#121820] border border-[#222C3A] rounded-[8px] px-3 py-2 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="size-2 rounded-full bg-volt animate-ping"></span>
+        <span class="font-mono text-[10px] text-text-secondary uppercase">
+          Passage de relais dans <span class="text-volt font-bold">180 m</span>
+        </span>
+      </div>
+      <span class="font-mono text-[9.5px] text-text-secondary uppercase tracking-wider border border-border-card px-1.5 py-0.5 rounded bg-surface-dark">
+        Rameur #3 Prêt
+      </span>
+    </div>
+
+  </div>
+
+  <!-- SECTION BOTTOM: ACTION BUTTONS (NO TAB BAR) -->
+  <!-- Port Stop 64px button + Ghost Pause button -->
+  <footer class="relative z-10 flex items-center gap-3 pt-2">
+    <!-- Ghost Pause button -->
+    <button type="button" class="flex-1 h-[64px] rounded-[12px] bg-transparent border border-border-card text-text-secondary hover:text-[#F4F6F8] hover:border-text-secondary/60 active:bg-surface-card transition-colors flex items-center justify-center gap-2 font-mono text-[14px] font-bold uppercase tracking-wider">
+      <span class="material-symbols-outlined text-[20px]">pause</span>
+      <span>Pause</span>
+    </button>
+
+    <!-- Primary Port Stop 64px button (#E05353) -->
+    <button type="button" class="flex-[1.5] h-[64px] rounded-[12px] bg-port text-[#FFFFFF] active:opacity-90 active:scale-[0.99] transition-transform flex items-center justify-center gap-2 font-mono text-[15px] font-extrabold uppercase tracking-wider">
+      <span class="material-symbols-outlined text-[22px]">stop</span>
+      <span>Stop</span>
+    </button>
+  </footer>
+
+</main>
+
+</body>
+</html>

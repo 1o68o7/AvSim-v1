@@ -266,16 +266,28 @@ class _HomeRowerScreenState extends ConsumerState<HomeRowerScreen> {
                   hasRower: rower != null,
                   onStart: () {
                     final f = ref.read(funnelProvider);
-                    final dist = f.profile?.playDistanceM ?? 500;
-                    ref.read(funnelProvider.notifier).setActivePiece(
-                          distM: dist,
-                          dragFactor: f.profile?.dragFactor,
-                        );
-                    context.go(
-                      '${AppRoutes.funnelPreview}?dist=$dist',
-                    );
+                    final piece = f.profile?.todayPiece;
+                    if (piece != null) {
+                      ref.read(funnelProvider.notifier).setActivePiece(
+                            piece: piece,
+                            dragFactor: f.profile?.dragFactor,
+                          );
+                      context.go(
+                        '${AppRoutes.funnelPreview}?piece=${piece.id}',
+                      );
+                    } else {
+                      final dist = f.profile?.playDistanceM ?? 500;
+                      ref.read(funnelProvider.notifier).setActivePiece(
+                            distM: dist,
+                            dragFactor: f.profile?.dragFactor,
+                          );
+                      context.go(
+                        '${AppRoutes.funnelPreview}?dist=$dist',
+                      );
+                    }
                   },
                   onSetupPractice: () => context.go(AppRoutes.funnelOnboard),
+                  onAteliers: () => context.go(AppRoutes.funnelAteliers),
                 ),
                 const SizedBox(height: 12),
                 _HeroLastOuting(
@@ -385,12 +397,14 @@ class _FunnelTodayCard extends StatelessWidget {
     required this.hasRower,
     required this.onStart,
     required this.onSetupPractice,
+    required this.onAteliers,
   });
 
   final FunnelState funnel;
   final bool hasRower;
   final VoidCallback onStart;
   final VoidCallback onSetupPractice;
+  final VoidCallback onAteliers;
 
   @override
   Widget build(BuildContext context) {
@@ -508,6 +522,14 @@ class _FunnelTodayCard extends StatelessWidget {
               onPressed: onStart,
               icon: const Icon(Icons.play_arrow, size: 24),
               label: const Text('Start'),
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: onAteliers,
+            child: const Text(
+              'Ateliers brevet',
+              style: TextStyle(color: DeckColors.muted),
             ),
           ),
         ],
