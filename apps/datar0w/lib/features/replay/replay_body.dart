@@ -8,6 +8,7 @@ import 'package:latlong2/latlong.dart';
 import '../../session/model.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
+import '../../session/tel_cadence.dart';
 import '../../theme/deck_theme.dart';
 import '../../maps/deck_tiles.dart';
 import '../../widgets/deck_widgets.dart';
@@ -519,7 +520,8 @@ class _CursorMetrics extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cad = cur.cadenceSpm;
+    final cad = formatCadenceValue(cur.cadenceSpm, cur.cadenceSrc);
+    final cadApprox = cadenceApproxLabel(cur.cadenceSrc);
     final sog = cur.sog;
     final gite = cur.giteDeg;
     final giteColor = (gite ?? 0) >= 0 ? DeckColors.tribord : DeckColors.babord;
@@ -557,11 +559,11 @@ class _CursorMetrics extends StatelessWidget {
             children: [
               Expanded(
                 child: _MetricTile(
-                  label: 'Cadence',
+                  label: cadApprox == null ? 'Cadence' : 'Cadence · $cadApprox',
                   unit: 'spm',
-                  value: cad == null ? '—' : cad.toStringAsFixed(0),
+                  value: cad,
                   accent: DeckColors.tribord,
-                  footnote: dCad == null
+                  footnote: dCad == null || cad == '—'
                       ? null
                       : 'Δ ${dCad! >= 0 ? '+' : ''}${dCad!.toStringAsFixed(0)}',
                 ),
@@ -834,12 +836,8 @@ class _CurvesPainter extends CustomPainter {
       Offset.zero & size,
       Paint()..color = const Color(0xFF090C10),
     );
-    _line(
-      canvas,
-      size,
-      samples.map((s) => s.cadenceSpm).toList(),
-      DeckColors.tribord,
-    );
+    // Cadence : high = tribords ; medium = gris ; low (null) = trou.
+    _cadenceLine(canvas, size, samples);
     _line(
       canvas,
       size,
@@ -873,6 +871,50 @@ class _CurvesPainter extends CustomPainter {
       Paint()
         ..color = DeckColors.volt
         ..strokeWidth = 1.2,
+    );
+  }
+
+  void _cadenceLine(Canvas canvas, Size size, List<SessionSample> samples) {
+    final ys = samples.map((s) => s.cadenceSpm).toList();
+    final finite = ys.whereType<double>().toList();
+    if (finite.isEmpty) return;
+    final minY = finite.reduce(math.min);
+    final maxY = finite.reduce(math.max);
+    final span = (maxY - minY).abs() < 1e-6 ? 1.0 : maxY - minY;
+    void stroke(Color color, bool Function(int i) include) {
+      final paint = Paint()
+        ..color = color
+        ..strokeWidth = 1.5
+        ..style = PaintingStyle.stroke;
+      ui.Path? path;
+      for (var i = 0; i < ys.length; i++) {
+        final yv = ys[i];
+        if (yv == null || !include(i)) {
+          if (path != null) {
+            canvas.drawPath(path, paint);
+            path = null;
+          }
+          continue;
+        }
+        final x = i / (ys.length - 1) * size.width;
+        final y = size.height - (yv - minY) / span * size.height;
+        if (path == null) {
+          path = ui.Path()..moveTo(x, y);
+        } else {
+          path.lineTo(x, y);
+        }
+      }
+      if (path != null) canvas.drawPath(path, paint);
+    }
+
+    stroke(
+      DeckColors.muted.withValues(alpha: 0.55),
+      (i) => samples[i].cadenceSrc == 'imu_pitch_ac_approx' ||
+          samples[i].cadenceSrc == 'tel',
+    );
+    stroke(
+      DeckColors.tribord,
+      (i) => samples[i].cadenceSrc == 'imu_pitch_ac',
     );
   }
 

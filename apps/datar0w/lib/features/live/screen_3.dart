@@ -16,6 +16,7 @@ import '../../session/heel.dart';
 import '../../session/live_hub.dart';
 import '../../session/rower_orientation.dart';
 import '../../session/session_sync.dart';
+import '../../session/tel_cadence.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/heel_gauge.dart';
 import '../../widgets/live_affordances.dart';
@@ -339,6 +340,9 @@ class _LeftColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spm = s.cadenceSpm;
+    final cadSrc = s.cadenceSrc;
+    final cadLabel = formatCadenceValue(spm, cadSrc);
+    final cadApprox = cadenceApproxLabel(cadSrc);
     final sog = s.sog;
     final kmh = sog == null ? null : sog * 3.6;
     final split = _split500(sog);
@@ -366,7 +370,7 @@ class _LeftColumn extends StatelessWidget {
                           style: DeckType.uiLabel(color: DeckColors.label),
                         ),
                       ),
-                      if (spm != null) ...[
+                      if (cadLabel != '—') ...[
                         const SizedBox(width: 4),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -378,7 +382,7 @@ class _LeftColumn extends StatelessWidget {
                             borderRadius: DeckRadii.chipAll,
                           ),
                           child: Text(
-                            'SPM',
+                            cadApprox ?? 'SPM',
                             style: DeckType.labelMono(
                               color: DeckColors.tribord,
                               size: 10,
@@ -396,7 +400,7 @@ class _LeftColumn extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          spm == null ? '—' : spm.toStringAsFixed(0),
+                          cadLabel,
                           style: DeckType.metric(
                             size: 44,
                             weight: FontWeight.w700,

@@ -12,6 +12,7 @@ import '../../ops/controller.dart';
 import '../../ops/impact_report.dart';
 import '../../router.dart';
 import '../../session/boat_config.dart';
+import '../../session/cadence_backfill.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
 import '../../theme/deck_theme.dart';
@@ -57,6 +58,7 @@ class _HomeRowerScreenState extends ConsumerState<HomeRowerScreen> {
     _LastOuting? last;
     if (metas.isNotEmpty) {
       final m = metas.first;
+      await CadenceBackfill.maybeBackfill(m.id);
       final samples = await SessionStore.loadSamples(m.id);
       Duration? duration;
       double? distM;
@@ -65,7 +67,7 @@ class _HomeRowerScreenState extends ConsumerState<HomeRowerScreen> {
         final s = SessionSummary.fromSamples(samples);
         duration = s.duration;
         distM = s.distM;
-        cad = s.cadenceMean;
+        cad = s.cadenceMedianHigh ?? s.cadenceMean;
       } else {
         final a = DateTime.tryParse(m.startedAt ?? '');
         final b = DateTime.tryParse(m.endedAt ?? '');

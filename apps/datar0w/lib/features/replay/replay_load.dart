@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../session/cadence_backfill.dart';
 import '../../session/live_hub.dart';
 import '../../session/model.dart';
 import '../../session/share_files.dart';
@@ -77,6 +78,8 @@ class _ReplayLoadScreenState extends ConsumerState<ReplayLoadScreen> {
       }
       return;
     }
+    // Backfill local si cadence_spm null + imu.jsonl présent.
+    await CadenceBackfill.maybeBackfill(id);
     final samples = await SessionStore.loadSamples(id);
     final notes = await SessionStore.loadNotes(id);
     final meta = await SessionStore.loadMeta(id);

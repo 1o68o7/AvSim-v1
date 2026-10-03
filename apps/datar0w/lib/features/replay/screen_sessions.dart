@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router.dart';
+import '../../session/cadence_backfill.dart';
 import '../../session/share_files.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
@@ -70,6 +71,7 @@ class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
     });
     final rows = <_SessionRow>[];
     for (final m in filtered) {
+      await CadenceBackfill.maybeBackfill(m.id);
       final samples = await SessionStore.loadSamples(m.id);
       Duration? duration;
       double? distM;
@@ -78,7 +80,7 @@ class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
         final s = SessionSummary.fromSamples(samples);
         duration = s.duration;
         distM = s.distM;
-        cad = s.cadenceMean;
+        cad = s.cadenceMedianHigh ?? s.cadenceMean;
       } else {
         final a = DateTime.tryParse(m.startedAt ?? '');
         final b = DateTime.tryParse(m.endedAt ?? '');
