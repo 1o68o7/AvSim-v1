@@ -67,28 +67,6 @@ String? _staffToolsRedirect(BuildContext context, GoRouterState state) {
   }
 }
 
-/// Guard licence FFA : tunnel eau sans licence → onboarding rameur.
-String? _waterLicenceRedirect(BuildContext context, GoRouterState state) {
-  if (!isWaterSessionPath(state.uri.path)) return null;
-  try {
-    final snap = ProviderScope.containerOf(context).read(identityProvider);
-    final denied = waterLicenceRedirect(snap);
-    if (denied != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final messenger = ScaffoldMessenger.maybeOf(context);
-        messenger?.showSnackBar(
-          const SnackBar(
-            content: Text('Licence FFA requise pour aller sur l’eau'),
-          ),
-        );
-      });
-    }
-    return denied;
-  } catch (_) {
-    return null;
-  }
-}
-
 /// try/catch builder → Page introuvable (pas de lock orientation ici :
 /// le lock portrait hub de #72 cassait le paysage live/cox).
 Widget _hub(String dest, Widget child) => SafeRoute(
@@ -329,25 +307,21 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.presession,
       name: '2a-presession',
-      redirect: _waterLicenceRedirect,
       builder: (context, state) => const PresessionScreen(),
     ),
     GoRoute(
       path: AppRoutes.tare,
       name: '2b-tare',
-      redirect: _waterLicenceRedirect,
       builder: (context, state) => const TareScreen(),
     ),
     GoRoute(
       path: AppRoutes.live,
       name: '3-live',
-      redirect: _waterLicenceRedirect,
       builder: (context, state) => const LiveScreen(),
     ),
     GoRoute(
       path: AppRoutes.cox,
       name: '3-cox',
-      redirect: _waterLicenceRedirect,
       builder: (context, state) => const CoxLiveScreen(),
     ),
     GoRoute(
