@@ -123,7 +123,7 @@ class _FunnelPm5ScreenState extends ConsumerState<FunnelPm5Screen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Sans PM5 : saisie manuelle au Stop (Lot 1).',
+                'Sans PM5 : saisie manuelle au Stop.',
                 style: DeckType.uiLabel(color: DeckColors.label),
               ),
               const SizedBox(height: 16),
