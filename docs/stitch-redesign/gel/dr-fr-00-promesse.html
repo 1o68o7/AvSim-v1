@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>DR-FR-00 Promesse funnel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            deck: {
+              bg: '#0A0A0A',
+              surface: '#111418',
+              hairline: '#2A2F36',
+              text: '#F4F6F8',
+              muted: '#8C96A5',
+              volt: '#D6FF3C',
+              voltDark: '#0A0A0A'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    body {
+      background-color: #050709;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+    }
+    .screen-container {
+      width: 390px;
+      height: 844px;
+      max-width: 390px;
+      max-height: 844px;
+      background-color: #0A0A0A;
+      color: #F4F6F8;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid #2A2F36;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body>
+
+<main class="screen-container px-6 pt-5 pb-8">
+  <!-- Top App Bar / Status & Nav -->
+  <div>
+    <header class="flex items-center justify-between w-full h-11">
+      <!-- Back Chevron Only -->
+      <button type="button" aria-label="Retour" class="flex items-center justify-center w-10 h-10 -ml-2 text-deck-text hover:text-deck-volt transition-colors">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+
+      <!-- Honest badge style: LOCAL mono chip -->
+      <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded border border-deck-hairline bg-deck-surface text-deck-muted">
+        <span class="w-1.5 h-1.5 rounded-full bg-deck-volt"></span>
+        <span class="font-mono text-[10px] tracking-wider font-medium text-deck-text">LOCAL</span>
+      </div>
+    </header>
+
+    <!-- Main Content Flow (Onboarding Promise) -->
+    <div class="mt-8">
+      <!-- Hero Headline (Inter 26–28 bold) -->
+      <h1 class="text-[27px] font-bold leading-[34px] tracking-tight text-deck-text">
+        Un morceau déjà écrit.<br/>
+        Tu sais quoi lire sur le moniteur.
+      </h1>
+
+      <!-- Supporting copy (Inter 15 muted) -->
+      <div class="mt-6 space-y-2 text-[15px] leading-[22px] text-deck-muted">
+        <p>Temps au 500 · cadence · watts.</p>
+        <p class="text-deck-muted/90">Le drag factor si tu es en compétition.</p>
+      </div>
+
+      <!-- Precision Nautical Deck Instrument Preview (Subtle 1px border, no drop shadow, purely essential) -->
+      <div class="mt-10 rounded-xl border border-deck-hairline bg-deck-surface p-5">
+        <div class="flex items-center justify-between pb-3 border-b border-deck-hairline">
+          <span class="font-mono text-[11px] uppercase tracking-wider text-deck-muted">Repères essentiels</span>
+          <span class="font-mono text-[10px] tracking-wider text-deck-volt uppercase">PM5 &amp; Capteurs</span>
+        </div>
+
+        <div class="mt-4 grid grid-cols-3 gap-3">
+          <!-- Metric 1: Split -->
+          <div class="flex flex-col">
+            <span class="font-mono text-[10px] uppercase tracking-wider text-deck-muted">Allure</span>
+            <div class="font-mono text-[20px] font-bold text-deck-text mt-1 tabular-nums">1:45.0</div>
+            <span class="font-mono text-[9px] text-deck-muted mt-0.5">/500m</span>
+          </div>
+
+          <!-- Metric 2: Cadence -->
+          <div class="flex flex-col border-l border-deck-hairline pl-3">
+            <span class="font-mono text-[10px] uppercase tracking-wider text-deck-muted">Cadence</span>
+            <div class="font-mono text-[20px] font-bold text-deck-text mt-1 tabular-nums">24</div>
+            <span class="font-mono text-[9px] text-deck-muted mt-0.5">coups/min</span>
+          </div>
+
+          <!-- Metric 3: Watts -->
+          <div class="flex flex-col border-l border-deck-hairline pl-3">
+            <span class="font-mono text-[10px] uppercase tracking-wider text-deck-muted">Puissance</span>
+            <div class="font-mono text-[20px] font-bold text-deck-text mt-1 tabular-nums">280</div>
+            <span class="font-mono text-[9px] text-deck-muted mt-0.5">watts</span>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-deck-hairline flex items-center justify-between">
+          <span class="font-mono text-[10px] uppercase tracking-wider text-deck-muted">Drag Factor (DF)</span>
+          <span class="font-mono text-[11px] font-semibold text-deck-text tabular-nums">128</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Pinned Actions -->
+  <footer class="w-full flex flex-col items-center">
+    <!-- Primary Volt filled button -->
+    <a href="#commencer" class="w-full h-[52px] rounded-xl bg-deck-volt text-deck-voltDark font-semibold text-[15px] flex items-center justify-center tracking-tight transition-transform active:scale-[0.99] select-none">
+      Commencer
+    </a>
+
+    <!-- Secondary Text Link -->
+    <a href="#connexion" class="mt-4 py-1 text-[13px] font-medium text-deck-muted hover:text-deck-text transition-colors select-none">
+      J’ai déjà un compte
+    </a>
+  </footer>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DataR0w // DR-FR-5 Player erg</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-dim": "#07090C",
+            "surface": "#0A0A0A",
+            "surface-card": "#111418",
+            "surface-container": "#151A22",
+            "surface-container-high": "#1C222C",
+            "border-hairline": "#2A2F36",
+            "border-subtle": "#202834",
+            "border-volt": "#D6FF3C",
+            "volt": "#D6FF3C",
+            "port": "#E05353",
+            "starboard": "#46C275",
+            "muted": "#8C96A5",
+            "subtle": "#64748B"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+    }
+    .tabular-numbers {
+      font-variant-numeric: tabular-nums;
+    }
+    /* Strictly disable all drop shadows for high-contrast nautical OLED legibility */
+    * {
+      box-shadow: none !important;
+      text-shadow: none !important;
+    }
+  </style>
+</head>
+<body class="bg-[#050709] text-[#F4F6F8] antialiased min-h-screen flex items-center justify-center p-0 selection:bg-volt selection:text-[#0A0A0A]">
+  <!-- Target Mobile Viewport: 390 x 844 px -->
+  <main class="w-[390px] h-[844px] max-h-[844px] flex flex-col justify-between bg-[#0A0A0A] p-5 relative overflow-hidden border border-[#2A2F36]/60">
+    
+    <!-- Subtle Nautical Matrix Deck Grid (Pure functional opacity) -->
+    <div class="absolute inset-0 pointer-events-none opacity-[0.025]" style="background-size: 24px 24px; background-image: linear-gradient(to right, #F4F6F8 1px, transparent 1px), linear-gradient(to bottom, #F4F6F8 1px, transparent 1px);"></div>
+
+    <!-- 1. HEADER & TOP STATUS BAR -->
+    <header class="relative z-10 flex items-center justify-between pt-1 border-b border-[#2A2F36]/60 pb-3">
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 text-volt">
+          <svg fill="currentColor" height="14" viewBox="0 0 256 256" width="14" xmlns="http://www.w3.org/2000/svg">
+            <path d="M235.33,116.72,139.28,20.66a16,16,0,0,0-22.56,0l-96,96.06a16,16,0,0,0,0,22.56l96.05,96.06h0a16,16,0,0,0,22.56,0l96.05-96.06a16,16,0,0,0,0-22.56ZM128,224h0L32,128,128,32,224,128Z"></path>
+          </svg>
+          <span class="font-mono text-xs font-bold tracking-tight text-[#F4F6F8]">DataR0w</span>
+        </div>
+        <span class="font-mono text-[9px] uppercase tracking-wider text-[#8C96A5] px-1.5 py-0.5 rounded bg-[#111418] border border-[#2A2F36]">
+          DR-FR-5
+        </span>
+      </div>
+
+      <!-- Distance target & Elapsed chrono & LOCAL status chip -->
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 font-mono text-[11px] tabular-numbers px-2 py-0.5 rounded bg-[#111418] border border-[#2A2F36]">
+          <span class="text-[#F4F6F8] font-bold">2 000 m</span>
+          <span class="text-[#8C96A5]/50">|</span>
+          <span class="text-volt font-semibold">02:56.8</span>
+        </div>
+        
+        <div class="flex items-center gap-1 rounded bg-[#111418] px-2 py-1 border border-[#2A2F36]">
+          <span class="size-1.5 rounded-full bg-[#46C275] animate-pulse"></span>
+          <span class="font-mono text-[9px] font-bold tracking-widest text-[#F4F6F8]">LOCAL</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. WORKOUT CONTEXT & SEGMENT MARKER -->
+    <section class="relative z-10 pt-2 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="size-1.5 rounded-full bg-volt"></span>
+        <span class="font-mono text-[10px] font-bold uppercase tracking-wider text-[#8C96A5]">
+          PIÈCE ACTIVE · TEST OFFICIEL 2K
+        </span>
+      </div>
+      <div class="font-mono text-[10px] text-[#8C96A5] tracking-tight">
+        PM5 BLE · 50 Hz
+      </div>
+    </section>
+
+    <!-- 3. HERO METRIC DECK CARD (Instantaneous Split / 500m + Target Delta) -->
+    <section class="relative z-10 w-full bg-[#111418] rounded-[12px] border border-[#2A2F36] p-5 flex flex-col items-center justify-center text-center">
+      <div class="w-full flex items-center justify-between border-b border-[#2A2F36]/60 pb-2 mb-3">
+        <span class="font-mono text-[10px] uppercase font-bold tracking-wider text-[#8C96A5]">
+          ALLURE INSTANTANÉE
+        </span>
+        <span class="font-mono text-[10px] text-[#8C96A5] uppercase tracking-wider">
+          CIBLE 1:55.0
+        </span>
+      </div>
+
+      <!-- Hero Metric Tabular Display -->
+      <div class="flex items-baseline justify-center gap-2 my-1">
+        <span class="font-mono text-[56px] leading-none font-extrabold tracking-tight text-[#F4F6F8] tabular-numbers">
+          1:54<span class="text-volt">.2</span>
+        </span>
+        <span class="font-mono text-base font-semibold text-[#8C96A5] tracking-tight">
+          /500 m
+        </span>
+      </div>
+
+      <!-- Delta vs Cible in Starboard Green (#46C275) -->
+      <div class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#0A0A0A] border border-[#2A2F36]">
+        <svg fill="currentColor" height="12" viewBox="0 0 256 256" width="12" xmlns="http://www.w3.org/2000/svg" class="text-[#46C275]">
+          <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,48,88H208a8,8,0,0,1,5.66,13.66Z"></path>
+        </svg>
+        <span class="font-mono text-xs font-bold tracking-tight text-[#46C275] tabular-numbers">
+          −0.8 s
+        </span>
+        <span class="font-mono text-[9px] uppercase tracking-wider text-[#8C96A5]">
+          EN AVANCE SUR CIBLE
+        </span>
+      </div>
+    </section>
+
+    <!-- 4. SECONDARY 3-COLUMN INSTRUMENT ROW -->
+    <section class="relative z-10 w-full grid grid-cols-3 gap-2.5">
+      <!-- Col 1: Distance Restante -->
+      <div class="bg-[#111418] rounded-[10px] border border-[#2A2F36] p-3 flex flex-col justify-between">
+        <div class="font-mono text-[9px] font-bold uppercase tracking-wider text-[#8C96A5]">
+          RESTANT
+        </div>
+        <div class="my-1.5">
+          <div class="font-mono text-[22px] leading-none font-bold text-[#F4F6F8] tabular-numbers">
+            1 240
+          </div>
+          <span class="font-mono text-[9px] text-[#8C96A5] uppercase tracking-wide">
+            MÈTRES
+          </span>
+        </div>
+        <div class="font-mono text-[9px] text-[#8C96A5]/70 tabular-numbers">
+          760 m faits
+        </div>
+      </div>
+
+      <!-- Col 2: Cadence SPM -->
+      <div class="bg-[#111418] rounded-[10px] border border-[#2A2F36] p-3 flex flex-col justify-between">
+        <div class="font-mono text-[9px] font-bold uppercase tracking-wider text-[#8C96A5]">
+          CADENCE
+        </div>
+        <div class="my-1.5">
+          <div class="font-mono text-[22px] leading-none font-bold text-[#F4F6F8] tabular-numbers">
+            28
+          </div>
+          <span class="font-mono text-[9px] text-volt uppercase tracking-wide font-medium">
+            SPM
+          </span>
+        </div>
+        <div class="font-mono text-[9px] text-[#46C275] tabular-numbers flex items-center gap-1">
+          <span class="size-1 rounded-full bg-[#46C275]"></span>
+          <span>STABLE</span>
+        </div>
+      </div>
+
+      <!-- Col 3: Puissance Watts -->
+      <div class="bg-[#111418] rounded-[10px] border border-[#2A2F36] p-3 flex flex-col justify-between">
+        <div class="font-mono text-[9px] font-bold uppercase tracking-wider text-[#8C96A5]">
+          PUISSANCE
+        </div>
+        <div class="my-1.5">
+          <div class="font-mono text-[22px] leading-none font-bold text-[#F4F6F8] tabular-numbers">
+            242
+          </div>
+          <span class="font-mono text-[9px] text-[#8C96A5] uppercase tracking-wide">
+            WATTS
+          </span>
+        </div>
+        <div class="font-mono text-[9px] text-[#8C96A5]/70 tabular-numbers">
+          DF 115
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. PROGRESS & SEGMENT PACING STRIP -->
+    <section class="relative z-10 w-full bg-[#111418] rounded-[10px] border border-[#2A2F36] p-3.5 flex flex-col gap-2">
+      <div class="flex items-center justify-between font-mono text-[10px] text-[#8C96A5]">
+        <span class="flex items-center gap-1.5">
+          <span class="size-1.5 rounded-full bg-volt"></span>
+          <span class="text-[#F4F6F8] font-bold tracking-tight">PROGRESSION DE L'ÉPREUVE</span>
+        </span>
+        <span class="font-bold text-volt tabular-numbers">38% (760 / 2 000 m)</span>
+      </div>
+
+      <!-- Thin Volt Progress Bar -->
+      <div class="w-full h-2 rounded-full bg-[#0A0A0A] border border-[#2A2F36] overflow-hidden p-[1px] relative">
+        <div class="h-full bg-volt rounded-full transition-all duration-300" style="width: 38%;"></div>
+      </div>
+
+      <!-- Split 500m Gate Markers -->
+      <div class="flex items-center justify-between font-mono text-[9px] text-[#8C96A5]/70 pt-0.5 tabular-numbers">
+        <span>0 m</span>
+        <span class="text-[#46C275] font-semibold">500 m (1:54.8)</span>
+        <span class="text-volt font-bold">1 000 m [En cours]</span>
+        <span>1 500 m</span>
+        <span>2 000 m</span>
+      </div>
+    </section>
+
+    <!-- 6. FOOTER & TACTICAL CONTROL ACTIONS (No bottom tab bar) -->
+    <footer class="relative z-10 pt-2 pb-1 flex flex-col gap-2.5">
+      <div class="w-full flex items-center gap-2">
+        <!-- Optional Secondary Ghost Action: PAUSE -->
+        <button type="button" aria-label="Mettre en pause l'épreuve" class="h-16 px-5 rounded-[10px] bg-[#111418] hover:bg-[#151A22] active:bg-[#1C222C] border border-[#2A2F36] text-[#F4F6F8] font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors">
+          <span class="material-symbols-outlined text-[18px] text-[#8C96A5]">pause</span>
+          <span>PAUSE</span>
+        </button>
+
+        <!-- Primary Emergency/End Action: Large Red Port Stop Button (64px Touch Height) -->
+        <button type="button" aria-label="Arrêter l'épreuve" class="flex-1 h-16 rounded-[10px] bg-[#E05353] hover:bg-[#c94545] active:bg-[#b03a3a] text-[#0A0A0A] font-sans text-base font-extrabold tracking-wide uppercase flex items-center justify-center gap-2 transition-transform active:scale-[0.99] border border-[#E05353]">
+          <span class="material-symbols-outlined text-[22px] font-bold">stop</span>
+          <span>ARRÊTER</span>
+        </button>
+      </div>
+
+      <!-- Regulatory & Telemetry Protocol Footer -->
+      <div class="flex items-center justify-center gap-2 text-[#8C96A5]/50 pt-0.5">
+        <span class="font-mono text-[9px] tracking-tight uppercase">
+          Flux Concept2 PM5 BLE · Épreuve standardisée FFA/FISA
+        </span>
+      </div>
+    </footer>
+
+  </main>
+</body>
+</html>
