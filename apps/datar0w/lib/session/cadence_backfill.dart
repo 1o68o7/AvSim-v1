@@ -23,17 +23,14 @@ class CadenceBackfill {
     final samples = await SessionStore.loadSamples(sessionId, root: base);
     if (samples.isEmpty) return false;
 
-    // Déjà backfillé (source imu_pitch_*) → no-op.
+    // Déjà backfillé IMU (imu_pitch_*) → no-op.
+    // Un résidu src "tel" / null-src avec cadence_spm ne bloque PAS le recalcul.
     final hasImuCad = samples.any(
       (s) =>
           s.cadenceSrc == 'imu_pitch_ac' ||
           s.cadenceSrc == 'imu_pitch_ac_approx',
     );
     if (hasImuCad) return false;
-
-    // Seulement si cadence_spm encore null partout (cas GCZEKF).
-    final anyCad = samples.any((s) => s.cadenceSpm != null);
-    if (anyCad) return false;
 
     final imu = await loadImuPoints(imuFile);
     if (imu.length < 40) return false;

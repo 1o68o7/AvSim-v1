@@ -84,6 +84,13 @@ class SessionSummary {
       cadenceFracLow: stats.fracLow,
     );
   }
+
+  /// Libellé liste / home / club (médiane high, ~ si medium seul, — si low).
+  String get cadenceLabel => formatSessionCadenceSummary(
+        medianHigh: cadenceMedianHigh,
+        meanNonNull: cadenceMean,
+        fracMedium: cadenceFracMedium,
+      );
 }
 
 String formatClockRange(String? startedAt, String? endedAt) {

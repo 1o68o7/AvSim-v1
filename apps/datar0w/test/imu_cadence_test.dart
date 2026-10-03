@@ -7,6 +7,7 @@ import 'package:datar0w/session/model.dart';
 import 'package:datar0w/session/store.dart';
 import 'package:datar0w/session/summary.dart';
 import 'package:datar0w/session/tel_cadence.dart';
+import 'package:datar0w/sync/club_sessions.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Sinus pitch période [periodS], ~17.5 Hz, durée [durationS].
@@ -57,6 +58,56 @@ void main() {
     expect(est.confidence, CadenceConfidence.medium);
     expect(est.spm, isNotNull);
     expect(est.src, 'imu_pitch_ac_approx');
+  });
+
+  test('pics absents + force/sog high → medium, jamais high', () {
+    final est = TelCadenceDetector.classify(
+      force: 0.5,
+      sog: 3.0,
+      spmAc: 30,
+      spmPeaks: null,
+    );
+    expect(est.confidence, CadenceConfidence.medium);
+    expect(est.src, 'imu_pitch_ac_approx');
+    expect(est.spm, 30);
+  });
+
+  test('signal périodique sans pics détectables → pas high', () {
+    // minPeakGap trop large → < 3 pics dans la fenêtre → spmPeaks null.
+    final d = TelCadenceDetector(minPeakGapS: 20);
+    _feedSinus(d, periodS: 2.05, sog: 3.0);
+    expect(d.confidence, isNot(CadenceConfidence.high));
+    expect(d.confidence, CadenceConfidence.medium);
+    expect(d.src, 'imu_pitch_ac_approx');
+    expect(d.spm, isNotNull);
+  });
+
+  test('fixture courte sinus 2,05 s + sog 3 → spm 28–31 high', () {
+    final d = TelCadenceDetector();
+    _feedSinus(d, periodS: 2.05, sog: 3.0, durationS: 28);
+    expect(d.confidence, CadenceConfidence.high);
+    expect(d.spm, isNotNull);
+    expect(d.spm!, inInclusiveRange(28.0, 31.0));
+    expect(d.src, 'imu_pitch_ac');
+  });
+
+  test('formatSessionCadenceSummary : high / ~medium / — low', () {
+    expect(
+      formatSessionCadenceSummary(medianHigh: 29.4, fracMedium: 0),
+      '29',
+    );
+    expect(
+      formatSessionCadenceSummary(
+        medianHigh: 30,
+        fracMedium: 0.3,
+      ),
+      '30 · 30 % approximatif',
+    );
+    expect(
+      formatSessionCadenceSummary(meanNonNull: 28.2),
+      '~28',
+    );
+    expect(formatSessionCadenceSummary(), '—');
   });
 
   test('GCZEKF-like fixture : médiane high dans 28–31', () {
@@ -186,6 +237,103 @@ void main() {
     );
     // Second passage : no-op
     expect(await CadenceBackfill.maybeBackfill('GCZEKF', root: root), isFalse);
+  });
+
+  test('backfill écrase cadence_src tel même si cadence_spm non null', () async {
+    final root = Directory.systemTemp.createTempSync('cad_tel_');
+    addTearDown(() {
+      if (root.existsSync()) root.deleteSync(recursive: true);
+    });
+    final dir = Directory('${root.path}/TELBF01')..createSync();
+    final imu = File('${dir.path}/imu.jsonl');
+    final samples = File('${dir.path}/samples.jsonl');
+    final t0 = 1_700_000_000_000;
+    const fs = 17.5;
+    const period = 2.05;
+    final buf = StringBuffer();
+    for (var i = 0; i < (30 * fs).round(); i++) {
+      final tMs = t0 + (i * 1000 / fs).round();
+      final pitch = 4.0 * math.sin(2 * math.pi * (i / fs) / period);
+      buf.writeln(
+        '{"t":$tMs,"ax":0,"ay":0,"az":9.8,"gx":0,"gy":0,"gz":0,'
+        '"roll_raw":0,"pitch_raw":$pitch}',
+      );
+    }
+    await imu.writeAsString(buf.toString());
+    final sbuf = StringBuffer();
+    for (var s = 0; s < 30; s++) {
+      final tMs = t0 + s * 1000;
+      // Résidu ancien détecteur : spm non null + src "tel".
+      sbuf.writeln(
+        '{"t":$tMs,"lat":44.8,"lon":-0.5,"sog":2.8,"dist_m":${s * 3},'
+        '"net":"wifi","cadence_spm":25,"cadence_src":"tel"}',
+      );
+    }
+    await samples.writeAsString(sbuf.toString());
+    await File('${dir.path}/meta.json').writeAsString(
+      '{"id":"TELBF01","code":"TELBF01","class":"1x",'
+      '"started_at":"2026-10-03T12:00:00Z"}',
+    );
+
+    final ok = await CadenceBackfill.maybeBackfill('TELBF01', root: root);
+    expect(ok, isTrue);
+    final loaded = await SessionStore.loadSamples('TELBF01', root: root);
+    expect(loaded.every((s) => s.cadenceSrc != 'tel'), isTrue);
+    expect(
+      loaded.any(
+        (s) =>
+            s.cadenceSrc == 'imu_pitch_ac' ||
+            s.cadenceSrc == 'imu_pitch_ac_approx',
+      ),
+      isTrue,
+    );
+    // Plus de 25 inventé tel — valeurs IMU autour de ~29.
+    final withCad = loaded.where((s) => s.cadenceSpm != null).toList();
+    expect(withCad, isNotEmpty);
+    expect(withCad.any((s) => (s.cadenceSpm! - 25).abs() > 1), isTrue);
+  });
+
+  test('resolveLocalCadenceLabel : pack local → libellé, cloud seul → null',
+      () async {
+    final root = Directory.systemTemp.createTempSync('cad_club_');
+    addTearDown(() {
+      if (root.existsSync()) root.deleteSync(recursive: true);
+    });
+    expect(await resolveLocalCadenceLabel('NOPE', root: root), isNull);
+
+    final dir = Directory('${root.path}/CLUB01')..createSync();
+    final t0 = 1_700_000_000_000;
+    const fs = 17.5;
+    const period = 2.05;
+    final buf = StringBuffer();
+    for (var i = 0; i < (30 * fs).round(); i++) {
+      final tMs = t0 + (i * 1000 / fs).round();
+      final pitch = 4.0 * math.sin(2 * math.pi * (i / fs) / period);
+      buf.writeln(
+        '{"t":$tMs,"ax":0,"ay":0,"az":9.8,"gx":0,"gy":0,"gz":0,'
+        '"roll_raw":0,"pitch_raw":$pitch}',
+      );
+    }
+    await File('${dir.path}/imu.jsonl').writeAsString(buf.toString());
+    final sbuf = StringBuffer();
+    for (var s = 0; s < 30; s++) {
+      final tMs = t0 + s * 1000;
+      sbuf.writeln(
+        '{"t":$tMs,"lat":44.8,"lon":-0.5,"sog":2.8,"dist_m":${s * 3},'
+        '"net":"wifi","cadence_spm":null,"cadence_src":null}',
+      );
+    }
+    await File('${dir.path}/samples.jsonl').writeAsString(sbuf.toString());
+    await File('${dir.path}/meta.json').writeAsString(
+      '{"id":"CLUB01","code":"CLUB01","class":"1x",'
+      '"started_at":"2026-10-03T12:00:00Z"}',
+    );
+
+    final label = await resolveLocalCadenceLabel('CLUB01', root: root);
+    expect(label, isNotNull);
+    expect(label, isNot('—'));
+    expect(formatClubCadenceDisplay(null), 'cadence non mesurée');
+    expect(formatClubCadenceDisplay(label), contains('spm'));
   });
 
   test('logbook cadence stats inclut médiane high et part approx', () {

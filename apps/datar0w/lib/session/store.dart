@@ -333,11 +333,11 @@ class SessionStore {
     );
   }
 
-  static Future<String?> findIdByCode(String code) async {
-    final root = await sessionsRootIfPresent();
-    if (root == null) return null;
+  static Future<String?> findIdByCode(String code, {Directory? root}) async {
+    final base = root ?? await sessionsRootIfPresent();
+    if (base == null) return null;
     final needle = code.trim().toUpperCase();
-    await for (final entity in root.list()) {
+    await for (final entity in base.list()) {
       if (entity is! Directory) continue;
       final metaFile = File('${entity.path}/meta.json');
       if (!metaFile.existsSync()) continue;

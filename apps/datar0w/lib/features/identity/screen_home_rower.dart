@@ -33,13 +33,14 @@ class _LastOuting {
     required this.meta,
     this.duration,
     this.distM,
-    this.cadenceMean,
+    this.cadenceLabel = '—',
   });
 
   final SessionMeta meta;
   final Duration? duration;
   final double? distM;
-  final double? cadenceMean;
+  /// Médiane high / ~moyenne / — (jamais 0 inventé).
+  final String cadenceLabel;
 }
 
 class _HomeRowerScreenState extends ConsumerState<HomeRowerScreen> {
@@ -62,12 +63,12 @@ class _HomeRowerScreenState extends ConsumerState<HomeRowerScreen> {
       final samples = await SessionStore.loadSamples(m.id);
       Duration? duration;
       double? distM;
-      double? cad;
+      var cadLabel = '—';
       if (samples.isNotEmpty) {
         final s = SessionSummary.fromSamples(samples);
         duration = s.duration;
         distM = s.distM;
-        cad = s.cadenceMedianHigh ?? s.cadenceMean;
+        cadLabel = s.cadenceLabel;
       } else {
         final a = DateTime.tryParse(m.startedAt ?? '');
         final b = DateTime.tryParse(m.endedAt ?? '');
@@ -79,7 +80,7 @@ class _HomeRowerScreenState extends ConsumerState<HomeRowerScreen> {
         meta: m,
         duration: duration,
         distM: distM,
-        cadenceMean: cad,
+        cadenceLabel: cadLabel,
       );
     }
     if (!mounted) return;
@@ -598,7 +599,7 @@ class _HeroLastOuting extends StatelessWidget {
   Widget build(BuildContext context) {
     final m = last?.meta;
     final dist = last?.distM;
-    final cad = last?.cadenceMean;
+    final cad = last?.cadenceLabel ?? '—';
     final dur = last?.duration;
 
     return Container(
@@ -687,8 +688,8 @@ class _HeroLastOuting extends StatelessWidget {
                 Expanded(
                   child: _MetricCol(
                     label: 'Cadence moy',
-                    value: cad == null ? '—' : cad.round().toString(),
-                    unit: 'spm',
+                    value: cad,
+                    unit: cad == '—' ? null : 'spm',
                   ),
                 ),
               ],

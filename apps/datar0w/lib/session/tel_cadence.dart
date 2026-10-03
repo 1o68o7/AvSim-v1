@@ -240,6 +240,8 @@ class TelCadenceDetector {
   }
 
   /// Décision high / medium / low (testable sans signal).
+  /// high exige un recoupement pics (`spmPeaks != null`) — pas de high
+  /// si seuls force + sog sont bons.
   static CadenceEstimate classify({
     required double force,
     required double sog,
@@ -251,8 +253,9 @@ class TelCadenceDetector {
     double mediumSog = 1.1,
     double maxSpmDelta = 5.0,
   }) {
-    final deltaOk = spmPeaks == null || (spmAc - spmPeaks).abs() < maxSpmDelta;
-    if (force >= highForce && sog >= highSog && deltaOk) {
+    final peaksOk =
+        spmPeaks != null && (spmAc - spmPeaks).abs() < maxSpmDelta;
+    if (force >= highForce && sog >= highSog && peaksOk) {
       return CadenceEstimate(
         spm: spmAc,
         confidence: CadenceConfidence.high,
@@ -262,6 +265,7 @@ class TelCadenceDetector {
         spmPeaks: spmPeaks,
       );
     }
+    // Pics absents ou divergents : medium si force/sog suffisent.
     if (force >= mediumForce && sog >= mediumSog) {
       return CadenceEstimate(
         spm: spmAc,
@@ -553,3 +557,31 @@ String? cadenceApproxLabel(String? src) {
 
 bool cadenceIsDisplayable(String? src, double? spm) =>
     spm != null && src != null;
+
+/// Liste / home / club : médiane high sec ; part medium à côté ;
+/// moyenne seule → `~` ; low seul → `—` (jamais 0).
+String formatSessionCadenceSummary({
+  double? medianHigh,
+  double? meanNonNull,
+  double fracMedium = 0,
+}) {
+  if (medianHigh != null) {
+    final n = medianHigh.round().toString();
+    if (fracMedium > 0) {
+      final pct = (fracMedium * 100).round();
+      return '$n · $pct % approximatif';
+    }
+    return n;
+  }
+  if (meanNonNull != null) {
+    return '~${meanNonNull.round()}';
+  }
+  return '—';
+}
+
+String formatSessionCadenceFromSummary(SessionCadenceStats stats) =>
+    formatSessionCadenceSummary(
+      medianHigh: stats.medianHigh,
+      meanNonNull: stats.meanNonNull,
+      fracMedium: stats.fracMedium,
+    );
