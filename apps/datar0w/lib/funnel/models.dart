@@ -31,7 +31,12 @@ enum PracticeFrame {
 enum ErgDistance {
   m500(500),
   m1000(1000),
-  m2000(2000);
+  m2000(2000),
+  m5000(5000),
+  m6000(6000),
+  m10000(10000),
+  m21000(21000),
+  m42000(42000);
 
   const ErgDistance(this.meters);
   final int meters;
@@ -48,6 +53,11 @@ enum ErgDistance {
         m500 => '500 m',
         m1000 => '1 000 m',
         m2000 => '2 000 m',
+        m5000 => '5 000 m',
+        m6000 => '6 000 m',
+        m10000 => '10 km',
+        m21000 => '21 km',
+        m42000 => '42 km',
       };
 }
 
@@ -201,7 +211,72 @@ class ErgPiece {
     kpiHint: 'temps · split · watts',
   );
 
-  /// Lot 2 — ateliers brevet + relais (écran DR-FR-A).
+  static const distance5000 = ErgPiece(
+    id: 'dist_5000',
+    kind: ErgPieceKind.distance,
+    label: '5 000 m',
+    cues: [
+      'Endurance indoor FFA',
+      'Split régulier',
+      'Cadence stable',
+    ],
+    distM: 5000,
+    kpiHint: 'temps · split',
+  );
+
+  static const distance6000 = ErgPiece(
+    id: 'dist_6000',
+    kind: ErgPieceKind.distance,
+    label: '6 000 m',
+    cues: [
+      'Ordre de grandeur tête de rivière',
+      'Allure tenue',
+      'Split /500 m',
+    ],
+    distM: 6000,
+    kpiHint: 'temps · split',
+  );
+
+  static const brevet10km = ErgPiece(
+    id: 'brevet_10km',
+    kind: ErgPieceKind.distance,
+    label: 'Brevet 10 km',
+    cues: [
+      'Après un 2 000 m logué',
+      'Endurance brevet indoor',
+      'Temps et split moyen',
+    ],
+    distM: 10000,
+    kpiHint: 'temps · split',
+  );
+
+  static const brevet21km = ErgPiece(
+    id: 'brevet_21km',
+    kind: ErgPieceKind.distance,
+    label: 'Brevet 21 km',
+    cues: [
+      'Après le brevet 10 km',
+      'Semi-marathon indoor',
+      'Temps en h:mm:ss',
+    ],
+    distM: 21000,
+    kpiHint: 'temps · split',
+  );
+
+  static const brevet42km = ErgPiece(
+    id: 'brevet_42km',
+    kind: ErgPieceKind.distance,
+    label: 'Brevet 42 km',
+    cues: [
+      'Après le brevet 21 km',
+      'Marathon indoor',
+      'Temps en h:mm:ss',
+    ],
+    distM: 42000,
+    kpiHint: 'temps · split',
+  );
+
+  /// Ateliers brevet + relais (écran DR-FR-A).
   static const lot2Catalog = [
     fiveMin18,
     threeByOne,
@@ -209,10 +284,20 @@ class ErgPiece {
     relay4x500,
   ];
 
+  /// Endurance + brevets km (5k / 6k / 10 / 21 / 42).
+  static const lot4Catalog = [
+    distance5000,
+    distance6000,
+    brevet10km,
+    brevet21km,
+    brevet42km,
+  ];
+
   static ErgPiece? byId(String? id) {
     if (id == null || id.isEmpty) return null;
     for (final p in [
       ...lot2Catalog,
+      ...lot4Catalog,
       distance500,
       distance2000,
     ]) {
@@ -221,12 +306,46 @@ class ErgPiece {
     return null;
   }
 
-  /// Pièce Lot 1 à partir d’une distance FFA.
+  /// Pièce à partir d’une distance FFA connue.
   static ErgPiece fromDistanceMeters(int meters) {
+    if (meters == ErgDistance.m42000.meters) return brevet42km;
+    if (meters == ErgDistance.m21000.meters) return brevet21km;
+    if (meters == ErgDistance.m10000.meters) return brevet10km;
+    if (meters == ErgDistance.m6000.meters) return distance6000;
+    if (meters == ErgDistance.m5000.meters) return distance5000;
     if (meters == ErgDistance.m2000.meters) return distance2000;
     if (meters == ErgDistance.m1000.meters) return announced1000;
     return distance500;
   }
+}
+
+/// Chaîne brevets km : 10 km ← 2 000 m ; 21 ← 10 ; 42 ← 21.
+bool hasCompleteLog(List<ErgSessionLog> logs, int distM) =>
+    logs.any((l) => l.complete && l.distM == distM);
+
+bool isLot4Unlocked(ErgPiece piece, List<ErgSessionLog> logs) {
+  final d = piece.logDistM;
+  if (d == ErgDistance.m5000.meters || d == ErgDistance.m6000.meters) {
+    return true;
+  }
+  if (d == ErgDistance.m10000.meters) {
+    return hasCompleteLog(logs, ErgDistance.m2000.meters);
+  }
+  if (d == ErgDistance.m21000.meters) {
+    return hasCompleteLog(logs, ErgDistance.m10000.meters);
+  }
+  if (d == ErgDistance.m42000.meters) {
+    return hasCompleteLog(logs, ErgDistance.m21000.meters);
+  }
+  return true;
+}
+
+String lot4UnlockHint(ErgPiece piece) {
+  final d = piece.logDistM;
+  if (d == ErgDistance.m10000.meters) return 'Débloque après un 2 000 m complet';
+  if (d == ErgDistance.m21000.meters) return 'Débloque après le brevet 10 km';
+  if (d == ErgDistance.m42000.meters) return 'Débloque après le brevet 21 km';
+  return '';
 }
 
 /// 1 000 m annoncé : distance réalisée dans [990, 1010].
@@ -352,15 +471,13 @@ class FunnelProfile {
     return ErgDistance.m500.label;
   }
 
-  /// Distance effective Lot 1 (500/2000) si pas de pièce durée/intervalle.
+  /// Distance effective (FFA) si pas de pièce durée/intervalle.
   int get playDistanceM {
     final piece = todayPiece;
     if (piece.kind == ErgPieceKind.distance || piece.kind == ErgPieceKind.relay) {
       return piece.logDistM > 0 ? piece.logDistM : ErgDistance.m500.meters;
     }
-    if (todayDistanceM == ErgDistance.m500.meters ||
-        todayDistanceM == ErgDistance.m2000.meters ||
-        todayDistanceM == ErgDistance.m1000.meters) {
+    if (ErgDistance.fromMeters(todayDistanceM) != null) {
       return todayDistanceM;
     }
     return ErgDistance.m500.meters;
