@@ -14,14 +14,23 @@ class FunnelBriefScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final funnel = ref.watch(funnelProvider);
-    final distM = funnel.activeDistM ?? funnel.profile?.playDistanceM ?? 500;
+    final piece = funnel.resolvedPiece;
     final df = funnel.activeDragFactor ?? funnel.profile?.dragFactor ?? 115;
-    final label = ErgDistance.fromMeters(distM)?.label ?? '$distM m';
+    final label = piece.label;
 
     final items = [
       ('Cale-pieds', 'Réglés, sangles fermées.'),
       ('Damper → DF', 'Viser DF $df. Le cran seul ne suffit pas.'),
-      ('Écran /500 m', 'Affiche le split, la cadence et les watts.'),
+      (
+        piece.kind == ErgPieceKind.duration ||
+                piece.kind == ErgPieceKind.intervals
+            ? 'Écran cadence'
+            : 'Écran /500 m',
+        piece.kind == ErgPieceKind.duration ||
+                piece.kind == ErgPieceKind.intervals
+            ? 'Cadence cible visible. Split en secondaire.'
+            : 'Affiche le split, la cadence et les watts.',
+      ),
     ];
 
     return Scaffold(

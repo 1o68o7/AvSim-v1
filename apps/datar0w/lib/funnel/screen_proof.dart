@@ -7,7 +7,7 @@ import '../theme/deck_theme.dart';
 import 'controller.dart';
 import 'models.dart';
 
-/// DR-FR-6 — Preuve (temps, split, cadence, watts, DF).
+/// DR-FR-6 — Preuve (temps, split, cadence, watts, DF + ateliers Lot 2).
 class FunnelProofScreen extends ConsumerWidget {
   const FunnelProofScreen({super.key});
 
@@ -15,16 +15,21 @@ class FunnelProofScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final funnel = ref.watch(funnelProvider);
     final log = funnel.lastResult;
+    final piece = ErgPiece.byId(log?.pieceId) ?? funnel.resolvedPiece;
     final target = funnel.profile?.targetSplit500s;
-    final distLabel = log == null
-        ? '—'
-        : (ErgDistance.fromMeters(log.distM)?.label ?? '${log.distM} m');
+    final distLabel = piece.label;
     final timeLabel = log == null ? '—' : formatErgTime(log.durationS);
     final splitLabel = log == null ? '—' : formatErgTime(log.split500S);
-    final vsTarget = (log == null || target == null)
+    final vsTarget = (log == null ||
+            target == null ||
+            piece.kind != ErgPieceKind.distance ||
+            piece.announcedMinM != null)
         ? null
         : log.split500S - target;
     final onTarget = vsTarget != null && vsTarget <= 0;
+    final announcedOk = log?.realizedDistM != null &&
+        piece.announcedMinM != null &&
+        announced1000InBand(log!.realizedDistM!);
 
     return Scaffold(
       backgroundColor: DeckColors.bg,
@@ -70,13 +75,38 @@ class FunnelProofScreen extends ConsumerWidget {
                       borderRadius: DeckRadii.chipAll,
                     ),
                     child: Text(
-                      'PB $distLabel',
+                      'PB ${ErgDistance.fromMeters(log!.distM)?.label ?? piece.label}',
                       style: const TextStyle(
                         fontFamily: DeckType.ui,
                         fontWeight: FontWeight.w700,
                         color: DeckColors.onVolt,
                         fontSize: 12,
                       ),
+                    ),
+                  ),
+                ),
+              ],
+              if (piece.kind == ErgPieceKind.duration &&
+                  log?.complete == true) ...[
+                const SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    'Créneau tenu',
+                    style: DeckType.uiLabel(
+                      color: DeckColors.tribord,
+                      weight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+              if (announcedOk) ...[
+                const SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    'Bande 990–1 010 m · ${log!.realizedDistM} m',
+                    style: DeckType.uiLabel(
+                      color: DeckColors.tribord,
+                      weight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -113,13 +143,21 @@ class FunnelProofScreen extends ConsumerWidget {
                 ),
               ],
               const SizedBox(height: 24),
-              _Kpi(label: 'Split moy.', value: '$splitLabel /500 m'),
-              _Kpi(
-                label: 'Cadence',
-                value: log?.cadence == null
-                    ? '—'
-                    : '${log!.cadence!.round()} spm',
-              ),
+              if (piece.kind == ErgPieceKind.distance ||
+                  piece.kind == ErgPieceKind.relay)
+                _Kpi(label: 'Split moy.', value: '$splitLabel /500 m'),
+              if (log?.blockCadences.isNotEmpty == true)
+                _Kpi(
+                  label: 'Cadences',
+                  value: log!.blockCadences.join(' / '),
+                )
+              else
+                _Kpi(
+                  label: 'Cadence',
+                  value: log?.cadence == null
+                      ? '—'
+                      : '${log!.cadence!.round()} spm',
+                ),
               _Kpi(
                 label: 'Watts',
                 value: log?.watts == null ? '—' : '${log!.watts!.round()} W',
@@ -131,7 +169,9 @@ class FunnelProofScreen extends ConsumerWidget {
               if (log?.complete != true) ...[
                 const SizedBox(height: 12),
                 Text(
-                  'Partiel gardé — pas un PB.',
+                  piece.kind == ErgPieceKind.duration
+                      ? 'Partiel gardé.'
+                      : 'Partiel gardé — pas un PB.',
                   style: DeckType.uiLabel(color: DeckColors.amber),
                   textAlign: TextAlign.center,
                 ),

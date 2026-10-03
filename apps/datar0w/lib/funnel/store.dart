@@ -69,6 +69,11 @@ class FunnelStore {
     return logs.where((l) => l.distM == distM).length;
   }
 
+  Future<int> sessionCountForPiece(String pieceId) async {
+    final logs = await loadLogs();
+    return logs.where((l) => l.pieceId == pieceId).length;
+  }
+
   Future<void> clear() async {
     final prefs = await _prefsFile();
     final logs = await _logsFile();

@@ -34,6 +34,7 @@ import 'features/replay/screen_6.dart';
 import 'features/replay/screen_6r.dart';
 import 'features/replay/screen_sessions.dart';
 import 'features/tare/screen_2b.dart';
+import 'funnel/screen_ateliers.dart';
 import 'funnel/screen_brief.dart';
 import 'funnel/screen_onboard.dart';
 import 'funnel/screen_player.dart';
@@ -126,8 +127,9 @@ abstract final class AppRoutes {
   static const devices = '/devices';
   static const physio = '/physio';
 
-  /// Funnel rameur Lot 1 (erg 500 / 2 000 m).
+  /// Funnel rameur Lot 1–2 (erg + ateliers brevet + relais).
   static const funnelOnboard = '/funnel/onboard';
+  static const funnelAteliers = '/funnel/ateliers';
   static const funnelPreview = '/funnel/preview';
   static const funnelBrief = '/funnel/brief';
   static const funnelPlayer = '/funnel/player';
@@ -455,14 +457,21 @@ final GoRouter appRouter = GoRouter(
           _hub(AppRoutes.funnelOnboard, const FunnelOnboardScreen()),
     ),
     GoRoute(
+      path: AppRoutes.funnelAteliers,
+      name: 'funnel-ateliers',
+      builder: (context, state) =>
+          _hub(AppRoutes.funnelAteliers, const FunnelAteliersScreen()),
+    ),
+    GoRoute(
       path: AppRoutes.funnelPreview,
       name: 'funnel-preview',
       builder: (context, state) {
         final raw = state.uri.queryParameters['dist'];
         final dist = raw == null ? null : int.tryParse(raw);
+        final pieceId = state.uri.queryParameters['piece'];
         return _hub(
           AppRoutes.funnelPreview,
-          FunnelPreviewScreen(distM: dist),
+          FunnelPreviewScreen(distM: dist, pieceId: pieceId),
         );
       },
     ),
