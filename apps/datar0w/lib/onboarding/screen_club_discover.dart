@@ -37,7 +37,7 @@ class ClubDiscoverScreen extends StatelessWidget {
               const SizedBox(height: 12),
               const Text(
                 'Explore le plan d’eau et le calendrier. '
-                'Rejoins pour ramer avec une licence.',
+                'Rejoins pour ramer — licence FFA optionnelle pour l’instant.',
                 style: TextStyle(
                   fontFamily: DeckType.ui,
                   fontSize: 15,

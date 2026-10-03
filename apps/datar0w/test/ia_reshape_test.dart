@@ -163,24 +163,17 @@ void main() {
     expect(resolveRootRedirect(const IdentitySnapshot()), AppRoutes.discover);
   });
 
-  test('needsLicence / waterLicenceRedirect', () {
+  test('needsLicence désactivé — eau sans licence FFA OK pour l’instant', () {
     final bare = Rower.create(
       displayName: 'Ada',
       birthDate: DateTime.utc(2000),
     );
-    final licensed = bare.copyWith(ffaLicence: '1234567A');
     final bareSnap = IdentitySnapshot(
       rowers: [bare],
       prefs: IdentityPrefs(activeRowerId: bare.id),
     );
-    final licSnap = IdentitySnapshot(
-      rowers: [licensed],
-      prefs: IdentityPrefs(activeRowerId: licensed.id),
-    );
-    expect(needsLicence(bareSnap), isTrue);
-    expect(waterLicenceRedirect(bareSnap), AppRoutes.rowerOnboard);
-    expect(needsLicence(licSnap), isFalse);
-    expect(waterLicenceRedirect(licSnap), isNull);
+    expect(needsLicence(bareSnap), isFalse);
+    expect(waterLicenceRedirect(bareSnap), isNull);
     expect(needsLicence(const IdentitySnapshot()), isFalse);
   });
 

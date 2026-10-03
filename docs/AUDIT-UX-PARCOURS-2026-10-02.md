@@ -116,9 +116,9 @@ calendrier / plans d’eau / rejoindre (`/auth`) / profils locaux (secondaire).
 `GoRouter(initialLocation: AppRoutes.discover)` ; `/` via `resolveRootRedirect`
 → discover si aucun profil, sinon hubs métier.
 
-**Gate licence (tunnel eau)** : `needsLicence` + redirect sur
-`/presession`, `/tare`, `/live`, `/cox` → `/onboarding/rower` + SnackBar
-si profil actif sans `ffaLicence`.
+**Gate licence (tunnel eau)** : **désactivée** (2026-10-03) — licence FFA
+reste optionnelle ; `needsLicence` retourne toujours `false` jusqu’à
+réactivation club. Redirects retirés du router.
 
 **Échappatoires** : « Passer (sans profil) » (debug only) et auth « Sans
 compte » → `/discover`, plus `/home/rower` / stack identité.

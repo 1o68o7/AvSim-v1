@@ -66,13 +66,10 @@ String resolveRootRedirect(IdentitySnapshot snap) {
   return AppRoutes.rowerOnboard;
 }
 
-/// Licence FFA requise pour le tunnel eau si un profil rameur est actif.
-bool needsLicence(IdentitySnapshot snap) {
-  final rower = snap.activeRower;
-  if (rower == null) return false;
-  final lic = rower.ffaLicence?.trim();
-  return lic == null || lic.isEmpty;
-}
+/// Gate licence FFA sur le tunnel eau — **désactivée pour l’instant**.
+/// La licence reste optionnelle (onboarding ST-08 / PASSER).
+/// Remettre : profil actif sans `ffaLicence` → `true`.
+bool needsLicence(IdentitySnapshot _) => false;
 
 /// Routes tunnel eau : pré-session → tare → live / cox.
 bool isWaterSessionPath(String path) =>
@@ -81,7 +78,7 @@ bool isWaterSessionPath(String path) =>
     path == AppRoutes.live ||
     path == AppRoutes.cox;
 
-/// `null` = accès OK ; sinon → onboarding licence.
+/// Toujours `null` tant que [needsLicence] est désactivé.
 String? waterLicenceRedirect(IdentitySnapshot snap) {
   if (!needsLicence(snap)) return null;
   return AppRoutes.rowerOnboard;
