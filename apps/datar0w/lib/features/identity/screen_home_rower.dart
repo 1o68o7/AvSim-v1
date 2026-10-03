@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../funnel/controller.dart';
 import '../../funnel/models.dart';
+import '../../funnel/water_today_card.dart';
 import '../../identity/controller.dart';
 import '../../identity/format.dart';
 import '../../identity/models.dart';
@@ -261,6 +262,8 @@ class _HomeRowerScreenState extends ConsumerState<HomeRowerScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
+                const WaterTodayCard(),
+                const SizedBox(height: 12),
                 _FunnelTodayCard(
                   funnel: ref.watch(funnelProvider),
                   hasRower: rower != null,

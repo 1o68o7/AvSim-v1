@@ -31,6 +31,7 @@ class FunnelProofScreen extends ConsumerWidget {
     final announcedOk = log?.realizedDistM != null &&
         piece.announcedMinM != null &&
         announced1000InBand(log!.realizedDistM!);
+    final isReplacement = log?.origin == 'remplacement';
 
     return Scaffold(
       backgroundColor: DeckColors.bg,
@@ -65,6 +66,18 @@ class FunnelProofScreen extends ConsumerWidget {
                 style: DeckType.metric(size: 56, weight: FontWeight.w700),
                 textAlign: TextAlign.center,
               ),
+              if (isReplacement) ...[
+                const SizedBox(height: 6),
+                Text(
+                  'Indoor · remplacement',
+                  key: const Key('funnel-proof-remplacement'),
+                  style: DeckType.uiLabel(
+                    color: DeckColors.amber,
+                    weight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
               if (funnel.lastWasPb && log?.complete == true) ...[
                 const SizedBox(height: 8),
                 Center(
