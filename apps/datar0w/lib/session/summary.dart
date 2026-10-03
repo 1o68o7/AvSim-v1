@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:latlong2/latlong.dart';
 
 import 'model.dart';
+import 'tel_cadence.dart';
 
 /// Segments GPS : un trou (lat/lon null) coupe le trait, pas d'interpolation.
 List<List<LatLng>> gpsSegments(List<SessionSample> samples) {
@@ -32,12 +33,21 @@ class SessionSummary {
     required this.distM,
     required this.giteRms,
     this.cadenceMean,
+    this.cadenceMedianHigh,
+    this.cadenceFracHigh = 0,
+    this.cadenceFracMedium = 0,
+    this.cadenceFracLow = 1,
   });
 
   final Duration duration;
   final double distM;
   final double giteRms;
+  /// Moyenne sur samples non null uniquement (jamais 0 pour les null).
   final double? cadenceMean;
+  final double? cadenceMedianHigh;
+  final double cadenceFracHigh;
+  final double cadenceFracMedium;
+  final double cadenceFracLow;
 
   static SessionSummary fromSamples(List<SessionSample> samples) {
     if (samples.isEmpty) {
@@ -60,17 +70,27 @@ class SessionSummary {
       }
       rms = sqrt(acc / gites.length);
     }
-    final cads = samples.map((s) => s.cadenceSpm).whereType<double>().toList();
-    final cad = cads.isEmpty
-        ? null
-        : cads.reduce((a, b) => a + b) / cads.length;
+    final stats = SessionCadenceStats.fromSamples([
+      for (final s in samples) (spm: s.cadenceSpm, src: s.cadenceSrc),
+    ]);
     return SessionSummary(
       duration: duration,
       distM: dist,
       giteRms: rms,
-      cadenceMean: cad,
+      cadenceMean: stats.meanNonNull,
+      cadenceMedianHigh: stats.medianHigh,
+      cadenceFracHigh: stats.fracHigh,
+      cadenceFracMedium: stats.fracMedium,
+      cadenceFracLow: stats.fracLow,
     );
   }
+
+  /// Libellé liste / home / club (médiane high, ~ si medium seul, — si low).
+  String get cadenceLabel => formatSessionCadenceSummary(
+        medianHigh: cadenceMedianHigh,
+        meanNonNull: cadenceMean,
+        fracMedium: cadenceFracMedium,
+      );
 }
 
 String formatClockRange(String? startedAt, String? endedAt) {

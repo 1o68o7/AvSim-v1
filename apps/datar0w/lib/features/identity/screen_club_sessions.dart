@@ -169,6 +169,8 @@ class _ClubSessionDetailScreenState
   ClubSessionMeta? _row;
   bool _loading = true;
   String? _error;
+  /// Libellé local (médiane high / ~ / —) ; null → « non mesurée ».
+  String? _localCadenceLabel;
 
   @override
   void initState() {
@@ -194,9 +196,14 @@ class _ClubSessionDetailScreenState
       final row = await ref
           .read(clubSessionRemoteProvider)
           .byCode(clubId, widget.code);
+      String? localCad;
+      if (row != null) {
+        localCad = await resolveLocalCadenceLabel(row.code);
+      }
       if (!mounted) return;
       setState(() {
         _row = row;
+        _localCadenceLabel = localCad;
         _loading = false;
         _error = row == null ? 'Séance introuvable pour ce code.' : null;
       });
@@ -270,9 +277,7 @@ class _ClubSessionDetailScreenState
                         ),
                         _kv(
                           'Cadence',
-                          r.cadenceSpm != null
-                              ? '${r.cadenceSpm!.toStringAsFixed(0)} spm'
-                              : 'cadence non mesurée',
+                          formatClubCadenceDisplay(_localCadenceLabel),
                         ),
                         _kv(
                           'Gîte (RMS)',

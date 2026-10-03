@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../router.dart';
+import '../../session/cadence_backfill.dart';
 import '../../session/share_files.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
@@ -33,13 +34,14 @@ class _SessionRow {
     required this.meta,
     this.duration,
     this.distM,
-    this.cadenceMean,
+    this.cadenceLabel = '—',
   });
 
   final SessionMeta meta;
   final Duration? duration;
   final double? distM;
-  final double? cadenceMean;
+  /// Médiane high / ~moyenne / — (jamais 0 inventé).
+  final String cadenceLabel;
 }
 
 class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
@@ -70,15 +72,16 @@ class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
     });
     final rows = <_SessionRow>[];
     for (final m in filtered) {
+      await CadenceBackfill.maybeBackfill(m.id);
       final samples = await SessionStore.loadSamples(m.id);
       Duration? duration;
       double? distM;
-      double? cad;
+      var cadLabel = '—';
       if (samples.isNotEmpty) {
         final s = SessionSummary.fromSamples(samples);
         duration = s.duration;
         distM = s.distM;
-        cad = s.cadenceMean;
+        cadLabel = s.cadenceLabel;
       } else {
         final a = DateTime.tryParse(m.startedAt ?? '');
         final b = DateTime.tryParse(m.endedAt ?? '');
@@ -91,7 +94,7 @@ class _SessionHistoryScreenState extends ConsumerState<SessionHistoryScreen> {
           meta: m,
           duration: duration,
           distM: distM,
-          cadenceMean: cad,
+          cadenceLabel: cadLabel,
         ),
       );
     }
@@ -309,7 +312,8 @@ class _SessionCard extends StatelessWidget {
     final distLabel =
         (dist != null && dist > 0) ? '${dist.round()} m' : '—';
     final dur = row.duration == null ? '—' : formatDuration(row.duration!);
-    final cad = row.cadenceMean?.round().toString() ?? '—';
+    final cad = row.cadenceLabel;
+    final cadDisplay = cad == '—' ? '—' : '$cad spm';
 
     return Material(
       color: DeckColors.surface,
@@ -378,7 +382,7 @@ class _SessionCard extends StatelessWidget {
                   Expanded(child: _Mini('Distance', distLabel)),
                   Expanded(child: _Mini('Durée', dur)),
                   Expanded(child: _Mini('Allure /500m', pace)),
-                  Expanded(child: _Mini('Cadence', '$cad spm')),
+                  Expanded(child: _Mini('Cadence', cadDisplay)),
                 ],
               ),
               const SizedBox(height: 8),

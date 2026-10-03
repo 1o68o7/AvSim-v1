@@ -1,7 +1,39 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../session/cadence_backfill.dart';
+import '../session/store.dart';
+import '../session/summary.dart';
 import 'club_sql.dart';
 import 'supabase_boot.dart';
+
+/// Pack local (samples + imu) pour [code] → backfill puis libellé liste/home.
+/// Sans IMU local → null (UI : « cadence non mesurée »). Jamais la méta cloud.
+Future<String?> resolveLocalCadenceLabel(
+  String code, {
+  Directory? root,
+}) async {
+  final id = await SessionStore.findIdByCode(code, root: root);
+  if (id == null) return null;
+  final base = root ?? await SessionStore.sessionsRootIfPresent();
+  if (base == null) return null;
+  final dir = Directory('${base.path}/$id');
+  final samplesFile = File('${dir.path}/samples.jsonl');
+  final imuFile = File('${dir.path}/imu.jsonl');
+  if (!samplesFile.existsSync() || !imuFile.existsSync()) return null;
+  await CadenceBackfill.maybeBackfill(id, root: base);
+  final samples = await SessionStore.loadSamples(id, root: base);
+  if (samples.isEmpty) return null;
+  return SessionSummary.fromSamples(samples).cadenceLabel;
+}
+
+/// Affichage fiche club : local (même contrat liste) ou « non mesurée ».
+String formatClubCadenceDisplay(String? localLabel) {
+  if (localLabel == null) return 'cadence non mesurée';
+  if (localLabel == '—') return '—';
+  return '$localLabel spm';
+}
 
 /// Ligne `session_meta` cloud (ST-05 / ST-06).
 class ClubSessionMeta {

@@ -66,6 +66,7 @@ class LiveHubState {
     this.ay,
     this.az,
     this.cadenceSpm,
+    this.cadenceSrc,
     this.hdgMag,
     this.hrBpm,
     this.spo2Pct,
@@ -106,6 +107,8 @@ class LiveHubState {
   final double? ay;
   final double? az;
   final double? cadenceSpm;
+  /// `imu_pitch_ac` | `imu_pitch_ac_approx` | null (low → pas une mesure).
+  final String? cadenceSrc;
   final double? hdgMag;
   final int? hrBpm;
   final int? spo2Pct;
@@ -158,6 +161,9 @@ class LiveHubState {
     double? ay,
     double? az,
     double? cadenceSpm,
+    bool clearCadenceSpm = false,
+    String? cadenceSrc,
+    bool clearCadenceSrc = false,
     double? hdgMag,
     int? hrBpm,
     int? spo2Pct,
@@ -197,7 +203,9 @@ class LiveHubState {
       ax: ax ?? this.ax,
       ay: ay ?? this.ay,
       az: az ?? this.az,
-      cadenceSpm: cadenceSpm ?? this.cadenceSpm,
+      cadenceSpm:
+          clearCadenceSpm ? null : (cadenceSpm ?? this.cadenceSpm),
+      cadenceSrc: clearCadenceSrc ? null : (cadenceSrc ?? this.cadenceSrc),
       hdgMag: hdgMag ?? this.hdgMag,
       hrBpm: hrBpm ?? this.hrBpm,
       spo2Pct: spo2Pct ?? this.spo2Pct,
@@ -309,13 +317,12 @@ class LiveHub extends Notifier<LiveHubState> {
           }
           _maybeLogImu(f);
           if (state.logging) {
-            final along = deviceToScreenVec(
-              f.ax,
-              f.ay,
-              f.az,
-              displayRotationDeg: _heelRotationDeg,
-            ).x;
-            _cadence.add(alongMps2: along, now: DateTime.now());
+            _cadence.add(
+              pitchDeg: f.accelPitchDeg,
+              gy: f.gy,
+              now: DateTime.now(),
+              sog: state.sog,
+            );
           }
         },
         onError: (Object e) {
@@ -397,6 +404,10 @@ class LiveHub extends Notifier<LiveHubState> {
       ax: imu?.ax,
       ay: imu?.ay,
       az: imu?.az,
+      cadenceSpm: state.logging ? _cadence.spm : state.cadenceSpm,
+      clearCadenceSpm: state.logging && _cadence.spm == null,
+      cadenceSrc: state.logging ? _cadence.src : state.cadenceSrc,
+      clearCadenceSrc: state.logging && _cadence.src == null,
     );
     _maybeCompleteTare();
   }
@@ -661,7 +672,7 @@ class LiveHub extends Notifier<LiveHubState> {
       giteDeg: state.giteDeg,
       pitchDeg: _lastImu?.accelPitchDeg ?? state.pitchDeg,
       cadenceSpm: _cadence.spm,
-      cadenceSrc: _cadence.spm == null ? null : 'tel',
+      cadenceSrc: _cadence.src,
       hdgMag: hdg,
       pHpa: _pHpa,
       altBaro: altBaroRelM(_pHpa, _p0Hpa),
@@ -676,10 +687,15 @@ class LiveHub extends Notifier<LiveHubState> {
     if (sid != null) {
       unawaited(_api.tick(id: sid, sample: sample));
     }
+    // Mettre à jour sog du détecteur (fenêtre courante).
+    _cadence.setSog(stale ? null : fix?.sog);
     state = state.copyWith(
       batt: batt,
       sampleCount: state.sampleCount + 1,
       cadenceSpm: _cadence.spm,
+      clearCadenceSpm: _cadence.spm == null,
+      cadenceSrc: _cadence.src,
+      clearCadenceSrc: _cadence.src == null,
       hdgMag: hdg,
       hrBpm: hr?.bpm,
     );

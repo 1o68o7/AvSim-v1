@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../session/summary.dart';
+import '../session/tel_cadence.dart';
 import 'models.dart';
 
 /// Export logbook local (CSV + JSON). Pas de table erg_logs.
@@ -32,6 +34,35 @@ class LogbookExport {
       );
     }
     return buf.toString();
+  }
+
+  /// Stats cadence eau (médiane high + parts). Nulls jamais moyennés comme 0.
+  static String cadenceStatsCsv(SessionSummary summary) {
+    final med = summary.cadenceMedianHigh;
+    final mean = summary.cadenceMean;
+    return 'cadence_median_high_spm,cadence_mean_non_null_spm,'
+        'frac_high,frac_medium,frac_low,frac_approx\n'
+        '${med?.toStringAsFixed(2) ?? ''},'
+        '${mean?.toStringAsFixed(2) ?? ''},'
+        '${summary.cadenceFracHigh.toStringAsFixed(3)},'
+        '${summary.cadenceFracMedium.toStringAsFixed(3)},'
+        '${summary.cadenceFracLow.toStringAsFixed(3)},'
+        '${summary.cadenceFracMedium.toStringAsFixed(3)}\n';
+  }
+
+  static Map<String, dynamic> cadenceStatsJson(SessionSummary summary) => {
+        'cadence_median_high_spm': summary.cadenceMedianHigh,
+        'cadence_mean_non_null_spm': summary.cadenceMean,
+        'frac_high': summary.cadenceFracHigh,
+        'frac_medium': summary.cadenceFracMedium,
+        'frac_low': summary.cadenceFracLow,
+        'frac_approx': summary.cadenceFracMedium,
+      };
+
+  static String formatCadenceStatsLine(SessionCadenceStats stats) {
+    final med = stats.medianHigh?.toStringAsFixed(1) ?? '—';
+    final approxPct = (stats.fracMedium * 100).round();
+    return 'médiane high $med spm · ~$approxPct % approximatif';
   }
 
   static String toJson(List<ErgSessionLog> logs) =>

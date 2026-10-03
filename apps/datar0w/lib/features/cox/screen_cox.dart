@@ -12,6 +12,7 @@ import '../../session/heel.dart';
 import '../../session/live_hub.dart';
 import '../../session/rower_orientation.dart';
 import '../../session/session_sync.dart';
+import '../../session/tel_cadence.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
 import '../../widgets/deck_widgets.dart';
@@ -98,6 +99,11 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
       _lastAlert = alert;
     }
     final tag = boat.info.code.toUpperCase();
+    final cadV = formatCadenceValue(s.cadenceSpm, s.cadenceSrc);
+    final cadApprox = cadenceApproxLabel(s.cadenceSrc);
+    final cadLine = cadV == '—'
+        ? 'Cadence —'
+        : (cadApprox == null ? 'Cadence $cadV' : 'Cadence $cadV · $cadApprox');
 
     return Scaffold(
       backgroundColor: DeckColors.bg,
@@ -157,9 +163,7 @@ class _CoxLiveScreenState extends ConsumerState<CoxLiveScreen> {
                               perspective: HeelPerspective.cox,
                             ),
                             Text(
-                              s.cadenceSpm == null
-                                  ? 'Cadence —'
-                                  : 'Cadence ${s.cadenceSpm!.toStringAsFixed(0)}',
+                              cadLine,
                               style: const TextStyle(
                                 color: DeckColors.label,
                                 fontSize: 9,

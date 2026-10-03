@@ -15,6 +15,7 @@ import '../../session/model.dart';
 import '../../session/rower_orientation.dart';
 import '../../session/store.dart';
 import '../../session/summary.dart';
+import '../../session/tel_cadence.dart';
 import '../../maps/deck_tiles.dart';
 import '../../theme/deck_theme.dart';
 import '../../widgets/deck_scaffold.dart';
@@ -99,7 +100,10 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
     final giteLabel = giteUi == null
         ? '—'
         : '${giteUi >= 0 ? '+' : ''}${giteUi.toStringAsFixed(1)}°';
-    final cad = live ? hub.cadenceSpm : last?.cadenceSpm;
+    final cadSpm = live ? hub.cadenceSpm : last?.cadenceSpm;
+    final cadSrc = live ? hub.cadenceSrc : last?.cadenceSrc;
+    final cad = formatCadenceValue(cadSpm, cadSrc);
+    final cadApprox = cadenceApproxLabel(cadSrc);
 
     return Scaffold(
       backgroundColor: DeckColors.bg,
@@ -290,10 +294,10 @@ class _CoachLiveScreenState extends ConsumerState<CoachLiveScreen> {
                             children: [
                               Expanded(
                                 child: InstrumentPod(
-                                  label: 'Cadence',
-                                  value: cad == null
-                                      ? '—'
-                                      : cad.toStringAsFixed(0),
+                                  label: cadApprox == null
+                                      ? 'Cadence'
+                                      : 'Cadence · $cadApprox',
+                                  value: cad,
                                   unit: 'spm',
                                 ),
                               ),
