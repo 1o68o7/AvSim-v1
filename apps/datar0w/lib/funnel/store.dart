@@ -59,8 +59,7 @@ class FunnelStore {
   }
 
   Future<void> addLog(ErgSessionLog log) async {
-    final logs = await loadLogs();
-    logs.add(log);
+    final logs = [...await loadLogs(), log];
     await saveLogs(logs);
   }
 
