@@ -7,19 +7,21 @@ import '../theme/deck_theme.dart';
 import 'controller.dart';
 import 'models.dart';
 
-/// Suite — même pièce, 500 m, ou ateliers Lot 2.
+/// Suite — même pièce, 500 m, brevets km, ou ateliers.
 class FunnelSuiteScreen extends ConsumerWidget {
   const FunnelSuiteScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final log = ref.watch(funnelProvider).lastResult;
+    final state = ref.watch(funnelProvider);
+    final log = state.lastResult;
     final piece = ErgPiece.byId(log?.pieceId);
     final was2000 = log?.distM == ErgDistance.m2000.meters;
     final sameDist = log?.distM ?? ErgDistance.m500.meters;
     final sameLabel = piece?.label ??
         ErgDistance.fromMeters(sameDist)?.label ??
         '$sameDist m';
+    final nextBrevet = _nextBrevetAfter(log?.distM);
 
     return Scaffold(
       backgroundColor: DeckColors.bg,
@@ -77,11 +79,37 @@ class FunnelSuiteScreen extends ConsumerWidget {
                     context.go(AppRoutes.homeRower);
                   },
                 ),
+                if (isLot4Unlocked(ErgPiece.brevet10km, state.logs)) ...[
+                  const SizedBox(height: 10),
+                  _Choice(
+                    title: ErgPiece.brevet10km.label,
+                    subtitle: 'Endurance brevet indoor',
+                    onTap: () {
+                      ref.read(funnelProvider.notifier).bookNext(
+                            piece: ErgPiece.brevet10km,
+                          );
+                      context.go(AppRoutes.homeRower);
+                    },
+                  ),
+                ],
+              ],
+              if (nextBrevet != null) ...[
+                const SizedBox(height: 10),
+                _Choice(
+                  title: nextBrevet.label,
+                  subtitle: 'Prochain brevet km',
+                  onTap: () {
+                    ref
+                        .read(funnelProvider.notifier)
+                        .bookNext(piece: nextBrevet);
+                    context.go(AppRoutes.homeRower);
+                  },
+                ),
               ],
               const SizedBox(height: 10),
               _Choice(
                 title: 'Ateliers brevet',
-                subtitle: '5 min · 3×1 min · 1 000 m · relais 4×500',
+                subtitle: 'Cadence · relais · endurance 5k–42 km',
                 onTap: () => context.go(AppRoutes.funnelAteliers),
               ),
               const Spacer(),
@@ -98,6 +126,12 @@ class FunnelSuiteScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+ErgPiece? _nextBrevetAfter(int? distM) {
+  if (distM == ErgDistance.m10000.meters) return ErgPiece.brevet21km;
+  if (distM == ErgDistance.m21000.meters) return ErgPiece.brevet42km;
+  return null;
 }
 
 class _Choice extends StatelessWidget {
