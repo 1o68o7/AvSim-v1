@@ -52,10 +52,11 @@ class _FunnelPreviewScreenState extends ConsumerState<FunnelPreviewScreen> {
     final needs =
         await ref.read(funnelProvider.notifier).needsBrief(_piece);
     if (!mounted) return;
+    // Lot 3 : brief (1re fois) puis PM5, sinon PM5 direct.
     if (needs) {
       context.go(AppRoutes.funnelBrief);
     } else {
-      context.go(AppRoutes.funnelPlayer);
+      context.go(AppRoutes.funnelPm5);
     }
   }
 

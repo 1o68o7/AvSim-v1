@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../router.dart';
 import '../theme/deck_theme.dart';
 import 'controller.dart';
+import 'logbook_export.dart';
 import 'models.dart';
 
 /// DR-FR-6 — Preuve (temps, split, cadence, watts, DF + ateliers Lot 2).
@@ -185,6 +186,23 @@ class FunnelProofScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 8),
+              TextButton(
+                key: const Key('funnel-export-logbook'),
+                onPressed: () async {
+                  final logs = ref.read(funnelProvider).logs;
+                  final file = await LogbookExport.writeFiles(logs);
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Logbook exporté · ${file.path}'),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Exporter le logbook',
+                  style: TextStyle(color: DeckColors.muted),
+                ),
+              ),
               TextButton(
                 onPressed: () => context.go(AppRoutes.homeRower),
                 child: const Text(

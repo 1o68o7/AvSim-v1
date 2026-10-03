@@ -42,6 +42,7 @@ les headers / pilules des écrans hub — pas de strip permanent sous AppBar.
 | DR-FR-H Home carte jour | `/home/rower` | Carte `Aujourd’hui · {distance}` · gel `dr-fr-h-home.html` |
 | DR-FR-A Ateliers brevet | `/funnel/ateliers` | Lot 2 — 5 min / 3×1 / 1 000 annoncé / relais · `d849835042894645b5b618070d8db897` · gel `dr-fr-a-ateliers.html` |
 | DR-FR-3 Preview erg | `/funnel/preview` | DF, cues, CTA « Je suis sur l’erg » · `4c582f4f795d462ab7998917f9fb7876` · gel `dr-fr-3-preview.html` |
+| DR-FR-P PM5 | `/funnel/pm5` | Lot 3 — scan/relier PM5, DF live · gel `dr-fr-p-pm5.html` (local ; sync Stitch si dispo) |
 | DR-FR-5 Player erg | `/funnel/player` | Split hero, restant, stop → partiel · `ac0af2e8becb4c0a909ee70b9e0ed03f` · gel `dr-fr-5-player.html` |
 | DR-FR-R Relais 4×500 | `/funnel/player` | Jambe N/4, barre 4 segments · `3b811b20bbc74512bdbcd5c9a5761372` · gel `dr-fr-r-relais.html` |
 | DR-FR-6 Preuve | `/funnel/proof` | Temps / split / cadence / watts / DF · `92091af51d0d404f9df3fc6e454c86e2` · gel `dr-fr-6-preuve.html` |

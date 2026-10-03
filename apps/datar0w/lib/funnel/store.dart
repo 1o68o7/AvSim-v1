@@ -33,9 +33,16 @@ class FunnelStore {
   Future<FunnelProfile?> loadProfile() async {
     final f = await _prefsFile();
     if (!f.existsSync()) return null;
-    final raw = jsonDecode(f.readAsStringSync());
-    if (raw is! Map<String, dynamic>) return null;
-    return FunnelProfile.fromJson(raw);
+    final text = f.readAsStringSync().trim();
+    if (text.isEmpty) return null;
+    try {
+      final raw = jsonDecode(text);
+      if (raw is! Map<String, dynamic>) return null;
+      return FunnelProfile.fromJson(raw);
+    } on FormatException {
+      // Fichier partiellement écrit (race reload vs save) → traité comme vide.
+      return null;
+    }
   }
 
   Future<void> saveProfile(FunnelProfile profile) async {
@@ -45,11 +52,17 @@ class FunnelStore {
   Future<List<ErgSessionLog>> loadLogs() async {
     final f = await _logsFile();
     if (!f.existsSync()) return const [];
-    final raw = jsonDecode(f.readAsStringSync());
-    if (raw is! List) return const [];
-    return raw
-        .map((e) => ErgSessionLog.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final text = f.readAsStringSync().trim();
+    if (text.isEmpty) return const [];
+    try {
+      final raw = jsonDecode(text);
+      if (raw is! List) return const [];
+      return raw
+          .map((e) => ErgSessionLog.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on FormatException {
+      return const [];
+    }
   }
 
   Future<void> saveLogs(List<ErgSessionLog> logs) async {

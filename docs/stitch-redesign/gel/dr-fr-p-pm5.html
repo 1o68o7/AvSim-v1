@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>DR-FR-P PM5</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "volt": "#D6FF3C",
+            "surface-dark": "#0A0A0A",
+            "surface-card": "#111418",
+            "border-tech": "#2A2F36",
+            "text-primary": "#F4F6F8",
+            "text-muted": "#8C96A5"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-surface-dark text-text-primary font-sans min-h-screen">
+  <div class="max-w-md mx-auto px-6 pt-4 pb-8 min-h-screen flex flex-col">
+    <header class="flex items-center justify-between mb-6">
+      <span class="text-text-muted text-sm">←</span>
+      <h1 class="text-base font-semibold">PM5</h1>
+      <span class="text-text-muted text-sm">Rescan</span>
+    </header>
+    <h2 class="text-xl font-bold mb-2">Drag factor live depuis le moniteur</h2>
+    <p class="text-text-muted text-sm mb-6">Sans PM5 : saisie manuelle au Stop (Lot 1).</p>
+    <div class="rounded-xl border border-volt bg-surface-card p-4 mb-auto">
+      <p class="font-bold text-volt text-base">Relié · DF 118</p>
+      <p class="font-mono text-sm mt-2 text-text-primary">Split 1:55.2  ·  28 spm  ·  220 W</p>
+    </div>
+    <button class="mt-8 w-full h-13 rounded-xl bg-volt text-surface-dark font-semibold py-3.5">
+      Continuer vers le player
+    </button>
+  </div>
+</body>
+</html>
