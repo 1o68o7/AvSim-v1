@@ -34,6 +34,12 @@ import 'features/replay/screen_6.dart';
 import 'features/replay/screen_6r.dart';
 import 'features/replay/screen_sessions.dart';
 import 'features/tare/screen_2b.dart';
+import 'funnel/screen_brief.dart';
+import 'funnel/screen_onboard.dart';
+import 'funnel/screen_player.dart';
+import 'funnel/screen_preview.dart';
+import 'funnel/screen_proof.dart';
+import 'funnel/screen_suite.dart';
 import 'identity/controller.dart';
 import 'identity/models.dart';
 import 'onboarding/routing.dart';
@@ -119,6 +125,14 @@ abstract final class AppRoutes {
   static const consent = '/consent';
   static const devices = '/devices';
   static const physio = '/physio';
+
+  /// Funnel rameur Lot 1 (erg 500 / 2 000 m).
+  static const funnelOnboard = '/funnel/onboard';
+  static const funnelPreview = '/funnel/preview';
+  static const funnelBrief = '/funnel/brief';
+  static const funnelPlayer = '/funnel/player';
+  static const funnelProof = '/funnel/proof';
+  static const funnelSuite = '/funnel/suite';
 
   /// Après tare : barreur → `/cox`, rameur → `/live`. Écrans distincts.
   static String afterTare(CrewRole role) =>
@@ -433,6 +447,48 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.physio,
       name: 'physio',
       builder: (context, state) => const PhysioScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.funnelOnboard,
+      name: 'funnel-onboard',
+      builder: (context, state) =>
+          _hub(AppRoutes.funnelOnboard, const FunnelOnboardScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.funnelPreview,
+      name: 'funnel-preview',
+      builder: (context, state) {
+        final raw = state.uri.queryParameters['dist'];
+        final dist = raw == null ? null : int.tryParse(raw);
+        return _hub(
+          AppRoutes.funnelPreview,
+          FunnelPreviewScreen(distM: dist),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.funnelBrief,
+      name: 'funnel-brief',
+      builder: (context, state) =>
+          _hub(AppRoutes.funnelBrief, const FunnelBriefScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.funnelPlayer,
+      name: 'funnel-player',
+      builder: (context, state) =>
+          _hub(AppRoutes.funnelPlayer, const FunnelPlayerScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.funnelProof,
+      name: 'funnel-proof',
+      builder: (context, state) =>
+          _hub(AppRoutes.funnelProof, const FunnelProofScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.funnelSuite,
+      name: 'funnel-suite',
+      builder: (context, state) =>
+          _hub(AppRoutes.funnelSuite, const FunnelSuiteScreen()),
     ),
   ],
 );

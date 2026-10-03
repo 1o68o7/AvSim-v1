@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../funnel/controller.dart';
+import '../../funnel/models.dart';
 import '../../identity/controller.dart';
 import '../../identity/format.dart';
 import '../../identity/models.dart';
@@ -259,6 +261,23 @@ class _HomeRowerScreenState extends ConsumerState<HomeRowerScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
+                _FunnelTodayCard(
+                  funnel: ref.watch(funnelProvider),
+                  hasRower: rower != null,
+                  onStart: () {
+                    final f = ref.read(funnelProvider);
+                    final dist = f.profile?.playDistanceM ?? 500;
+                    ref.read(funnelProvider.notifier).setActivePiece(
+                          distM: dist,
+                          dragFactor: f.profile?.dragFactor,
+                        );
+                    context.go(
+                      '${AppRoutes.funnelPreview}?dist=$dist',
+                    );
+                  },
+                  onSetupPractice: () => context.go(AppRoutes.funnelOnboard),
+                ),
+                const SizedBox(height: 12),
                 _HeroLastOuting(
                   loaded: _loaded,
                   last: _last,
@@ -351,6 +370,144 @@ class _HomeRowerScreenState extends ConsumerState<HomeRowerScreen> {
                   ),
                 ),
               ]),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Carte funnel « Aujourd’hui · {distance} » ou CTA pratique.
+class _FunnelTodayCard extends StatelessWidget {
+  const _FunnelTodayCard({
+    required this.funnel,
+    required this.hasRower,
+    required this.onStart,
+    required this.onSetupPractice,
+  });
+
+  final FunnelState funnel;
+  final bool hasRower;
+  final VoidCallback onStart;
+  final VoidCallback onSetupPractice;
+
+  @override
+  Widget build(BuildContext context) {
+    final profile = funnel.profile;
+    final ready = profile != null && profile.onboardDone;
+
+    if (!ready) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: DeckColors.surface,
+          borderRadius: DeckRadii.cardAll,
+          border: Border.all(color: DeckColors.hairline),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              hasRower
+                  ? 'Pose ton cadre de pratique'
+                  : 'Un morceau sur l’erg',
+              style: const TextStyle(
+                fontFamily: DeckType.ui,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: DeckColors.text,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              hasRower
+                  ? 'Une fois, pour la carte du jour.'
+                  : '500 m ou 2 000 m — local, sans compte.',
+              style: const TextStyle(
+                fontFamily: DeckType.ui,
+                fontSize: 13,
+                color: DeckColors.label,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 48,
+              child: FilledButton(
+                onPressed: onSetupPractice,
+                child: Text(hasRower ? 'Choisir mon cadre' : 'Commencer'),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final label = profile.todayCardLabel;
+    final pb = profile.pb2000s;
+    final df = profile.dragFactor;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: DeckColors.surface,
+        borderRadius: DeckRadii.cardAll,
+        border: Border.all(color: DeckColors.hairline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.fitness_center, size: 18, color: DeckColors.volt),
+              const SizedBox(width: 6),
+              Text(
+                'Erg',
+                style: DeckType.uiLabel(
+                  color: DeckColors.volt,
+                  weight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              if (pb != null)
+                Text(
+                  'PB 2 000 m · ${formatErgTime(pb)}',
+                  style: DeckType.labelMono(size: 10),
+                )
+              else
+                Text(
+                  'Pas de 2 000 m logué',
+                  style: DeckType.labelMono(size: 10),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "Aujourd'hui · $label",
+            style: const TextStyle(
+              fontFamily: DeckType.ui,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.2,
+              color: DeckColors.text,
+            ),
+          ),
+          if (df != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'DF $df',
+              style: DeckType.labelMono(size: 11),
+            ),
+          ],
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 52,
+            child: FilledButton.icon(
+              onPressed: onStart,
+              icon: const Icon(Icons.play_arrow, size: 24),
+              label: const Text('Start'),
             ),
           ),
         ],

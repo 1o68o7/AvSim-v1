@@ -38,6 +38,11 @@ les headers / pilules des écrans hub — pas de strip permanent sous AppBar.
 | DR-10 Connexion | `/auth` | Volt CTA |
 | DR-02 Fiche rameur | `/identity/edit` | |
 | DR-03 Licence & club | `/onboarding/rower`, `/club` | |
+| DR-FR-00 Promesse funnel | `/funnel/onboard` | Lot 1 — pratique + premier morceau |
+| DR-FR-H Home carte jour | `/home/rower` | Carte `Aujourd’hui · {distance}` |
+| DR-FR-3 Preview erg | `/funnel/preview` | DF, cues, CTA « Je suis sur l’erg » |
+| DR-FR-5 Player erg | `/funnel/player` | Split hero, restant, stop → partiel |
+| DR-FR-6 Preuve | `/funnel/proof` | Temps / split / cadence / watts / DF |
 | DR-30 Aujourd’hui Coach | `/home/coach` | |
 | DR-31 Composer équipage | `/crew` | |
 | DR-32 Rejoindre par code | `/join` | |

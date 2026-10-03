@@ -60,6 +60,11 @@ class ClubDiscoverScreen extends StatelessWidget {
                 onPressed: () => context.go(AppRoutes.auth),
                 child: const Text('Rejoindre / Connexion'),
               ),
+              const SizedBox(height: 10),
+              OutlinedButton(
+                onPressed: () => context.go(AppRoutes.funnelOnboard),
+                child: const Text('Commencer un morceau'),
+              ),
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () => context.go(AppRoutes.identity),
