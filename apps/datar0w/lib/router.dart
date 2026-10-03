@@ -36,12 +36,14 @@ import 'features/replay/screen_sessions.dart';
 import 'features/tare/screen_2b.dart';
 import 'funnel/screen_ateliers.dart';
 import 'funnel/screen_brief.dart';
+import 'funnel/screen_dispos.dart';
 import 'funnel/screen_onboard.dart';
 import 'funnel/screen_player.dart';
 import 'funnel/screen_pm5.dart';
 import 'funnel/screen_preview.dart';
 import 'funnel/screen_proof.dart';
 import 'funnel/screen_suite.dart';
+import 'funnel/screen_water_veto.dart';
 import 'identity/controller.dart';
 import 'identity/models.dart';
 import 'onboarding/routing.dart';
@@ -128,7 +130,7 @@ abstract final class AppRoutes {
   static const devices = '/devices';
   static const physio = '/physio';
 
-  /// Funnel rameur Lot 1–2 (erg + ateliers brevet + relais).
+  /// Funnel rameur (erg, ateliers, PM5, endurance, eau → indoor).
   static const funnelOnboard = '/funnel/onboard';
   static const funnelAteliers = '/funnel/ateliers';
   static const funnelPreview = '/funnel/preview';
@@ -137,6 +139,8 @@ abstract final class AppRoutes {
   static const funnelPlayer = '/funnel/player';
   static const funnelProof = '/funnel/proof';
   static const funnelSuite = '/funnel/suite';
+  static const funnelDispos = '/funnel/dispos';
+  static const funnelWaterVeto = '/funnel/water-veto';
 
   /// Après tare : barreur → `/cox`, rameur → `/live`. Écrans distincts.
   static String afterTare(CrewRole role) =>
@@ -506,6 +510,18 @@ final GoRouter appRouter = GoRouter(
       name: 'funnel-suite',
       builder: (context, state) =>
           _hub(AppRoutes.funnelSuite, const FunnelSuiteScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.funnelDispos,
+      name: 'funnel-dispos',
+      builder: (context, state) =>
+          _hub(AppRoutes.funnelDispos, const FunnelDisposScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.funnelWaterVeto,
+      name: 'funnel-water-veto',
+      builder: (context, state) =>
+          _hub(AppRoutes.funnelWaterVeto, const FunnelWaterVetoScreen()),
     ),
   ],
 );

@@ -15,6 +15,7 @@ class FunnelState {
     this.activeDragFactor,
     this.lastResult,
     this.lastWasPb = false,
+    this.pendingOrigin,
   });
 
   final FunnelProfile? profile;
@@ -25,6 +26,8 @@ class FunnelState {
   final int? activeDragFactor;
   final ErgSessionLog? lastResult;
   final bool lastWasPb;
+  /// Origin one-shot pour le prochain finish (ex. bascule indoor → remplacement).
+  final String? pendingOrigin;
 
   bool get onboardDone => profile?.onboardDone == true;
 
@@ -42,8 +45,10 @@ class FunnelState {
     int? activeDragFactor,
     ErgSessionLog? lastResult,
     bool? lastWasPb,
+    String? pendingOrigin,
     bool clearActive = false,
     bool clearResult = false,
+    bool clearPendingOrigin = false,
   }) =>
       FunnelState(
         profile: profile ?? this.profile,
@@ -55,6 +60,9 @@ class FunnelState {
             clearActive ? null : (activeDragFactor ?? this.activeDragFactor),
         lastResult: clearResult ? null : (lastResult ?? this.lastResult),
         lastWasPb: lastWasPb ?? this.lastWasPb,
+        pendingOrigin: clearPendingOrigin
+            ? null
+            : (pendingOrigin ?? this.pendingOrigin),
       );
 }
 
@@ -117,6 +125,13 @@ class FunnelController extends Notifier<FunnelState> {
     return true;
   }
 
+  void setPendingOrigin(String? origin) {
+    state = state.copyWith(
+      pendingOrigin: origin,
+      clearPendingOrigin: origin == null,
+    );
+  }
+
   Future<ErgSessionLog> finishSession({
     required ErgPiece piece,
     required double durationS,
@@ -126,8 +141,9 @@ class FunnelController extends Notifier<FunnelState> {
     bool? complete,
     int? realizedDistM,
     List<int> blockCadences = const [],
-    String origin = 'indoor',
+    String? origin,
   }) async {
+    final resolvedOrigin = origin ?? state.pendingOrigin ?? 'indoor';
     final distM = piece.logDistM;
     final done = complete ?? (durationS > 0);
     final splitDist = realizedDistM ?? (distM > 0 ? distM : 500);
@@ -141,7 +157,7 @@ class FunnelController extends Notifier<FunnelState> {
       watts: watts,
       dragFactor: dragFactor ?? state.activeDragFactor ?? state.profile?.dragFactor,
       complete: done,
-      origin: origin,
+      origin: resolvedOrigin,
       pieceId: piece.id,
       realizedDistM: realizedDistM,
       blockCadences: blockCadences,
@@ -163,6 +179,7 @@ class FunnelController extends Notifier<FunnelState> {
       lastWasPb: wasPb,
       activePiece: piece,
       activeDistM: distM > 0 ? distM : state.activeDistM,
+      clearPendingOrigin: true,
     );
     return log;
   }

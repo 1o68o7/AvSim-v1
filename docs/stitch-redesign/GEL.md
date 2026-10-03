@@ -39,7 +39,9 @@ les headers / pilules des écrans hub — pas de strip permanent sous AppBar.
 | DR-02 Fiche rameur | `/identity/edit` | |
 | DR-03 Licence & club | `/onboarding/rower`, `/club` | |
 | DR-FR-00 Promesse funnel | `/funnel/onboard` | Lot 1 — pratique + premier morceau · `e9d5f8dc25fe4b32834c57bf4d5b479c` · gel `dr-fr-00-promesse.html` |
-| DR-FR-H Home carte jour | `/home/rower` | Carte `Aujourd’hui · {distance}` · gel `dr-fr-h-home.html` |
+| DR-FR-H Home carte jour | `/home/rower` | Carte erg + carte eau (portes équipage / plan d’eau, bascule indoor) · gel `dr-fr-h-home.html` |
+| DR-FR-D Dispos | `/funnel/dispos` | Créneaux matin/midi/soir · eau / erg / les deux |
+| DR-FR-V Veto plan d’eau | `/funnel/water-veto` | Coach : fermer / lever veto bassin |
 | DR-FR-A Ateliers brevet | `/funnel/ateliers` | 5 min / 3×1 / 1 000 annoncé / relais + endurance 5k–42 km · `d849835042894645b5b618070d8db897` · gel `dr-fr-a-ateliers.html` |
 | DR-FR-3 Preview erg | `/funnel/preview` | DF, cues, CTA « Je suis sur l’erg » · `4c582f4f795d462ab7998917f9fb7876` · gel `dr-fr-3-preview.html` |
 | DR-FR-P PM5 | `/funnel/pm5` | Lot 3 — scan/relier PM5, DF live · gel `dr-fr-p-pm5.html` (local ; sync Stitch si dispo) |
